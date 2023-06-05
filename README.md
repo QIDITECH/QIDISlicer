@@ -1,3 +1,6 @@
+
+![image](/resources/icons/QIDISlicer.png?raw=true)
+
 # QIDISlicer
 QIDISlicer is a moredern and pratical slicing software,designed for 3D printing enthusiasts.The software integrates various functions such as printer control and slicing.The interface is intuitive and the operation is simple and sensitive,which can meet the different printing needs of primary and advanced user.
 
@@ -6,7 +9,7 @@ Prebuilt Windows, macOS and Linux 64-bit releases are available through the [git
 QIDISlicer is based on [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) by Prusa Research, which is from [Slic3r](https://github.com/Slic3r/Slic3r) by Alessandro Ranellucci and the RepRap community.
 
 See the [project homepage](https://qidi3d.com) and the [documentation directory](doc/) for more information.
-### What are PrusaSlicer's main features?
+### What are QIDISlicer's main features?
 
 Key features are:
 
@@ -31,9 +34,9 @@ Other major features are:
 ### How to compile
 Following platforms are currently supported to compile:
 
-- Windows 64-bit, Compile Guide
-- Mac 64-bit, Compile Guide
-- Linux 64-bit, Compile Guide
+- Windows 64-bit, [Compile Guide](doc/How%20to%20build%20-%20Windows.md)
+- Mac 64-bit, [Compile Guide](doc/How%20to%20build%20-%20Mac%20OS.md)
+- Linux 64-bit, [Compile Guide](doc/How%20to%20build%20-%20Linux%20et%20al.md)
 
 ### Develop together with QIDISlicer
 
