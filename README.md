@@ -2,48 +2,20 @@
 ![QIDISlicer logo](/resources/icons/QIDISlicer.png?raw=true)
 
 # QIDISlicer
-QIDISlicer is a moredern and pratical slicing software,designed for 3D printing enthusiasts.The software integrates various functions such as printer control and slicing.The interface is intuitive and the operation is simple and sensitive,which can meet the different printing needs of primary and advanced user.
+QIDISlicer is a moredern and pratical slicing software to provide customers with more convenient operation experience. The software integrates various functions such as printer control and slicing. The interface is intuitive and the operation is simple and sensitive, which can meet the different printing needs of primary and advanced user.
 
-Prebuilt Windows, macOS and Linux 64-bit releases are available through the [github releases page](https://github.com/QIDITECH/QIDISlicer/releases/).  
+**Notice:QIDISlicer as a new software dedicated to QIDI's new high speed printers, please make sure your firmware version is higher than version 2.0.**
 
 QIDISlicer is based on [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) by Prusa Research, which is from [Slic3r](https://github.com/Slic3r/Slic3r) by Alessandro Ranellucci and the RepRap community.
+Thanks to PrusaSlicer and Bambulab for their contributions to the 3D printing community.
 
 See the [project homepage](https://qidi3d.com) and the [documentation directory](doc/) for more information.
-### What are QIDISlicer's main features?
 
-Key features are:
+### How to report an issue?
 
-- Multi-platform (Win/Mac/Linux) support
-- Multi-material printing and rich painting tools
-- Multiple G-code flavors supported (RepRap, Makerbot, Mach3, Machinekit etc.)
-- Multithread processing
-- Ability to plate multiple objects having distinct print settings
-- STL auto-repair (tolerance for broken models) 
-- Hybrid/Tree/Normal support types, Customized support
-- Multi-material printing and rich painting tools
-- Global/Object/Part level slicing parameters
+You can perform the following operations to report an issue:
 
-Other major features are:
-
-- 3D preview (including multi-material files) 
-- Multiple layer heights in a single print
-- Fine-grained configuration of speed, acceleration, extrusion width
-- Support material, raft, brim, skirt
-- Advanced cooling logic controlling fan speed and dynamic print speed 
-
-### How to compile
-Following platforms are currently supported to compile:
-
-- Windows 64-bit, [Compile Guide](doc/How%20to%20build%20-%20Windows.md)
-- Mac 64-bit, [Compile Guide](doc/How%20to%20build%20-%20Mac%20OS.md)
-- Linux 64-bit, [Compile Guide](doc/How%20to%20build%20-%20Linux%20et%20al.md)
-
-### Develop together with QIDISlicer
-
-You can perform the following operations to develop together with:
-
-- Add an [issue](https://github.com/QIDITECH/QIDISlicer/issues) to the github tracker if it isn't already present. 
-- Use the "report an issue" page of the QIDISlicer to copy the corresponding URL for error reporting.
+- Use QIDISlicer's "Report an Issue" page, copy the URL of "Printer after-sales email" to report an issue.
 
 ### License
 
