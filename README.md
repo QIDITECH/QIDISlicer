@@ -9,7 +9,7 @@ QIDISlicer is a moredern and pratical slicing software to provide customers with
 QIDISlicer is based on [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) by Prusa Research, which is from [Slic3r](https://github.com/Slic3r/Slic3r) by Alessandro Ranellucci and the RepRap community.
 Thanks to PrusaSlicer and Bambulab for their contributions to the 3D printing community.
 
-See the [project homepage](https://qidi3d.com) and the [documentation directory](doc/) for more information.
+See the [QIDI's homepage](https://qidi3d.com) for more information.
 
 ### How to report an issue?
 
