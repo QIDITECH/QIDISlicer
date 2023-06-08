@@ -4,8 +4,7 @@
 # QIDISlicer
 QIDISlicer is aprofessional 3D printer slicing software，which is perfectly compatible with all printers and 3D printing filaments of QIDI Technology. Multi-platform support, simple inerface, easy to use, complate functions, easy to learn 3D printing.
 
-**Notice:QIDISlicer as a new software dedicated to QIDI's new high speed printers, please make sure your firmware version is V M.1.0 or above.**
-(M means the model number of the printer, please ignore it.)
+**Notice:QIDISlicer as a new software dedicated to QIDI's new high speed printers, please make sure your firmware version is V 4.0.0 or above.**
 
 QIDISlicer is based on [PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) by Prusa Research, which is from [Slic3r](https://github.com/Slic3r/Slic3r) by Alessandro Ranellucci and the RepRap community.
 Thanks to PrusaSlicer and Bambulab for their contributions to the 3D printing community.
