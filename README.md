@@ -1,5 +1,5 @@
 
-![QIDISlicer logo](/resources/icons/QIDISlicer.png?raw=true)
+![QIDISlicer logo](/QIDISlicer.png?raw=true)
 
 # QIDISlicer
 QIDISlicer is a moredern and pratical slicing software to provide customers with more convenient operation experience. The software integrates various functions such as printer control and slicing. The interface is intuitive and the operation is simple and sensitive, which can meet the different printing needs of primary and advanced user.
