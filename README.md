@@ -22,9 +22,9 @@ You can find the printer's firmware here:
 
 [X-smart 3](https://github.com/QIDITECH/QIDI_SMART3)
 
-### How to report an issue?
+### Report Issues and Make Suggestions
 
-You can contact [After-Sales Service](https://qidi3d.com/pages/warranty-policy-after-sales-support) to report problems and make suggestions.
+You can contact [After-Sales Service](https://qidi3d.com/pages/warranty-policy-after-sales-support) to report issues and make suggestions.
 
 ### License
 
