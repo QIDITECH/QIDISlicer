@@ -11,7 +11,7 @@
 #endif
 
 namespace Slic3r {
-//YYY
+//YYYBBBB
 class AABBMesh::AABBImpl {
 private:
     AABBTreeIndirect::Tree3f m_tree;
