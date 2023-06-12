@@ -728,12 +728,6 @@ void PrintConfigDef::init_fff_params()
                    "and fan speed according to layer printing time.");
     def->set_default_value(new ConfigOptionBools { true });
 
-    //B15
-    // def = this->add("enable_auxiliary_fan", coBools);
-    // def->label = L("Enable Auxiliary Fan");
-    // def->tooltip = L("This flag enables the automatic cooling logic that adjusts print speed "
-    //                "and fan speed according to layer printing time.");
-    // def->set_default_value(new ConfigOptionBools { true });
 
     def = this->add("cooling_tube_retraction", coFloat);
     def->label = L("Cooling tube position");
@@ -1944,6 +1938,15 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInts { 35 });
 
+    //B25
+    def = this->add("enable_volume_fan", coInts);
+    def->label = L("Volume Fan Speed");
+    def->tooltip = L("This setting represents the PWM your volume fan needs to work.");
+    def->sidetext = L("%");
+    def->min = 0;
+    def->max = 100;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionInts { 35 });
 
     def = this->add("min_layer_height", coFloats);
     def->label = L("Min");
@@ -3828,6 +3831,31 @@ void PrintConfigDef::init_sla_params()
     def->min = 0;
     def->max = max_temp;
     def->set_default_value(new ConfigOptionIntsNullable { ConfigOptionIntsNullable::nil_value() });
+    //B26
+    def = this->add("enable_advance_pressure", coBools);
+    def->label = L("Enable pressure advance");
+    def->tooltip = L("Enable pressure advance, auto calibration result will be overwriten once enabled.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBools{ false });
+
+    //B26
+    def = this->add("advance_pressure", coFloats);
+    def->label = L("Pressure advance");
+    def->tooltip = L("Pressure advance(Klipper) AKA Linear advance factor(Marlin)");
+    def->sidetext = L("mm/s");
+    def->min = 0;
+    def->max = 2;
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloats { 0.02 });
+    //B26
+    def = this->add("smooth_time", coFloats);
+    def->label = L("Smooth Time");
+    def->tooltip = L("PSmooth Time(Klipper) AKA Linear advance factor(Marlin)");
+    def->sidetext = L("s");
+    def->min = 0;
+    def->max = 1;
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloats { 0.02 });
 
     def = this->add("bottle_volume", coFloat);
     def->label = L("Bottle volume");

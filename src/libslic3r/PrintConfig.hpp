@@ -764,9 +764,9 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionBool,               complete_objects))
     ((ConfigOptionFloats,             colorprint_heights))
     ((ConfigOptionBools,              cooling))
+    //B25
+    ((ConfigOptionInts,               enable_volume_fan)) 
     //B15
-    // ((ConfigOptionBools,              enable_auxiliary_fan))
-    // ((ConfigOptionInts,               enable_auxiliary_fan))   
     ((ConfigOptionInts,               enable_auxiliary_fan))     
     ((ConfigOptionFloat,              default_acceleration))
     ((ConfigOptionInts,               disable_fan_first_layers))
@@ -790,6 +790,10 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloatOrPercent,     first_layer_speed))
     ((ConfigOptionInts,               first_layer_temperature))
     ((ConfigOptionIntsNullable,       idle_temperature))
+    //B26
+    ((ConfigOptionBools,              enable_advance_pressure))
+    ((ConfigOptionFloats,             advance_pressure))
+    ((ConfigOptionFloats,             smooth_time))
     ((ConfigOptionInts,               full_fan_speed_layer))
     ((ConfigOptionFloat,              infill_acceleration))
     ((ConfigOptionBool,               infill_first))

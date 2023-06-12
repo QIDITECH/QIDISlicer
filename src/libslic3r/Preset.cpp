@@ -503,7 +503,15 @@ static std::vector<std::string> s_Preset_filament_options {
     //B15
     "enable_auxiliary_fan",
     //B24
-    "volume_temperature", "first_layer_volume_temperature"
+    "volume_temperature", "first_layer_volume_temperature",
+    //B25
+    "enable_volume_fan",
+    //B26
+    "enable_advance_pressure",
+    //B26
+    "advance_pressure",
+    //B26
+    "smooth_time"
 };
 
 static std::vector<std::string> s_Preset_machine_limits_options {

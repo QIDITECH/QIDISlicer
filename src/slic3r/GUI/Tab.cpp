@@ -1863,6 +1863,7 @@ void TabFilament::create_line_with_near_label_widget(ConfigOptionsGroupShp optgr
     optgroup->append_line(line);
 }
 
+
 void TabFilament::update_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& opt_key, int opt_index/* = 0*/, bool is_checked/* = true*/)
 {
     if (!m_overrides_options[opt_key])
@@ -2005,6 +2006,10 @@ void TabFilament::build()
         optgroup->append_single_option_line("filament_cost");
         optgroup->append_single_option_line("filament_spool_weight");
 
+        optgroup->append_single_option_line("enable_advance_pressure");
+        optgroup->append_single_option_line("advance_pressure");
+        optgroup->append_single_option_line("smooth_time");
+
         optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value)
         {
             update_dirty();
@@ -2020,7 +2025,6 @@ void TabFilament::build()
         optgroup = page->new_optgroup(L("Temperature"));
 
         create_line_with_near_label_widget(optgroup, "idle_temperature");
-
         Line line = { L("Nozzle"), "" };
         line.append_option(optgroup->get_option("first_layer_temperature"));
         line.append_option(optgroup->get_option("temperature"));
@@ -2060,6 +2064,8 @@ void TabFilament::build()
         //B15
         // optgroup->append_single_option_line("auxiliary_fan_speed", category_path + "fan-settings");
         optgroup->append_single_option_line("enable_auxiliary_fan", category_path + "fan-settings");
+        //B25
+        optgroup->append_single_option_line("enable_volume_fan", category_path + "fan-settings");
         optgroup->append_single_option_line("disable_fan_first_layers", category_path + "fan-settings");
         optgroup->append_single_option_line("full_fan_speed_layer", category_path + "fan-settings");
 
@@ -2234,10 +2240,18 @@ void TabFilament::toggle_options()
 
     if (m_active_page->title() == "Filament") {
         Page* page = m_active_page;
-
+        //B26
         const auto og_it = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Temperature"; });
         if (og_it != page->m_optgroups.end())
-            update_line_with_near_label_widget(*og_it, "idle_temperature");
+            {
+                update_line_with_near_label_widget(*og_it, "idle_temperature");
+            }
+        //B26
+        if (m_active_page->title() == "Filament") {
+            bool pa = m_config->opt_bool("enable_advance_pressure", 0);
+            toggle_option("advance_pressure", pa);
+            toggle_option("smooth_time", pa);
+        }
     }
 }
 
