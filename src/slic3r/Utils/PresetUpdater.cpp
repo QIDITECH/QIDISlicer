@@ -1278,7 +1278,8 @@ PresetUpdater::UpdateResult PresetUpdater::config_update(const Semver& old_slic3
 
 			std::vector<GUI::MsgUpdateConfig::Update> updates_msg;
 			for (const auto& update : updates.updates) {
-				std::string changelog_url = update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
+				//B27
+				std::string changelog_url = std::string();//update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
 				updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url));
 			}
 
