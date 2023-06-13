@@ -87,6 +87,9 @@ static const Slic3r::ColorRGBA DARKMODE_BG_LIGHT_COLOR = {0.145f, 0.149f, 0.165f
 static const Slic3r::ColorRGBA ERROR_BG_DARK_COLOR     = {0.478f, 0.192f, 0.039f, 1.0f};
 static const Slic3r::ColorRGBA ERROR_BG_LIGHT_COLOR    = {0.753f, 0.192f, 0.039f, 1.0f};
 
+//Y5
+bool isToolpathOutside = false;
+
 // Number of floats
 static constexpr const size_t MAX_VERTEX_BUFFER_SIZE     = 131072 * 6; // 3.15MB
 
@@ -1032,6 +1035,8 @@ wxDEFINE_EVENT(EVT_GLCANVAS_FORCE_UPDATE, SimpleEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_WIPETOWER_MOVED, Vec3dEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_WIPETOWER_ROTATED, Vec3dEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, Event<bool>);
+//Y5
+wxDEFINE_EVENT(EVT_GLCANVAS_ENABLE_EXPORT_BUTTONS, Event<bool>);
 wxDEFINE_EVENT(EVT_GLCANVAS_UPDATE_GEOMETRY, Vec3dsEvent<2>);
 wxDEFINE_EVENT(EVT_GLCANVAS_MOUSE_DRAGGING_STARTED, SimpleEvent);
 wxDEFINE_EVENT(EVT_GLCANVAS_MOUSE_DRAGGING_FINISHED, SimpleEvent);
@@ -2642,8 +2647,17 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
             }
         }
 
-        post_event(Event<bool>(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, 
+        //Y5 if ToolpathOutside, unable export button
+        //post_event(Event<bool>(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, 
+        //                       contained_min_one && !m_model->objects.empty() && !partlyOut));
+        if (isToolpathOutside) {
+            post_event(Event<bool>(EVT_GLCANVAS_ENABLE_EXPORT_BUTTONS, false));
+            isToolpathOutside = false;
+        }
+        else {
+            post_event(Event<bool>(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, 
                                contained_min_one && !m_model->objects.empty() && !partlyOut));
+        }
     }
     else {
         _set_warning_notification(EWarning::ObjectOutside, false);
@@ -7467,7 +7481,14 @@ void GLCanvas3D::_set_warning_notification_if_needed(EWarning warning)
                 show = m_gcode_viewer.has_data() && !m_gcode_viewer.is_contained_in_bed();
         }
     }
-
+    
+    //Y5
+    if (warning == EWarning::ToolpathOutside) {
+        isToolpathOutside = show;
+    }
+    else {
+        isToolpathOutside = false;
+    }
     _set_warning_notification(warning, show);
 }
 

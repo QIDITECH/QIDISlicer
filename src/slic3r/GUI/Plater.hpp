@@ -103,6 +103,8 @@ public:
     void                    show_sliced_info_sizer(const bool show);
     void                    update_sliced_info_sizer();
     void                    enable_buttons(bool enable);
+    //Y5
+    void                    enable_export_buttons(bool enable);
     void                    set_btn_label(const ActionButtonType btn_type, const wxString& label) const;
     bool                    show_reslice(bool show) const;
 	bool                    show_export(bool show) const;

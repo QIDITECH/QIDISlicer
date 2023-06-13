@@ -1503,6 +1503,15 @@ void Sidebar::enable_buttons(bool enable)
 	p->btn_export_gcode_removable->Enable(enable);
 }
 
+//Y5
+void Sidebar::enable_export_buttons(bool enable)
+{
+    p->btn_export_gcode->Enable(enable);
+    p->btn_send_gcode->Enable(enable);
+//    p->btn_eject_device->Enable(enable);
+	p->btn_export_gcode_removable->Enable(enable);
+}
+
 bool Sidebar::show_reslice(bool show)          const { return p->btn_reslice->Show(show); }
 bool Sidebar::show_export(bool show)           const { return p->btn_export_gcode->Show(show); }
 bool Sidebar::show_send(bool show)             const { return p->btn_send_gcode->Show(show); }
@@ -2106,6 +2115,8 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
         view3D_canvas->Bind(EVT_GLCANVAS_RESET_SKEW, [this](SimpleEvent&) { update(); });
         view3D_canvas->Bind(EVT_GLCANVAS_INSTANCE_SCALED, [this](SimpleEvent&) { update(); });
         view3D_canvas->Bind(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, [this](Event<bool>& evt) { this->sidebar->enable_buttons(evt.data); });
+        //Y5
+        view3D_canvas->Bind(EVT_GLCANVAS_ENABLE_EXPORT_BUTTONS, [this](Event<bool>& evt) { this->sidebar->enable_export_buttons(evt.data); });
         view3D_canvas->Bind(EVT_GLCANVAS_UPDATE_GEOMETRY, &priv::on_update_geometry, this);
         view3D_canvas->Bind(EVT_GLCANVAS_MOUSE_DRAGGING_STARTED, &priv::on_3dcanvas_mouse_dragging_started, this);
         view3D_canvas->Bind(EVT_GLCANVAS_MOUSE_DRAGGING_FINISHED, &priv::on_3dcanvas_mouse_dragging_finished, this);
