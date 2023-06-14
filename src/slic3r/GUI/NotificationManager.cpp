@@ -238,8 +238,8 @@ bool NotificationManager::PopNotification::push_background_color()
 	if (m_data.level == NotificationLevel::ErrorNotificationLevel) {
 		// ImVec4 backcolor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
 		ImVec4 backcolor(0.27f, 0.47f, 1.0f, 0.5f);
-		backcolor.x += 0.73f;
-        backcolor.y += 0.03f;
+        backcolor.x += 0.73f;
+        backcolor.y -= 0.47f;
         backcolor.z -= 1.0f;
 		push_style_color(ImGuiCol_WindowBg, backcolor, m_state == EState::FadingOut, m_current_fade_opacity);
 		return true;
@@ -248,7 +248,7 @@ bool NotificationManager::PopNotification::push_background_color()
 		// ImVec4 backcolor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
 		ImVec4 backcolor(0.27f, 0.47f, 1.0f, 0.5f);
         backcolor.x += 0.73f;
-        backcolor.y -= 0.47f;
+        backcolor.y += 0.03f;
         backcolor.z -= 1.0f;
 		push_style_color(ImGuiCol_WindowBg, backcolor, m_state == EState::FadingOut, m_current_fade_opacity);
 		return true;
