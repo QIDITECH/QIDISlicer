@@ -1486,11 +1486,11 @@ void GUI_App::init_ui_colours()
     //B10
     m_color_label_default           = is_dark_mode ? wxColour(255, 255, 255): wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
     m_color_highlight_label_default = is_dark_mode ? wxColour(230, 230, 230): wxSystemSettings::GetColour(/*wxSYS_COLOUR_HIGHLIGHTTEXT*/wxSYS_COLOUR_WINDOWTEXT);
-    m_color_highlight_default       = is_dark_mode ? wxColour(0, 0, 0)   : wxColour(180, 201, 253);
+    m_color_highlight_default       = is_dark_mode ? wxColour(68, 68, 68)    : wxColour(180, 201, 253);
     m_tap_color_highlight_default   = is_dark_mode ? wxColour(43, 43, 43)   : wxColour(255, 255, 255);
     m_color_hovered_btn_label       = is_dark_mode ? wxColour(68, 121, 251) : wxColour(68, 121, 251);
     m_color_default_btn_label       = is_dark_mode ? wxColour(68, 121, 251): wxColour(68, 121, 251);
-    m_color_selected_btn_bg         = is_dark_mode ? wxColour(0, 0, 0)   : wxColour(206, 209, 217);
+    m_color_selected_btn_bg         = is_dark_mode ? wxColour(68, 68, 68)   : wxColour(206, 209, 217);
 #else
     m_color_label_default = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
 #endif
