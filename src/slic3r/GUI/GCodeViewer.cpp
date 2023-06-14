@@ -505,7 +505,7 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
     imgui.set_next_window_pos(0.0f, top, ImGuiCond_Always, 0.0f, 0.0f);
     imgui.set_next_window_size(0.0f, wnd_height, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::SetNextWindowBgAlpha(0.6f);
+    ImGui::SetNextWindowBgAlpha(0.8f);
     imgui.begin(std::string("G-code"), ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove);
    
     // center the text in the window by pushing down the first line
@@ -3219,7 +3219,7 @@ void GCodeViewer::render_legend(float& legend_height)
     const float max_height = 0.75f * static_cast<float>(cnv_size.get_height());
     const float child_height = 0.3333f * max_height;
     ImGui::SetNextWindowSizeConstraints({ 0.0f, 0.0f }, { -1.0f, max_height });
-    imgui.begin(std::string("Legend"), ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+    imgui.begin(std::string("Legend"), ImGuiWindowFlags_AlwaysAutoResize| ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
     enum class EItemType : unsigned char
     {
