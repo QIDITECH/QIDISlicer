@@ -3466,6 +3466,30 @@ void Plater::priv::export_gcode(fs::path output_path, bool output_path_on_remova
     // If the SLA processing of just a single object's supports is running, restart slicing for the whole object.
     this->background_process.set_task(PrintBase::TaskParams());
     this->restart_background_process(priv::UPDATE_BACKGROUND_PROCESS_FORCE_EXPORT);
+
+    //Y6 PrintHint
+    std::string filament_type;
+    bool ShowPrintHint = false;
+    const PrintStatistics& ps = this->fff_print.print_statistics();
+    const auto& extruders_filaments = wxGetApp().preset_bundle->extruders_filaments;
+    std::list<std::string> FilamentsHintList = {"PETG", "PLA", "TPU"};
+
+    for (const auto& [filament_id, filament_vol] : ps.filament_stats) {
+        assert(filament_id < extruders_filaments.size());
+        if (const Preset* preset = extruders_filaments[filament_id].get_selected_preset()) {
+            filament_type = preset->config.opt_string("filament_type", filament_id);
+            if (std::find(FilamentsHintList.begin(), FilamentsHintList.end(), filament_type) != FilamentsHintList.end()) {
+                ShowPrintHint = true;
+                break;
+            }
+        }
+    }
+
+    if (ShowPrintHint) {
+        std::string message;
+        message = _u8L("Opening the front door and top cover before printing can improve heat dissipation, obtain better print quality, and prevent extruder blockage.");
+        notification_manager->push_notification(message);
+    }
 }
 
 unsigned int Plater::priv::update_restart_background_process(bool force_update_scene, bool force_update_preview)
