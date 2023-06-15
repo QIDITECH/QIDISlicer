@@ -229,7 +229,7 @@ void ImGuiWrapper::set_scaling(float font_size, float scale_style, float scale_b
         return;
     }
 
-    m_font_size = 1.05f * font_size;
+    m_font_size = font_size;
 
     ImGui::GetStyle().ScaleAllSizes(scale_style / m_style_scaling);
     m_style_scaling = scale_style;
