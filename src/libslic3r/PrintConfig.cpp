@@ -1137,7 +1137,8 @@ void PrintConfigDef::init_fff_params()
     def->label = L("Filament type");
     def->tooltip = L("The filament material type for use in custom G-codes.");
     def->gui_flags = "show_value";
-    def->set_enum_values(ConfigOptionDef::GUIType::select_open, {
+    //Y
+    /*def->set_enum_values(ConfigOptionDef::GUIType::select_open, {
         "PLA", 
         "PET",
         "ABS",
@@ -1158,6 +1159,17 @@ void PrintConfigDef::init_fff_params()
         "PSU",
         "PVDF",
         "SCAFF"
+    });*/
+    def->set_enum_values(ConfigOptionDef::GUIType::select_open, {
+        "ABS", 
+        "ABS-GF",
+        "PA12-CF",
+        "PAHT-CF",
+        "PET-CF", 
+        "PETG",
+        "PLA",
+        "UltraPA",
+        "TPU"
     });
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionStrings { "PLA" });
