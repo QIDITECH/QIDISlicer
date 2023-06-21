@@ -9,8 +9,8 @@ beta = 1.0.1-beta1
 rc = 1.0.1-rc2
 
 [release:win64]
-url = https://qidi3d.com/
-size = 85814296
+url = https://github.com/QIDITECH/QIDISlicer/releases/download/V1.0.1/QIDISlicer_Setup_1.0.1.exe
+size = 64366437
 
 [release:linux]
 url = https://qidi3d.com
