@@ -1423,7 +1423,7 @@ void PresetUpdater::on_update_notification_confirm()
 
 	std::vector<GUI::MsgUpdateConfig::Update> updates_msg;
 	for (const auto& update : p->waiting_updates.updates) {
-		std::string changelog_url = update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
+		std::string changelog_url = std::string();//update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
 		updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url));
 	}
 
