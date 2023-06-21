@@ -3,19 +3,13 @@
 <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
 <g>
-	<polygon fill="#174CCE" points="64,29.6 11.9,119.9 116.1,119.9 	"/>
-	<polygon fill="#174CCE" points="64,98.4 116.1,8.1 11.9,8.1 	"/>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
+	
+		<polygon fill="none" stroke="#174CCE" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
+		10.5,95.6 63.9,118.4 117.5,95.6 117.5,32.7 63.4,9.6 10.5,32.7 	"/>
+	
+		<polyline fill="none" stroke="#174CCE" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
+		10.5,32.7 64,55.9 63.9,118.4 	"/>
+	
+		<line fill="none" stroke="#174CCE" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="64" y1="55.9" x2="117.5" y2="32.7"/>
 </g>
 </svg>
