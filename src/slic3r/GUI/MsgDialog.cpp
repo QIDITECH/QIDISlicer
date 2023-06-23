@@ -116,7 +116,7 @@ void MsgDialog::finalize()
 // Text shown as HTML, so that mouse selection and Ctrl-V to copy will work.
 static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxString msg, bool monospaced_font = false, bool is_marked_msg = false)
 {
-    wxHtmlWindow* html = new wxHtmlWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHW_SCROLLBAR_AUTO);
+    wxHtmlWindow* html = new wxHtmlWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHW_SCROLLBAR_NEVER);
 
     // count lines in the message
     int msg_lines = 0;
@@ -193,7 +193,7 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
         wxClientDC dc(parent);
         wxSize msg_sz = dc.GetMultiLineTextExtent(msg);
         page_size = wxSize(std::min(msg_sz.GetX() + 2 * em, 68 * em),
-                           std::min(msg_sz.GetY() + 2 * em, 68 * em));
+                           std::min(msg_sz.GetY() + 4 * em, 68 * em));
     }
     html->SetMinSize(page_size);
 
