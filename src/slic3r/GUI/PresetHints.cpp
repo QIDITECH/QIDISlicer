@@ -309,5 +309,46 @@ std::string PresetHints::top_bottom_shell_thickness_explanation(const PresetBund
 
     return out;
 }
+//Y7
+std::string PresetHints::drying_box_description(const Preset &preset)
+{
+    std::string out;
+
+    std::string filament_type = preset.config.opt_string("filament_type", 0);
+
+    if (preset.config.option("filament_property_drying_box")->is_nil()) {
+        out += GUI::format(_L("%1% is no need to put the filament in the drying box when printing."), filament_type);
+    }
+    else {
+        int filament_property_drying_box = preset.config.option<ConfigOptionIntsNullable>("filament_property_drying_box")->get_at(0);
+        out += GUI::format(_L("%1% will not print properly if it is damp.\n"
+                              "Please put the filament in the drying box when printing, "
+                              "and keep the humidity in the drying box less than %2%."),
+                              filament_type, filament_property_drying_box);
+    }
+
+    return out;
+}
+
+std::string PresetHints::anneal_temperature_description(const Preset &preset)
+{
+    std::string out;
+
+    std::string  filament_type = preset.config.opt_string("filament_type", 0);
+
+    if (preset.config.option("filament_property_anneal_temperature")->is_nil()) {
+        out += GUI::format(_L("%1% cannot be annealed."), filament_type);
+    }
+    else {
+        int filament_property_anneal_temperature = preset.config.option<ConfigOptionIntsNullable>("filament_property_anneal_temperature")->get_at(0);
+        int filament_property_anneal_temperature_max = filament_property_anneal_temperature + 20;
+        out += GUI::format(_L("Annealing the model immediately after printing can further improve the mechanical properties of %1%.\n"
+                              "Put the model in a drying oven and set it at %2%-%3% °C for 4-6 hours."),
+                              filament_type, filament_property_anneal_temperature, filament_property_anneal_temperature_max);
+    }
+
+    return out;
+}
+//Y7
 
 }; // namespace Slic3r

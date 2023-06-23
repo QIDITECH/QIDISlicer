@@ -206,6 +206,14 @@ static const t_config_enum_values s_keys_map_GCodeThumbnailsFormat = {
     { "QOI", int(GCodeThumbnailsFormat::QOI) }
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(GCodeThumbnailsFormat)
+//Y7
+static const t_config_enum_values s_keys_map_WaterResistance = {
+    { "none", int(WaterResistance::None) },
+    { "weak", int(WaterResistance::Weak) },
+    { "fine", int(WaterResistance::Fine) },
+    { "strong", int(WaterResistance::Strong) }
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(WaterResistance)
 
 static const t_config_enum_values s_keys_map_ForwardCompatibilitySubstitutionRule = {
     { "disable",        ForwardCompatibilitySubstitutionRule::Disable },
@@ -1373,6 +1381,121 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInts { 0 });
 
+////////////Y7
+    def = this->add_nullable("filament_property_drying_box", coInts);
+    def->label = L("Drying box");
+    def->tooltip = L("The maximum humidity in the drying box. Please place the desiccant in the drying box so that the internal humidity is lower than this value.");
+    def->sidetext = L("%");
+    def->min = 0;
+    def->max = 100;
+    def->mode = comSimple;
+    def->set_default_value(new ConfigOptionIntsNullable { ConfigOptionIntsNullable::nil_value() });
+
+    def = this->add_nullable("filament_property_anneal_temperature", coInts);
+    def->label = L("Anneal temperature");
+    def->tooltip = L("Annealing temperature of the filament.Placing the model in a drying oven for 4-6 hours immediately after printing can improve its physical properties.");
+    def->sidetext = L("°C");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionIntsNullable { ConfigOptionIntsNullable::nil_value() });
+
+    def = this->add("filament_property_water_resistance", coEnum);
+    def->label = L("Water resistance");
+    def->tooltip = L("Water resistance of the filament.");
+    def->set_enum<WaterResistance>({
+        { "none",       L("None") },
+        { "weak",       L("Weak") },
+        { "fine",       L("Fine") },
+        { "strong",     L("Strong") }
+    });
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<WaterResistance>(WaterResistance::None));
+
+    def = this->add("filament_property_corrosion_resistance", coEnum);
+    def->label = L("Corrosion resistance");
+    def->tooltip = L("Corrosion resistance of the filament.");
+    def->set_enum<WaterResistance>({
+        { "none",       L("None") },
+        { "weak",       L("Weak") },
+        { "fine",       L("Fine") },
+        { "strong",     L("Strong") }
+    });
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<WaterResistance>(WaterResistance::None));
+
+    def = this->add("filament_property_creep_resistance", coEnum);
+    def->label = L("Creep resistance");
+    def->tooltip = L("Creep resistance of the filament.");
+    def->set_enum<WaterResistance>({
+        { "none",       L("None") },
+        { "weak",       L("Weak") },
+        { "fine",       L("Fine") },
+        { "strong",     L("Strong") }
+    });
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<WaterResistance>(WaterResistance::None));
+
+    def = this->add("filament_property_hdt_045", coFloats);
+    def->label = L("HDT(0.45MPa)");
+    def->tooltip = L("Heat distortion temp(0.45MPa).");
+    def->sidetext = L("°C");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionFloats { 0. });
+
+    def = this->add("filament_property_hdt_180", coFloats);
+    def->label = L("HDT(1.80MPa)");
+    def->tooltip = L("Heat distortion temp(1.80MPa).");
+    def->sidetext = L("°C");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionFloats { 0. });
+
+    def = this->add("filament_property_tensile_strength", coStrings);
+    def->label = L("Tensile strength");
+    def->tooltip = L("Tensile strength of the filament.");
+    def->sidetext = L("MPa");
+    def->width = 15;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionStrings { "" });
+
+    def = this->add("filament_property_tensile_modulus", coStrings);
+    def->label = L("Tensile modulus");
+    def->tooltip = L("Tensile modulus of the filament.");
+    def->sidetext = L("MPa");
+    def->width = 15;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionStrings { "" });
+
+    def = this->add("filament_property_elongation_at_break", coStrings);
+    def->label = L("Elongation at break");
+    def->tooltip = L("Elongation at break of the filament.");
+    def->sidetext = L("%");
+    def->width = 15;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionStrings { "" });
+
+    def = this->add("filament_property_flexural_strength", coStrings);
+    def->label = L("Flexural strength");
+    def->tooltip = L("Flexural strength of the filament.");
+    def->sidetext = L("MPa");
+    def->width = 15;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionStrings { "" });
+
+    def = this->add("filament_property_flexural_modulus", coStrings);
+    def->label = L("Flexural modulus");
+    def->tooltip = L("Flexural modulus of the filament.");
+    def->sidetext = L("MPa");
+    def->width = 15;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionStrings { "" });
+
+    def = this->add("filament_property_notch_impact_strength", coStrings);
+    def->label = L("Notch impact strength");
+    def->tooltip = L("Notch impact strength of the filament.");
+    def->sidetext = L("MPa");
+    def->width = 15;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionStrings { "" });
+////////////Y7
     def = this->add("fuzzy_skin", coEnum);
     def->label = L("Fuzzy Skin");
     def->category = L("Fuzzy Skin");

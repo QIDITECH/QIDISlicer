@@ -511,7 +511,12 @@ static std::vector<std::string> s_Preset_filament_options {
     //B26
     "advance_pressure",
     //B26
-    "smooth_time"
+    "smooth_time",
+    //Y7
+    "filament_property_drying_box", "filament_property_anneal_temperature", "filament_property_water_resistance", "filament_property_corrosion_resistance",
+    "filament_property_creep_resistance", "filament_property_hdt_045", "filament_property_hdt_180", "filament_property_tensile_strength",
+    "filament_property_tensile_modulus", "filament_property_elongation_at_break", "filament_property_flexural_strength","filament_property_flexural_modulus",
+    "filament_property_notch_impact_strength"
 };
 
 static std::vector<std::string> s_Preset_machine_limits_options {

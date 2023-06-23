@@ -2040,6 +2040,38 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("volume_temperature"));
         optgroup->append_line(line);
 
+        //Y7
+        optgroup = page->new_optgroup(L("Drying box"));
+        create_line_with_near_label_widget(optgroup, "filament_property_drying_box");
+        line = { "", "" };
+        line.full_width = 1;
+        line.widget = [this](wxWindow* parent) {
+            return description_line_widget(parent, &m_drying_box_description_line);
+        };
+        optgroup->append_line(line);
+
+        optgroup = page->new_optgroup(L("Anneal"));
+        create_line_with_near_label_widget(optgroup, "filament_property_anneal_temperature");
+        line = { "", "" };
+        line.full_width = 1;
+        line.widget = [this](wxWindow* parent) {
+            return description_line_widget(parent, &m_anneal_temperature_description_line);
+        };
+        optgroup->append_line(line);
+
+        optgroup = page->new_optgroup(L("Property"));
+        optgroup->append_single_option_line("filament_property_water_resistance");
+        optgroup->append_single_option_line("filament_property_corrosion_resistance");
+        optgroup->append_single_option_line("filament_property_creep_resistance");
+        optgroup->append_single_option_line("filament_property_hdt_045");
+        optgroup->append_single_option_line("filament_property_hdt_180");
+        optgroup->append_single_option_line("filament_property_tensile_strength");
+        optgroup->append_single_option_line("filament_property_tensile_modulus");
+        optgroup->append_single_option_line("filament_property_elongation_at_break");
+        optgroup->append_single_option_line("filament_property_flexural_strength");
+        optgroup->append_single_option_line("filament_property_flexural_modulus");
+        optgroup->append_single_option_line("filament_property_notch_impact_strength");
+
     page = add_options_page(L("Cooling"), "cooling");
         std::string category_path = "cooling_127569#";
         optgroup = page->new_optgroup(L("Enable"));
@@ -2211,6 +2243,15 @@ void TabFilament::update_description_lines()
         m_cooling_description_line->SetText(from_u8(PresetHints::cooling_description(m_presets->get_edited_preset())));
     if (m_active_page->title() == "Advanced" && m_volumetric_speed_description_line)
         this->update_volumetric_flow_preset_hints();
+    //Y7
+    if (m_active_page->title() == "Filament"){
+        if (m_drying_box_description_line){
+            m_drying_box_description_line->SetText(from_u8(PresetHints::drying_box_description(m_presets->get_edited_preset())));
+        }
+        if (m_anneal_temperature_description_line){
+            m_anneal_temperature_description_line->SetText(from_u8(PresetHints::anneal_temperature_description(m_presets->get_edited_preset())));
+        }
+    }
 }
 
 void TabFilament::toggle_options()
@@ -2247,11 +2288,20 @@ void TabFilament::toggle_options()
                 update_line_with_near_label_widget(*og_it, "idle_temperature");
             }
         //B26
-        if (m_active_page->title() == "Filament") {
-            bool pa = m_config->opt_bool("enable_advance_pressure", 0);
-            toggle_option("advance_pressure", pa);
-            toggle_option("smooth_time", pa);
-        }
+        bool pa = m_config->opt_bool("enable_advance_pressure", 0);
+        toggle_option("advance_pressure", pa);
+        toggle_option("smooth_time", pa);
+        //Y7
+        const auto og_it2 = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Drying box"; });
+        if (og_it2 != page->m_optgroups.end())
+            {
+                update_line_with_near_label_widget(*og_it2, "filament_property_drying_box");
+            }
+        const auto og_it3 = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Anneal"; });
+        if (og_it3 != page->m_optgroups.end())
+            {
+                update_line_with_near_label_widget(*og_it3, "filament_property_anneal_temperature");
+            }
     }
 }
 
@@ -2278,7 +2328,10 @@ void TabFilament::clear_pages()
     Tab::clear_pages();
 
     m_volumetric_speed_description_line = nullptr;
-	m_cooling_description_line = nullptr;
+    m_cooling_description_line = nullptr;
+    //Y7
+    m_drying_box_description_line = nullptr;
+    m_anneal_temperature_description_line = nullptr;
 }
 
 void TabFilament::msw_rescale()

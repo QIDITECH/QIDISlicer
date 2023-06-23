@@ -441,6 +441,9 @@ class TabFilament : public Tab
     int             m_active_extruder {0};
 	ogStaticText*	m_volumetric_speed_description_line {nullptr};
 	ogStaticText*	m_cooling_description_line {nullptr};
+    //Y7
+    ogStaticText*	m_drying_box_description_line {nullptr};
+    ogStaticText*	m_anneal_temperature_description_line {nullptr};
 
     void            create_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string &opt_key, int opt_index = 0);
     void            update_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string &opt_key, int opt_index = 0, bool is_checked = true);
