@@ -214,7 +214,7 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
                                         "</font>"
                                     "</body>"
                                "</html>", 
-                    bgr_clr_str, text_clr_str, from_u8(msg_escaped), (is_that_msg == "28]") ? "<br />You can try visiting the following link to resolve the problem: <a href=\"https://qidi3d.com/pages/software-firmware\">https://qidi3d.com/pages/software-firmware</a>" : ""));
+                    bgr_clr_str, text_clr_str, from_u8(msg_escaped), (is_that_msg == "28]") ? "<br />You can get the latest version of the software through the link below:\n<a href=\"https://qidi3d.com/pages/software-firmware\">https://qidi3d.com/pages/software-firmware</a>" : ""));
 
     html->Bind(wxEVT_HTML_LINK_CLICKED, [parent](wxHtmlLinkEvent& event) {
         wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref(), parent, false);
