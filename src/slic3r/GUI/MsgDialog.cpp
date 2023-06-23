@@ -203,14 +203,18 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
     if (monospaced_font)
         // Code formatting will be preserved. This is useful for reporting errors from the placeholder parser.
         msg_escaped = std::string("<pre><code>") + msg_escaped + "</code></pre>";
+    std::string is_that_msg;
+    is_that_msg = msg_escaped.substr(msg_escaped.length() - 3, msg_escaped.length());
+    bool is_errort = false;//priv::http_get_file();
     html->SetPage(format_wxstr("<html>"
                                     "<body bgcolor=%1% link=%2%>"
                                         "<font color=%2%>"
                                             "%3%"
+                                            "%4%"
                                         "</font>"
                                     "</body>"
                                "</html>", 
-                    bgr_clr_str, text_clr_str, from_u8(msg_escaped)));
+                    bgr_clr_str, text_clr_str, from_u8(msg_escaped), (is_that_msg == "28]") ? "<br />You can try visiting the following link to resolve the problem: <a href=\"https://qidi3d.com/pages/software-firmware\">https://qidi3d.com/pages/software-firmware</a>" : ""));
 
     html->Bind(wxEVT_HTML_LINK_CLICKED, [parent](wxHtmlLinkEvent& event) {
         wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref(), parent, false);
