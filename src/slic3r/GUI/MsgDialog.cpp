@@ -22,6 +22,7 @@
 #include "wxExtensions.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
 #include "GUI_App.hpp"
+#include "libslic3r/AppConfig.cpp"
 
 namespace Slic3r {
 namespace GUI {
@@ -116,7 +117,7 @@ void MsgDialog::finalize()
 // Text shown as HTML, so that mouse selection and Ctrl-V to copy will work.
 static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxString msg, bool monospaced_font = false, bool is_marked_msg = false)
 {
-    wxHtmlWindow* html = new wxHtmlWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHW_SCROLLBAR_NEVER);
+    wxHtmlWindow* html = new wxHtmlWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHW_SCROLLBAR_AUTO);
 
     // count lines in the message
     int msg_lines = 0;
@@ -193,7 +194,7 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
         wxClientDC dc(parent);
         wxSize msg_sz = dc.GetMultiLineTextExtent(msg);
         page_size = wxSize(std::min(msg_sz.GetX() + 2 * em, 68 * em),
-                           std::min(msg_sz.GetY() + 4 * em, 68 * em));
+                           std::min(msg_sz.GetY() + 8 * em, 68 * em));
     }
     html->SetMinSize(page_size);
 
@@ -203,8 +204,11 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
     if (monospaced_font)
         // Code formatting will be preserved. This is useful for reporting errors from the placeholder parser.
         msg_escaped = std::string("<pre><code>") + msg_escaped + "</code></pre>";
-    std::string is_that_msg;
-    is_that_msg = msg_escaped.substr(msg_escaped.length() - 3, msg_escaped.length());
+    bool is_that_msg = false;
+    std::string that_msg;
+    that_msg = msg_escaped.substr(0, 46);
+    if (that_msg == "Downloading QIDISlicer version file has failed")
+        is_that_msg = true;
     bool is_errort = false;//priv::http_get_file();
     html->SetPage(format_wxstr("<html>"
                                     "<body bgcolor=%1% link=%2%>"
@@ -214,7 +218,7 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
                                         "</font>"
                                     "</body>"
                                "</html>", 
-                    bgr_clr_str, text_clr_str, from_u8(msg_escaped), (is_that_msg == "28]") ? "<br />You can get the latest version of the software through the link below:\n<a href=\"https://qidi3d.com/pages/software-firmware\">https://qidi3d.com/pages/software-firmware</a>" : ""));
+                    bgr_clr_str, text_clr_str, from_u8(msg_escaped), is_that_msg ? "<br />You can get the latest version of the software through the link below:\n<a href=\"https://qidi3d.com/pages/software-firmware\">https://qidi3d.com/pages/software-firmware</a>" : ""));
 
     html->Bind(wxEVT_HTML_LINK_CLICKED, [parent](wxHtmlLinkEvent& event) {
         wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref(), parent, false);
