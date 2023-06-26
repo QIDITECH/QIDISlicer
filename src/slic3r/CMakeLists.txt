@@ -18,6 +18,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/BitmapCache.hpp
     GUI/Widgets/StateColor.cpp
     GUI/Widgets/StateColor.hpp
+    GUI/Widgets/WebView.cpp
+    GUI/Widgets/WebView.hpp
     GUI/ConfigSnapshotDialog.cpp
     GUI/ConfigSnapshotDialog.hpp
     GUI/3DScene.cpp
@@ -173,6 +175,8 @@ set(SLIC3R_GUI_SOURCES
     Config/Snapshot.hpp
     GUI/PrinterWebView.cpp
     GUI/PrinterWebView.hpp
+    GUI/GuideWebView.cpp
+    GUI/GuideWebView.hpp
     Config/Version.cpp
     Config/Version.hpp    
     Utils/ASCIIFolding.cpp
