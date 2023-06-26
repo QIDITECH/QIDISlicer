@@ -50,9 +50,6 @@
 #include "NotificationManager.hpp"
 #include "Preferences.hpp"
 
-//B4
-//#include "WebViewDialog.hpp"
-
 #ifdef _WIN32
 #include <dbt.h>
 #include <shlobj.h>
@@ -773,27 +770,11 @@ void MainFrame::init_tabpanel()
         else
             select_tab(size_t(0)); // select Plater
     });
-    //B4
-    //if (wxGetApp().is_editor()) {
-    //    m_webview = new WebViewPanel(m_tabpanel);
-    //    Bind(EVT_LOAD_URL, [this](wxCommandEvent &evt) {
-    //        wxString url = evt.GetString();
-    //        select_tab(MainFrame::tpHome);
-    //        m_webview->load_url(url);
-    //    });
-    //    m_tabpanel->AddPage(m_webview, "", "tab_home_active");
-    //    //m_param_panel = new ParamsPanel(m_tabpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_LEFT | wxTAB_TRAVERSAL);
-    //}
-    //m_printer_view = new PrinterWebView(m_tabpanel);
-    //Bind(EVT_LOAD_PRINTER_URL, [this](wxCommandEvent &evt) {
-    //    wxString url = evt.GetString();
-    //    // select_tab(MainFrame::tpMonitor);
-    //    m_printer_view->load_url(url);
-    //});
-    //wxString url = "http://www.baidu.com";
-    //m_printer_view->load_url(url);
-    //m_printer_view->Hide();
-    //m_tabpanel->AddPage(m_printer_view, "", "tab_home_active");
+   
+
+
+    
+
     m_plater = new Plater(this, this);
     m_plater->Hide();
 
@@ -814,14 +795,6 @@ void MainFrame::init_tabpanel()
         }
     }
 }
-//B4
-//void MainFrame::load_url(wxString url)
-//{
-//    BOOST_LOG_TRIVIAL(trace) << "load_url:" << url;
-//    auto evt = new wxCommandEvent(EVT_LOAD_URL, this->GetId());
-//    evt->SetString(url);
-//    wxQueueEvent(this, evt);
-//}
 
 #ifdef WIN32
 void MainFrame::register_win32_callbacks()
@@ -887,6 +860,16 @@ void MainFrame::create_preset_tabs()
     add_created_tab(new TabSLAPrint(m_tabpanel), "cog");
     add_created_tab(new TabSLAMaterial(m_tabpanel), "resin");
     add_created_tab(new TabPrinter(m_tabpanel), wxGetApp().preset_bundle->printers.get_edited_preset().printer_technology() == ptFFF ? "printer" : "sla_printer");
+    //B4
+    m_printer_view = new PrinterWebView(m_tabpanel);
+    m_printer_view->Hide();
+    dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_printer_view, _L("Device"), "tab_monitor_active");
+    //B28
+    m_guide_view = new GuideWebView(m_tabpanel);
+    wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+    m_guide_view->load_url(url);
+    m_guide_view->Hide();
+    dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "notification_preferences");
 }
 
 void MainFrame::add_created_tab(Tab* panel,  const std::string& bmp_name /*= ""*/)
@@ -2064,7 +2047,7 @@ void MainFrame::select_tab(Tab* tab)
         page_idx++;
     select_tab(size_t(page_idx));
 }
-
+//B4
 void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 {
     bool tabpanel_was_hidden = false;
@@ -2074,9 +2057,32 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
     auto select = [this, tab](bool was_hidden) {
         // when tab == -1, it means we should show the last selected tab
         size_t new_selection = tab == (size_t)(-1) ? m_last_selected_tab : (m_layout == ESettingsLayout::Dlg && tab != 0) ? tab - 1 : tab;
+        //B4
+        if (m_tabpanel->GetSelection() == 4) {
+            if (const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config(); cfg) {
+                PresetBundle &         preset_bundle = *wxGetApp().preset_bundle;
+                const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
+                wxString               host          = pp.config.opt_string("print_host");
+                if (host.empty())
+                    host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                else {
+                    if (!host.Lower().starts_with("http"))
+                        host = wxString::Format("http://%s", host);
+                    if (!host.Lower().ends_with("10088"))
+                        host = wxString::Format("%s:10088", host);
+                }
+                if (tem_host != host) {
+                    m_printer_view->load_url(host);
+                    tem_host = host;
+                }
 
-        if (m_tabpanel->GetSelection() != (int)new_selection)
-            m_tabpanel->SetSelection(new_selection);
+            } else {
+                wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                m_printer_view->load_url(url);
+            }
+        }
+        // if (m_tabpanel->GetSelection() != (int)new_selection)
+        //     m_tabpanel->SetSelection(new_selection);
 #ifdef _MSW_DARK_MODE
         if (wxGetApp().tabs_as_menu()) {
             if (Tab* cur_tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(new_selection)))

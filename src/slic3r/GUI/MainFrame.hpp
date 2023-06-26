@@ -19,6 +19,8 @@
 #include "UnsavedChangesDialog.hpp"
 //B4
 #include "PrinterWebView.hpp"
+// B28
+#include "GuideWebView.hpp"
 
 class wxBookCtrlBase;
 class wxProgressDialog;
@@ -36,7 +38,6 @@ class Plater;
 class MainFrame;
 class PreferencesDialog;
 class GalleryDialog;
-//class WebViewPanel;
 
 
 enum QuickSlice
@@ -146,16 +147,6 @@ public:
     MainFrame(const int font_point_size);
     ~MainFrame() = default;
 
-    enum TabPosition {
-        tpHome     = 0,
-        tp3DEditor = 1,
-        // tpSettings = 1,
-        tpPreview   = 2,
-        tpMonitor   = 3,
-        tpProject   = 4,
-        toDebugTool = 5,
-    };
-
 
     void update_layout();
     void update_mode_markers();
@@ -216,10 +207,15 @@ public:
     void        technology_changed();
 
     PrintHostQueueDialog *printhost_queue_dlg() { return m_printhost_queue_dlg; }
-    //B4
+
+
     Plater *m_plater{nullptr};
-    //WebViewPanel *        m_webview{nullptr};
+
+    //B4
+    wxString              tem_host;
     PrinterWebView *      m_printer_view{nullptr};
+    //B28
+    GuideWebView *        m_guide_view{nullptr};
     wxBookCtrlBase *      m_tabpanel{nullptr};
     SettingsDialog        m_settings_dialog;
     DiffPresetDialog      diff_dialog;
