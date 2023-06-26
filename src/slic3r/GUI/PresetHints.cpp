@@ -342,7 +342,7 @@ std::string PresetHints::anneal_temperature_description(const Preset &preset)
     else {
         int filament_property_anneal_temperature = preset.config.option<ConfigOptionIntsNullable>("filament_property_anneal_temperature")->get_at(0);
         int filament_property_anneal_temperature_max = filament_property_anneal_temperature + 20;
-        out += GUI::format(_L("Annealing the model immediately after printing can further improve the mechanical properties of %1%.\n"
+        out += GUI::format(_L("Annealing the model immediately after printing can further improve the physical properties of %1%.\n"
                               "Put the model in a drying oven and set it at %2%-%3% °C for 4-6 hours."),
                               filament_type, filament_property_anneal_temperature, filament_property_anneal_temperature_max);
     }
