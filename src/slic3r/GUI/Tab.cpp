@@ -466,7 +466,6 @@ void Tab::OnActivate()
         Refresh(); // Just refresh page, if m_presets_choice is already shown
     else {
         // From the tab creation whole top sizer is hidden to correct update of preset combobox's size
-        // (see https://github.com/prusa3d/PrusaSlicer/issues/10746)
 
         // On first OnActivate call show top sizer
         m_top_hsizer->ShowItems(true);

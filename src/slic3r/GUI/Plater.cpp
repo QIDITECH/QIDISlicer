@@ -4143,11 +4143,11 @@ void Plater::priv::on_slicing_update(SlicingStatusEvent &evt)
             const std::string message_dial = GUI::format("%1% %2% %3%"
                 , _L_PLURAL("You are using template filament preset.", "You are using template filament presets.", templ_cnt)
                 , _u8L("Please note that template presets are not customized for specific printer and should only be used as a starting point for creating your own user presets.")
-                , "<a href=https://help.prusa3d.com/article/template-filaments_467599>https://help.prusa3d.com/</a>"
+                , "<a href=https://qidi3d.com/>https://qidi3d.com/</a>"
             );
             BOOST_LOG_TRIVIAL(warning) << message_notif;
-            notification_manager->push_slicing_warning_notification(message_notif, false, 0, 0, "https://help.prusa3d.com/", 
-                [](wxEvtHandler* evnthndlr) { wxGetApp().open_browser_with_warning_dialog("https://help.prusa3d.com/article/template-filaments_467599"); return false; }
+            notification_manager->push_slicing_warning_notification(message_notif, false, 0, 0, "https://qidi3d.com/", 
+                [](wxEvtHandler* evnthndlr) { wxGetApp().open_browser_with_warning_dialog("https://qidi3d.com/"); return false; }
                 );
             add_warning({ PrintStateBase::WarningLevel::CRITICAL, true, message_dial, 0}, 0);
         }
