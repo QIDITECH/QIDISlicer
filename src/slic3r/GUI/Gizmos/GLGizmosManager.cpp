@@ -173,8 +173,7 @@ void GLGizmosManager::reset_all_states()
     const EType current = get_current_type();
     if (current != Undefined)
         // close any open gizmo
-        if (!open_gizmo(current))
-            return;
+        open_gizmo(current);
 
     activate_gizmo(Undefined);
     m_hover = Undefined;
@@ -960,6 +959,8 @@ bool GLGizmosManager::activate_gizmo(EType type)
     if (type == Undefined) { 
         // it is deactivation of gizmo
         m_current = Undefined;
+        if (m_parent.current_printer_technology() == ptSLA)
+            m_parent.detect_sla_view_type();
         return true;
     }
 

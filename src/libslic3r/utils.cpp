@@ -9,6 +9,7 @@
 
 #include "Platform.hpp"
 #include "Time.hpp"
+#include "format.hpp"
 #include "libslic3r.h"
 
 #ifdef WIN32

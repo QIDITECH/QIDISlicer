@@ -418,6 +418,39 @@ private:
     FillLightning::GeneratorPtr m_lightning_generator;
 };
 
+struct FakeWipeTower
+{
+    // generate fake extrusion
+    Vec2f pos;
+    float width;
+    float height;
+    float layer_height;
+    float depth;
+    std::vector<std::pair<float, float>> z_and_depth_pairs;
+    float brim_width;
+    float rotation_angle;
+    float cone_angle;
+    Vec2d plate_origin;
+
+    void set_fake_extrusion_data(const Vec2f& p, float w, float h, float lh, float d, const std::vector<std::pair<float, float>>& zad, float bd, float ra, float ca, const Vec2d& o)
+    {
+        pos = p;
+        width = w;
+        height = h;
+        layer_height = lh;
+        depth = d;
+        z_and_depth_pairs = zad;
+        brim_width = bd;
+        rotation_angle = ra;
+        cone_angle = ca;
+        plate_origin = o;
+    }
+
+    void set_pos_and_rotation(const Vec2f& p, float rotation) { pos = p; rotation_angle = rotation; }
+
+    std::vector<ExtrusionPaths> getFakeExtrusionPathsFromWipeTower() const;
+};
+
 struct WipeTowerData
 {
     // Following section will be consumed by the GCodeGenerator.
@@ -433,6 +466,7 @@ struct WipeTowerData
 
     // Depth of the wipe tower to pass to GLCanvas3D for exact bounding box:
     float                                                 depth;
+    std::vector<std::pair<float, float>>                  z_and_depth_pairs;
     float                                                 brim_width;
     float                                                 height;
 
@@ -668,6 +702,9 @@ private:
     friend class GCodeProcessor;
     // Allow PrintObject to access m_mutex and m_cancel_callback.
     friend class PrintObject;
+
+    ConflictResultOpt m_conflict_result;
+    FakeWipeTower     m_fake_wipe_tower;
 };
 
 } /* slic3r_Print_hpp_ */

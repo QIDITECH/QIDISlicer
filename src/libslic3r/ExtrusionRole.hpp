@@ -5,6 +5,7 @@
 
 #include <string>
 #include <string_view>
+#include <cstdint>
 
 namespace Slic3r {
 

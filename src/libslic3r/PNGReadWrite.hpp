@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <istream>
+#include <cstdint>
 
 namespace Slic3r { namespace png {
 

@@ -11,6 +11,7 @@
 #include "Thread.hpp"
 #include "GCode.hpp"
 #include "GCode/WipeTower.hpp"
+#include "GCode/ConflictChecker.hpp"
 #include "Utils.hpp"
 #include "BuildVolume.hpp"
 #include "format.hpp"
@@ -25,7 +26,6 @@
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/regex.hpp>
-
 
 namespace Slic3r {
 
@@ -964,6 +964,18 @@ void Print::process()
         this->finalize_first_layer_convex_hull();
         this->set_done(psSkirtBrim);
     }
+
+    std::optional<const FakeWipeTower*> wipe_tower_opt = {};
+    if (this->has_wipe_tower()) {
+        m_fake_wipe_tower.set_pos_and_rotation({ m_config.wipe_tower_x, m_config.wipe_tower_y }, m_config.wipe_tower_rotation_angle);
+        wipe_tower_opt = std::make_optional<const FakeWipeTower*>(&m_fake_wipe_tower);
+    }
+    auto conflictRes = ConflictChecker::find_inter_of_lines_in_diff_objs(m_objects, wipe_tower_opt);
+
+    m_conflict_result = conflictRes;
+    if (conflictRes.has_value())
+        BOOST_LOG_TRIVIAL(error) << boost::format("gcode path conflicts found between %1% and %2%") % conflictRes->_objName1 % conflictRes->_objName2;
+
     BOOST_LOG_TRIVIAL(info) << "Slicing process finished." << log_memory_info();
 }
 
@@ -989,6 +1001,10 @@ std::string Print::export_gcode(const std::string& path_template, GCodeProcessor
     // Create GCode on heap, it has quite a lot of data.
     std::unique_ptr<GCode> gcode(new GCode);
     gcode->do_export(this, path.c_str(), result, thumbnail_cb);
+
+    if (m_conflict_result.has_value())
+        result->conflict_result = *m_conflict_result;
+
     return path.c_str();
 }
 
@@ -1487,6 +1503,7 @@ void Print::_make_wipe_tower()
     m_wipe_tower_data.tool_changes.reserve(m_wipe_tower_data.tool_ordering.layer_tools().size());
     wipe_tower.generate(m_wipe_tower_data.tool_changes);
     m_wipe_tower_data.depth = wipe_tower.get_depth();
+    m_wipe_tower_data.z_and_depth_pairs = wipe_tower.get_z_and_depth_pairs();
     m_wipe_tower_data.brim_width = wipe_tower.get_brim_width();
     m_wipe_tower_data.height = wipe_tower.get_wipe_tower_height();
 
@@ -1511,6 +1528,10 @@ void Print::_make_wipe_tower()
 
     m_wipe_tower_data.used_filament = wipe_tower.get_used_filament();
     m_wipe_tower_data.number_of_toolchanges = wipe_tower.get_number_of_toolchanges();
+    const Vec3d origin = Vec3d::Zero();
+    m_fake_wipe_tower.set_fake_extrusion_data(wipe_tower.position(), wipe_tower.width(), wipe_tower.get_wipe_tower_height(), config().first_layer_height, m_wipe_tower_data.depth,
+                                              m_wipe_tower_data.z_and_depth_pairs, m_wipe_tower_data.brim_width, config().wipe_tower_rotation_angle, config().wipe_tower_cone_angle, {scale_(origin.x()), scale_(origin.y())});
+
 }
 
 // Generate a recommended G-code output file name based on the format template, default extension, and template parameters
@@ -1522,6 +1543,7 @@ std::string Print::output_filename(const std::string &filename_base) const
     // These values will be just propagated into the output file name.
     DynamicConfig config = this->finished() ? this->print_statistics().config() : this->print_statistics().placeholders();
     config.set_key_value("num_extruders", new ConfigOptionInt((int)m_config.nozzle_diameter.size()));
+    config.set_key_value("default_output_extension", new ConfigOptionString(".gcode"));
     return this->PrintBase::output_filename(m_config.output_filename_format.value, ".gcode", filename_base, &config);
 }
 
@@ -1577,5 +1599,81 @@ std::string PrintStatistics::finalize_output_path(const std::string &path_in) co
     }
     return final_path;
 }
+
+    std::vector<ExtrusionPaths> FakeWipeTower::getFakeExtrusionPathsFromWipeTower() const
+    {
+        float h = height;
+        float lh = layer_height;
+        int   d = scale_(depth);
+        int   w = scale_(width);
+        int   bd = scale_(brim_width);
+        Point minCorner = { -bd, -bd };
+        Point maxCorner = { minCorner.x() + w + bd, minCorner.y() + d + bd };
+
+        const auto [cone_base_R, cone_scale_x] = WipeTower::get_wipe_tower_cone_base(width, height, depth, cone_angle);
+
+        std::vector<ExtrusionPaths> paths;
+        for (float hh = 0.f; hh < h; hh += lh) {
+            
+            if (hh != 0.f) {
+                // The wipe tower may be getting smaller. Find the depth for this layer.
+                size_t i = 0;
+                for (i=0; i<z_and_depth_pairs.size()-1; ++i)
+                    if (hh >= z_and_depth_pairs[i].first && hh < z_and_depth_pairs[i+1].first)
+                        break;
+                d = scale_(z_and_depth_pairs[i].second);
+                minCorner = {0.f, -d/2 + scale_(z_and_depth_pairs.front().second/2.f)};
+                maxCorner = { minCorner.x() + w, minCorner.y() + d };
+            }
+
+
+            ExtrusionPath path(ExtrusionRole::WipeTower, 0.0, 0.0, lh);
+            path.polyline = { minCorner, {maxCorner.x(), minCorner.y()}, maxCorner, {minCorner.x(), maxCorner.y()}, minCorner };
+            paths.push_back({ path });
+
+            // We added the border, now add several parallel lines so we can detect an object that is fully inside the tower.
+            // For now, simply use fixed spacing of 3mm.
+            for (coord_t y=minCorner.y()+scale_(3.); y<maxCorner.y(); y+=scale_(3.)) {
+                path.polyline = { {minCorner.x(), y}, {maxCorner.x(), y} };
+                paths.back().emplace_back(path);
+            }
+
+            // And of course the stabilization cone and its base...
+            if (cone_base_R > 0.) {
+                path.polyline.clear();
+                double r = cone_base_R * (1 - hh/height);
+                for (double alpha=0; alpha<2.01*M_PI; alpha+=2*M_PI/20.)
+                    path.polyline.points.emplace_back(Point::new_scale(width/2. + r * std::cos(alpha)/cone_scale_x, depth/2. + r * std::sin(alpha)));
+                paths.back().emplace_back(path);
+                if (hh == 0.f) { // Cone brim.
+                    for (float bw=brim_width; bw>0.f; bw-=3.f) {
+                        path.polyline.clear();
+                        for (double alpha=0; alpha<2.01*M_PI; alpha+=2*M_PI/20.) // see load_wipe_tower_preview, where the same is a bit clearer
+                            path.polyline.points.emplace_back(Point::new_scale(
+                                width/2. + cone_base_R * std::cos(alpha)/cone_scale_x * (1. + cone_scale_x*bw/cone_base_R),
+                                depth/2. + cone_base_R * std::sin(alpha) * (1. + bw/cone_base_R))
+                            );
+                        paths.back().emplace_back(path);
+                    }
+                }
+            }
+
+            // Only the first layer has brim.
+            if (hh == 0.f) {
+                minCorner = minCorner + Point(bd, bd);
+                maxCorner = maxCorner - Point(bd, bd);
+            }
+        }
+
+        // Rotate and translate the tower into the final position.
+        for (ExtrusionPaths& ps : paths) {
+            for (ExtrusionPath& p : ps) {
+                p.polyline.rotate(Geometry::deg2rad(rotation_angle));
+                p.polyline.translate(scale_(pos.x()), scale_(pos.y()));
+            }
+        }
+
+        return paths;
+    }
 
 } // namespace Slic3r

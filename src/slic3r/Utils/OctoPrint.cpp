@@ -32,6 +32,7 @@ namespace pt = boost::property_tree;
 namespace Slic3r {
 
 namespace {
+#ifdef WIN32
 std::string get_host_from_url(const std::string& url_in)
 {
     std::string url = url_in;
@@ -63,7 +64,7 @@ std::string get_host_from_url(const std::string& url_in)
         BOOST_LOG_TRIVIAL(error) << "OctoPrint get_host_from_url: failed to allocate curl_url";
     return out;
 }
-#ifdef WIN32
+
     // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
 std::string substitute_host(const std::string& orig_addr, std::string sub_addr)
 {
@@ -470,15 +471,17 @@ bool OctoPrint::upload_inner_with_host(PrintHostUpload upload_data, ProgressFn p
         % upload_parent_path.string()
         % (upload_data.post_action == PrintHostPostUploadAction::StartPrint ? "true" : "false");
 
-    std::string host = get_host_from_url(m_host);
     auto http = Http::post(std::move(url));
+#ifdef WIN32
     // "Host" header is necessary here. In the workaround above (two mDNS..) we have got IP address from test connection and subsituted it into "url" variable.
     // And when creating Http object above, libcurl automatically includes "Host" header from address it got.
     // Thus "Host" is set to the resolved IP instead of host filled by user. We need to change it back.
     // Not changing the host would work on the most cases (where there is 1 service on 1 hostname) but would break when f.e. reverse proxy is used (issue #9734).
     // Also when allow_ip_resolve = 0, this is not needed, but it should not break anything if it stays.
     // https://www.rfc-editor.org/rfc/rfc7230#section-5.4
+    std::string host = get_host_from_url(m_host);
     http.header("Host", host);
+#endif // _WIN32
     set_auth(http);
     http.form_add("print", upload_data.post_action == PrintHostPostUploadAction::StartPrint ? "true" : "false")
         .form_add("path", upload_parent_path.string())      // XXX: slashes on windows ???
@@ -1036,14 +1039,16 @@ bool QIDILink::put_inner(PrintHostUpload upload_data, std::string url, const std
     bool res = true;
     // Percent escape all filenames in on path and add it to the url. This is different from POST.
     url += "/" + escape_path_by_element(upload_data.upload_path);
-    std::string host = get_host_from_url(m_host);
     Http http = Http::put(std::move(url));
+#ifdef WIN32
     // "Host" header is necessary here. We have resolved IP address and subsituted it into "url" variable.
     // And when creating Http object above, libcurl automatically includes "Host" header from address it got.
     // Thus "Host" is set to the resolved IP instead of host filled by user. We need to change it back.
     // Not changing the host would work on the most cases (where there is 1 service on 1 hostname) but would break when f.e. reverse proxy is used (issue #9734).
     // https://www.rfc-editor.org/rfc/rfc7230#section-5.4
+    std::string host = get_host_from_url(m_host);
     http.header("Host", host);
+#endif // _WIN32
     set_auth(http);
     // This is ugly, but works. There was an error at QIDILink side that accepts any string at Print-After-Upload as true, thus False was also triggering print after upload.
     if (upload_data.post_action == PrintHostPostUploadAction::StartPrint)
@@ -1083,15 +1088,17 @@ bool QIDILink::post_inner(PrintHostUpload upload_data, std::string url, const st
     bool res = true;
     const auto upload_filename = upload_data.upload_path.filename();
     const auto upload_parent_path = upload_data.upload_path.parent_path();
-    std::string host = get_host_from_url(m_host);
 
     Http http = Http::post(std::move(url));
+#ifdef WIN32
     // "Host" header is necessary here. We have resolved IP address and subsituted it into "url" variable.
     // And when creating Http object above, libcurl automatically includes "Host" header from address it got.
     // Thus "Host" is set to the resolved IP instead of host filled by user. We need to change it back.
     // Not changing the host would work on the most cases (where there is 1 service on 1 hostname) but would break when f.e. reverse proxy is used (issue #9734).
     // https://www.rfc-editor.org/rfc/rfc7230#section-5.4
+    std::string host = get_host_from_url(m_host);
     http.header("Host", host);
+#endif // _WIN32
     set_auth(http);
     set_http_post_header_args(http, upload_data.post_action);
     http.form_add("path", upload_parent_path.string())      // XXX: slashes on windows ???

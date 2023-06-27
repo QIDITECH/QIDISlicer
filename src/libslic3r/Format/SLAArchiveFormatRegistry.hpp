@@ -48,9 +48,9 @@ struct ArchiveEntry {
         : id{formatid}
         , desc{description}
         , ext{extension}
-        , ext_aliases{extaliases}
         , wrfactoryfn{wrfn}
         , rdfactoryfn{rdfn}
+        , ext_aliases{extaliases}
     {}
 
     bool operator <(const ArchiveEntry &other) const
@@ -61,8 +61,10 @@ struct ArchiveEntry {
 
 std::vector<std::string> get_extensions(const ArchiveEntry &entry);
 
-std::set<ArchiveEntry> registered_sla_archives();
+const std::set<ArchiveEntry>& registered_sla_archives();
 
+const ArchiveEntry * get_archive_entry(const char *formatid);
+const char * get_default_extension(const char *formatid);
 ArchiveWriterFactory get_writer_factory(const char *formatid);
 ArchiveReaderFactory get_reader_factory(const char *formatid);
 

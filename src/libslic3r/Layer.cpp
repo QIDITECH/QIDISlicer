@@ -656,12 +656,22 @@ void Layer::make_perimeters()
     	        layer_region_ids.push_back(region_id);
     	        for (LayerRegionPtrs::const_iterator it = layerm + 1; it != m_regions.end(); ++it)
     	            if (! (*it)->slices().empty()) {
-    		            LayerRegion* other_layerm = *it;
-    		            const PrintRegionConfig &other_config = other_layerm->region().config();
-    		            if (config.perimeter_extruder             == other_config.perimeter_extruder
+                        LayerRegion             *other_layerm                         = *it;
+                        const PrintRegionConfig &other_config                         = other_layerm->region().config();
+                        bool                     dynamic_overhang_speed_compatibility = config.enable_dynamic_overhang_speeds ==
+                                                                    other_config.enable_dynamic_overhang_speeds;
+                        if (dynamic_overhang_speed_compatibility && config.enable_dynamic_overhang_speeds) {
+                            dynamic_overhang_speed_compatibility = config.overhang_speed_0 == other_config.overhang_speed_0 &&
+                                                                   config.overhang_speed_1 == other_config.overhang_speed_1 &&
+                                                                   config.overhang_speed_2 == other_config.overhang_speed_2 &&
+                                                                   config.overhang_speed_3 == other_config.overhang_speed_3;
+                        }
+
+                        if (config.perimeter_extruder             == other_config.perimeter_extruder
     		                && config.perimeters                  == other_config.perimeters
     		                && config.perimeter_speed             == other_config.perimeter_speed
     		                && config.external_perimeter_speed    == other_config.external_perimeter_speed
+                            && dynamic_overhang_speed_compatibility
     		                && (config.gap_fill_enabled ? config.gap_fill_speed.value : 0.) == 
                                (other_config.gap_fill_enabled ? other_config.gap_fill_speed.value : 0.)
     		                && config.overhangs                   == other_config.overhangs

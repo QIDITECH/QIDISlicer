@@ -650,7 +650,7 @@ std::tuple<ObjectPart, float> build_object_part_from_slice(const size_t &slice_i
             new_object_part.volume += volume;
             new_object_part.volume_centroid_accumulator += to_3d(Vec2f((line.a + line.b) / 2.0f), slice_z) * volume;
 
-            if (l->id() == params.raft_layers_count) { // layer attached on bed/raft
+            if (int(l->id()) == params.raft_layers_count) { // layer attached on bed/raft
                 new_object_part.connected_to_bed = true;
                 float sticking_area              = line.len * flow_width;
                 new_object_part.sticking_area += sticking_area;
@@ -673,7 +673,7 @@ std::tuple<ObjectPart, float> build_object_part_from_slice(const size_t &slice_i
 
     for (const auto &island : slice.islands) {
         const LayerRegion *perimeter_region = layer->get_region(island.perimeters.region());
-        for (const auto &perimeter_idx : island.perimeters) {
+        for (size_t perimeter_idx : island.perimeters) {
             for (const ExtrusionEntity *perimeter :
                  static_cast<const ExtrusionEntityCollection *>(perimeter_region->perimeters().entities[perimeter_idx])->entities) {
                 add_extrusions_to_object(perimeter, perimeter_region);
@@ -681,20 +681,20 @@ std::tuple<ObjectPart, float> build_object_part_from_slice(const size_t &slice_i
         }
         for (const LayerExtrusionRange &fill_range : island.fills) {
             const LayerRegion *fill_region = layer->get_region(fill_range.region());
-            for (const auto &fill_idx : fill_range) {
+            for (size_t fill_idx : fill_range) {
                 for (const ExtrusionEntity *fill :
                      static_cast<const ExtrusionEntityCollection *>(fill_region->fills().entities[fill_idx])->entities) {
                     add_extrusions_to_object(fill, fill_region);
                 }
             }
         }
-        for (const auto &thin_fill_idx : island.thin_fills) {
+        for (size_t thin_fill_idx : island.thin_fills) {
             add_extrusions_to_object(perimeter_region->thin_fills().entities[thin_fill_idx], perimeter_region);
         }
     }
 
     //  BRIM HANDLING
-    if (layer->id() == params.raft_layers_count && params.raft_layers_count == 0 && params.brim_type != BrimType::btNoBrim &&
+    if (int(layer->id()) == params.raft_layers_count && params.raft_layers_count == 0 && params.brim_type != BrimType::btNoBrim &&
         params.brim_width > 0.0) {
         // TODO: The algorithm here should take into account that multiple slices may have coliding Brim areas and the final brim area is
         // smaller,
@@ -911,7 +911,7 @@ std::tuple<SupportPoints, PartialObjects> check_stability(const PrintObject     
             for (const auto &island : slice.islands) {
                 for (const LayerExtrusionRange &fill_range : island.fills) {
                     const LayerRegion *fill_region = layer->get_region(fill_range.region());
-                    for (const auto &fill_idx : fill_range) {
+                    for (size_t fill_idx : fill_range) {
                         for (const ExtrusionEntity *e : get_flat_entities(fill_region->fills().entities[fill_idx])) {
                             if (e->role() == ExtrusionRole::BridgeInfill) {
                                 entities_to_check.push_back({e, fill_region, slice_idx});
@@ -921,7 +921,7 @@ std::tuple<SupportPoints, PartialObjects> check_stability(const PrintObject     
                 }
 
                 const LayerRegion *perimeter_region = layer->get_region(island.perimeters.region());
-                for (const size_t &perimeter_idx : island.perimeters) {
+                for (size_t perimeter_idx : island.perimeters) {
                     for (const ExtrusionEntity *e : get_flat_entities(perimeter_region->perimeters().entities[perimeter_idx])) {
                         entities_to_check.push_back({e, perimeter_region, slice_idx});
                     }

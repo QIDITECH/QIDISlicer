@@ -72,6 +72,7 @@ struct RegionExpansion
 };
 
 std::vector<RegionExpansion> propagate_waves(const WaveSeeds &seeds, const ExPolygons &boundary, const RegionExpansionParameters &params);
+std::vector<RegionExpansion> propagate_waves(const ExPolygons &src, const ExPolygons &boundary, const RegionExpansionParameters &params);
 
 std::vector<RegionExpansion> propagate_waves(const ExPolygons &src, const ExPolygons &boundary,
     // Scaled expansion value
@@ -105,6 +106,9 @@ std::vector<Polygons> expand_expolygons(const ExPolygons &src, const ExPolygons 
     float expansion_step,
     // Don't take more than max_nr_steps for small expansion_step.
     size_t max_nr_steps);
+
+// Merge src with expansions, return the merged expolygons.
+std::vector<ExPolygon> merge_expansions_into_expolygons(ExPolygons &&src, std::vector<RegionExpansion> &&expanded);
 
 std::vector<ExPolygon> expand_merge_expolygons(ExPolygons &&src, const ExPolygons &boundary, const RegionExpansionParameters &params);
 

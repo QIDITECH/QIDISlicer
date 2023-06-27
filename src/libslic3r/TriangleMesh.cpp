@@ -903,7 +903,7 @@ Polygon its_convex_hull_2d_above(const indexed_triangle_set& its, const Transfor
         chs.push_back(collect_mesh_projection_points_above(range));
     });
 
-    const Polygons polygons(chs.begin(), chs.end());
+    const Polygons polygons(std::make_move_iterator(chs.begin()), std::make_move_iterator(chs.end()));
     return Geometry::convex_hull(polygons);
 }
 

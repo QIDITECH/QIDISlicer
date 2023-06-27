@@ -315,7 +315,7 @@ private:
 
     bool can_perform_cut() const;
     bool has_valid_contour() const;
-    void apply_connectors_in_model(ModelObject* mo, bool &create_dowels_as_separate_object);
+    void apply_connectors_in_model(ModelObject* mo, int &dowels_count);
     bool cut_line_processing() const;
     void discard_cut_line_processing();
 

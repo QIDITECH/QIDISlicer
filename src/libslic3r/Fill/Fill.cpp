@@ -468,11 +468,8 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         f->print_config        = &this->object()->print()->config();
         f->print_object_config = &this->object()->config();
 
-		if (surface_fill.params.pattern == ipLightning) {
-			auto *lf = dynamic_cast<FillLightning::Filler*>(f.get());
-			lf->generator = lightning_generator;
-			lf->num_raft_layers = this->object()->slicing_parameters().raft_layers();
-		}
+        if (surface_fill.params.pattern == ipLightning)
+            dynamic_cast<FillLightning::Filler*>(f.get())->generator = lightning_generator;
 
         if (surface_fill.params.pattern == ipEnsuring) {
             auto *fill_ensuring = dynamic_cast<FillEnsuring *>(f.get());
@@ -649,18 +646,15 @@ Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Oc
         // Create the filler object.
         std::unique_ptr<Fill> f = std::unique_ptr<Fill>(Fill::new_from_type(surface_fill.params.pattern));
         f->set_bounding_box(bbox);
-        f->layer_id = this->id();
+        f->layer_id = this->id() - this->object()->get_layer(0)->id(); // We need to subtract raft layers.
         f->z        = this->print_z;
         f->angle    = surface_fill.params.angle;
         f->adapt_fill_octree   = (surface_fill.params.pattern == ipSupportCubic) ? support_fill_octree : adaptive_fill_octree;
         f->print_config        = &this->object()->print()->config();
         f->print_object_config = &this->object()->config();
 
-        if (surface_fill.params.pattern == ipLightning) {
-            auto *lf            = dynamic_cast<FillLightning::Filler *>(f.get());
-            lf->generator       = lightning_generator;
-            lf->num_raft_layers = this->object()->slicing_parameters().raft_layers();
-        }
+        if (surface_fill.params.pattern == ipLightning)
+            dynamic_cast<FillLightning::Filler *>(f.get())->generator = lightning_generator;
 
         // calculate flow spacing for infill pattern generation
         double link_max_length = 0.;

@@ -180,7 +180,7 @@ void ImGuiWrapper::set_language(const std::string &language)
     m_font_cjk = false;
     if (lang == "cs" || lang == "pl" || lang == "hu") {
         ranges = ranges_latin2;
-    } else if (lang == "ru" || lang == "uk") {
+    } else if (lang == "ru" || lang == "uk" || lang == "be") {
         ranges = ImGui::GetIO().Fonts->GetGlyphRangesCyrillic(); // Default + about 400 Cyrillic characters
     } else if (lang == "tr") {
         ranges = ranges_turkish;

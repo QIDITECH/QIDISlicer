@@ -86,6 +86,8 @@ extern wxString file_wildcards(FileType file_type);
 extern wxString file_wildcards(FileType file_type, const std::string &custom_extension = std::string{});
 #endif // ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
 
+wxString sla_wildcards(const char *formatid);
+
 enum ConfigMenuIDs {
     ConfigMenuWizard,
     ConfigMenuSnapshots,

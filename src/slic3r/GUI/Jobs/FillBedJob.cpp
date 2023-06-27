@@ -17,7 +17,6 @@ void FillBedJob::prepare()
 {
     m_selected.clear();
     m_unselected.clear();
-    m_bedpts.clear();
     m_min_bed_inset = 0.;
 
     m_object_idx = m_plater->get_selected_object_idx();
@@ -41,10 +40,10 @@ void FillBedJob::prepare()
     if (m_selected.empty())
         return;
 
-    m_bedpts = get_bed_shape(*m_plater->config());
+    Points bedpts = get_bed_shape(*m_plater->config());
 
     auto &objects = m_plater->model().objects;
-    BoundingBox bedbb = get_extents(m_bedpts);
+    BoundingBox bedbb = get_extents(bedpts);
 
     for (size_t idx = 0; idx < objects.size(); ++idx)
         if (int(idx) != m_object_idx)
@@ -72,7 +71,7 @@ void FillBedJob::prepare()
                                         }) / sc;
 
     double fixed_area = unsel_area + m_selected.size() * poly_area;
-    double bed_area   = Polygon{m_bedpts}.area() / sc;
+    double bed_area   = Polygon{bedpts}.area() / sc;
 
     // This is the maximum number of items, the real number will always be close but less.
     int needed_items = (bed_area - fixed_area) / poly_area;
@@ -85,27 +84,17 @@ void FillBedJob::prepare()
 
     for (int i = 0; i < needed_items; ++i) {
         ArrangePolygon ap = template_ap;
-        ap.poly = m_selected.front().poly;
         ap.bed_idx = arrangement::UNARRANGED;
         auto m = mi->get_transformation();
-        ap.setter = [this, mi, m](const ArrangePolygon &p) {
+        ap.setter = [this, m](const ArrangePolygon &p) {
             ModelObject *mo = m_plater->model().objects[m_object_idx];
-            ModelInstance *inst = mo->add_instance(*mi);
-            inst->set_transformation(m);
+            ModelInstance *inst = mo->add_instance(m);
             inst->apply_arrange_result(p.translation.cast<double>(), p.rotation);
         };
         m_selected.emplace_back(ap);
     }
 
     m_status_range = m_selected.size();
-
-    // The strides have to be removed from the fixed items. For the
-    // arrangeable (selected) items bed_idx is ignored and the
-    // translation is irrelevant.
-    double stride = bed_stride(m_plater);
-    for (auto &p : m_unselected)
-        if (p.bed_idx > 0)
-            p.translation(X) -= p.bed_idx * stride;
 
     coord_t min_offset = 0;
     for (auto &ap : m_selected) {
@@ -123,6 +112,14 @@ void FillBedJob::prepare()
         }
         m_min_bed_inset = min_offset;
     }
+
+    // The strides have to be removed from the fixed items. For the
+    // arrangeable (selected) items bed_idx is ignored and the
+    // translation is irrelevant.
+    double stride = bed_stride(m_plater);
+
+    m_bed = arrangement::to_arrange_bed(bedpts);
+    assign_logical_beds(m_unselected, m_bed, stride);
 }
 
 void FillBedJob::process(Ctl &ctl)
@@ -154,7 +151,7 @@ void FillBedJob::process(Ctl &ctl)
         do_stop = ap.bed_idx > 0 && ap.priority == 0;
     };
 
-    arrangement::arrange(m_selected, m_unselected, m_bedpts, params);
+    arrangement::arrange(m_selected, m_unselected, m_bed, params);
 
     // finalize just here.
     ctl.update_status(100, ctl.was_canceled() ?
@@ -191,7 +188,8 @@ void FillBedJob::finalize(bool canceled, std::exception_ptr &eptr)
 
         model_object->ensure_on_bed();
 
-        m_plater->update();
+        m_plater->update(static_cast<unsigned int>(
+            Plater::UpdateParams::FORCE_FULL_SCREEN_REFRESH));
 
         // FIXME: somebody explain why this is needed for increase_object_instances
         if (inst_cnt == 1)

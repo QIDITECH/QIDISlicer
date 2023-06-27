@@ -581,7 +581,7 @@ void WipeTower::set_extruder(size_t idx, const PrintConfig& config)
     m_filpar.push_back(FilamentParameters());
 
     m_filpar[idx].material = config.filament_type.get_at(idx);
-    m_filpar[idx].is_soluble = config.wipe_tower_extruder == 0 ? config.filament_soluble.get_at(idx) : (idx != config.wipe_tower_extruder - 1);
+    m_filpar[idx].is_soluble = config.wipe_tower_extruder == 0 ? config.filament_soluble.get_at(idx) : (idx != size_t(config.wipe_tower_extruder - 1));
     m_filpar[idx].temperature = config.temperature.get_at(idx);
     m_filpar[idx].first_layer_temperature = config.first_layer_temperature.get_at(idx);
 
@@ -1292,7 +1292,6 @@ WipeTower::ToolChangeResult WipeTower::finish_layer()
 
     // brim (first layer only)
     if (first_layer) {
-        box_coordinates box = wt_box;
         size_t loops_num = (m_wipe_tower_brim_width + spacing/2.f) / spacing;
         
         for (size_t i = 0; i < loops_num; ++ i) {
@@ -1561,6 +1560,21 @@ void WipeTower::generate(std::vector<std::vector<WipeTower::ToolChangeResult>> &
 
 		result.emplace_back(std::move(layer_result));
 	}
+}
+
+
+
+std::vector<std::pair<float, float>> WipeTower::get_z_and_depth_pairs() const
+{
+    std::vector<std::pair<float, float>> out = {{0.f, m_wipe_tower_depth}};
+    for (const WipeTowerInfo& wti : m_plan) {
+        assert(wti.depth < wti.depth + WT_EPSILON);
+        if (wti.depth < out.back().second - WT_EPSILON)
+            out.emplace_back(wti.z, wti.depth);
+    }
+    if (out.back().first < m_wipe_tower_height - WT_EPSILON)
+        out.emplace_back(m_wipe_tower_height, 0.f);
+    return out;
 }
 
 } // namespace Slic3r

@@ -1,5 +1,5 @@
-#ifndef slic3r_Mainsail_hpp_
-#define slic3r_Mainsail_hpp_
+#ifndef slic3r_Moonraker_hpp_
+#define slic3r_Moonraker_hpp_
 
 #include <string>
 #include <wx/string.h>
@@ -16,11 +16,11 @@ class DynamicPrintConfig;
 class Http;
 
 // https://moonraker.readthedocs.io/en/latest/web_api
-class Mainsail : public PrintHost
+class Moonraker : public PrintHost
 {
 public:
-    Mainsail(DynamicPrintConfig *config);
-    ~Mainsail() override = default;
+    Moonraker(DynamicPrintConfig *config);
+    ~Moonraker() override = default;
 
     const char* get_name() const override;
 

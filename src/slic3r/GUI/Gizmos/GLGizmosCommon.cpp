@@ -391,7 +391,7 @@ void ObjectClipper::render_cut(const std::vector<size_t>* ignore_idxs) const
         // Now update the ignore idxs. Find the first element belonging to the next clipper,
         // and remove everything before it and decrement everything by current number of contours.
         const int num_of_contours = clipper.first->get_number_of_contours();
-        ignore_idxs_local.erase(ignore_idxs_local.begin(), std::find_if(ignore_idxs_local.begin(), ignore_idxs_local.end(), [num_of_contours](size_t idx) { return idx >= num_of_contours; } ));
+        ignore_idxs_local.erase(ignore_idxs_local.begin(), std::find_if(ignore_idxs_local.begin(), ignore_idxs_local.end(), [num_of_contours](size_t idx) { return idx >= size_t(num_of_contours); } ));
         for (size_t& idx : ignore_idxs_local)
             idx -= num_of_contours;
     }

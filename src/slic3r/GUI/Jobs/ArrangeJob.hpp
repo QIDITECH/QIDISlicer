@@ -21,9 +21,11 @@ class ArrangeJob : public Job
 
     ArrangePolygons m_selected, m_unselected, m_unprintable;
     std::vector<ModelInstance*> m_unarranged;
+    arrangement::ArrangeBed m_bed;
     coord_t m_min_bed_inset = 0.;
 
     Plater *m_plater;
+    bool m_selection_only = false;
 
     // clear m_selected and m_unselected, reserve space for next usage
     void clear_input();
@@ -39,11 +41,13 @@ class ArrangeJob : public Job
 
 public:
 
+    enum Mode { Full, SelectionOnly };
+
     void prepare();
 
     void process(Ctl &ctl) override;
 
-    ArrangeJob();
+    ArrangeJob(Mode mode = Full);
 
     int status_range() const
     {
@@ -86,7 +90,6 @@ arrangement::ArrangePolygon get_arrange_poly(T obj, const Plater *plater)
     using ArrangePolygon = arrangement::ArrangePolygon;
 
     ArrangePolygon ap = obj.get_arrange_polygon();
-    ap.bed_idx        = get_extents(ap.transformed_poly()).min.x() / bed_stride(plater);
     ap.setter         = [obj, plater](const ArrangePolygon &p) {
         if (p.is_arranged()) {
             Vec2d t = p.translation.cast<double>();
@@ -105,6 +108,10 @@ arrangement::ArrangePolygon get_arrange_poly(ModelInstance *inst,
 arrangement::ArrangeParams get_arrange_params(Plater *p);
 
 coord_t get_skirt_offset(const Plater* plater);
+
+void assign_logical_beds(std::vector<arrangement::ArrangePolygon> &items,
+                         const arrangement::ArrangeBed &bed,
+                         double stride);
 
 }} // namespace Slic3r::GUI
 

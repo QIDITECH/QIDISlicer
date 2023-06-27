@@ -855,6 +855,7 @@ void GLGizmoSlaSupports::on_set_state()
             m_old_mo_id = -1;
         }
 
+        m_parent.post_event(SimpleEvent(EVT_GLCANVAS_FORCE_UPDATE));
         m_c->instances_hider()->set_hide_full_scene(false);
         m_c->selection_info()->set_use_shift(false); // see top of on_render for details
 

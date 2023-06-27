@@ -1,4 +1,4 @@
-#include "Mainsail.hpp"
+#include "Moonraker.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -63,28 +63,28 @@ std::string substitute_host(const std::string& orig_addr, std::string sub_addr)
 }
 #endif
 }
-Mainsail::Mainsail(DynamicPrintConfig *config) :
+Moonraker::Moonraker(DynamicPrintConfig *config) :
     m_host(config->opt_string("print_host")),
     m_apikey(config->opt_string("printhost_apikey")),
     m_cafile(config->opt_string("printhost_cafile")),
     m_ssl_revoke_best_effort(config->opt_bool("printhost_ssl_ignore_revoke"))
 {}
 
-const char* Mainsail::get_name() const { return "Mainsail"; }
+const char* Moonraker::get_name() const { return "Moonraker"; }
 
-wxString Mainsail::get_test_ok_msg () const
+wxString Moonraker::get_test_ok_msg () const
 {
-    return _(L("Connection to Mainsail works correctly."));
+    return _(L("Connection to Moonraker works correctly."));
 }
 
-wxString Mainsail::get_test_failed_msg (wxString &msg) const
+wxString Moonraker::get_test_failed_msg (wxString &msg) const
 {
     return GUI::format_wxstr("%s: %s"
-        , _L("Could not connect to Mainsail")
+        , _L("Could not connect to Moonraker")
         , msg);
 }
 
-bool Mainsail::test(wxString& msg) const
+bool Moonraker::test(wxString& msg) const
 {
     // GET /server/info
 
@@ -142,7 +142,7 @@ bool Mainsail::test(wxString& msg) const
     return res;
 }
 
-bool Mainsail::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const
+bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const
 {
     // POST /server/files/upload
 
@@ -232,15 +232,20 @@ bool Mainsail::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Error
     return res;
 }
 
-void Mainsail::set_auth(Http &http) const
+void Moonraker::set_auth(Http &http) const
 {
     if (!m_apikey.empty())
         http.header("X-Api-Key", m_apikey);
     if (!m_cafile.empty())
         http.ca_file(m_cafile);
 }
+<<<<<<< Updated upstream:src/slic3r/Utils/Mainsail.cpp
 //B4
 std::string Mainsail::make_url(const std::string &path) const
+=======
+
+std::string Moonraker::make_url(const std::string &path) const
+>>>>>>> Stashed changes:src/slic3r/Utils/Moonraker.cpp
 {
     std::string m_host_add = m_host + ":10088";
     if (m_host_add.find("http://") == 0 || m_host_add.find("https://") == 0) {

@@ -526,6 +526,10 @@ class GCodeViewer
         std::vector<Range>& get_ranges() { return m_ranges; }
         double get_z_at(unsigned int id) const { return (id < m_zs.size()) ? m_zs[id] : 0.0; }
         Range get_range_at(unsigned int id) const { return (id < m_ranges.size()) ? m_ranges[id] : Range(); }
+        int get_l_at(double z) const {
+            auto iter = std::upper_bound(m_zs.begin(), m_zs.end(), z);
+            return std::distance(m_zs.begin(), iter);
+        }
 
         bool operator != (const Layers& other) const {
             if (m_zs != other.m_zs)
@@ -784,6 +788,8 @@ private:
 
     bool m_contained_in_bed{ true };
 
+    ConflictResultOpt m_conflict_result;
+
 public:
     GCodeViewer();
     ~GCodeViewer() { reset(); }
@@ -840,6 +846,8 @@ public:
     size_t get_extruders_count() { return m_extruders_count; }
 
     void invalidate_legend() { m_legend_resizer.reset(); }
+
+    const ConflictResultOpt& get_conflict_result() const { return m_conflict_result; }
 
 private:
     void load_toolpaths(const GCodeProcessorResult& gcode_result);

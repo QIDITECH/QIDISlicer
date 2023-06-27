@@ -68,7 +68,7 @@ static const t_config_enum_values s_keys_map_PrintHostType {
     { "qidilink",      htQIDILink },
     { "qidiconnect",   htQIDIConnect },
     { "octoprint",      htOctoPrint },
-    { "mainsail",       htMainSail },
+    { "moonraker",      htMoonraker },
     { "duet",           htDuet },
     { "flashair",       htFlashAir },
     { "astrobox",       htAstroBox },
@@ -735,7 +735,6 @@ void PrintConfigDef::init_fff_params()
     def->tooltip = L("This flag enables the automatic cooling logic that adjusts print speed "
                    "and fan speed according to layer printing time.");
     def->set_default_value(new ConfigOptionBools { true });
-
 
     def = this->add("cooling_tube_retraction", coFloat);
     def->label = L("Cooling tube position");
@@ -1535,8 +1534,6 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(true));
 
-
-
     def = this->add("gap_fill_speed", coFloat);
     def->label = L("Gap fill");
     def->category = L("Speed");
@@ -2134,7 +2131,7 @@ void PrintConfigDef::init_fff_params()
         { "qidilink",      "QIDILink" },
         { "qidiconnect",   "QIDIConnect" },
         { "octoprint",      "OctoPrint" },
-        { "mainsail",       "Mainsail/Fluidd" },
+        { "moonraker",      "Klipper (via Moonraker)" },
         { "duet",           "Duet" },
         { "flashair",       "FlashAir" },
         { "astrobox",       "AstroBox" },
@@ -2164,7 +2161,7 @@ void PrintConfigDef::init_fff_params()
     def->tooltip = L("You can use all configuration options as variables inside this template. "
                    "For example: [layer_height], [fill_density] etc. You can also use [timestamp], "
                    "[year], [month], [day], [hour], [minute], [second], [version], [input_filename], "
-                   "[input_filename_base].");
+                   "[input_filename_base], [default_output_extension].");
     def->full_width = true;
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionString("[input_filename_base].gcode"));
@@ -4420,6 +4417,9 @@ void PrintConfigDef::handle_legacy(t_config_option_key &opt_key, std::string &va
         else if (value == "marlinfirmware")
             // the "new" marlin firmware flavor used to be called "marlinfirmware" for some time during QIDISlicer 2.4.0-alpha development.
             value = "marlin2";
+    } else if (opt_key == "host_type" && value == "mainsail") {
+        // the "mainsail" key (introduced in 2.6.0-alpha6) was renamed to "moonraker" (in 2.6.0-rc1).
+        value = "moonraker";
     } else if (opt_key == "fill_density" && value.find("%") == std::string::npos) {
         try {
             // fill_density was turned into a percent value
@@ -5185,21 +5185,21 @@ std::string get_sla_suptree_prefix(const DynamicPrintConfig &config)
     return slatree;
 }
 
-static bool is_XL_printer(const std::string& printer_model)
+static bool is_XL_printer(const std::string& printer_notes)
 {
-    static constexpr const char *ALIGN_ONLY_FOR = "XL";
-    return boost::algorithm::contains(printer_model, ALIGN_ONLY_FOR);
+    return boost::algorithm::contains(printer_notes, "PRINTER_VENDOR_PRUSA3D")
+        && boost::algorithm::contains(printer_notes, "PRINTER_MODEL_XL");
 }
 
 bool is_XL_printer(const DynamicPrintConfig &cfg)
 {
-    auto *printer_model = cfg.opt<ConfigOptionString>("printer_model");
-    return printer_model && is_XL_printer(printer_model->value);    
+    auto *printer_notes = cfg.opt<ConfigOptionString>("printer_notes");
+    return printer_notes && is_XL_printer(printer_notes->value);
 }
 
 bool is_XL_printer(const PrintConfig &cfg)
 {
-    return is_XL_printer(cfg.printer_model.value);
+    return is_XL_printer(cfg.printer_notes.value);
 }
 
 } // namespace Slic3r

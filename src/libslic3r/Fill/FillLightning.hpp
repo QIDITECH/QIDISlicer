@@ -22,7 +22,6 @@ public:
     ~Filler() override = default;
 
     Generator   *generator { nullptr };
-    size_t       num_raft_layers { 0 };
 protected:
     Fill* clone() const override { return new Filler(*this); }
 

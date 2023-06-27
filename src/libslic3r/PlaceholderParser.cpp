@@ -1090,6 +1090,7 @@ namespace client
 
         static void scalar_variable_assign_scalar(const MyContext *ctx, OptWithPos &lhs, const expr &rhs)
         {
+            assert(! ctx->skipping());
             assert(lhs.opt->is_scalar());
             check_writable(ctx, lhs);
             ConfigOption *wropt = const_cast<ConfigOption*>(lhs.opt);
@@ -1121,6 +1122,7 @@ namespace client
 
         static void vector_variable_element_assign_scalar(const MyContext *ctx, OptWithPos &lhs, const expr &rhs)
         {
+            assert(! ctx->skipping());
             assert(lhs.opt->is_vector());
             check_writable(ctx, lhs);
             if (! lhs.has_index())
@@ -1158,6 +1160,7 @@ namespace client
 
         static void vector_variable_assign_expr_with_count(const MyContext *ctx, OptWithPos &lhs, const expr &rhs_count, const expr &rhs_value)
         {
+            assert(! ctx->skipping());
             size_t count = evaluate_count(rhs_count);
             auto *opt = const_cast<ConfigOption*>(lhs.opt);
             switch (lhs.opt->type()) {

@@ -10,6 +10,7 @@
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/dll/runtime_symbol_info.hpp>
 
@@ -1161,8 +1162,8 @@ void PageMaterials::sort_list_data(StringList* list, bool add_All_item, bool mat
 // then the rest
 // in alphabetical order
     
-    std::vector<std::reference_wrapper<const std::string>> qidi_profiles;
-    std::vector<std::reference_wrapper<const std::string>> other_profiles;
+    std::vector<std::reference_wrapper<const std::string>> prusa_profiles;
+    std::vector<std::pair<std::wstring ,std::reference_wrapper<const std::string>>> other_profiles; // first is lower case id for sorting
     bool add_TEMPLATES_item = false;
     for (int i = 0 ; i < list->size(); ++i) {
         const std::string& data = list->get_data(i);
@@ -1175,7 +1176,7 @@ void PageMaterials::sort_list_data(StringList* list, bool add_All_item, bool mat
         if (!material_type_ordering && data.find("QIDI") != std::string::npos)
             qidi_profiles.push_back(data);
         else 
-            other_profiles.push_back(data);
+            other_profiles.emplace_back(boost::algorithm::to_lower_copy(boost::nowide::widen(data)),data);
     }
     if (material_type_ordering) {
         
@@ -1185,10 +1186,10 @@ void PageMaterials::sort_list_data(StringList* list, bool add_All_item, bool mat
             for (size_t profs = end_of_sorted; profs < other_profiles.size(); profs++)
             {
                 // find instead compare because PET vs PETG
-                if (other_profiles[profs].get().find(value) != std::string::npos) {
+                if (other_profiles[profs].second.get().find(value) != std::string::npos) {
                     //swap
                     if(profs != end_of_sorted) {
-                        std::reference_wrapper<const std::string> aux = other_profiles[end_of_sorted];
+                        std::pair<std::wstring, std::reference_wrapper<const std::string>> aux = other_profiles[end_of_sorted];
                         other_profiles[end_of_sorted] = other_profiles[profs];
                         other_profiles[profs] = aux;
                     }
@@ -1201,8 +1202,8 @@ void PageMaterials::sort_list_data(StringList* list, bool add_All_item, bool mat
         std::sort(qidi_profiles.begin(), qidi_profiles.end(), [](std::reference_wrapper<const std::string> a, std::reference_wrapper<const std::string> b) {
             return a.get() < b.get();
             });
-        std::sort(other_profiles.begin(), other_profiles.end(), [](std::reference_wrapper<const std::string> a, std::reference_wrapper<const std::string> b) {
-            return a.get() < b.get();
+        std::sort(other_profiles.begin(), other_profiles.end(), [](const std::pair<std::wstring, std::reference_wrapper<const std::string>>& a, const std::pair<std::wstring, std::reference_wrapper<const std::string>>& b) {
+            return a.first <b.first;
             });
     }
     
@@ -1214,7 +1215,7 @@ void PageMaterials::sort_list_data(StringList* list, bool add_All_item, bool mat
     for (const auto& item : qidi_profiles)
         list->append(item, &const_cast<std::string&>(item.get()));
     for (const auto& item : other_profiles)
-        list->append(item, &const_cast<std::string&>(item.get()));
+        list->append(item.second, &const_cast<std::string&>(item.second.get()));
     
 }     
 
@@ -1225,20 +1226,19 @@ void PageMaterials::sort_list_data(PresetList* list, const std::vector<ProfilePr
     // then the rest
     // in alphabetical order
     std::vector<ProfilePrintData> qidi_profiles;
-    std::vector<ProfilePrintData> other_profiles;
-    //for (int i = 0; i < data.size(); ++i) {
+    std::vector<std::pair<std::wstring, ProfilePrintData>> other_profiles; // first is lower case id for sorting
     for (const auto& item : data) {
         const std::string& name = item.name;
         if (name.find("QIDI") != std::string::npos)
             qidi_profiles.emplace_back(item);
         else
-            other_profiles.emplace_back(item);
+            other_profiles.emplace_back(boost::algorithm::to_lower_copy(boost::nowide::widen(name)), item);
     }
     std::sort(qidi_profiles.begin(), qidi_profiles.end(), [](ProfilePrintData a, ProfilePrintData b) {
         return a.name.get() < b.name.get();
         });
-    std::sort(other_profiles.begin(), other_profiles.end(), [](ProfilePrintData a, ProfilePrintData b) {
-        return a.name.get() < b.name.get();
+    std::sort(other_profiles.begin(), other_profiles.end(), [](const std::pair<std::wstring, ProfilePrintData>& a, const std::pair<std::wstring, ProfilePrintData>& b) {
+        return a.first < b.first;
         });
     list->Clear();
     for (size_t i = 0; i < qidi_profiles.size(); ++i) {
@@ -1246,8 +1246,8 @@ void PageMaterials::sort_list_data(PresetList* list, const std::vector<ProfilePr
         list->Check(i, qidi_profiles[i].checked);
     }
     for (size_t i = 0; i < other_profiles.size(); ++i) {
-        list->append(std::string(other_profiles[i].name) + (other_profiles[i].omnipresent || template_shown ? "" : " *"), &const_cast<std::string&>(other_profiles[i].name.get()));
-        list->Check(i + qidi_profiles.size(), other_profiles[i].checked);
+        list->append(std::string(other_profiles[i].second.name) + (other_profiles[i].second.omnipresent || template_shown ? "" : " *"), &const_cast<std::string&>(other_profiles[i].second.name.get()));
+        list->Check(i + qidi_profiles.size(), other_profiles[i].second.checked);
     }
 }
 
@@ -1670,9 +1670,17 @@ PageVendors::PageVendors(ConfigWizard *parent)
 
     auto boldfont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
     boldfont.SetWeight(wxFONTWEIGHT_BOLD);
+    // Copy vendors from bundle map to vector, so we can sort it without case sensitivity
+    std::vector<std::pair<std::wstring, const VendorProfile*>> vendors;
+    for (const auto& pair : wizard_p()->bundles) {
+        vendors.emplace_back(boost::algorithm::to_lower_copy(boost::nowide::widen(pair.second.vendor_profile->name)),pair.second.vendor_profile);
+    }
+    std::sort(vendors.begin(), vendors.end(), [](const std::pair<std::wstring, const VendorProfile*>& a, const std::pair<std::wstring, const VendorProfile*>& b) {
+        return a.first < b.first;
+        });
 
-    for (const auto &pair : wizard_p()->bundles) {
-        const VendorProfile *vendor = pair.second.vendor_profile;
+    for (const std::pair<std::wstring, const VendorProfile*>& v : vendors) {
+        const VendorProfile* vendor = v.second;
         if (vendor->id == PresetBundle::PRUSA_BUNDLE) { continue; }
         if (vendor && vendor->templates_profile)
             continue;
@@ -1682,8 +1690,8 @@ PageVendors::PageVendors(ConfigWizard *parent)
             wizard_p()->on_3rdparty_install(vendor, cbox->IsChecked());
         });
 
-        const auto &vendors = appconfig.vendors();
-        const bool enabled = vendors.find(pair.first) != vendors.end();
+        const auto &acvendors = appconfig.vendors();
+        const bool enabled = acvendors.find(vendor->id) != acvendors.end();
         if (enabled) {
             cbox->SetValue(true);
 
@@ -2317,12 +2325,25 @@ void ConfigWizard::priv::load_pages()
     // index->add_page(page_msla);
     if (!only_sla_mode) {
         //B9
-        // index->add_page(page_vendors);
-        // for (const auto &pages : pages_3rdparty) {
-        //     for ( PagePrinters* page : { pages.second.first, pages.second.second })
-        //         if (page && page->install)
-        //             index->add_page(page);
-        // }
+        /*index->add_page(page_vendors);
+
+        // Copy pages names from map to vector, so we can sort it without case sensitivity
+        std::vector<std::pair<std::wstring, std::string>> sorted_vendors;
+        for (const auto& pages : pages_3rdparty) {
+            sorted_vendors.emplace_back(boost::algorithm::to_lower_copy(boost::nowide::widen(pages.first)), pages.first);
+        }
+        std::sort(sorted_vendors.begin(), sorted_vendors.end(), [](const std::pair<std::wstring, std::string>& a, const std::pair<std::wstring, std::string>& b) {
+            return a.first < b.first;
+            });
+
+        for (const std::pair<std::wstring, std::string> v : sorted_vendors) {
+            const auto& pages = pages_3rdparty.find(v.second);
+            if (pages == pages_3rdparty.end())
+                continue; // Should not happen
+            for ( PagePrinters* page : { pages->second.first, pages->second.second })
+                if (page && page->install)
+                    index->add_page(page);
+        }*/
 
         index->add_page(page_custom);
         if (page_custom->custom_wanted()) {

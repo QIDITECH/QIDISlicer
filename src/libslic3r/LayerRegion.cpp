@@ -1,4 +1,5 @@
 #include "ExPolygon.hpp"
+#include "Flow.hpp"
 #include "Layer.hpp"
 #include "BridgeDetector.hpp"
 #include "ClipperUtils.hpp"
@@ -169,7 +170,10 @@ static ExPolygons fill_surfaces_extract_expolygons(Surfaces &surfaces, std::init
 Surfaces expand_bridges_detect_orientations(
     Surfaces                                    &surfaces,
     ExPolygons                                  &shells,
-    const Algorithm::RegionExpansionParameters  &expansion_params)
+    const Algorithm::RegionExpansionParameters  &expansion_params_into_solid_infill,
+    ExPolygons                                  &sparse,
+    const Algorithm::RegionExpansionParameters  &expansion_params_into_sparse_infill,
+    const float                                 closing_radius)
 {
     using namespace Slic3r::Algorithm;
 
@@ -179,8 +183,23 @@ Surfaces expand_bridges_detect_orientations(
         return {};
 
     // Calculate bridge anchors and their expansions in their respective shell region.
-    WaveSeeds                       bridge_anchors    = wave_seeds(bridges_ex, shells, expansion_params.tiny_expansion, true);
-    std::vector<RegionExpansionEx>  bridge_expansions = propagate_waves_ex(bridge_anchors, shells, expansion_params);
+    WaveSeeds                       bridge_anchors           = wave_seeds(bridges_ex, shells, expansion_params_into_solid_infill.tiny_expansion, true);
+    std::vector<RegionExpansionEx>  bridge_expansions        = propagate_waves_ex(bridge_anchors, shells, expansion_params_into_solid_infill);
+    bool                            expanded_into_shells     = ! bridge_expansions.empty();
+    bool                            expanded_into_sparse     = false;
+    {
+        WaveSeeds                       bridge_anchors_sparse    = wave_seeds(bridges_ex, sparse, expansion_params_into_sparse_infill.tiny_expansion, true);
+        std::vector<RegionExpansionEx>  bridge_expansions_sparse = propagate_waves_ex(bridge_anchors_sparse, sparse, expansion_params_into_sparse_infill);
+        if (! bridge_expansions_sparse.empty()) {
+            expanded_into_sparse = true;
+            for (WaveSeed &seed : bridge_anchors_sparse)
+                seed.boundary += uint32_t(shells.size());
+            for (RegionExpansionEx &expansion : bridge_expansions_sparse)
+                expansion.boundary_id += uint32_t(shells.size());
+            append(bridge_anchors,    std::move(bridge_anchors_sparse));
+            append(bridge_expansions, std::move(bridge_expansions_sparse));
+        }
+    }
 
     // Cache for detecting bridge orientation and merging regions with overlapping expansions.
     struct Bridge {
@@ -257,7 +276,7 @@ Surfaces expand_bridges_detect_orientations(
             for (; it_bridge_anchor != bridge_anchors.end() && it_bridge_anchor->src == bridge_id; ++ it_bridge_anchor) {
                 if (last_anchor_id != int(it_bridge_anchor->boundary)) {
                     last_anchor_id = int(it_bridge_anchor->boundary);
-                    append(anchor_areas, to_polygons(shells[last_anchor_id]));
+                    append(anchor_areas, to_polygons(last_anchor_id < int32_t(shells.size()) ? shells[last_anchor_id] : sparse[last_anchor_id - int32_t(shells.size())]));
                 }
 //                if (Points &polyline = it_bridge_anchor->path; polyline.size() >= 2) {
 //                    reserve_more_power_of_2(lines, polyline.size() - 1);
@@ -268,17 +287,18 @@ Surfaces expand_bridges_detect_orientations(
             lines = to_lines(diff_pl(to_polylines(bridge.expolygon), expand(anchor_areas, float(SCALED_EPSILON))));
             auto [bridging_dir, unsupported_dist] = detect_bridging_direction(lines, to_polygons(bridge.expolygon));
             bridge.angle = M_PI + std::atan2(bridging_dir.y(), bridging_dir.x());
-            // #if 1
-            //     coordf_t    stroke_width = scale_(0.06);
-            //     BoundingBox bbox         = get_extents(initial);
-            //     bbox.offset(scale_(1.));
-            //     ::Slic3r::SVG
-            //     svg(debug_out_path(("bridge"+std::to_string(bridges[idx_last].bridge_angle)+"_"+std::to_string(this->layer()->bottom_z())).c_str()),
-            //     bbox);
-
-            //     svg.draw(initial, "cyan");
-            //     svg.draw(to_lines(lower_layer->lslices), "green", stroke_width);
-            // #endif
+#if 0
+            coordf_t    stroke_width = scale_(0.06);
+            BoundingBox bbox         = get_extents(anchor_areas);
+            bbox.merge(get_extents(bridge.expolygon));
+            bbox.offset(scale_(1.));
+            ::Slic3r::SVG
+                svg(debug_out_path(("bridge" + std::to_string(bridge.angle) + "_" /* + std::to_string(this->layer()->bottom_z())*/).c_str()),
+                bbox);
+            svg.draw(bridge.expolygon, "cyan");
+            svg.draw(lines, "green", stroke_width);
+            svg.draw(anchor_areas, "red");
+#endif
         }
     }
 
@@ -309,14 +329,22 @@ Surfaces expand_bridges_detect_orientations(
                     }
                 //FIXME try to be smart and pick the best bridging angle for all?
                 templ.bridge_angle = bridges[bridge_id].angle;
+                //NOTE: The current regularization of the shells can create small unasigned regions in the object (E.G. benchy)
+                // without the following closing operation, those regions will stay unfilled and cause small holes in the expanded surface.
+                // look for narrow_ensure_vertical_wall_thickness_region_radius filter.
+                ExPolygons final = closing_ex(acc, closing_radius);
                 // without safety offset, artifacts are generated (GH #2494)
-                for (ExPolygon &ex : union_safety_offset_ex(acc))
+                // union_safety_offset_ex(acc)
+                for (ExPolygon &ex : final)
                     out.emplace_back(templ, std::move(ex));
             }
     }
 
-    // Clip the shells by the expanded bridges.
-    shells = diff_ex(shells, out);
+    // Clip by the expanded bridges.
+    if (expanded_into_shells)
+        shells = diff_ex(shells, out);
+    if (expanded_into_sparse)
+        sparse = diff_ex(sparse, out);
     return out;
 }
 
@@ -325,18 +353,43 @@ Surfaces expand_bridges_detect_orientations(
 static Surfaces expand_merge_surfaces(
     Surfaces                                   &surfaces,
     SurfaceType                                 surface_type,
-    ExPolygons                                 &shells,
-    const Algorithm::RegionExpansionParameters &params,
+    ExPolygons                                  &shells,
+    const Algorithm::RegionExpansionParameters  &expansion_params_into_solid_infill,
+    ExPolygons                                  &sparse,
+    const Algorithm::RegionExpansionParameters  &expansion_params_into_sparse_infill,
+    const float                                 closing_radius,
     const double                                bridge_angle = -1.)
 {
+    using namespace Slic3r::Algorithm;
+
     double thickness;
     ExPolygons src = fill_surfaces_extract_expolygons(surfaces, {surface_type}, thickness);
     if (src.empty())
         return {};
 
-    std::vector<ExPolygon> expanded = expand_merge_expolygons(std::move(src), shells, params);
+    std::vector<RegionExpansion> expansions = propagate_waves(src, shells, expansion_params_into_solid_infill);
+    bool                         expanded_into_shells = !expansions.empty();
+    bool                         expanded_into_sparse = false;
+    {
+        std::vector<RegionExpansion> expansions2 = propagate_waves(src, sparse, expansion_params_into_sparse_infill);
+        if (! expansions2.empty()) {
+            expanded_into_sparse = true;
+            for (RegionExpansion &expansion : expansions2)
+                expansion.boundary_id += uint32_t(shells.size());
+            append(expansions, std::move(expansions2));
+        }
+    }
+
+    std::vector<ExPolygon> expanded = merge_expansions_into_expolygons(std::move(src), std::move(expansions));
+    //NOTE: The current regularization of the shells can create small unasigned regions in the object (E.G. benchy)
+    // without the following closing operation, those regions will stay unfilled and cause small holes in the expanded surface.
+    // look for narrow_ensure_vertical_wall_thickness_region_radius filter.
+    expanded = closing_ex(expanded, closing_radius);
     // Trim the shells by the expanded expolygons.
-    shells = diff_ex(shells, expanded);
+    if (expanded_into_shells)
+        shells = diff_ex(shells, expanded);
+    if (expanded_into_sparse)
+        sparse = diff_ex(sparse, expanded);
 
     Surface templ{ surface_type, {} };
     templ.bridge_angle = bridge_angle;
@@ -349,20 +402,25 @@ static Surfaces expand_merge_surfaces(
 
 void LayerRegion::process_external_surfaces(const Layer *lower_layer, const Polygons *lower_layer_covered)
 {
+    using namespace Slic3r::Algorithm;
+
 #ifdef SLIC3R_DEBUG_SLICE_PROCESSING
     export_region_fill_surfaces_to_svg_debug("4_process_external_surfaces-initial");
 #endif /* SLIC3R_DEBUG_SLICE_PROCESSING */
 
     // Width of the perimeters.
     float shell_width = 0;
+    float expansion_min = 0;
     if (int num_perimeters = this->region().config().perimeters; num_perimeters > 0) {
         Flow external_perimeter_flow = this->flow(frExternalPerimeter);
         Flow perimeter_flow          = this->flow(frPerimeter);
-        shell_width += 0.5f * external_perimeter_flow.scaled_width() + external_perimeter_flow.scaled_spacing();
+        shell_width  = 0.5f * external_perimeter_flow.scaled_width() + external_perimeter_flow.scaled_spacing();
         shell_width += perimeter_flow.scaled_spacing() * (num_perimeters - 1);
+        expansion_min = perimeter_flow.scaled_spacing();
     } else {
         // TODO: Maybe there is better solution when printing with zero perimeters, but this works reasonably well, given the situation
-        shell_width = float(SCALED_EPSILON);
+        shell_width   = float(SCALED_EPSILON);
+        expansion_min = float(SCALED_EPSILON);;
     }
 
     // Scaled expansions of the respective external surfaces.
@@ -373,19 +431,23 @@ void LayerRegion::process_external_surfaces(const Layer *lower_layer, const Poly
     static constexpr const float    expansion_step          = scaled<float>(0.1);
     // Don't take more than max_nr_steps for small expansion_step.
     static constexpr const size_t   max_nr_expansion_steps  = 5;
+    // Radius (with added epsilon) to absorb empty regions emering from regularization of ensuring, viz  const float narrow_ensure_vertical_wall_thickness_region_radius = 0.5f * 0.65f * min_perimeter_infill_spacing;
+    const float closing_radius = 0.55f * 0.65f * 1.05f * this->flow(frSolidInfill).scaled_spacing();
 
     // Expand the top / bottom / bridge surfaces into the shell thickness solid infills.
     double     layer_thickness;
-    ExPolygons shells = union_ex(fill_surfaces_extract_expolygons(m_fill_surfaces.surfaces, {stInternalSolid}, layer_thickness));
+    ExPolygons shells = union_ex(fill_surfaces_extract_expolygons(m_fill_surfaces.surfaces, { stInternalSolid }, layer_thickness));
+    ExPolygons sparse = union_ex(fill_surfaces_extract_expolygons(m_fill_surfaces.surfaces, { stInternal }, layer_thickness));
 
     SurfaceCollection bridges;
+    const auto expansion_params_into_sparse_infill = RegionExpansionParameters::build(expansion_min, expansion_step, max_nr_expansion_steps);
     {
         BOOST_LOG_TRIVIAL(trace) << "Processing external surface, detecting bridges. layer" << this->layer()->print_z;
         const double custom_angle = this->region().config().bridge_angle.value;
-        const auto   params = Algorithm::RegionExpansionParameters::build(expansion_bottom_bridge, expansion_step, max_nr_expansion_steps);
+        const auto   expansion_params_into_solid_infill  = RegionExpansionParameters::build(expansion_bottom_bridge, expansion_step, max_nr_expansion_steps);
         bridges.surfaces = custom_angle > 0 ?
-            expand_merge_surfaces(m_fill_surfaces.surfaces, stBottomBridge, shells, params, Geometry::deg2rad(custom_angle)) :
-            expand_bridges_detect_orientations(m_fill_surfaces.surfaces, shells, params);
+            expand_merge_surfaces(m_fill_surfaces.surfaces, stBottomBridge, shells, expansion_params_into_solid_infill, sparse, expansion_params_into_sparse_infill, closing_radius, Geometry::deg2rad(custom_angle)) :
+            expand_bridges_detect_orientations(m_fill_surfaces.surfaces, shells, expansion_params_into_solid_infill, sparse, expansion_params_into_sparse_infill, closing_radius);
         BOOST_LOG_TRIVIAL(trace) << "Processing external surface, detecting bridges - done";
 #if 0
         {
@@ -396,15 +458,25 @@ void LayerRegion::process_external_surfaces(const Layer *lower_layer, const Poly
     }
 
     Surfaces    bottoms = expand_merge_surfaces(m_fill_surfaces.surfaces, stBottom, shells,
-        Algorithm::RegionExpansionParameters::build(expansion_bottom, expansion_step, max_nr_expansion_steps));
+        RegionExpansionParameters::build(expansion_bottom, expansion_step, max_nr_expansion_steps), 
+        sparse, expansion_params_into_sparse_infill, closing_radius);
     Surfaces    tops    = expand_merge_surfaces(m_fill_surfaces.surfaces, stTop, shells,
-        Algorithm::RegionExpansionParameters::build(expansion_top, expansion_step, max_nr_expansion_steps));
+        RegionExpansionParameters::build(expansion_top, expansion_step, max_nr_expansion_steps), 
+        sparse, expansion_params_into_sparse_infill, closing_radius);
 
-    m_fill_surfaces.remove_types({ stBottomBridge, stBottom, stTop, stInternalSolid });
-    reserve_more(m_fill_surfaces.surfaces, shells.size() + bridges.size() + bottoms.size() + tops.size());
-    Surface solid_templ(stInternalSolid, {});
-    solid_templ.thickness = layer_thickness;
-    m_fill_surfaces.append(std::move(shells), solid_templ);
+//    m_fill_surfaces.remove_types({ stBottomBridge, stBottom, stTop, stInternal, stInternalSolid });
+    m_fill_surfaces.clear();
+    reserve_more(m_fill_surfaces.surfaces, shells.size() + sparse.size() + bridges.size() + bottoms.size() + tops.size());
+    {
+        Surface solid_templ(stInternalSolid, {});
+        solid_templ.thickness = layer_thickness;
+        m_fill_surfaces.append(std::move(shells), solid_templ);
+    }
+    {
+        Surface sparse_templ(stInternal, {});
+        sparse_templ.thickness = layer_thickness;
+        m_fill_surfaces.append(std::move(sparse), sparse_templ);
+    }
     m_fill_surfaces.append(std::move(bridges.surfaces));
     m_fill_surfaces.append(std::move(bottoms));
     m_fill_surfaces.append(std::move(tops));

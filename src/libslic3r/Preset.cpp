@@ -2282,7 +2282,7 @@ namespace PresetUtils {
 	{
 		const VendorProfile::PrinterModel *out = nullptr;
 		if (preset.vendor != nullptr) {
-			auto *printer_model = preset.config.opt<ConfigOptionString>("printer_model");
+			const auto *printer_model = preset.config.opt<ConfigOptionString>("printer_model");
 			if (printer_model != nullptr && ! printer_model->value.empty()) {
 				auto it = std::find_if(preset.vendor->models.begin(), preset.vendor->models.end(), [printer_model](const VendorProfile::PrinterModel &pm) { return pm.id == printer_model->value; });
 				if (it != preset.vendor->models.end())

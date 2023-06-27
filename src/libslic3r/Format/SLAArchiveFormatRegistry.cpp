@@ -11,20 +11,17 @@
 
 namespace Slic3r {
 
-static std::mutex arch_mtx;
-
 class Registry {
     static std::unique_ptr<Registry> registry;
 
     std::set<ArchiveEntry> entries;
-public:
 
     Registry ()
     {
         entries = {
             {
                 "SL1",                      // id
-                L("SL1 archive format"),    // description
+                L("SL1 archive"),    // description
                 "sl1",                      // main extension
                 {"sl1s", "zip"},            // extension aliases
 
@@ -38,21 +35,13 @@ public:
             },
             {
                 "SL1SVG",
-                L("SL1SVG archive files"),
+                L("SL1 SVG archive"),
                 "sl1_svg",
-                {},
+                {"zip"},
                 [] (const auto &cfg) { return std::make_unique<SL1_SVGArchive>(cfg); },
                 [] (const std::string &fname, SLAImportQuality quality, const ProgrFn &progr) {
                     return std::make_unique<SL1_SVGReader>(fname, quality, progr);
                 }
-            },
-            {
-                "SL2",
-                "",
-                "sl1_svg",
-                {},
-                [] (const auto &cfg) { return std::make_unique<SL1_SVGArchive>(cfg); },
-                nullptr
             },
             anycubic_sla_format("pwmo", "Photon Mono"),
             anycubic_sla_format("pwmx", "Photon Mono X"),
@@ -85,28 +74,26 @@ public:
         };
     }
 
-    static Registry& get_instance()
+public:
+
+    static const Registry& get_instance()
     {
         if (!registry)
-            registry = std::make_unique<Registry>();
+            registry.reset(new Registry());
 
         return *registry;
     }
 
-    static std::set<ArchiveEntry>& get()
+    static const std::set<ArchiveEntry>& get()
     {
         return get_instance().entries;
     }
-
-    std::set<ArchiveEntry>& get_entries() { return entries; }
 };
 
 std::unique_ptr<Registry> Registry::registry = nullptr;
 
-std::set<ArchiveEntry> registered_sla_archives()
+const std::set<ArchiveEntry>& registered_sla_archives()
 {
-    std::lock_guard lk{arch_mtx};
-
     return Registry::get();
 }
 
@@ -123,8 +110,6 @@ std::vector<std::string> get_extensions(const ArchiveEntry &entry)
 
 ArchiveWriterFactory get_writer_factory(const char *formatid)
 {
-    std::lock_guard lk{arch_mtx};
-
     ArchiveWriterFactory ret;
     auto entry = Registry::get().find(ArchiveEntry{formatid});
     if (entry != Registry::get().end())
@@ -135,12 +120,35 @@ ArchiveWriterFactory get_writer_factory(const char *formatid)
 
 ArchiveReaderFactory get_reader_factory(const char *formatid)
 {
-    std::lock_guard lk{arch_mtx};
 
     ArchiveReaderFactory ret;
     auto entry = Registry::get().find(ArchiveEntry{formatid});
     if (entry != Registry::get().end())
         ret = entry->rdfactoryfn;
+
+    return ret;
+}
+
+const char *get_default_extension(const char *formatid)
+{
+    static constexpr const char *Empty = "";
+
+    const char * ret = Empty;
+
+    auto entry = Registry::get().find(ArchiveEntry{formatid});
+    if (entry != Registry::get().end())
+        ret = entry->ext;
+
+    return ret;
+}
+
+const ArchiveEntry * get_archive_entry(const char *formatid)
+{
+    const ArchiveEntry *ret = nullptr;
+
+    auto entry = Registry::get().find(ArchiveEntry{formatid});
+    if (entry != Registry::get().end())
+        ret = &(*entry);
 
     return ret;
 }

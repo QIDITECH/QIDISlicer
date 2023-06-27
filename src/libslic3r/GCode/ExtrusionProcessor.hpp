@@ -189,13 +189,13 @@ std::vector<ExtendedPoint> estimate_points_properties(const POINTS              
                 head_window_acc -= distances_for_curvature[point_idx - 1];
                 head_angle_acc -= angles_for_curvature[point_idx - 1];
             }
-            while (tail_window_acc > window_size * 0.5 && tail_point < point_idx) {
+            while (tail_window_acc > window_size * 0.5 && int(tail_point) < point_idx) {
                 tail_window_acc -= distances_for_curvature[tail_point];
                 tail_angle_acc -= angles_for_curvature[tail_point];
                 tail_point++;
             }
 
-            while (head_window_acc < window_size * 0.5 && head_point < int(points.size()) - 1) {
+            while (head_window_acc < window_size * 0.5 && int(head_point) < int(points.size()) - 1) {
                 head_window_acc += distances_for_curvature[head_point];
                 head_angle_acc += angles_for_curvature[head_point];
                 head_point++;

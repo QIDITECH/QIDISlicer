@@ -19,7 +19,7 @@
 #include "AstroBox.hpp"
 #include "Repetier.hpp"
 #include "MKS.hpp"
-#include "Mainsail.hpp"
+#include "Moonraker.hpp"
 #include "../GUI/PrintHostDialogs.hpp"
 
 namespace fs = boost::filesystem;
@@ -55,7 +55,7 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
             case htQIDILink: return new QIDILink(config);
             case htQIDIConnect: return new QIDIConnect(config);
             case htMKS:       return new MKS(config);
-            case htMainSail:  return new Mainsail(config);
+            case htMoonraker: return new Moonraker(config);
             default:          return nullptr;
         }
     } else {

@@ -1353,37 +1353,6 @@ void ModelObject::delete_connectors()
     }
 }
 
-void ModelObject::synchronize_model_after_cut()
-{
-    for (ModelObject* obj : m_model->objects) {
-        if (obj == this || obj->cut_id.is_equal(this->cut_id))
-            continue;
-        if (obj->is_cut() && obj->cut_id.has_same_id(this->cut_id))
-            obj->cut_id.copy(this->cut_id);
-    }
-    this->invalidate_cut();
-}
-
-void ModelObject::apply_cut_attributes(ModelObjectCutAttributes attributes)
-{
-    // we don't save cut information, if result will not contains all parts of initial object
-    if (!attributes.has(ModelObjectCutAttribute::KeepUpper) || 
-        !attributes.has(ModelObjectCutAttribute::KeepLower) || 
-        attributes.has(ModelObjectCutAttribute::InvalidateCutInfo))
-        return;
-
-    if (cut_id.id().invalid())
-        cut_id.init();
-    {
-        int cut_obj_cnt = -1;
-        if (attributes.has(ModelObjectCutAttribute::KeepUpper))     cut_obj_cnt++;
-        if (attributes.has(ModelObjectCutAttribute::KeepLower))     cut_obj_cnt++;
-        if (attributes.has(ModelObjectCutAttribute::CreateDowels))  cut_obj_cnt++;
-        if (cut_obj_cnt > 0)
-            cut_id.increase_check_sum(size_t(cut_obj_cnt));
-    }
-}
-
 void ModelObject::clone_for_cut(ModelObject** obj)
 {
     (*obj) = ModelObject::new_clone(*this);
@@ -1636,9 +1605,6 @@ ModelObjectPtrs ModelObject::cut(size_t instance, const Transform3d& cut_matrix,
 
     BOOST_LOG_TRIVIAL(trace) << "ModelObject::cut - start";
 
-    // apply cut attributes for object
-    apply_cut_attributes(attributes);
-
     // Clone the object to duplicate instances, materials etc.
     ModelObject* upper{ nullptr };
     if (attributes.has(ModelObjectCutAttribute::KeepUpper))
@@ -1708,8 +1674,6 @@ ModelObjectPtrs ModelObject::cut(size_t instance, const Transform3d& cut_matrix,
     }
 
     BOOST_LOG_TRIVIAL(trace) << "ModelObject::cut - end";
-
-    synchronize_model_after_cut();
 
     return res;
 }

@@ -243,9 +243,10 @@ bool GCodeReader::GCodeLine::has_value(char axis, float &value) const
     if (c == nullptr)
         return false;
     // Try to parse the numeric value.
-    char   *pend = nullptr;
-    double  v = strtod(++ c, &pend);
-    if (pend != nullptr && is_end_of_word(*pend)) {
+    double v = 0.;
+    const char* end = m_raw.c_str() + m_raw.size();
+    auto [pend, ec] = fast_float::from_chars(++c, end, v);
+    if (pend != c && is_end_of_word(*pend)) {
         // The axis value has been parsed correctly.
         value = float(v);
         return true;

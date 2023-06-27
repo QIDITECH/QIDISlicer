@@ -4,6 +4,8 @@
 #include "CSGMesh/PerformCSGMeshBooleans.hpp"
 #include "format.hpp"
 
+#include "Format/SLAArchiveFormatRegistry.hpp"
+
 #include "Geometry.hpp"
 #include "Thread.hpp"
 
@@ -522,6 +524,7 @@ SLAPrint::ApplyStatus SLAPrint::apply(const Model &model, DynamicPrintConfig con
 #endif /* _DEBUG */
 
     m_full_print_config = std::move(config);
+
     return static_cast<ApplyStatus>(apply_status);
 }
 
@@ -531,7 +534,16 @@ SLAPrint::ApplyStatus SLAPrint::apply(const Model &model, DynamicPrintConfig con
 std::string SLAPrint::output_filename(const std::string &filename_base) const
 {
     DynamicConfig config = this->finished() ? this->print_statistics().config() : this->print_statistics().placeholders();
-    return this->PrintBase::output_filename(m_print_config.output_filename_format.value, ".sl1", filename_base, &config);
+    std::string default_ext = get_default_extension(m_printer_config.sla_archive_format.value.c_str());
+    if (default_ext.empty())
+        default_ext = "sl1";
+
+    default_ext.insert(default_ext.begin(), '.');
+
+    config.set_key_value("default_output_extension",
+                         new ConfigOptionString(default_ext));
+
+    return this->PrintBase::output_filename(m_print_config.output_filename_format.value, default_ext, filename_base, &config);
 }
 
 std::string SLAPrint::validate(std::vector<std::string>*) const

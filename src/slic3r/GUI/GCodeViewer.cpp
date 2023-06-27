@@ -800,6 +800,9 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
             short_time(get_time_dhms(time)) == short_time(get_time_dhms(m_print_statistics.modes[static_cast<size_t>(PrintEstimatedStatistics::ETimeMode::Normal)].time)))
             m_time_estimate_mode = PrintEstimatedStatistics::ETimeMode::Normal;
     }
+
+    m_conflict_result = gcode_result.conflict_result;
+    if (m_conflict_result.has_value()) { m_conflict_result->layer = m_layers.get_l_at(m_conflict_result->_height); }
 }
 
 void GCodeViewer::refresh(const GCodeProcessorResult& gcode_result, const std::vector<std::string>& str_tool_colors)
@@ -2148,6 +2151,7 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
 
     // layers zs / roles / extruder ids -> extract from result
     size_t last_travel_s_id = 0;
+    size_t first_travel_s_id = 0;
     seams_count = 0;
     for (size_t i = 0; i < m_moves_count; ++i) {
         const GCodeProcessorResult::MoveVertex& move = gcode_result.moves[i];
@@ -2161,8 +2165,10 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
                 // layers zs
                 const double* const last_z = m_layers.empty() ? nullptr : &m_layers.get_zs().back();
                 const double z = static_cast<double>(move.position.z());
-                if (last_z == nullptr || z < *last_z - EPSILON || *last_z + EPSILON < z)
-                    m_layers.append(z, { last_travel_s_id, move_id });
+                if (last_z == nullptr || z < *last_z - EPSILON || *last_z + EPSILON < z) {
+                    const size_t start_it = (m_layers.empty() && first_travel_s_id != 0) ? first_travel_s_id : last_travel_s_id;
+                    m_layers.append(z, { start_it, move_id });
+                }
                 else
                     m_layers.get_ranges().back().last = move_id;
             }
@@ -2175,7 +2181,8 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
         else if (move.type == EMoveType::Travel) {
             if (move_id - last_travel_s_id > 1 && !m_layers.empty())
                 m_layers.get_ranges().back().last = move_id;
-
+            else if (m_layers.empty() && first_travel_s_id == 0)
+                first_travel_s_id = move_id;
             last_travel_s_id = move_id;
         }
     }
@@ -2258,9 +2265,11 @@ void GCodeViewer::load_shells(const Print& print)
         if (extruders_count > 1 && config.wipe_tower && !config.complete_objects) {
             const WipeTowerData& wipe_tower_data = print.wipe_tower_data(extruders_count);
             const float depth = wipe_tower_data.depth;
+            const std::vector<std::pair<float, float>> z_and_depth_pairs = print.wipe_tower_data(extruders_count).z_and_depth_pairs;
             const float brim_width = wipe_tower_data.brim_width;
-            m_shells.volumes.load_wipe_tower_preview(config.wipe_tower_x, config.wipe_tower_y, config.wipe_tower_width, depth, max_z, config.wipe_tower_cone_angle, config.wipe_tower_rotation_angle,
-                !print.is_step_done(psWipeTower), brim_width);
+            if (depth != 0.)
+                m_shells.volumes.load_wipe_tower_preview(config.wipe_tower_x, config.wipe_tower_y, config.wipe_tower_width, depth, z_and_depth_pairs, max_z, config.wipe_tower_cone_angle, config.wipe_tower_rotation_angle,
+                    !print.is_step_done(psWipeTower), brim_width);
         }
     }
 
@@ -2429,8 +2438,10 @@ void GCodeViewer::refresh_render_paths(bool keep_sequential_current_first, bool 
             for (size_t i = 0; i < buffer.paths.size(); ++i) {
                 const Path& path = buffer.paths[i];
                 if (path.type == EMoveType::Travel) {
-                    if (!is_travel_in_layers_range(i, m_layers_z_range[0], m_layers_z_range[1]))
-                        continue;
+                    if (path.sub_paths.front().first.s_id > m_layers_z_range[0]) {
+                        if (!is_travel_in_layers_range(i, m_layers_z_range[0], m_layers_z_range[1]))
+                            continue;
+                    }
                 }
                 else if (!is_in_layers_range(path, m_layers_z_range[0], m_layers_z_range[1]))
                     continue;
@@ -3963,7 +3974,7 @@ void GCodeViewer::render_legend(float& legend_height)
       const auto custom_it = std::find(m_roles.begin(), m_roles.end(), GCodeExtrusionRole::Custom);
       if (custom_it != m_roles.end()) {
           const bool custom_visible = is_visible(GCodeExtrusionRole::Custom);
-          const wxString btn_text = custom_visible ? _u8L("Hide Custom G-code") : _u8L("Show Custom G-code");
+          const wxString btn_text = custom_visible ? _L("Hide Custom G-code") : _L("Show Custom G-code");
           ImGui::Separator();
           if (imgui.button(btn_text, ImVec2(-1.0f, 0.0f), true)) {
               m_extrusions.role_visibility_flags = custom_visible ? m_extrusions.role_visibility_flags & ~(1 << int(GCodeExtrusionRole::Custom)) :

@@ -172,6 +172,7 @@ protected:
 	ScalableButton*		m_btn_delete_preset;
 	ScalableButton*		m_btn_edit_ph_printer {nullptr};
 	ScalableButton*		m_btn_hide_incompatible_presets;
+	wxBoxSizer*			m_top_hsizer;
 	wxBoxSizer*			m_hsizer;
 	wxBoxSizer*			m_h_buttons_sizer;
 	wxBoxSizer*			m_left_sizer;
@@ -464,6 +465,7 @@ public:
 	void		update() override;
 	void		clear_pages() override;
 	void        msw_rescale() override;
+	void		sys_color_changed() override;
 	bool 		supports_printer_technology(const PrinterTechnology tech) const override { return tech == ptFFF; }
     void        load_current_preset() override;
 
@@ -545,7 +547,7 @@ public:
 	void		build() override;
 	void		toggle_options() override;
 	void		update() override;
-    bool        supports_printer_technology(const PrinterTechnology tech) const override { return tech == ptSLA; }
+	bool 		supports_printer_technology(const PrinterTechnology tech) const override { return tech == ptSLA; }
 };
 
 class TabSLAPrint : public Tab

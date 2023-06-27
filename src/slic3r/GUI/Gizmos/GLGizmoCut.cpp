@@ -1488,8 +1488,7 @@ void GLGizmoCut3D::PartSelection::render(const Vec3d* normal, GLModel& sphere_mo
             if (!m_parts[id].is_modifier && normal && ((is_looking_forward && m_parts[id].selected) ||
                                                       (!is_looking_forward && !m_parts[id].selected)   ) )
                 continue;
-            const Vec3d volume_offset = model_object()->volumes[id]->get_offset();
-            shader->set_uniform("view_model_matrix", view_inst_matrix * translation_transform(volume_offset));
+            shader->set_uniform("view_model_matrix", view_inst_matrix * model_object()->volumes[id]->get_matrix());
             if (m_parts[id].is_modifier) {
                 glsafe(::glEnable(GL_BLEND));
                 glsafe(::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -2429,7 +2428,7 @@ bool GLGizmoCut3D::has_valid_contour() const
     return clipper && clipper->has_valid_contour();
 }
 
-void GLGizmoCut3D::apply_connectors_in_model(ModelObject* mo, bool &create_dowels_as_separate_object)
+void GLGizmoCut3D::apply_connectors_in_model(ModelObject* mo, int &dowels_count)
 {
     if (m_connector_mode == CutConnectorMode::Manual) {
         clear_selection();
@@ -2440,7 +2439,7 @@ void GLGizmoCut3D::apply_connectors_in_model(ModelObject* mo, bool &create_dowel
             if (connector.attribs.type == CutConnectorType::Dowel) {
                 if (connector.attribs.style == CutConnectorStyle::Prism)
                     connector.height *= 2;
-                create_dowels_as_separate_object = true;
+                dowels_count ++;
             }
             else {
                 // calculate shift of the connector center regarding to the position on the cut plane
@@ -2467,6 +2466,34 @@ Transform3d GLGizmoCut3D::get_cut_matrix(const Selection& selection)
     cut_center_offset[Z] -= sla_shift_z;
 
     return translation_transform(cut_center_offset) * m_rotation_m;
+}
+
+void update_object_cut_id(CutObjectBase& cut_id, ModelObjectCutAttributes attributes, const int dowels_count)
+{
+    // we don't save cut information, if result will not contains all parts of initial object
+    if (!attributes.has(ModelObjectCutAttribute::KeepUpper) ||
+        !attributes.has(ModelObjectCutAttribute::KeepLower) ||
+        attributes.has(ModelObjectCutAttribute::InvalidateCutInfo))
+        return;
+
+    if (cut_id.id().invalid())
+        cut_id.init();
+    // increase check sum, if it's needed
+    {
+        int cut_obj_cnt = -1;
+        if (attributes.has(ModelObjectCutAttribute::KeepUpper))    cut_obj_cnt++;
+        if (attributes.has(ModelObjectCutAttribute::KeepLower))    cut_obj_cnt++;
+        if (attributes.has(ModelObjectCutAttribute::CreateDowels)) cut_obj_cnt+= dowels_count;
+        if (cut_obj_cnt > 0)
+            cut_id.increase_check_sum(size_t(cut_obj_cnt));
+    }
+}
+
+void synchronize_model_after_cut(Model& model, const CutObjectBase& cut_id)
+{
+    for (ModelObject* obj : model.objects)
+        if (obj->is_cut() && obj->cut_id.has_same_id(cut_id) && !obj->cut_id.is_equal(cut_id))
+            obj->cut_id.copy(cut_id);
 }
 
 void GLGizmoCut3D::perform_cut(const Selection& selection)
@@ -2497,11 +2524,13 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
         ModelObject* cut_mo = cut_by_contour ? m_part_selection.model_object() : nullptr;
         if (cut_mo)
             cut_mo->cut_connectors = mo->cut_connectors;
+        else
+            cut_mo = mo;
 
-        bool create_dowels_as_separate_object = false;
+        int dowels_count = 0;
         const bool has_connectors = !mo->cut_connectors.empty();
         // update connectors pos as offset of its center before cut performing
-        apply_connectors_in_model(cut_mo ? cut_mo : mo , create_dowels_as_separate_object);
+        apply_connectors_in_model(cut_mo , dowels_count);
 
         wxBusyCursor wait;
 
@@ -2514,33 +2543,27 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
                                               only_if(m_place_on_cut_lower, ModelObjectCutAttribute::PlaceOnCutLower) |
                                               only_if(m_rotate_upper, ModelObjectCutAttribute::FlipUpper) |
                                               only_if(m_rotate_lower, ModelObjectCutAttribute::FlipLower) |
-                                              only_if(create_dowels_as_separate_object, ModelObjectCutAttribute::CreateDowels) |
-                                              only_if(!has_connectors, ModelObjectCutAttribute::InvalidateCutInfo);
+                                              only_if(dowels_count > 0, ModelObjectCutAttribute::CreateDowels) |
+                                              only_if(!has_connectors && cut_mo->cut_id.id().invalid(), ModelObjectCutAttribute::InvalidateCutInfo);
+
+        // update cut_id for the cut object in respect to the attributes
+        update_object_cut_id(cut_mo->cut_id, attributes, dowels_count);
 
         ModelObjectPtrs cut_object_ptrs;
         if (cut_by_contour) {
-            // apply cut attributes for object
-            if (m_keep_upper && m_keep_lower)
-                cut_mo->apply_cut_attributes(ModelObjectCutAttribute::KeepLower | ModelObjectCutAttribute::KeepUpper | 
-                                             only_if(create_dowels_as_separate_object, ModelObjectCutAttribute::CreateDowels));
-
             // Clone the object to duplicate instances, materials etc.
             ModelObject* upper{ nullptr };
             if (m_keep_upper) cut_mo->clone_for_cut(&upper);
             ModelObject* lower{ nullptr };
             if (m_keep_lower) cut_mo->clone_for_cut(&lower);
 
-            auto add_cut_objects = [this, &instance_idx, &cut_matrix](ModelObjectPtrs& cut_objects, ModelObject* upper, ModelObject* lower, bool invalidate_cut = true) {
+            auto add_cut_objects = [this, &instance_idx, &cut_matrix](ModelObjectPtrs& cut_objects, ModelObject* upper, ModelObject* lower) {
                 if (upper && !upper->volumes.empty()) {
                     ModelObject::reset_instance_transformation(upper, instance_idx, cut_matrix, m_place_on_cut_upper, m_rotate_upper);
-                    if (invalidate_cut)
-                        upper->invalidate_cut();
                     cut_objects.push_back(upper);
                 }
                 if (lower && !lower->volumes.empty()) {
                     ModelObject::reset_instance_transformation(lower, instance_idx, cut_matrix, m_place_on_cut_lower, m_place_on_cut_lower || m_rotate_lower);
-                    if (invalidate_cut)
-                        lower->invalidate_cut();
                     cut_objects.push_back(lower);
                 }
             };
@@ -2578,7 +2601,7 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
             if (volumes.size() == cut_parts_cnt) {
                 // Means that object is cut without connectors
 
-                // Just add Upper and Lower objects to cut_object_ptrs and invalidate any cut information
+                // Just add Upper and Lower objects to cut_object_ptrs
                 add_cut_objects(cut_object_ptrs, upper, lower);
             }
             else if (volumes.size() > cut_parts_cnt) {
@@ -2592,7 +2615,7 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
 
                 // Perform cut just to get connectors
                 const ModelObjectPtrs cut_connectors_obj = cut_mo->cut(instance_idx, get_cut_matrix(selection), attributes);
-                assert(create_dowels_as_separate_object ? cut_connectors_obj.size() >= 3 : cut_connectors_obj.size() == 2);
+                assert(dowels_count > 0 ? cut_connectors_obj.size() >= 3 : cut_connectors_obj.size() == 2);
 
                 // Connectors from upper object
                 for (const ModelVolume* volume : cut_connectors_obj[0]->volumes)
@@ -2602,8 +2625,8 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
                 for (const ModelVolume* volume : cut_connectors_obj[1]->volumes)
                      lower->add_volume(*volume, volume->type());
 
-                // Add Upper and Lower objects to cut_object_ptrs with saved cut information
-                add_cut_objects(cut_object_ptrs, upper, lower, false);
+                // Add Upper and Lower objects to cut_object_ptrs
+                add_cut_objects(cut_object_ptrs, upper, lower);
 
                 // Add Dowel-connectors as separate objects to cut_object_ptrs
                 if (cut_connectors_obj.size() >= 3)
@@ -2637,13 +2660,17 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
             }
         }
         else
-            cut_object_ptrs = mo->cut(instance_idx, cut_matrix, attributes);
+            cut_object_ptrs = cut_mo->cut(instance_idx, cut_matrix, attributes);
 
+        // save cut_id to post update synchronization
+        const CutObjectBase cut_id = cut_mo->cut_id;
+
+        // update cut results on plater and in the model 
         plater->cut(object_idx, cut_object_ptrs);
+
+        synchronize_model_after_cut(plater->model(), cut_id);
     }
 }
-
-
 
 // Unprojects the mouse position on the mesh and saves hit point and normal of the facet into pos_and_normal
 // Return false if no intersection was found, true otherwise.

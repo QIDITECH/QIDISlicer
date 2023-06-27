@@ -364,7 +364,8 @@ class GLCanvas3D
         ToolpathOutside,
         SlaSupportsOutside,
         SomethingNotShown,
-        ObjectClashed
+        ObjectClashed,
+        GCodeConflict
     };
 
     class RenderStats
@@ -1006,6 +1007,7 @@ public:
 
     std::pair<SlicingParameters, const std::vector<double>> get_layers_height_data(int object_id);
 
+    void detect_sla_view_type();
     void set_sla_view_type(ESLAViewType type);
     void set_sla_view_type(const GLVolume::CompositeID& id, ESLAViewType type);
     void enable_sla_view_type_detection() { m_sla_view_type_detection_active = true; }

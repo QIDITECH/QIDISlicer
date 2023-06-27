@@ -216,10 +216,10 @@ void Tab::create_preset_tab()
         m_mode_sizer = new ModeSizer(panel, int (0.5*em_unit(this)));
 
     const float scale_factor = em_unit(this)*0.1;// GetContentScaleFactor();
-    m_hsizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer->Add(m_hsizer, 0, wxEXPAND | wxBOTTOM, 3);
-    m_hsizer->Add(m_presets_choice, 0, wxLEFT | wxRIGHT | wxTOP | wxALIGN_CENTER_VERTICAL, 3);
-    m_hsizer->AddSpacer(int(4*scale_factor));
+    m_top_hsizer = new wxBoxSizer(wxHORIZONTAL);
+    sizer->Add(m_top_hsizer, 0, wxEXPAND | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 3);
+    m_top_hsizer->Add(m_presets_choice, 0, wxLEFT | wxRIGHT | wxTOP | wxALIGN_CENTER_VERTICAL, 3);
+    m_top_hsizer->AddSpacer(int(4*scale_factor));
 
     m_h_buttons_sizer = new wxBoxSizer(wxHORIZONTAL);
     m_h_buttons_sizer->Add(m_btn_save_preset, 0, wxALIGN_CENTER_VERTICAL);
@@ -243,9 +243,8 @@ void Tab::create_preset_tab()
     m_h_buttons_sizer->AddSpacer(int(8*scale_factor));
     m_h_buttons_sizer->Add(m_btn_compare_preset, 0, wxALIGN_CENTER_VERTICAL);
 
-    m_hsizer->Add(m_h_buttons_sizer, 1, wxEXPAND);
-    m_hsizer->AddSpacer(int(16*scale_factor));
-    // m_hsizer->AddStretchSpacer(32);
+    m_top_hsizer->Add(m_h_buttons_sizer, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
+    m_top_hsizer->AddSpacer(int(16*scale_factor));
     // StretchSpacer has a strange behavior under OSX, so
     // There is used just additional sizer for m_mode_sizer with right alignment
     if (m_mode_sizer) {
@@ -253,8 +252,10 @@ void Tab::create_preset_tab()
         // Don't set the 2nd parameter to 1, making the sizer rubbery scalable in Y axis may lead 
         // to wrong vertical size assigned to wxBitmapComboBoxes, see GH issue #7176.
         mode_sizer->Add(m_mode_sizer, 0, wxALIGN_RIGHT);
-        m_hsizer->Add(mode_sizer, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, wxOSX ? 15 : 10);
+        m_top_hsizer->Add(mode_sizer, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, wxOSX ? 15 : 10);
     }
+    // hide whole top sizer to correct layout later
+    m_top_hsizer->ShowItems(false);
 
     //Horizontal sizer to hold the tree and the selected page.
     m_hsizer = new wxBoxSizer(wxHORIZONTAL);
@@ -461,20 +462,24 @@ void Tab::OnActivate()
     activate_selected_page([](){});
     m_hsizer->Layout();
 
-#ifdef _MSW_DARK_MODE
-    // Because of DarkMode we use our own Notebook (inherited from wxSiplebook) instead of wxNotebook
-    // And it looks like first Layout of the page doesn't update a size of the m_presets_choice
-    // So we have to set correct size explicitely
-    if (wxSize ok_sz = wxSize(35 * m_em_unit, m_presets_choice->GetBestSize().y);
-        ok_sz != m_presets_choice->GetSize()) {
-        m_presets_choice->SetMinSize(ok_sz);
-        m_presets_choice->SetSize(ok_sz);
-        GetSizer()->GetItem(size_t(0))->GetSizer()->Layout();
-        if (wxGetApp().tabs_as_menu())
-            m_presets_choice->update();
+    if (m_presets_choice->IsShown())
+        Refresh(); // Just refresh page, if m_presets_choice is already shown
+    else {
+        // From the tab creation whole top sizer is hidden to correct update of preset combobox's size
+        // (see https://github.com/prusa3d/PrusaSlicer/issues/10746)
+
+        // On first OnActivate call show top sizer
+        m_top_hsizer->ShowItems(true);
+        // Size and layouts of all items are correct now,
+        // but ALL items of top sizer are visible.
+        // So, update visibility of each item according to the ui settings
+        update_btns_enabling();
+        m_btn_hide_incompatible_presets->Show(m_show_btn_incompatible_presets && m_type != Slic3r::Preset::TYPE_PRINTER);
+        if (TabFilament* tab = dynamic_cast<TabFilament*>(this))
+            tab->update_extruder_combobox();
+
+        Layout();
     }
-#endif // _MSW_DARK_MODE
-    Refresh();
 }
 
 void Tab::update_label_colours()
@@ -1863,7 +1868,6 @@ void TabFilament::create_line_with_near_label_widget(ConfigOptionsGroupShp optgr
     optgroup->append_line(line);
 }
 
-
 void TabFilament::update_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& opt_key, int opt_index/* = 0*/, bool is_checked/* = true*/)
 {
     if (!m_overrides_options[opt_key])
@@ -1951,6 +1955,9 @@ void TabFilament::create_extruder_combobox()
 
 void TabFilament::update_extruder_combobox()
 {
+    if (!m_presets_choice->IsShown())
+        return; // it will be updated later, on OnActive()
+
     const size_t extruder_cnt = static_cast<const ConfigOptionFloats*>(m_preset_bundle->printers.get_edited_preset().config.option("nozzle_diameter"))->values.size();
 
     m_extruders_cb->Show(extruder_cnt > 1);
@@ -2025,6 +2032,7 @@ void TabFilament::build()
         optgroup = page->new_optgroup(L("Temperature"));
 
         create_line_with_near_label_widget(optgroup, "idle_temperature");
+
         Line line = { L("Nozzle"), "" };
         line.append_option(optgroup->get_option("first_layer_temperature"));
         line.append_option(optgroup->get_option("temperature"));
@@ -2341,6 +2349,14 @@ void TabFilament::msw_rescale()
             win->SetInitialSize(win->GetBestSize());
 
     Tab::msw_rescale();
+}
+
+void TabFilament::sys_color_changed()
+{
+    m_extruders_cb->Clear();
+    update_extruder_combobox();
+
+    Tab::sys_color_changed();
 }
 
 void TabFilament::load_current_preset()
@@ -5041,6 +5057,97 @@ void TabSLAMaterial::build()
     m_presets = &m_preset_bundle->sla_materials;
     load_initial_data();
 
+    auto page = add_options_page(L("Material"), "resin");
+
+    auto optgroup = page->new_optgroup(L("Material"));
+    optgroup->append_single_option_line("material_colour");
+    optgroup->append_single_option_line("bottle_cost");
+    optgroup->append_single_option_line("bottle_volume");
+    optgroup->append_single_option_line("bottle_weight");
+    optgroup->append_single_option_line("material_density");
+
+    optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value)
+    {
+        if (opt_key == "material_colour") {
+            update_dirty();
+            on_value_change(opt_key, value); 
+            return;
+        }
+
+        DynamicPrintConfig new_conf = *m_config;
+
+        if (opt_key == "bottle_volume") {
+            double new_bottle_weight =  boost::any_cast<double>(value)*(new_conf.option("material_density")->getFloat() / 1000);
+            new_conf.set_key_value("bottle_weight", new ConfigOptionFloat(new_bottle_weight));
+        }
+        if (opt_key == "bottle_weight") {
+            double new_bottle_volume =  boost::any_cast<double>(value)/new_conf.option("material_density")->getFloat() * 1000;
+            new_conf.set_key_value("bottle_volume", new ConfigOptionFloat(new_bottle_volume));
+        }
+        if (opt_key == "material_density") {
+            double new_bottle_volume = new_conf.option("bottle_weight")->getFloat() / boost::any_cast<double>(value) * 1000;
+            new_conf.set_key_value("bottle_volume", new ConfigOptionFloat(new_bottle_volume));
+        }
+
+        load_config(new_conf);
+
+        update_dirty();
+
+        // Change of any from those options influences for an update of "Sliced Info"
+        wxGetApp().sidebar().update_sliced_info_sizer();
+        wxGetApp().sidebar().Layout();
+    };
+
+    optgroup = page->new_optgroup(L("Layers"));
+    optgroup->append_single_option_line("initial_layer_height");
+
+    optgroup = page->new_optgroup(L("Exposure"));
+    optgroup->append_single_option_line("exposure_time");
+    optgroup->append_single_option_line("initial_exposure_time");
+
+    optgroup = page->new_optgroup(L("Corrections"));
+    auto line = Line{ m_config->def()->get("material_correction")->full_label, "" };
+    for (auto& axis : { "X", "Y", "Z" }) {
+        auto opt = optgroup->get_option(std::string("material_correction_") + char(std::tolower(axis[0])));
+        opt.opt.label = axis;
+        line.append_option(opt);
+    }
+
+    optgroup->append_line(line);
+
+    page = add_options_page(L("Notes"), "note");
+    optgroup = page->new_optgroup(L("Notes"), 0);
+    optgroup->label_width = 0;
+    Option option = optgroup->get_option("material_notes");
+    option.opt.full_width = true;
+    option.opt.height = 25;//250;
+    optgroup->append_single_option_line(option);
+
+    page = add_options_page(L("Dependencies"), "wrench");
+    optgroup = page->new_optgroup(L("Profile dependencies"));
+
+    create_line_with_widget(optgroup.get(), "compatible_printers", "", [this](wxWindow* parent) {
+        return compatible_widget_create(parent, m_compatible_printers);
+    });
+    
+    option = optgroup->get_option("compatible_printers_condition");
+    option.opt.full_width = true;
+    optgroup->append_single_option_line(option);
+
+    create_line_with_widget(optgroup.get(), "compatible_prints", "", [this](wxWindow* parent) {
+        return compatible_widget_create(parent, m_compatible_prints);
+    });
+
+    option = optgroup->get_option("compatible_prints_condition");
+    option.opt.full_width = true;
+    optgroup->append_single_option_line(option);
+
+    build_preset_description_line(optgroup.get());
+
+    page = add_options_page(L("Material printing profile"), "note");
+    optgroup = page->new_optgroup(L("Material printing profile"));
+    option = optgroup->get_option("material_print_speed");
+    optgroup->append_single_option_line(option);
 }
 
 void TabSLAMaterial::toggle_options()
