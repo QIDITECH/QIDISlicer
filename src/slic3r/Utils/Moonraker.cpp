@@ -239,13 +239,8 @@ void Moonraker::set_auth(Http &http) const
     if (!m_cafile.empty())
         http.ca_file(m_cafile);
 }
-<<<<<<< Updated upstream:src/slic3r/Utils/Mainsail.cpp
 //B4
-std::string Mainsail::make_url(const std::string &path) const
-=======
-
 std::string Moonraker::make_url(const std::string &path) const
->>>>>>> Stashed changes:src/slic3r/Utils/Moonraker.cpp
 {
     std::string m_host_add = m_host + ":10088";
     if (m_host_add.find("http://") == 0 || m_host_add.find("https://") == 0) {

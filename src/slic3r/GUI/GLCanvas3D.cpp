@@ -2660,7 +2660,6 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
         //                       contained_min_one && !m_model->objects.empty() && !partlyOut));
         if (isToolpathOutside) {
             post_event(Event<bool>(EVT_GLCANVAS_ENABLE_EXPORT_BUTTONS, false));
-            isToolpathOutside = false;
         }
         else {
             post_event(Event<bool>(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, 
@@ -2720,6 +2719,8 @@ void GLCanvas3D::load_gcode_preview(const GCodeProcessorResult& gcode_result, co
     m_gcode_viewer.load(gcode_result, *this->fff_print());
 
     if (wxGetApp().is_editor()) {
+        //Y5
+        isToolpathOutside = false;
         m_gcode_viewer.update_shells_color_by_extruder(m_config);
         _set_warning_notification_if_needed(EWarning::ToolpathOutside);
         _set_warning_notification_if_needed(EWarning::GCodeConflict);
@@ -7503,11 +7504,8 @@ void GLCanvas3D::_set_warning_notification_if_needed(EWarning warning)
     }
     
     //Y5
-    if (warning == EWarning::ToolpathOutside) {
-        isToolpathOutside = show;
-    }
-    else {
-        isToolpathOutside = false;
+    if (show) {
+        isToolpathOutside = true;
     }
     _set_warning_notification(warning, show);
 }

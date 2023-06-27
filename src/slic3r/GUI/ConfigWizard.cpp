@@ -1162,7 +1162,7 @@ void PageMaterials::sort_list_data(StringList* list, bool add_All_item, bool mat
 // then the rest
 // in alphabetical order
     
-    std::vector<std::reference_wrapper<const std::string>> prusa_profiles;
+    std::vector<std::reference_wrapper<const std::string>> qidi_profiles;
     std::vector<std::pair<std::wstring ,std::reference_wrapper<const std::string>>> other_profiles; // first is lower case id for sorting
     bool add_TEMPLATES_item = false;
     for (int i = 0 ; i < list->size(); ++i) {

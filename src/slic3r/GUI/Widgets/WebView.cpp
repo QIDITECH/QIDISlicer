@@ -254,7 +254,7 @@ bool WebView::RunScript(wxWebView *webView, wxString const &javascript)
         if (webView2 == nullptr)
             return false;
         int count = 0;
-        wxJSScriptWrapper wrapJS(javascript, &count);
+        wxJSScriptWrapper wrapJS(javascript, wxJSScriptWrapper::OutputType::JS_OUTPUT_RAW);
         return webView2->ExecuteScript(wrapJS.GetWrappedCode(), NULL) == 0;
 #elif defined __WXMAC__
         WKWebView *       wkWebView = (WKWebView *) webView->GetNativeBackend();
