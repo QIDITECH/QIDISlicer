@@ -186,9 +186,6 @@ set(SLIC3R_GUI_SOURCES
     GUI/ConfigWizard.cpp
     GUI/ConfigWizard.hpp
     GUI/ConfigWizard_private.hpp
-    GUI/BugWizard.cpp
-    GUI/BugWizard.hpp
-    GUI/BugWizard_private.hpp
     GUI/MsgDialog.cpp
     GUI/MsgDialog.hpp
     GUI/UpdateDialogs.cpp

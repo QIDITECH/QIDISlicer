@@ -887,12 +887,12 @@ void TriangleSelectorGUI::render(ImGuiWrapper* imgui, const Transform3d& matrix)
 
     render_paint_contour(matrix);
 
-#ifdef PRUSASLICER_TRIANGLE_SELECTOR_DEBUG
+#ifdef QIDISLICER_TRIANGLE_SELECTOR_DEBUG
     if (imgui)
         render_debug(imgui);
     else
         assert(false); // If you want debug output, pass ptr to ImGuiWrapper.
-#endif // PRUSASLICER_TRIANGLE_SELECTOR_DEBUG
+#endif // QIDISLICER_TRIANGLE_SELECTOR_DEBUG
 }
 
 void TriangleSelectorGUI::update_render_data()
@@ -958,7 +958,7 @@ void TriangleSelectorGUI::update_render_data()
     update_paint_contour();
 }
 
-#ifdef PRUSASLICER_TRIANGLE_SELECTOR_DEBUG
+#ifdef QIDISLICER_TRIANGLE_SELECTOR_DEBUG
 void TriangleSelectorGUI::render_debug(ImGuiWrapper* imgui)
 {
     imgui->begin(std::string("TriangleSelector dialog (DEV ONLY)"),
@@ -1065,7 +1065,7 @@ void TriangleSelectorGUI::render_debug(ImGuiWrapper* imgui)
     if (curr_shader != nullptr)
         curr_shader->start_using();
 }
-#endif // PRUSASLICER_TRIANGLE_SELECTOR_DEBUG
+#endif // QIDISLICER_TRIANGLE_SELECTOR_DEBUG
 
 void TriangleSelectorGUI::update_paint_contour()
 {

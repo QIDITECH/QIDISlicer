@@ -3096,39 +3096,6 @@ bool GUI_App::run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage
 
     return res;
 }
-//B19
-bool GUI_App::run_bwizard(BugWizard::BugRunReason reason, BugWizard::BugStartPage start_page)
-{
-    wxCHECK_MSG(mainframe != nullptr, false, "Internal error: Main frame not created / null");
-
-    if (reason == BugWizard::RR_USER) {
-        // Cancel sync before starting wizard to prevent two downloads at same time
-        preset_updater->cancel_sync();
-        preset_updater->update_index_db();
-        if (preset_updater->config_update(app_config->orig_version(), PresetUpdater::UpdateParams::FORCED_BEFORE_WIZARD) == PresetUpdater::R_ALL_CANCELED)
-            return false;
-    }
-
-    auto       wizard = new BugWizard(mainframe);
-    const bool res = wizard->run(reason, start_page);
-
-    // !!! Deallocate memory after close ConfigWizard.
-    // Note, that mainframe is a parent of ConfigWizard.
-    // So, wizard will be destroyed only during destroying of mainframe
-    // To avoid this state the wizard have to be disconnected from mainframe and Destroyed explicitly
-    mainframe->RemoveChild(wizard);
-    wizard->Destroy();
-
-    if (res) {
-        load_current_presets();
-
-        // #ysFIXME - delete after testing: This part of code looks redundant. All checks are inside ConfigWizard::priv::apply_config() 
-        if (preset_bundle->printers.get_edited_preset().printer_technology() == ptSLA)
-            may_switch_to_SLA_preset(_L("Configuration is editing from BugWizard"));
-    }
-
-    return res;
-}
 
 void GUI_App::show_desktop_integration_dialog()
 {

@@ -1,7 +1,7 @@
 #ifndef libslic3r_TriangleSelector_hpp_
 #define libslic3r_TriangleSelector_hpp_
 
-// #define PRUSASLICER_TRIANGLE_SELECTOR_DEBUG
+// #define QIDISLICER_TRIANGLE_SELECTOR_DEBUG
 
 
 #include <cfloat>

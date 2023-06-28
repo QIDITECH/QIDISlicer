@@ -770,10 +770,6 @@ void MainFrame::init_tabpanel()
         else
             select_tab(size_t(0)); // select Plater
     });
-   
-
-
-    
 
     m_plater = new Plater(this, this);
     m_plater->Hide();
@@ -1160,11 +1156,7 @@ static const wxString sep_space = "\xA0";
 static const wxString sep = " - ";
 static const wxString sep_space = "";
 #endif
-//B19
-static void run_bwizard(BugWizard::BugStartPage sp)
-{
-    wxGetApp().run_bwizard(BugWizard::RR_USER, sp);
-}
+
 static wxMenu* generate_help_menu()
 {
     wxMenu* helpMenu = new wxMenu();
@@ -1190,10 +1182,8 @@ static wxMenu* generate_help_menu()
         [](wxCommandEvent&) { wxGetApp().system_info(); });
     append_menu_item(helpMenu, wxID_ANY, _L("Show &Configuration Folder"), _L("Show user configuration folder (datadir)"),
         [](wxCommandEvent&) { Slic3r::GUI::desktop_open_datadir_folder(); });
-    //B19
-    append_menu_item(helpMenu, wxID_ANY, _L("Report an I&ssue"), wxString::Format(_L("Report an issue on %s"), SLIC3R_APP_NAME),
-        [](wxCommandEvent&) {
-            wxTheApp->CallAfter([]() { run_bwizard(BugWizard::SP_PRINTERS); });});
+//    append_menu_item(helpMenu, wxID_ANY, _L("Report an I&ssue"), wxString::Format(_L("Report an issue on %s"), SLIC3R_APP_NAME),
+//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://github.com/QIDITECH/QIDISlicer", nullptr, false); });
     if (wxGetApp().is_editor())
         append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("&About %s"), SLIC3R_APP_NAME), _L("Show about dialog"),
             [](wxCommandEvent&) { Slic3r::GUI::about(); });
@@ -1728,7 +1718,7 @@ void MainFrame::quick_slice(const int qs)
 
     // select input file
     if (!(qs & qsReslice)) {
-        wxFileDialog dlg(this, _L("Choose a file to slice (STL/OBJ/AMF/3MF/PRUSA):"),
+        wxFileDialog dlg(this, _L("Choose a file to slice (STL/OBJ/AMF/3MF/QIDI):"),
             wxGetApp().app_config->get_last_dir(), "",
             file_wildcards(FT_MODEL), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
         if (dlg.ShowModal() != wxID_OK)

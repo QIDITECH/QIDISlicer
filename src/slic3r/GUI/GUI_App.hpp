@@ -5,8 +5,6 @@
 #include <string>
 #include "ImGuiWrapper.hpp"
 #include "ConfigWizard.hpp"
-//B19
-#include "BugWizard.hpp"
 #include "OpenGLManager.hpp"
 #include "libslic3r/Preset.hpp"
 
@@ -357,8 +355,6 @@ public:
     void            open_web_page_localized(const std::string &http_address);
     bool            may_switch_to_SLA_preset(const wxString& caption);
     bool            run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage start_page = ConfigWizard::SP_WELCOME);
-    //B19
-    bool            run_bwizard(BugWizard::BugRunReason reason, BugWizard::BugStartPage start_page = BugWizard::SP_WELCOME);
     void            show_desktop_integration_dialog();
     void            show_downloader_registration_dialog();
 

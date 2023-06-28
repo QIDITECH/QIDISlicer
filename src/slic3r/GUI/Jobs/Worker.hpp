@@ -1,5 +1,5 @@
-#ifndef PRUSALSICER_WORKER_HPP
-#define PRUSALSICER_WORKER_HPP
+#ifndef QIDILSICER_WORKER_HPP
+#define QIDILSICER_WORKER_HPP
 
 #include <memory>
 

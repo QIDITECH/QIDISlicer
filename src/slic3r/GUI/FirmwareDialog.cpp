@@ -377,7 +377,7 @@ bool FirmwareDialog::priv::check_model_id()
 
 	// std::string line;
 	// error_code ec;
-	// serial.printer_write_line("PRUSA Rev");
+	// serial.printer_write_line("QIDI Rev");
 	// while (serial.read_line(TIMEOUT, line, ec)) {
 	// 	if (ec) {
 	// 		queue_error(wxString::Format(_(L("Could not connect to the printer at %s")), port->port));
