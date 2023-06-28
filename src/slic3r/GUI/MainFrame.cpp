@@ -862,10 +862,10 @@ void MainFrame::create_preset_tabs()
     dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_printer_view, _L("Device"), "tab_monitor_active");
     //B28
     m_guide_view = new GuideWebView(m_tabpanel);
-    wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+    wxString url = wxString::Format("file://%s/web/guide/index.html", from_u8(resources_dir()));
     m_guide_view->load_url(url);
     m_guide_view->Hide();
-    dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "notification_preferences");
+    dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "userguide");
 }
 
 void MainFrame::add_created_tab(Tab* panel,  const std::string& bmp_name /*= ""*/)
