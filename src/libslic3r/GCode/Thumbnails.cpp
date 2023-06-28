@@ -38,7 +38,7 @@ std::unique_ptr<CompressedImageBuffer> compress_thumbnail_png(
      MZ_DEFAULT_LEVEL, 1);
     return out;
 }
-// B3
+//B3
 std::string compress_qidi_thumbnail_png(const ThumbnailData &data)
 {
     auto out = std::make_unique<CompressedPNG>();
@@ -59,7 +59,7 @@ std::string compress_qidi_thumbnail_png(const ThumbnailData &data)
     std::vector<uint8_t> rgba_pixels(data.pixels.size() * 4);
     size_t  row_size = width * 4; 
     for (size_t y = 0; y <height; ++y)
-        memcpy(rgba_pixels.data() + (height - y - 1) * row_size,
+        memcpy(rgba_pixels.data() + y * row_size,
                data.pixels.data() + y * row_size, row_size);
     const unsigned char *pixels;
     pixels = (const unsigned char *) rgba_pixels.data();
@@ -68,12 +68,13 @@ std::string compress_qidi_thumbnail_png(const ThumbnailData &data)
     int time = width * height-1; // 200*200-1;
 
     for (unsigned int r = 0; r < height; ++r) {
-        unsigned int rr = (height - 1 - r) * width;
+        unsigned int rr = r * width;
         for (unsigned int c = 0; c < width; ++c) {
-            rrrr = int(pixels[4 * (rr + c) + 0]) >> 3;
-            gggg = int(pixels[4 * (rr + c) + 1]) >> 2;
-            bbbb = int(pixels[4 * (rr + c) + 2]) >> 3;
-            aaaa = int(pixels[4 * (rr + c) + 3]);
+            unsigned int cc = width - c -1;
+            rrrr = int(pixels[4 * (rr + cc) + 0]) >> 3;
+            gggg = int(pixels[4 * (rr + cc) + 1]) >> 2;
+            bbbb = int(pixels[4 * (rr + cc) + 2]) >> 3;
+            aaaa = int(pixels[4 * (rr + cc) + 3]);
             if (aaaa == 0) {
                 rrrr = 239 >> 3;
                 gggg = 243 >> 2;
