@@ -1,0 +1,399 @@
+*
+{
+	padding:0px;
+	border: 0px;
+	margin: 0px;
+    font-family: "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-sans;
+	border-color: #4479FB;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+    margin: 0px;
+    padding: 0px;
+	line-height: 20px;
+    font-size: 16px;	
+	background-color:#F4F7FE;
+}
+
+.ZScrol::-webkit-scrollbar {/*滚动条整体样式*/
+    width: 12px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 1px;
+	padding: 2px;
+}
+
+.ZScrol::-webkit-scrollbar:hover {
+    color: #4479FB;
+}
+
+.ZScrol::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 6px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+	box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background-color: #AAAAAA;
+}
+
+.ZScrol::-webkit-scrollbar-track {/*滚动条里面轨道*/
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+	    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        border-radius: 10px;
+        background: #EDEDED;
+}
+
+
+.RedFont
+{
+	font-size:12px;
+	color: #F07E4A;		
+}
+
+.LinkBtn
+{
+	font-size:12px;
+	color: #1200FF;	
+	cursor: pointer;
+}
+
+.LinkBtn:hover
+{
+	text-decoration:underline;
+}
+
+/*------------------*/
+body
+{
+	display:flex;
+	justify-content: flex-start;
+}
+
+#LeftBoard
+{
+	/*border-right-width: 1px;
+	border-right-style: solid;*/
+	background:#9B9DA3;
+	width: 248px;
+	height: 100%;
+}
+
+#GuideArea
+{
+	border-bottom-width:1px;
+	border-bottom-style:inset;
+	height: 100px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: nowrap;
+	position: relative;
+	width:248px;
+}
+
+
+#Guide1
+{
+	height:36px;
+	line-height: 36px;
+	display: flex;
+	justify-content: center;
+	user-select: none;
+}
+
+#GuideBtn
+{
+	cursor: pointer;
+	color: #4479FB;
+}
+.TbItem {
+	font-size: 24px;
+	display: flex;
+	justify-content: flex-start;
+	cursor: pointer;
+	color: #4479FB
+}
+
+.TbItem:hover {
+	font-size:25px;
+}
+
+.TbItemSelected {
+
+}
+
+#Icon1
+{
+	margin-right: 10px;	
+}
+
+#QDIcon
+{
+	height:36px;
+}
+
+/*------------------*/
+#BtnArea
+{
+	
+}
+
+
+.BtnItem
+{
+	border-bottom-width:1px;
+	border-bottom-style:inset;
+    padding-left:30px;	
+	height:50px;
+	line-height: 50px;
+	display: flex;
+	justify-content:flex-start;
+	cursor: pointer;
+}
+
+.BtnItem:hover
+{
+	color:#4479FB
+}
+
+.BtnItemSelected
+{
+	background-color: #CED1D9;
+	color:#4479FB
+}
+
+.BtnIcon
+{
+	margin-right:6px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.LeftIcon
+{
+	width:20px;
+	height: 20px;
+}
+
+/*--------------------*/
+#RightBoard
+{
+	width: 100%;
+	height: 100%;
+	min-width: 835px;
+	overflow-y:auto;
+}
+
+#ThumbBoard
+{
+	overflow-y:auto;
+	padding: 0px 40px;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	margin: 30px 40px;
+	position: relative;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+@media screen and (max-width: 1100px) {
+	.GuideBlock {
+		width: calc(50% - 20px);
+		margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+@media screen and ( min-width:1101px) and ( max-width:1680px ) {
+	.GuideBlock {
+		width: calc(33% - 20px);
+		margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+@media screen and ( min-width:1681px) and (max-width:2120px ) {
+	.GuideBlock {
+		width: calc(25% - 20px);
+		margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+@media screen and ( min-width:2121px) and (max-width:2620px ) {
+	.GuideBlock {
+		width: calc(20% - 20px);
+		margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+@media screen and (min-width:2621px ) and (max-width:3120px ) {
+	.GuideBlock {
+		width: calc(16.6% - 20px);
+		margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+@media screen and (min-width:3121px ) {
+	.GuideBlock {
+		width: calc(14.2% - 20px);
+		margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+#HotspotWEB
+{
+	width:100%;
+	height: 420px;
+}
+/*------Thumbnail------*/
+#WikiGuideBigBoard
+{
+	display:none;
+}
+
+
+#WikiGuideBoard
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	overflow-y: auto;
+	margin: 30px 40px;
+	position: relative;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+
+@media screen and (max-width: 1100px) {
+.GuideBlock
+{
+	width: calc(50% - 20px);
+	margin: 0px 10px 40px 10px;
+	cursor: pointer;
+}
+}
+
+@media screen and ( min-width:1101px) and ( max-width:1680px )
+{
+	.GuideBlock
+	{
+		width: calc(33% - 20px);
+	    margin: 0px 10px 40px 10px;
+		cursor: pointer;
+	}
+}
+
+@media screen and ( min-width:1681px) and (max-width:2120px ) {
+.GuideBlock
+{
+    width: calc(25% - 20px);	
+	margin: 0px 10px 40px 10px;
+	cursor: pointer;
+}
+}
+
+@media screen and ( min-width:2121px) and (max-width:2620px ) {
+.GuideBlock
+{
+    width: calc(20% - 20px);
+	margin: 0px 10px 40px 10px;
+	cursor: pointer;
+}
+}
+
+@media screen  and (min-width:2621px ) and (max-width:3120px ) {
+.GuideBlock
+{
+    width: calc(16.6% - 20px);
+	margin: 0px 10px 40px 10px;
+	cursor: pointer;
+}
+}
+
+@media screen  and (min-width:3121px ) {
+.GuideBlock
+{
+    width: calc(14.2% - 20px);
+	margin: 0px 10px 40px 10px;
+	cursor: pointer;
+}
+}
+/*------Gif------*/
+#GifBigBoard
+{
+	display:none;
+}
+
+#GifBoard
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	align-items: center;
+	justify-content: center;
+	overflow-y: auto;
+	margin: 30px 40px;
+	position: relative;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+@media screen {
+.GifBlock
+{
+	margin: 0px 0px 0px 0px;
+	cursor: pointer;
+}
+}
+
+.UG_PRINTER
+{
+	text-align:center;
+	width:100%;
+}
+
+.UG_PRINTER img
+{
+	width:15%;
+}
+
+.UG_IMG
+{
+	width: 100%;	
+}
+
+.UG_IMG img
+{
+	width: 100%;
+	border-radius: 5px 5px 0px 0px;
+}
+
+.UG_TITLE
+{
+	font-size: 18px;
+	font-weight: 700;
+	line-height: 25px;
+	width: 100%;
+	margin-top: 20px;
+	margin-bottom: 4px;
+	color: #4479FB;
+}
+
+.UG_DESC
+{
+	width: 100%;
+	line-height: 20px;
+	font-size: 14px;
+}

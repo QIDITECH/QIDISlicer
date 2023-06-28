@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="max-age=7200" />
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />	
+<title>homepage</title>
+<link rel="stylesheet" type="text/css" href="css/home.css" />
+<link rel="stylesheet" type="text/css" href="css/dark.css" />	
+<script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="../data/text.js"></script>	
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/globalapi.js"></script>
+<script type="text/javascript" src="js/home.js"></script>
+</head>
+<body class="ZScrol" onLoad="OnInit()">
+<div id="LeftBoard">
+	<div id="GuideArea">
+		<!--<div menu="userguide" class="BtnItem" onClick="GotoMenu('userguide')">
+			<div class="BtnIcon "><img class="LeftIcon" src="img/logo2.png" /></div>
+			<div class="trans" tid="t2">UserGuide</div>
+		</div>-->
+	<div id="Guide1">
+		<div id="Icon1"><img id="QDIcon" src="img/logo.png" /></div>
+		<div menu="userguide" class="TbItem" onClick="GotoMain('userguide')">
+			<div class="trans" tid="t2">UserGuide</div>
+		</div>
+	</div>
+	</div>
+
+	<div id="BtnArea">
+		<div menu="firstprint" class="BtnItem" onClick="GotoMenu('firstprint')">
+			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+			<div class="trans" tid="t3">UserGuide</div>
+		</div>
+		<div menu="supportgenerate" class="BtnItem" onClick="GotoMenu('supportgenerate')">
+			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+			<div class="trans" tid="t4">UserGuide</div>
+		</div>
+		<div menu="issuereport" class="BtnItem" onClick="GotoMenu('issuereport')">
+			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+			<div class="trans" tid="t5">UserGuide</div>
+		</div>
+	</div>
+</div>
+
+<div id="RightBoard">
+<div id="ThumbBoard" class="ZScrol" board="userguide">
+	<div class="GuideBlock" onClick="GotoMenu('firstprint')">
+		<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
+		<div class="UG_TITLE trans TextS1" tid="t3">FP</div>
+		<div class="UG_DESC trans" tid="wk2">This gif introduces the most basic usage of QIDISlicer. It guides users to configure software, create projects, and complete the first printing task step by step. </div>
+	</div>
+	<div class="GuideBlock" onClick="GotoMenu('supportgenerate')">
+		<div class="UG_IMG"><img src="img/SupportGenerate.gif" /></div>
+		<div class="UG_TITLE trans TextS1" tid="t4">SG</div>
+		<div class="UG_DESC trans" tid="wk4">When your model of choice has overhangs, the printed product is terrible, and this gif will teach you how to use support generation.</div>
+	</div>
+</div>
+
+<div id="GifBigBoard" board="firstprint">
+<div id="GifBoard" >
+	<div class="GifBlock">
+		<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
+	</div>
+</div>
+</div>
+
+<div id="GifBigBoard" board="supportgenerate">
+<div id="GifBoard" >
+	<div class="GifBlock">
+		<div class="UG_IMG"><img src="img/SupportGenerate.gif" /></div>
+	</div>
+</div>
+</div>
+
+<div id="GifBigBoard" board="issuereport">
+<div id="GifBoard" >
+	<div class="GifBlock">
+		<div class="UG_PRINTER"><img src="img/X-MAX3.png" /><img /><img src="img/X-Plus3.png" /><img /><img src="img/X-Smart3.png" /></div>
+		<div class="UG_TITLE trans TextS1" tid="wk1">Issue Report</div>
+		<div class="UG_DESC trans" tid="wk2">You can copy the email address or skype to get in touch with us by clicking Help - Requirements Report. Please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information. </div>
+	</div>
+</div>
+</div>
+	
+</div>	
+</body>
+<script type="text/javascript">
+	//HandleStudio(TestData);
+    document.onkeydown = function (event) {
+		var e = event || window.event || arguments.callee.caller.arguments[0];
+
+		if (e.ctrlKey && e.metaKey)
+			OutputKey(e.keyCode, true, false, true);
+		else if (e.ctrlKey)
+			OutputKey(e.keyCode, true, false, false);
+		else if (e.metaKey)
+			OutputKey(e.keyCode, false, false, true);
+
+		if (e.shiftKey && e.ctrlKey)
+			OutputKey(e.keyCode, true, true, false);
+
+		if (e.shiftKey && e.metaKey)
+			OutputKey(e.keyCode, false, true, true);
+
+		if (window.event) {
+			try { e.keyCode = 0; } catch (e) { }
+			e.returnValue = false;
+		}
+	};
+
+	window.addEventListener('mousewheel', function (event) {
+		if (event.ctrlKey === true || event.metaKey) {
+			event.preventDefault();
+		}
+	}, { passive: false });
+
+</script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
