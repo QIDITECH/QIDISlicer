@@ -1,21 +1,30 @@
 var LangText={
     "en": {
-		"t1": "Welcome to QIDISlicer",
-		"t2": "User Guide",
-		"t3": "First Print",
-		"t4": "Support Generate",
-		"t5": "Issue Report",
+		"t0": "Welcome to QIDISlicer",
+		"t1": "User Guide",
+		"t2": "First Print",
+		"t3": "Add Support",
+		"t4": "Connect Device",
+		"t5": "Wifi Send",
+		"t6": "Issue Report",
     },
     "zh_CN": {
-		"t1": "欢迎使用QIDISlicer",
-		"t2": "用户指南",
-		"t3": "首次打印",
-		"t4": "支撑生成",
-		"t5": "错误报告",
+		"t0": "欢迎使用QIDISlicer",
+		"t1": "用户指南",
+		"t2": "首次打印",
+		"t3": "添加支撑",
+		"t4": "连接设备",
+		"t5": "无线发送",
+		"t6": "问题报告",
     },
     "ja_JP": {
-		"t1": "QIDISlicerへようこそ",
-		"t2": "ユーザーガイド",
+		"t0": "QIDISlicerへようこそ",
+		"t1": "ユーザーガイド",
+		"t2": "最初の印刷物",
+		"t3": "サポートを追加する",
+		"t4": "デバイスを接続する",
+		"t5": "Wi-Fi送信",
+		"t6": "問題レポート",
     }
 };
 
