@@ -23,7 +23,7 @@
 	<div id="Guide1">
 		<div id="Icon1"><img id="QDIcon" src="img/logo.png" /></div>
 		<div menu="userguide" class="TbItem" onClick="GotoMain('userguide')">
-			<div class="trans" tid="t2">UserGuide</div>
+			<div class="trans" tid="t1">UserGuide</div>
 		</div>
 	</div>
 	</div>
@@ -31,15 +31,23 @@
 	<div id="BtnArea">
 		<div menu="firstprint" class="BtnItem" onClick="GotoMenu('firstprint')">
 			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+			<div class="trans" tid="t2">UserGuide</div>
+		</div>
+		<div menu="addsupport" class="BtnItem" onClick="GotoMenu('addsupport')">
+			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
 			<div class="trans" tid="t3">UserGuide</div>
 		</div>
-		<div menu="supportgenerate" class="BtnItem" onClick="GotoMenu('supportgenerate')">
+		<div menu="connectdevice" class="BtnItem" onClick="GotoMenu('connectdevice')">
 			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
 			<div class="trans" tid="t4">UserGuide</div>
 		</div>
-		<div menu="issuereport" class="BtnItem" onClick="GotoMenu('issuereport')">
+		<div menu="wifisend" class="BtnItem" onClick="GotoMenu('wifisend')">
 			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
 			<div class="trans" tid="t5">UserGuide</div>
+		</div>
+		<div menu="issuereport" class="BtnItem" onClick="GotoMenu('issuereport')">
+			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+			<div class="trans" tid="t6">UserGuide</div>
 		</div>
 	</div>
 </div>
@@ -48,13 +56,19 @@
 <div id="ThumbBoard" class="ZScrol" board="userguide">
 	<div class="GuideBlock" onClick="GotoMenu('firstprint')">
 		<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t3">FP</div>
-		<div class="UG_DESC trans" tid="wk2">This gif introduces the most basic usage of QIDISlicer. It guides users to configure software, create projects, and complete the first printing task step by step. </div>
+		<div class="UG_TITLE trans TextS1" tid="t2">FirstPrint</div>
 	</div>
-	<div class="GuideBlock" onClick="GotoMenu('supportgenerate')">
-		<div class="UG_IMG"><img src="img/SupportGenerate.gif" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t4">SG</div>
-		<div class="UG_DESC trans" tid="wk4">When your model of choice has overhangs, the printed product is terrible, and this gif will teach you how to use support generation.</div>
+	<div class="GuideBlock" onClick="GotoMenu('addsupport')">
+		<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
+		<div class="UG_TITLE trans TextS1" tid="t3">AddSupport</div>
+	</div>
+	<div class="GuideBlock" onClick="GotoMenu('connectdevice')">
+		<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
+		<div class="UG_TITLE trans TextS1" tid="t4">ConnectDevice</div>
+	</div>
+	<div class="GuideBlock" onClick="GotoMenu('wifisend')">
+		<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
+		<div class="UG_TITLE trans TextS1" tid="t5">WifiSend</div>
 	</div>
 </div>
 
@@ -66,10 +80,26 @@
 </div>
 </div>
 
-<div id="GifBigBoard" board="supportgenerate">
+<div id="GifBigBoard" board="addsupport">
 <div id="GifBoard" >
 	<div class="GifBlock">
-		<div class="UG_IMG"><img src="img/SupportGenerate.gif" /></div>
+		<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
+	</div>
+</div>
+</div>
+
+<div id="GifBigBoard" board="connectdevice">
+<div id="GifBoard" >
+	<div class="GifBlock">
+		<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
+	</div>
+</div>
+</div>
+
+<div id="GifBigBoard" board="wifisend">
+<div id="GifBoard" >
+	<div class="GifBlock">
+		<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
 	</div>
 </div>
 </div>
@@ -77,12 +107,47 @@
 <div id="GifBigBoard" board="issuereport">
 <div id="GifBoard" >
 	<div class="GifBlock">
-		<div class="UG_PRINTER"><img src="img/X-MAX3.png" /><img /><img src="img/X-Plus3.png" /><img /><img src="img/X-Smart3.png" /></div>
-		<div class="UG_TITLE trans TextS1" tid="wk1">Issue Report</div>
-		<div class="UG_DESC trans" tid="wk2">You can copy the email address or skype to get in touch with us by clicking Help - Requirements Report. Please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information. </div>
+		<div class="UG_B_TITLE trans TextS1" tid="wk1">Issue Report</div>
+		<div class="UG_B_DESC trans" tid="wk2">If you have any questions about the Printer or QIDISlicer, please contact us via the appropriate E-mail address or Skype.<br />
+		Note: please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information.</div>
+	</div>
+</div>
+<div id="IssueBoard">
+	<div class="PrintBlock">
+		<div class="UG_IMG"><img src="img/X-MAX3.png" /></div>
+		<div class="UG_TITLE">X-MAX 3</div>
+		<div class="UG_DESC">E-mail:</div>
+		<div class="UG_CDESC">MAX3support@qd3dprinter.com<br>MAX3AMS@qd3dprinter.com</div>
+		<div class="UG_DESC">Skype:</div>
+		<div class="UG_CDESC">MAX3support@qd3dprinter.com</div>
+	</div>
+	<div class="PrintBlock">
+		<div class="UG_IMG"><img src="img/X-Plus3.png" /></div>
+		<div class="UG_TITLE">X-Plus 3</div>
+		<div class="UG_DESC">E-mail:</div>
+		<div class="UG_CDESC">Plus3support@qd3dprinter.com<br>Plus3AMS@qd3dprinter.com</div>
+		<div class="UG_DESC">Skype:</div>
+		<div class="UG_CDESC">Plus3support@qd3dprinter.com</div>
+	</div>
+	<div class="PrintBlock">
+		<div class="UG_IMG"><img src="img/X-Smart3.png" /></div>
+		<div class="UG_TITLE">X-Smart 3</div>
+		<div class="UG_DESC">E-mail:</div>
+		<div class="UG_CDESC">Smart3support@qd3dprinter.com<br>Smart3AMS@qd3dprinter.com</div>
+		<div class="UG_DESC">Skype:</div>
+		<div class="UG_CDESC">Smart3support@qd3dprinter.com</div>
 	</div>
 </div>
 </div>
+<!--<div id="GifBigBoard" board="issuereport">
+<div id="GifBoard" >
+	<div class="GifBlock">
+		<div class="UG_B_TITLE trans TextS1" tid="wk1">Issue Report</div>
+		<div class="UG_B_DESC trans" tid="wk2">You can copy the email address or skype to get in touch with us by clicking Help - Requirements Report. Please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information. </div>
+		<div class="UG_PRINTER"><img src="img/X-MAX3.png" /><img /><img src="img/X-Plus3.png" /><img /><img src="img/X-Smart3.png" /></div>
+	</div>
+</div>
+</div>-->
 	
 </div>	
 </body>
