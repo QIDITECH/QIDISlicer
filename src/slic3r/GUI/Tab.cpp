@@ -2291,24 +2291,53 @@ void TabFilament::toggle_options()
         //B26
         const auto og_it = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Temperature"; });
         if (og_it != page->m_optgroups.end())
-            {
-                update_line_with_near_label_widget(*og_it, "idle_temperature");
-            }
+        {
+            update_line_with_near_label_widget(*og_it, "idle_temperature");
+        }
         //B26
         bool pa = m_config->opt_bool("enable_advance_pressure", 0);
         toggle_option("advance_pressure", pa);
         toggle_option("smooth_time", pa);
         //Y7
-        const auto og_it2 = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Drying box"; });
-        if (og_it2 != page->m_optgroups.end())
+        bool notQIDI = (m_config->opt_string("filament_vendor", true) != "QIDI");
+        if (notQIDI)
+        {
+            const auto og_it2 = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Drying box"; });
+            if (og_it2 != page->m_optgroups.end())
             {
                 update_line_with_near_label_widget(*og_it2, "filament_property_drying_box");
             }
-        const auto og_it3 = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Anneal"; });
-        if (og_it3 != page->m_optgroups.end())
+            const auto og_it3 = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Anneal"; });
+            if (og_it3 != page->m_optgroups.end())
             {
                 update_line_with_near_label_widget(*og_it3, "filament_property_anneal_temperature");
             }
+        }
+        else
+        {
+            if (m_overrides_options["filament_property_drying_box"])
+            {
+                m_overrides_options["filament_property_drying_box"]->Enable(notQIDI);
+            }
+            if (m_overrides_options["filament_property_anneal_temperature"])
+            {
+                m_overrides_options["filament_property_anneal_temperature"]->Enable(notQIDI);
+            }
+                toggle_option("filament_property_drying_box", notQIDI);
+                toggle_option("filament_property_anneal_temperature", notQIDI);
+            }
+
+        toggle_option("filament_property_water_resistance", notQIDI);
+        toggle_option("filament_property_corrosion_resistance", notQIDI);
+        toggle_option("filament_property_creep_resistance", notQIDI);
+        toggle_option("filament_property_hdt_045", notQIDI);
+        toggle_option("filament_property_hdt_180", notQIDI);
+        toggle_option("filament_property_tensile_strength", notQIDI);
+        toggle_option("filament_property_tensile_modulus", notQIDI);
+        toggle_option("filament_property_elongation_at_break", notQIDI);
+        toggle_option("filament_property_flexural_strength", notQIDI);
+        toggle_option("filament_property_flexural_modulus", notQIDI);
+        toggle_option("filament_property_notch_impact_strength", notQIDI);
     }
 }
 
