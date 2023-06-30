@@ -863,6 +863,9 @@ void MainFrame::create_preset_tabs()
     //B28
     m_guide_view = new GuideWebView(m_tabpanel);
     wxString url = wxString::Format("file://%s/web/guide/index.html", from_u8(resources_dir()));
+    wxString strlang = wxGetApp().app_config->get("translation_language");
+    if (strlang != "")
+        url = wxString::Format("file://%s/web/guide/index.html?lang=%s", from_u8(resources_dir()), strlang);
     m_guide_view->load_url(url);
     m_guide_view->Hide();
     dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "userguide");
