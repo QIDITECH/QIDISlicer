@@ -1,11 +1,16 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: QIDIlator\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: src/libslic3r/PrintConfig.cpp:503 src/libslic3r/PrintConfig.cpp:594
 #: src/libslic3r/PrintConfig.cpp:603 src/libslic3r/PrintConfig.cpp:612
@@ -66,7 +71,6 @@ msgid "%1$d connector is out of cut contour"
 msgid_plural "%1$d connectors are out of cut contour"
 msgstr[0] "%1$d connettore è fuori dal profilo di taglio"
 msgstr[1] "%1$d connettori sono fuori dal profilo di taglio"
-msgstr[2] ""
 
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2200
 #, c-format, boost-format
@@ -74,7 +78,6 @@ msgid "%1$d connector is out of object"
 msgid_plural "%1$d connectors are out of object"
 msgstr[0] "%1$d connettore è fuori dall'oggetto"
 msgstr[1] "%1$d connettori sono fuori dall'oggetto"
-msgstr[2] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:459
 #, c-format, boost-format
@@ -110,7 +113,6 @@ msgid "%1$d object was loaded as a part of cut object."
 msgid_plural "%1$d objects were loaded as parts of cut object"
 msgstr[0] "%1$d oggetto è stato caricato come parte di un oggetto tagliato."
 msgstr[1] "%1$d oggetti sono stati caricati come parti di un oggetto tagliato"
-msgstr[2] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1649
 #, c-format, boost-format
@@ -183,7 +185,17 @@ msgid "%1%=%2% mm is too low to be printable at a layer height %3% mm"
 msgstr ""
 "%1%=%2% mm è troppo basso per essere un altezza layer stampabile %3% mm"
 
-#: src/slic3r/GUI/Tab.cpp:5227
+#: src/slic3r/GUI/DoubleSlider.cpp:711 src/libslic3r/Utils.cpp:1016
+#, boost-format
+msgid "%1%d"
+msgstr "%1%g"
+
+#: src/slic3r/GUI/DoubleSlider.cpp:712 src/libslic3r/Utils.cpp:1017
+#, boost-format
+msgid "%1%h"
+msgstr "%1%h"
+
+#: src/slic3r/GUI/Tab.cpp:5244
 #, boost-format
 msgid ""
 "\"%1%\" is disabled because \"%2%\" is on in \"%3%\" category.\n"
@@ -195,6 +207,12 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:2736 src/libslic3r/PrintConfig.cpp:2754
 msgid "1 (light)"
 msgstr "1 (leggero)"
+
+#. TRN "m" means "minutes"
+#: src/slic3r/GUI/DoubleSlider.cpp:713 src/libslic3r/Utils.cpp:1019
+#, boost-format
+msgid "%1%m"
+msgstr "%1%m"
 
 #. TRN ConfigWizard: Materials : "%1%" = "Filaments"/"SLA materials"
 #: src/slic3r/GUI/ConfigWizard.cpp:838
@@ -232,6 +250,11 @@ msgstr "%1% Preset"
 #, boost-format
 msgid "%1% : read only"
 msgstr "%1% : sola lettura"
+
+#: src/slic3r/GUI/DoubleSlider.cpp:714 src/libslic3r/Utils.cpp:1027
+#, boost-format
+msgid "%1%s"
+msgstr "%1%s"
 
 #. TRN ConfigWizard: Materials : "%1%" = "Filaments"/"SLA materials"
 #: src/slic3r/GUI/ConfigWizard.cpp:835
@@ -1313,8 +1336,8 @@ msgstr ""
 
 #: src/slic3r/GUI/OpenGLManager.cpp:390
 msgid ""
-"As a workaround, you may run QIDISlicer with a software rendered 3D "
-"graphics by running qidi-slicer.exe with the --sw-renderer parameter."
+"As a workaround, you may run QIDISlicer with a software rendered 3D graphics "
+"by running qidi-slicer.exe with the --sw-renderer parameter."
 msgstr ""
 "Come soluzione alternativa, puoi eseguire QIDISlicer con una grafica 3D "
 "renderizzata dal software eseguendo qidi-slicer.exe con il parametro --sw-"
@@ -1574,7 +1597,13 @@ msgstr ""
 "Temperatura per i layer dopo il primo. Imposta a zero per disattivare i "
 "comandi di controllo della temperatura del piano di stampa in output."
 
-#: src/slic3r/GUI/Tab.cpp:2569 src/libslic3r/GCode.cpp:768
+#: src/slic3r/GUI/Plater.cpp:3229
+msgid "Bed temperatures for the used filaments differ significantly."
+msgstr ""
+"Le temperature del piano per i filamenti utilizzati differiscono in modo "
+"significativo."
+
+#: src/slic3r/GUI/Tab.cpp:2586 src/libslic3r/GCode.cpp:768
 #: src/libslic3r/PrintConfig.cpp:442
 msgid "Before layer change G-code"
 msgstr "G-code prima del cambio layer"
@@ -1716,6 +1745,10 @@ msgstr ""
 "diametro verranno stampate con pareti doppie per garantire la stabilità. "
 "Imposta questo valore a zero per non avere pareti doppie."
 
+#: src/slic3r/GUI/Tab.cpp:5174
+msgid "Branching"
+msgstr "Ramificazione"
+
 #. TRN One of the "Support tree type"s on SLAPrintSettings : Supports
 #: src/libslic3r/PrintConfig.cpp:3929
 msgid "Branching (experimental)"
@@ -1733,6 +1766,10 @@ msgstr "Bridge"
 #: src/libslic3r/PrintConfig.cpp:510
 msgid "Bridge flow ratio"
 msgstr "Rapporto flusso Bridge"
+
+#: src/libslic3r/ExtrusionRole.cpp:45 src/libslic3r/ExtrusionRole.cpp:73
+msgid "Bridge infill"
+msgstr "Riempimento Bridge"
 
 #: src/libslic3r/PrintConfig.cpp:522
 msgid "Bridges"
@@ -2635,6 +2672,17 @@ msgstr "Conferma"
 msgid "Confirm connectors"
 msgstr "Conferma connettori"
 
+#. TRN %3% is name of Object1, %4% is name of Object2
+#: src/slic3r/GUI/GLCanvas3D.cpp:7496
+#, boost-format
+msgid ""
+"Conflicts in G-code paths have been detected at layer %1%, z=%2$.2f mm. "
+"Please reposition the conflicting objects (%3% <-> %4%) further apart."
+msgstr ""
+"Sono stati rilevati conflitti nei percorsi G-Code nel layer %1%, z=%2$.2f "
+"mm. Riposizionare gli oggetti in conflitto (%3% <-> %4%) ad una distanza "
+"maggiore."
+
 #: src/libslic3r/PrintConfig.cpp:1492
 msgid ""
 "Connect an infill line to an internal perimeter with a short segment of an "
@@ -3093,6 +3141,12 @@ msgid ""
 msgstr ""
 "CURL init non riuscito. QIDISlicer non sarà in grado di stabilire "
 "connessioni di rete. Vedere i log per ulteriori dettagli."
+
+#. TRN Means "current color"
+#: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:340
+#: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:356
+msgid "Current"
+msgstr "Attuale"
 
 #: src/slic3r/GUI/wxExtensions.cpp:629
 #, c-format, boost-format
@@ -5012,6 +5066,10 @@ msgstr "Esposizione"
 msgid "Exposure time"
 msgstr "Tempo di esposizione"
 
+#: src/libslic3r/ExtrusionRole.cpp:39 src/libslic3r/ExtrusionRole.cpp:61
+msgid "External perimeter"
+msgstr "Perimetro esterno"
+
 #: src/slic3r/GUI/PresetHints.cpp:170
 msgid "external perimeters"
 msgstr "perimetri esterni"
@@ -6300,8 +6358,9 @@ msgstr "Nascondi righello"
 #: resources/data/hints.ini: [hint:Hiding sidebar]
 msgid ""
 "Hiding sidebar\n"
-"Did you know that you can hide the right sidebar using the shortcut <b>Shift"
-"+Tab</b>? You can also enable the icon for this from the<a>Preferences</a>."
+"Did you know that you can hide the right sidebar using the shortcut "
+"<b>Shift+Tab</b>? You can also enable the icon for this from "
+"the<a>Preferences</a>."
 msgstr ""
 "Nascondere barra laterale\n"
 "Sapevi che puoi nascondere la barra laterale destra usando la scorciatoia "
@@ -6737,8 +6796,8 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:4857
 msgid ""
 "If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides the "
+"\"single_instance\" configuration value from application preferences."
 msgstr ""
 "Se abilitato, gli argomenti della riga di comando vengono inviati ad "
 "un'istanza GUI esistente di QIDISlicer, oppure viene attivata una finestra "
@@ -6939,8 +6998,7 @@ msgid ""
 "instead."
 msgstr ""
 "Se questo è abilitato, quando si avvia QIDISlicer e un'altra istanza della "
-"stessa QIDISlicer è già in esecuzione, quell'istanza verrà invece "
-"riattivata."
+"stessa QIDISlicer è già in esecuzione, quell'istanza verrà invece riattivata."
 
 #: src/slic3r/GUI/SendSystemInfoDialog.cpp:591
 msgid ""
@@ -7382,6 +7440,10 @@ msgstr "errore interno"
 msgid "Internal error: %1%"
 msgstr "Errore interno: %1%"
 
+#: src/libslic3r/ExtrusionRole.cpp:41 src/libslic3r/ExtrusionRole.cpp:65
+msgid "Internal infill"
+msgstr "Riempimento interno"
+
 #: src/libslic3r/GCode.cpp:825
 msgid "In the custom G-code were found reserved keywords:"
 msgstr "Nel G-code personalizzato sono state trovate parole chiave riservate:"
@@ -7562,6 +7624,15 @@ msgstr "Jitter"
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:2092
 msgid "Join"
 msgstr "Unisci"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7526 ../src/common/stockitem.cpp:169
+#, fuzzy
+msgid "Jump to"
+msgstr ""
+"#-#-#-#-#  catalog.po  #-#-#-#-#\n"
+"Salta a\n"
+"#-#-#-#-#  catalog.po  #-#-#-#-#\n"
+"Vai a"
 
 #: src/slic3r/GUI/DoubleSlider.cpp:2094 src/slic3r/GUI/DoubleSlider.cpp:2324
 msgid "Jump to height"
@@ -8538,6 +8609,11 @@ msgstr "Messaggio"
 msgid "Message for pause print on current layer (%1% mm)."
 msgstr "Messaggio per pausa stampa al corrente layer (%1% mm)."
 
+#: src/slic3r/GUI/GCodeViewer.cpp:3291
+msgctxt "Metre"
+msgid "m"
+msgstr "m"
+
 #: src/libslic3r/PrintConfig.cpp:1897 src/libslic3r/PrintConfig.cpp:1906
 msgid "Min"
 msgstr "Minimo"
@@ -8969,6 +9045,10 @@ msgstr "Linee Monotoniche"
 #: src/slic3r/GUI/NotificationManager.cpp:474
 msgid "More"
 msgstr "Altro"
+
+#: src/slic3r/GUI/Plater.cpp:4106
+msgid "More info at"
+msgstr "Maggiori informazioni su"
 
 #: src/slic3r/GUI/GUI.cpp:317
 msgid ""
@@ -9441,7 +9521,6 @@ msgstr[0] ""
 "Si noti che il preset selezionato verrà rinominato anche in questa stampante."
 msgstr[1] ""
 "Si noti che il preset selezionato verrà rinominato anche in queste stampanti."
-msgstr[2] ""
 
 #: src/slic3r/GUI/Tab.cpp:4151
 msgid ""
@@ -10079,6 +10158,12 @@ msgstr "Orienta il testo verso di te."
 msgid "Origin"
 msgstr "Origine"
 
+#. TRN Means "original color"
+#: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:342
+#: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:356
+msgid "Original"
+msgstr "Originale"
+
 #: src/slic3r/GUI/UnsavedChangesDialog.cpp:860
 msgid "Original value"
 msgstr "Valore originale"
@@ -10138,6 +10223,10 @@ msgstr "Pareti esterne"
 #: src/slic3r/GUI/BackgroundSlicingProcess.cpp:285
 msgid "Overflow"
 msgstr "Overflow"
+
+#: src/libslic3r/ExtrusionRole.cpp:40 src/libslic3r/ExtrusionRole.cpp:63
+msgid "Overhang perimeter"
+msgstr "Perimetro sporgente"
 
 #. TRN FilamentSettings : "Dynamic fan speeds"
 #: src/libslic3r/PrintConfig.cpp:587
@@ -10570,7 +10659,11 @@ msgstr ""
 "Esecuzione dell'integrazione del downloader desktop non riuscita - "
 "Impossibile trovare l'eseguibile."
 
-#: src/libslic3r/PrintConfig.cpp:3312
+#: src/libslic3r/ExtrusionRole.cpp:38 src/libslic3r/ExtrusionRole.cpp:59
+msgid "Perimeter"
+msgstr "Perimetro"
+
+#: src/libslic3r/PrintConfig.cpp:3333
 msgid "Perimeter distribution count"
 msgstr "Conteggio della distribuzione dei perimetri"
 
@@ -10736,6 +10829,16 @@ msgstr "Controlla l'elenco degli oggetti prima di cambiare modalità."
 msgid "Please check your object list before preset changing."
 msgstr ""
 "Per favore verifica la tua lista di oggetti prima di cambiare i preset."
+
+#: src/slic3r/GUI/Plater.cpp:4104 src/slic3r/GUI/Plater.cpp:4110
+msgid ""
+"Please note that template presets are not customized for specific printer "
+"and should only be used as a starting point for creating your own user "
+"presets."
+msgstr ""
+"Si noti che i preset dei template non sono personalizzati per una stampante "
+"specifica e devono essere utilizzati solo come punto di partenza per la "
+"creazione di preset utente personalizzati."
 
 #: src/slic3r/GUI/BackgroundSlicingProcess.cpp:85
 msgid ""
@@ -11326,9 +11429,9 @@ msgstr "QIDISlicer ha riscontrato un errore fatale: \"%1%\""
 
 #: src/slic3r/GUI/GUI_App.cpp:743
 msgid ""
-"QIDISlicer has encountered a localization error. Please report to "
-"QIDISlicer team, what language was active and in which scenario this issue "
-"happened. Thank you.\n"
+"QIDISlicer has encountered a localization error. Please report to QIDISlicer "
+"team, what language was active and in which scenario this issue happened. "
+"Thank you.\n"
 "\n"
 "The application will now terminate."
 msgstr ""
@@ -11375,8 +11478,8 @@ msgid ""
 "QIDISlicer recieved a download request from Printables.com, but it's not "
 "allowed. You can allow it"
 msgstr ""
-"QIDISlicer ha ricevuto una richiesta di download da Printables.com, ma non "
-"è autorizzata. È possibile autorizzarla"
+"QIDISlicer ha ricevuto una richiesta di download da Printables.com, ma non è "
+"autorizzata. È possibile autorizzarla"
 
 #: src/slic3r/GUI/OpenGLManager.cpp:383
 #, c-format, boost-format
@@ -13308,6 +13411,12 @@ msgstr "Imposta cursore superiore come attivo"
 msgid "%s Family"
 msgstr "Famiglia %s"
 
+#. TRN %s = type of file
+#: src/slic3r/GUI/GUI_App.cpp:609
+#, c-format, boost-format
+msgid "%s files"
+msgstr "%s file"
+
 #: src/slic3r/GUI/ConfigManipulation.cpp:167
 msgid "Shall I adjust those settings for supports?"
 msgstr "Vuoi che regoli queste impostazioni per i supporti?"
@@ -13482,6 +13591,10 @@ msgstr "Mostra/Nascondi leggenda"
 #: src/slic3r/GUI/KBShortcutsDialog.cpp:127
 msgid "Show/Hide object/instance labels"
 msgstr "Mostra/Nascondi etichette dell'oggetto/istanza"
+
+#: src/slic3r/GUI/PresetComboBoxes.cpp:787
+msgid "Show/Hide template presets"
+msgstr "Mostra/Nascondi i preset template"
 
 #: src/slic3r/GUI/Preferences.cpp:304
 msgid "Show incompatible print and filament presets"
@@ -13753,6 +13866,10 @@ msgstr "Skirt"
 #: src/libslic3r/PrintConfig.cpp:653
 msgid "Skirt and brim"
 msgstr "Skirt e brim"
+
+#: src/libslic3r/ExtrusionRole.cpp:47 src/libslic3r/ExtrusionRole.cpp:77
+msgid "Skirt/Brim"
+msgstr "Skirt/Brim"
 
 #: src/libslic3r/PrintConfig.cpp:2350
 msgid "Skirt height"
@@ -15203,6 +15320,15 @@ msgstr ""
 msgid "The extruder to use when printing infill."
 msgstr "L'estrusore da utilizzare per la stampa del riempimento."
 
+#: src/libslic3r/PrintConfig.cpp:3241
+msgid ""
+"The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
+"use the one that is available (non-soluble would be preferred)."
+msgstr ""
+"L'estrusore da utilizzare per la stampa del perimetro della torre di "
+"pulitura. Impostare su 0 per utilizzare quello attualmente disponibile "
+"(sarebbe preferibile quello non solubile)."
+
 #: src/libslic3r/PrintConfig.cpp:2036
 msgid ""
 "The extruder to use when printing perimeters and brim. First extruder is 1."
@@ -15584,7 +15710,6 @@ msgstr[0] ""
 msgstr[1] ""
 "Le stampanti fisiche sottostanti sono basate sul preset che si intende "
 "rinominare."
-msgstr[2] ""
 
 #: src/libslic3r/PrintConfig.cpp:641
 msgid ""
@@ -16773,16 +16898,16 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4836
 msgid ""
-"This version of QIDISlicer may not understand configurations produced by "
-"the newest QIDISlicer versions. For example, newer QIDISlicer may extend "
-"the list of supported firmware flavors. One may decide to bail out or to "
+"This version of QIDISlicer may not understand configurations produced by the "
+"newest QIDISlicer versions. For example, newer QIDISlicer may extend the "
+"list of supported firmware flavors. One may decide to bail out or to "
 "substitute an unknown value with a default silently or verbosely."
 msgstr ""
 "Questa versione di QIDISlicer potrebbe non comprendere le configurazioni "
-"realizzate dalle versioni più recenti di QIDISlicer. Per esempio, "
-"QIDISlicer più recente può estendere la lista dei flavor di firmware "
-"supportati. Si può decidere di abbandonare o di sostituire un valore "
-"sconosciuto con un valore predefinito in modo silenzioso o verboso."
+"realizzate dalle versioni più recenti di QIDISlicer. Per esempio, QIDISlicer "
+"più recente può estendere la lista dei flavor di firmware supportati. Si può "
+"decidere di abbandonare o di sostituire un valore sconosciuto con un valore "
+"predefinito in modo silenzioso o verboso."
 
 #: src/slic3r/GUI/UpdateDialogs.cpp:392
 #, c-format, boost-format
@@ -17192,6 +17317,10 @@ msgstr "Impossibile ricaricare:"
 msgid "Unable to replace with more than one volume"
 msgstr "Impossibile sostituire con più di un volume"
 
+#: src/slic3r/GUI/Plater.cpp:6681
+msgid "Unable to save file"
+msgstr "Impossibile salvare il file"
+
 #: src/slic3r/GUI/OptionsGroup.cpp:126
 msgid "Unavailable for this method."
 msgstr "Non disponibile per questo metodo."
@@ -17286,6 +17415,10 @@ msgstr "Annulla rotazione"
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:3030
 msgid "Undo translation"
 msgstr "Annulla traslazione"
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:667
+msgid "Unexpected character"
+msgstr "Carattere non previsto"
 
 #: src/libslic3r/miniz_extension.cpp:111
 msgid "unexpected decompressed size"
@@ -17579,8 +17712,8 @@ msgid ""
 "Use \"Even-odd\" for 3DLabPrint airplane models. Use \"Close holes\" to "
 "close all holes in the model."
 msgstr ""
-"Usare \"Pari-dispari\" per i modelli di aerei 3DLabPrint. Usare \"Chiudi fori"
-"\" per chiudere tutti i fori del modello."
+"Usare \"Pari-dispari\" per i modelli di aerei 3DLabPrint. Usare \"Chiudi "
+"fori\" per chiudere tutti i fori del modello."
 
 #: src/libslic3r/PrintConfig.cpp:3098
 msgid "Use firmware retraction"
@@ -18201,7 +18334,11 @@ msgstr "Torre di pulitura"
 msgid "Wipe tower brim width"
 msgstr "Larghezza brim torre di pulitura"
 
-#: src/slic3r/GUI/Tab.cpp:2087
+#: src/libslic3r/PrintConfig.cpp:3239
+msgid "Wipe tower extruder"
+msgstr "Estrusore torre di pulitura"
+
+#: src/slic3r/GUI/Tab.cpp:2096
 msgid "Wipe tower parameters"
 msgstr "Parametri torre di pulitura"
 
@@ -18349,7 +18486,13 @@ msgstr ""
 "www.qidi3d.cz/qidislicer/.\n"
 "Vuoi continuare?"
 
-#: src/slic3r/GUI/Plater.cpp:5200
+#: src/slic3r/GUI/Plater.cpp:4103 src/slic3r/GUI/Plater.cpp:4109
+msgid "You are using template filament preset."
+msgid_plural "You are using template filament presets."
+msgstr[0] "Stai utilizzando un preset filamento template."
+msgstr[1] "Stai utilizzando dei preset filamento template."
+
+#: src/slic3r/GUI/Plater.cpp:5241
 msgid ""
 "You can keep presets modifications to the new project, discard them or save "
 "changes as new presets.\n"
@@ -18413,12 +18556,13 @@ msgid ""
 "You can use all configuration options as variables inside this template. For "
 "example: [layer_height], [fill_density] etc. You can also use [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 msgstr ""
 "È possibile utilizzare tutte le opzioni di configurazione come variabili "
 "all'interno di questo modello. Ad esempio: [layer_height], [fill_density] "
-"ecc. Puoi anche usare [timestamp], [year], [month], [day], [hour], [minute], "
-"[second], [version], [input_filename ], [nome_filename_input]."
+"ecc... È anche possibile utilizzare [timestamp], [year], [month], [day], "
+"[hour], [minute], [second], [version], [input_filename], "
+"[input_filename_base], [default_output_extension]."
 
 #: src/slic3r/GUI/NotificationManager.hpp:908
 msgid ""
@@ -22815,10 +22959,6 @@ msgstr "Cartolina giapponese 100 x 148 mm"
 msgid "Japanese Postcard Rotated 148 x 100 mm"
 msgstr "Cartolina giapponese ruotata 148 x 100 mm"
 
-#: ../src/common/stockitem.cpp:169
-msgid "Jump to"
-msgstr "Vai a"
-
 #: ../src/common/stockitem.cpp:171
 msgid "Justified"
 msgstr "Giustificato"
@@ -25485,8 +25625,8 @@ msgid ""
 "Type operation \"%s\" failed: Property labeled \"%s\" is of type \"%s\", NOT "
 "\"%s\"."
 msgstr ""
-"Tipo operazione \"%s\" fallita: etichetta proprietà:  \"%s\" è del tipo  \"%s"
-"\", NON \"%s\"."
+"Tipo operazione \"%s\" fallita: etichetta proprietà:  \"%s\" è del tipo  "
+"\"%s\", NON \"%s\"."
 
 #: ../src/common/paper.cpp:133
 msgid "US Std Fanfold, 14 7/8 x 11 in"

@@ -1,13 +1,18 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n"
-"%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || n%10 == 1 || (n%10 >= 5 && n"
-"%10 <=9)) || (n%100 >= 12 && n%100 <= 14)) ? 2 : 3);\n"
-"X-Generator: QIDIlator\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n%10 >= 2 && n%10 <=4 && "
+"(n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || n%10 == 1 || (n%10 >= 5 && "
+"n%10 <=9)) || (n%100 >= 12 && n%100 <= 14)) ? 2 : 3);\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: src/libslic3r/PrintConfig.cpp:503 src/libslic3r/PrintConfig.cpp:594
 #: src/libslic3r/PrintConfig.cpp:603 src/libslic3r/PrintConfig.cpp:612
@@ -72,7 +77,6 @@ msgstr[0] "%1$d spojka je mimo obrys řezu"
 msgstr[1] "%1$d spojky jsou mimo obrys řezu"
 msgstr[2] "%1$d spojky jsou mimo obrys řezu"
 msgstr[3] "%1$d spojek je mimo obrys řezu"
-msgstr[4] "%1$d spojek je mimo obrys řezu"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2200
 #, c-format, boost-format
@@ -82,7 +86,6 @@ msgstr[0] "%1$d spojka je mimo objekt"
 msgstr[1] "%1$d spojky jsou mimo objekt"
 msgstr[2] "%1$d spojek je mimo objekt"
 msgstr[3] "%1$d spojek je mimo objekt"
-msgstr[4] "%1$d spojek je mimo objekt"
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:459
 #, c-format, boost-format
@@ -128,7 +131,6 @@ msgstr[0] "%1$d objekt byl načten jako součást rozříznutého objektu."
 msgstr[1] "%1$d objekty byly načteny jako součást rozříznutého objektu."
 msgstr[2] "%1$d objekty byly načteny jako součást rozříznutého objektu."
 msgstr[3] "%1$d objektů bylo načteno jako součást rozříznutého objektu."
-msgstr[4] "%1$d objektů bylo načteno jako součást rozříznutého objektu."
 
 #: src/slic3r/GUI/NotificationManager.cpp:1649
 #, c-format, boost-format
@@ -1355,8 +1357,8 @@ msgstr ""
 
 #: src/slic3r/GUI/OpenGLManager.cpp:390
 msgid ""
-"As a workaround, you may run QIDISlicer with a software rendered 3D "
-"graphics by running qidi-slicer.exe with the --sw-renderer parameter."
+"As a workaround, you may run QIDISlicer with a software rendered 3D graphics "
+"by running qidi-slicer.exe with the --sw-renderer parameter."
 msgstr ""
 "QIDISlicer můžete spustit se softwarovým vykreslováním 3D grafiky pomocí "
 "spuštění programu qidi-slicer.exe s parametrem --sw-renderer."
@@ -1612,7 +1614,11 @@ msgstr ""
 "Teplota tiskové podložky pro další vrstvy po první vrstvě. Nastavením na "
 "hodnotu nula vypnete ovládací příkazy teploty tiskové podložky ve výstupu."
 
-#: src/slic3r/GUI/Tab.cpp:2569 src/libslic3r/GCode.cpp:768
+#: src/slic3r/GUI/Plater.cpp:3229
+msgid "Bed temperatures for the used filaments differ significantly."
+msgstr "Teplota podložky se u použitých filamentů výrazně liší."
+
+#: src/slic3r/GUI/Tab.cpp:2586 src/libslic3r/GCode.cpp:768
 #: src/libslic3r/PrintConfig.cpp:442
 msgid "Before layer change G-code"
 msgstr "G-code před změnou vrstvy"
@@ -1717,9 +1723,9 @@ msgid ""
 "also box-deselect objects with <b>Alt+Mouse drag</b>."
 msgstr ""
 "Výběr rámečkem\n"
-"Věděli jste, že můžete provést výběr rámečkem současným stiskem Shift"
-"+tažením myší? Výběr objektů v rámečku můžete také zrušit pomocí <b>Alt"
-"+tažení myší</b>."
+"Věděli jste, že můžete provést výběr rámečkem současným stiskem "
+"Shift+tažením myší? Výběr objektů v rámečku můžete také zrušit pomocí "
+"<b>Alt+tažení myší</b>."
 
 #: src/libslic3r/PrintConfig.cpp:2969
 msgid "Branch Density"
@@ -2670,6 +2676,16 @@ msgstr "Potvrzení"
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:1810
 msgid "Confirm connectors"
 msgstr "Potvrzení spojek"
+
+#. TRN %3% is name of Object1, %4% is name of Object2
+#: src/slic3r/GUI/GLCanvas3D.cpp:7496
+#, boost-format
+msgid ""
+"Conflicts in G-code paths have been detected at layer %1%, z=%2$.2f mm. "
+"Please reposition the conflicting objects (%3% <-> %4%) further apart."
+msgstr ""
+"Byly zjištěny konflikty v cestách G-codu ve vrstvě %1%, z=%2$.2f mm. "
+"Přemístěte prosím konfliktní objekty (%3% <-> %4%) dále od sebe."
 
 #: src/libslic3r/PrintConfig.cpp:1492
 msgid ""
@@ -6299,8 +6315,9 @@ msgstr "Skrýt pravítko"
 #: resources/data/hints.ini: [hint:Hiding sidebar]
 msgid ""
 "Hiding sidebar\n"
-"Did you know that you can hide the right sidebar using the shortcut <b>Shift"
-"+Tab</b>? You can also enable the icon for this from the<a>Preferences</a>."
+"Did you know that you can hide the right sidebar using the shortcut "
+"<b>Shift+Tab</b>? You can also enable the icon for this from "
+"the<a>Preferences</a>."
 msgstr ""
 "Skrytí postranního panelu\n"
 "Věděli jste, že pravý postranní panel můžete skrýt pomocí klávesové zkratky "
@@ -6601,8 +6618,8 @@ msgstr ""
 #: src/slic3r/GUI/Preferences.cpp:578
 msgid "If enabled, QIDISlicer will be allowed to download from Printables.com"
 msgstr ""
-"Pokud je tato možnost povolena, bude QIDISlicer moci stahovat soubory z "
-"webu Printables.com."
+"Pokud je tato možnost povolena, bude QIDISlicer moci stahovat soubory z webu "
+"Printables.com."
 
 #: src/slic3r/GUI/Preferences.cpp:383
 msgid "If enabled, QIDISlicer will be open at the position it was closed"
@@ -6733,8 +6750,8 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:4857
 msgid ""
 "If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides the "
+"\"single_instance\" configuration value from application preferences."
 msgstr ""
 "Pokud je povoleno, argumenty příkazového řádku se odešlou do existující "
 "instance grafického uživatelského rozhraní QIDISlicer,u nebo se aktivuje "
@@ -6933,8 +6950,8 @@ msgid ""
 "same QIDISlicer is already running, that instance will be reactivated "
 "instead."
 msgstr ""
-"Pokud je tato možnost povolena,  tak v případě již běžícího QIDISliceru "
-"bude při pokusu spuštění dalšího QIDISliceru aktivována právě tato instance."
+"Pokud je tato možnost povolena,  tak v případě již běžícího QIDISliceru bude "
+"při pokusu spuštění dalšího QIDISliceru aktivována právě tato instance."
 
 #: src/slic3r/GUI/SendSystemInfoDialog.cpp:591
 msgid ""
@@ -7554,6 +7571,10 @@ msgstr "Rozkmit (Jitter)"
 msgid "Join"
 msgstr "Přidat"
 
+#: src/slic3r/GUI/GLCanvas3D.cpp:7526 ../src/common/stockitem.cpp:169
+msgid "Jump to"
+msgstr "Přejít na"
+
 #: src/slic3r/GUI/DoubleSlider.cpp:2094 src/slic3r/GUI/DoubleSlider.cpp:2324
 msgid "Jump to height"
 msgstr "Přechod do výšky"
@@ -7681,6 +7702,7 @@ msgstr "Nastavení pro vrstvy v rozsahu"
 #: src/libslic3r/PrintConfig.cpp:2173 src/libslic3r/PrintConfig.cpp:2352
 #: src/libslic3r/PrintConfig.cpp:2426 src/libslic3r/PrintConfig.cpp:2685
 #: src/libslic3r/PrintConfig.cpp:2732 src/libslic3r/PrintConfig.cpp:2748
+#: src/libslic3r/PrintConfig.cpp:3254
 msgid "layers"
 msgstr "vrstva(y)"
 
@@ -8953,6 +8975,10 @@ msgstr "Monotónní extruze"
 msgid "More"
 msgstr "Více"
 
+#: src/slic3r/GUI/Plater.cpp:4106
+msgid "More info at"
+msgstr "Více informací na"
+
 #: src/slic3r/GUI/GUI.cpp:317
 msgid ""
 "Most likely the configuration was produced by a newer version of QIDISlicer "
@@ -9424,9 +9450,6 @@ msgstr[2] ""
 "tiskárnách."
 msgstr[3] ""
 "Upozorňujeme, že vybrané přednastavení bude přejmenováno i na této tiskárně."
-msgstr[4] ""
-"Upozorňujeme, že vybrané přednastavení bude přejmenováno i na těchto "
-"tiskárnách."
 
 #: src/slic3r/GUI/Tab.cpp:4151
 msgid ""
@@ -10727,6 +10750,16 @@ msgstr "Před změnou režimu zkontrolujte seznam objektů."
 msgid "Please check your object list before preset changing."
 msgstr "Před změnou nastavení zkontrolujte prosím seznam objektů."
 
+#: src/slic3r/GUI/Plater.cpp:4104 src/slic3r/GUI/Plater.cpp:4110
+msgid ""
+"Please note that template presets are not customized for specific printer "
+"and should only be used as a starting point for creating your own user "
+"presets."
+msgstr ""
+"Upozorňujeme, že šablony přednastavení nejsou přizpůsobeny konkrétní "
+"tiskárně a měly by sloužit pouze jako výchozí bod pro vytvoření vlastních "
+"uživatelských přednastavení."
+
 #: src/slic3r/GUI/BackgroundSlicingProcess.cpp:85
 msgid ""
 "Please save your project and restart QIDISlicer. We would be glad if you "
@@ -11311,14 +11344,14 @@ msgstr "QIDISlicer narazil na fatální chybu: \"%1%\""
 
 #: src/slic3r/GUI/GUI_App.cpp:743
 msgid ""
-"QIDISlicer has encountered a localization error. Please report to "
-"QIDISlicer team, what language was active and in which scenario this issue "
-"happened. Thank you.\n"
+"QIDISlicer has encountered a localization error. Please report to QIDISlicer "
+"team, what language was active and in which scenario this issue happened. "
+"Thank you.\n"
 "\n"
 "The application will now terminate."
 msgstr ""
-"V aplikaci QIDISlicer došlo k chybě v lokalizaci. Nahlaste QIDISlicer "
-"týmu, jaký jazyk byl aktivní a ve kterém scénáři k tomuto problému došlo. "
+"V aplikaci QIDISlicer došlo k chybě v lokalizaci. Nahlaste QIDISlicer týmu, "
+"jaký jazyk byl aktivní a ve kterém scénáři k tomuto problému došlo. "
 "Děkujeme.\n"
 "\n"
 "Aplikace bude nyní ukončena."
@@ -11333,8 +11366,7 @@ msgid ""
 "QIDISlicer is based on Slic3r by Alessandro Ranellucci and the RepRap "
 "community."
 msgstr ""
-"QIDISlicer je založen na Slic3r od Alessandra Ranellucciho a RepRap "
-"komunity."
+"QIDISlicer je založen na Slic3r od Alessandra Ranellucciho a RepRap komunity."
 
 #: src/slic3r/GUI/MainFrame.cpp:234
 msgid "QIDISlicer is closing"
@@ -13274,6 +13306,12 @@ msgstr "Nastavit horní ukazatel jako aktivní"
 msgid "%s Family"
 msgstr "%s Rodina"
 
+#. TRN %s = type of file
+#: src/slic3r/GUI/GUI_App.cpp:609
+#, c-format, boost-format
+msgid "%s files"
+msgstr "%s soubory"
+
 #: src/slic3r/GUI/ConfigManipulation.cpp:167
 msgid "Shall I adjust those settings for supports?"
 msgstr "Mám upravit tato nastavení pro podpěry?"
@@ -13443,6 +13481,10 @@ msgstr "Zobrazit/skrýt legendu"
 #: src/slic3r/GUI/KBShortcutsDialog.cpp:127
 msgid "Show/Hide object/instance labels"
 msgstr "Zobrazit/skrýt popisky objektů/instancí"
+
+#: src/slic3r/GUI/PresetComboBoxes.cpp:787
+msgid "Show/Hide template presets"
+msgstr "Zobrazit/skrýt šablony přednastavení"
 
 #: src/slic3r/GUI/Preferences.cpp:304
 msgid "Show incompatible print and filament presets"
@@ -15084,20 +15126,16 @@ msgid_plural ""
 "the dimensions of these objects?"
 msgstr[0] ""
 "Zdá se, že rozměry objektu ze souboru %s jsou definovány v palcích.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektu?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektu?"
 msgstr[1] ""
 "Zdá se, že rozměry objektů ze souboru %s jsou definovány v palcích.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektů?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektů?"
 msgstr[2] ""
 "Zdá se, že rozměry objektů ze souboru %s jsou definovány v palcích.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektů?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektů?"
 msgstr[3] ""
 "Zdá se, že rozměry objektů ze souboru %s jsou definovány v palcích.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektů?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektů?"
 
 #: src/slic3r/GUI/Plater.cpp:2611
 #, c-format, boost-format
@@ -15111,20 +15149,16 @@ msgid_plural ""
 "the dimensions of these objects?"
 msgstr[0] ""
 "Zdá se, že rozměry objektu ze souboru %s jsou definovány v metrech.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektu?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektu?"
 msgstr[1] ""
 "Zdá se, že rozměry objektů ze souboru %s jsou definovány v metrech.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektů?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektů?"
 msgstr[2] ""
 "Zdá se, že rozměry objektů ze souboru %s jsou definovány v metrech.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektů?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektů?"
 msgstr[3] ""
 "Zdá se, že rozměry objektů ze souboru %s jsou definovány v metrech.\n"
-"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry "
-"objektů?"
+"Interní jednotkou QIDISliceru je milimetr. Chcete přepočítat rozměry objektů?"
 
 #: src/slic3r/GUI/Downloader.cpp:181
 msgid "The download has failed"
@@ -15153,6 +15187,15 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:1538
 msgid "The extruder to use when printing infill."
 msgstr "Extruder který se použije pro tisk výplní."
+
+#: src/libslic3r/PrintConfig.cpp:3241
+msgid ""
+"The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
+"use the one that is available (non-soluble would be preferred)."
+msgstr ""
+"Extruder, který se použije při tisku obvodu čistící věže. Nastavte na 0, "
+"abyste použili ten, který je k dispozici (přednostně s nerozpustným "
+"filamentem)."
 
 #: src/libslic3r/PrintConfig.cpp:2036
 msgid ""
@@ -15549,9 +15592,6 @@ msgstr[2] ""
 "přejmenovat."
 msgstr[3] ""
 "Fyzické tiskárny níže je založeny na přednastavení, které se chystáte "
-"přejmenovat."
-msgstr[4] ""
-"Fyzických tiskáren níže je založeno na přednastavení, které se chystáte "
 "přejmenovat."
 
 #: src/libslic3r/PrintConfig.cpp:641
@@ -16690,15 +16730,15 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4836
 msgid ""
-"This version of QIDISlicer may not understand configurations produced by "
-"the newest QIDISlicer versions. For example, newer QIDISlicer may extend "
-"the list of supported firmware flavors. One may decide to bail out or to "
+"This version of QIDISlicer may not understand configurations produced by the "
+"newest QIDISlicer versions. For example, newer QIDISlicer may extend the "
+"list of supported firmware flavors. One may decide to bail out or to "
 "substitute an unknown value with a default silently or verbosely."
 msgstr ""
 "Tato verze QIDISliceru nemusí být kompatibilní s konfiguracemi vytvořenými "
-"nejnovějšími verzemi QIDISliceru. Novější verze QIDISliceru mohou "
-"například rozšířit seznam podporovaných druhů firmwaru. Lze se rozhodnout, "
-"že to budeme ignorovat, nebo že neznámou hodnotu nahradíme výchozí hodnotou."
+"nejnovějšími verzemi QIDISliceru. Novější verze QIDISliceru mohou například "
+"rozšířit seznam podporovaných druhů firmwaru. Lze se rozhodnout, že to "
+"budeme ignorovat, nebo že neznámou hodnotu nahradíme výchozí hodnotou."
 
 #: src/slic3r/GUI/UpdateDialogs.cpp:392
 #, c-format, boost-format
@@ -17097,6 +17137,10 @@ msgstr "Nelze znovu načíst:"
 msgid "Unable to replace with more than one volume"
 msgstr "Nelze nahradit více než jednou částí"
 
+#: src/slic3r/GUI/Plater.cpp:6681
+msgid "Unable to save file"
+msgstr "Nelze uložit soubor"
+
 #: src/slic3r/GUI/OptionsGroup.cpp:126
 msgid "Unavailable for this method."
 msgstr "Pro tuto metodu není k dispozici."
@@ -17192,6 +17236,10 @@ msgstr "Akce zpět Rotace"
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:3030
 msgid "Undo translation"
 msgstr "Akce zpět Posun"
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:667
+msgid "Unexpected character"
+msgstr "Neočekávaný znak"
 
 #: src/libslic3r/miniz_extension.cpp:111
 msgid "unexpected decompressed size"
@@ -17842,8 +17890,8 @@ msgstr ""
 "spustí Začátek G-codu poté, co podložka dosáhne cílové teploty a extruder se "
 "začal ohřívat.\n"
 "\n"
-"Pokud funkce není povolena, QIDISlicer NEvkládá příkazy k ohřevu extruderu "
-"a podložky, obojí ponechá na vašem vlastním Začátku G-code."
+"Pokud funkce není povolena, QIDISlicer NEvkládá příkazy k ohřevu extruderu a "
+"podložky, obojí ponechá na vašem vlastním Začátku G-code."
 
 #: src/slic3r/GUI/PresetHints.cpp:192
 msgid "when printing"
@@ -18080,7 +18128,11 @@ msgstr "Čistící Věž"
 msgid "Wipe tower brim width"
 msgstr "Šířka límce čistící věže"
 
-#: src/slic3r/GUI/Tab.cpp:2087
+#: src/libslic3r/PrintConfig.cpp:3239
+msgid "Wipe tower extruder"
+msgstr "Extruder čistící věže"
+
+#: src/slic3r/GUI/Tab.cpp:2096
 msgid "Wipe tower parameters"
 msgstr "Parametry čistící věže"
 
@@ -18219,13 +18271,21 @@ msgid ""
 "Do you wish to continue?"
 msgstr ""
 "Používáte 32bitovou aplikaci QIDISlicer v 64bitovém systému Windows.\n"
-"32bitovová aplikace QIDISliceru pravděpodobně nebude schopna využít "
-"veškerou dostupnou paměť RAM v systému.\n"
+"32bitovová aplikace QIDISliceru pravděpodobně nebude schopna využít veškerou "
+"dostupnou paměť RAM v systému.\n"
 "Stáhněte si a nainstalujte 64bitovou verzi QIDISliceru ze stránek https://"
 "www.qidi3d.cz/qidislicer/.\n"
 "Přejete si pokračovat?"
 
-#: src/slic3r/GUI/Plater.cpp:5200
+#: src/slic3r/GUI/Plater.cpp:4103 src/slic3r/GUI/Plater.cpp:4109
+msgid "You are using template filament preset."
+msgid_plural "You are using template filament presets."
+msgstr[0] "Používáte šablonu filamentového přednastavení."
+msgstr[1] "Používáte šablony filamentového přednastavení."
+msgstr[2] "Používáte šablony filamentového přednastavení."
+msgstr[3] "Používáte šablon filamentového přednastavení."
+
+#: src/slic3r/GUI/Plater.cpp:5241
 msgid ""
 "You can keep presets modifications to the new project, discard them or save "
 "changes as new presets.\n"
@@ -18287,12 +18347,13 @@ msgid ""
 "You can use all configuration options as variables inside this template. For "
 "example: [layer_height], [fill_density] etc. You can also use [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 msgstr ""
 "V této šabloně můžete použít všechny možnosti konfigurace jako proměnné. "
 "Můžete například použít: [layer_height], [fill_density] etc. Také můžete "
 "použít [timestamp], [year], [month], [day], [hour], [minute], [second], "
-"[version], [input_filename], [input_filename_base]."
+"[version], [input_filename], [input_filename_base], "
+"[default_output_extension]."
 
 #: src/slic3r/GUI/NotificationManager.hpp:908
 msgid ""
@@ -18602,6 +18663,7 @@ msgid_plural "%ld bytes"
 msgstr[0] "%ld bajt"
 msgstr[1] "%ld bajty"
 msgstr[2] "%ld bajtů"
+msgstr[3] ""
 
 #: ../src/html/helpwnd.cpp:1033
 #, c-format
@@ -22650,10 +22712,6 @@ msgstr "Japonská pohlednice 100 x 148 mm"
 msgid "Japanese Postcard Rotated 148 x 100 mm"
 msgstr "Japonská pohlednice na šířku, 148 x 100 mm"
 
-#: ../src/common/stockitem.cpp:169
-msgid "Jump to"
-msgstr "Přejít na"
-
 #: ../src/common/stockitem.cpp:171
 msgid "Justified"
 msgstr "Do bloku"
@@ -22811,6 +22869,7 @@ msgid_plural "Last repeated message (\"%s\", %u times) wasn't output"
 msgstr[0] "Poslední opakovaná zpráva (\"%s\", %ukrát) nebyla vypsána"
 msgstr[1] "Poslední opakovaná zpráva (\"%s\", %ukrát) nebyla vypsána"
 msgstr[2] "Poslední opakovaná zpráva (\"%s\", %ukrát) nebyla vypsána"
+msgstr[3] ""
 
 #: ../src/common/paper.cpp:103
 msgid "Ledger, 17 x 11 in"
@@ -25003,6 +25062,7 @@ msgid_plural "The previous message repeated %u times."
 msgstr[0] "Předchozí zpráva opakovaná %ukrát."
 msgstr[1] "Předchozí zpráva opakovaná %ukrát."
 msgstr[2] "Předchozí zpráva opakovaná %ukrát."
+msgstr[3] ""
 
 #: ../src/common/log.cpp:270
 msgid "The previous message repeated once."

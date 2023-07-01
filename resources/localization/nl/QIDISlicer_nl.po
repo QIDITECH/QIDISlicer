@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-26 13:11+0200\n"
-"PO-Revision-Date: 2022-09-27 15:39+0200\n"
+"PO-Revision-Date: 2023-07-01 15:15+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: src/slic3r/GUI/AboutDialog.cpp:46 src/slic3r/GUI/AboutDialog.cpp:304
 msgid "Portions copyright"
@@ -2808,7 +2808,28 @@ msgstr ""
 "Er is een object buiten het printbereik gedetecteerd.\n"
 "Los het probleem op om door te gaan met slicen."
 
-#: src/slic3r/GUI/GLCanvas3D.cpp:7539
+#. TRN %3% is name of Object1, %4% is name of Object2
+#: src/slic3r/GUI/GLCanvas3D.cpp:7496
+#, boost-format
+msgid ""
+"Conflicts in G-code paths have been detected at layer %1%, z=%2$.2f mm. "
+"Please reposition the conflicting objects (%3% <-> %4%) further apart."
+msgstr ""
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7526
+msgid "Jump to"
+msgstr "Spring naar"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7529
+#: src/slic3r/GUI/NotificationManager.cpp:2101
+#: src/slic3r/GUI/NotificationManager.cpp:2108
+#: src/slic3r/GUI/NotificationManager.cpp:2124
+#: src/slic3r/GUI/NotificationManager.cpp:2130
+#: src/slic3r/GUI/NotificationManager.cpp:2201
+msgid "ERROR:"
+msgstr "Fout:"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7606
 msgid "Selection-Add from rectangle"
 msgstr "Selectie - Voeg toe van boxselectie"
 
@@ -4546,7 +4567,13 @@ msgstr "Afsluiten, ik zal mijn data nu verplaatsen"
 msgid "Start the application"
 msgstr "Start het programma"
 
-#: src/slic3r/GUI/GUI_App.cpp:736
+#. TRN %s = type of file
+#: src/slic3r/GUI/GUI_App.cpp:609
+#, c-format, boost-format
+msgid "%s files"
+msgstr ""
+
+#: src/slic3r/GUI/GUI_App.cpp:772
 #, c-format, boost-format
 msgid ""
 "%s has encountered an error. It was likely caused by running out of memory. "
@@ -4567,9 +4594,9 @@ msgstr "Fatale fout"
 
 #: src/slic3r/GUI/GUI_App.cpp:743
 msgid ""
-"QIDISlicer has encountered a localization error. Please report to "
-"QIDISlicer team, what language was active and in which scenario this issue "
-"happened. Thank you.\n"
+"QIDISlicer has encountered a localization error. Please report to QIDISlicer "
+"team, what language was active and in which scenario this issue happened. "
+"Thank you.\n"
 "\n"
 "The application will now terminate."
 msgstr ""
@@ -4736,8 +4763,8 @@ msgid ""
 "Printer Settings anymore.\n"
 "Settings will be available in physical printers settings."
 msgstr ""
-"Maar sinds deze versie van QIDISlicer, wordt de informatie niet meer "
-"getoond in de printerinstellingen.\n"
+"Maar sinds deze versie van QIDISlicer, wordt de informatie niet meer getoond "
+"in de printerinstellingen.\n"
 "Instellingen zijn beschikbaar in de fysieke-printerinstellingen."
 
 #: src/slic3r/GUI/GUI_App.cpp:1793
@@ -7847,14 +7874,6 @@ msgstr "Exporteer G-code."
 msgid "Export."
 msgstr "Exporteer."
 
-#: src/slic3r/GUI/NotificationManager.cpp:2101
-#: src/slic3r/GUI/NotificationManager.cpp:2108
-#: src/slic3r/GUI/NotificationManager.cpp:2124
-#: src/slic3r/GUI/NotificationManager.cpp:2130
-#: src/slic3r/GUI/NotificationManager.cpp:2201
-msgid "ERROR:"
-msgstr "Fout:"
-
 #: src/slic3r/GUI/NotificationManager.cpp:2113
 #: src/slic3r/GUI/NotificationManager.cpp:2140
 #: src/slic3r/GUI/NotificationManager.cpp:2148
@@ -7932,12 +7951,11 @@ msgstr "U moet mogelijk uw grafische kaart updaten."
 
 #: src/slic3r/GUI/OpenGLManager.cpp:390
 msgid ""
-"As a workaround, you may run QIDISlicer with a software rendered 3D "
-"graphics by running qidi-slicer.exe with the --sw-renderer parameter."
+"As a workaround, you may run QIDISlicer with a software rendered 3D graphics "
+"by running qidi-slicer.exe with the --sw-renderer parameter."
 msgstr ""
 "Als tijdelijke oplossing kunt u QIDISlicer draaien met software gerenderde "
-"modelweergave door qidi-slicer.exe te draaien met de --sw-renderer "
-"parameter."
+"modelweergave door qidi-slicer.exe te draaien met de --sw-renderer parameter."
 
 #: src/slic3r/GUI/OpenGLManager.cpp:392
 msgid "Unsupported OpenGL version"
@@ -8042,7 +8060,16 @@ msgstr ""
 "Importeer een CA-bestand in de Certificate Store of Keychain om deze te "
 "gebruiken."
 
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:705
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:667
+msgid "Unexpected character"
+msgstr ""
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:668
+#: src/slic3r/GUI/SavePresetDialog.cpp:169
+msgid "The following characters are not allowed in the name"
+msgstr ""
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:723
 msgid "You have to enter a printer name."
 msgstr "U moet een printernaam invoeren."
 
@@ -8349,12 +8376,12 @@ msgid_plural ""
 "the dimensions of these objects?"
 msgstr[0] ""
 "De afmetingen van het object van bestand %s lijken in meters te zijn.\n"
-"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen "
-"van het object verschalen?"
+"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen van "
+"het object verschalen?"
 msgstr[1] ""
 "De afmetingen van sommige objecten van bestand %s lijken in meters te zijn.\n"
-"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen "
-"van het object verschalen?"
+"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen van "
+"het object verschalen?"
 
 #: src/slic3r/GUI/Plater.cpp:2615 src/slic3r/GUI/Plater.cpp:2637
 msgid "The object is too small"
@@ -8376,12 +8403,12 @@ msgid_plural ""
 "the dimensions of these objects?"
 msgstr[0] ""
 "De afmetingen van het object van bestand %s lijken in inches te zijn.\n"
-"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen "
-"van het object verschalen?"
+"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen van "
+"het object verschalen?"
 msgstr[1] ""
 "De afmetingen van sommige objecten van bestand %s lijken in inches te zijn.\n"
-"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen "
-"van het object verschalen?"
+"De gebruikte eenheid van QIDISlicer is millimeters. Wilt u de afmetingen van "
+"het object verschalen?"
 
 #: src/slic3r/GUI/Plater.cpp:2650
 msgid ""
@@ -8506,7 +8533,11 @@ msgstr ""
 msgid "Enable supports for enforcers only"
 msgstr "Sta supports voor forceringen alleen toe"
 
-#: src/slic3r/GUI/Plater.cpp:3362 src/slic3r/GUI/Plater.cpp:4258
+#: src/slic3r/GUI/Plater.cpp:3229
+msgid "Bed temperatures for the used filaments differ significantly."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:3367 src/slic3r/GUI/Plater.cpp:4294
 msgid "Invalid data"
 msgstr "Ongeldige data"
 
@@ -8567,7 +8598,24 @@ msgstr "Fout tijdens herladen"
 msgid "Reload all from disk"
 msgstr "Herlaad alles van schijf"
 
-#: src/slic3r/GUI/Plater.cpp:4211
+#: src/slic3r/GUI/Plater.cpp:4103 src/slic3r/GUI/Plater.cpp:4109
+msgid "You are using template filament preset."
+msgid_plural "You are using template filament presets."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/slic3r/GUI/Plater.cpp:4104 src/slic3r/GUI/Plater.cpp:4110
+msgid ""
+"Please note that template presets are not customized for specific printer "
+"and should only be used as a starting point for creating your own user "
+"presets."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:4106
+msgid "More info at"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:4247
 msgid "There are active warnings concerning sliced models:"
 msgstr "Er zijn actieve waarschuwingen wat betreft de slice:"
 
@@ -8816,7 +8864,11 @@ msgstr ""
 msgid "Save project"
 msgstr "Project opslaan"
 
-#: src/slic3r/GUI/Plater.cpp:6826
+#: src/slic3r/GUI/Plater.cpp:6681
+msgid "Unable to save file"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6875
 msgid "Is the printer ready? Is the print sheet in place, empty and clean?"
 msgstr ""
 
@@ -8848,8 +8900,8 @@ msgid ""
 "If this is enabled, Slic3r will prompt the last output directory instead of "
 "the one containing the input files."
 msgstr ""
-"Als dit aan staat zal QIDISlicer de opslaglocatie gebruiken in plaats van "
-"de originele locatie."
+"Als dit aan staat zal QIDISlicer de opslaglocatie gebruiken in plaats van de "
+"originele locatie."
 
 #: src/slic3r/GUI/Preferences.cpp:245
 msgid "Auto-center parts"
@@ -8872,8 +8924,8 @@ msgid ""
 "If this is enabled, Slic3r will pre-process objects as soon as they're "
 "loaded in order to save time when exporting G-code."
 msgstr ""
-"Als dit aanstaat zal QIDISlicer objecten op de achtergrond slicen om tijd "
-"te besparen bij het exporteren van de G-code."
+"Als dit aanstaat zal QIDISlicer objecten op de achtergrond slicen om tijd te "
+"besparen bij het exporteren van de G-code."
 
 #: src/slic3r/GUI/Preferences.cpp:256
 msgid "Alert when supports needed"
@@ -9423,7 +9475,11 @@ msgstr "Bewerk preset"
 msgid "Change extruder color"
 msgstr "Verander extruderkleur"
 
-#: src/slic3r/GUI/PresetComboBoxes.cpp:767 src/slic3r/GUI/Tab.cpp:3503
+#: src/slic3r/GUI/PresetComboBoxes.cpp:787
+msgid "Show/Hide template presets"
+msgstr ""
+
+#: src/slic3r/GUI/PresetComboBoxes.cpp:795 src/slic3r/GUI/Tab.cpp:3520
 msgid "Edit physical printer"
 msgstr "Bewerk fysieke printer"
 
@@ -9781,10 +9837,6 @@ msgstr ""
 
 #: src/slic3r/GUI/SavePresetDialog.cpp:95
 msgid "Save printer settings as"
-msgstr ""
-
-#: src/slic3r/GUI/SavePresetDialog.cpp:169
-msgid "The following characters are not allowed in the name"
 msgstr ""
 
 #: src/slic3r/GUI/SavePresetDialog.cpp:176
@@ -11897,14 +11949,13 @@ msgid ""
 "Could not detect system SSL certificate store. QIDISlicer will be unable to "
 "establish secure network connections."
 msgstr ""
-"Kan geen systeem SSL certicate store detecteren. QIDISlicer is niet in "
-"staat om een veilige netwerkverbinding in te stellen."
+"Kan geen systeem SSL certicate store detecteren. QIDISlicer is niet in staat "
+"om een veilige netwerkverbinding in te stellen."
 
 #: src/slic3r/Utils/Http.cpp:78
 #, boost-format
 msgid "QIDISlicer detected system SSL certificate store in: %1%"
-msgstr ""
-"QIDISlicer heeft een system SSL certificate store gedetecteerd in: %1%"
+msgstr "QIDISlicer heeft een system SSL certificate store gedetecteerd in: %1%"
 
 #: src/slic3r/Utils/Http.cpp:82
 #, boost-format
@@ -12827,8 +12878,8 @@ msgid ""
 "Slic3r can upload G-code files to a printer host. This field should contain "
 "the API Key or the password required for authentication."
 msgstr ""
-"QIDISlicer kan .gcode-bestanden naar een printerhost uploaden. Dit veld "
-"moet de API-key of het wachtwoord voor authenticatie bevatten."
+"QIDISlicer kan .gcode-bestanden naar een printerhost uploaden. Dit veld moet "
+"de API-key of het wachtwoord voor authenticatie bevatten."
 
 #: src/libslic3r/PrintConfig.cpp:333
 msgid "Name of the printer"
@@ -13256,8 +13307,8 @@ msgid ""
 msgstr ""
 "Als meerdere objecten geprint worden, zorgt deze optie dat de objecten "
 "afzonderlijk voltooid worden voordat bewogen wordt naar de volgende. "
-"QIDISlicer voorkomt botsingen van de extruder tegen eerder geprinte "
-"objecten en zal u daar ook voor waarschuwen, maar blijf wel alert."
+"QIDISlicer voorkomt botsingen van de extruder tegen eerder geprinte objecten "
+"en zal u daar ook voor waarschuwen, maar blijf wel alert."
 
 #: src/libslic3r/PrintConfig.cpp:714
 msgid "Enable auto cooling"
@@ -14085,10 +14136,11 @@ msgid ""
 "maximum allowed speed at layer \"disable_fan_first_layers\" + 1."
 msgstr ""
 "De ventilatorsnelheid wordt geleidelijk opgebouwd van 0 op laag "
-"\"disable_fan_first_layers\" naar het maximale op laag \"full_fan_speed_layer"
-"\". \"full_fan_speed_layer\" wordt genegeerd als die lager is dan "
-"\"disable_fan_first_layers\" in welk geval de ventilator zal draaien op de "
-"maximaal toegestane snelheid op laag \"disable_fan_first_layers\" + 1."
+"\"disable_fan_first_layers\" naar het maximale op laag "
+"\"full_fan_speed_layer\". \"full_fan_speed_layer\" wordt genegeerd als die "
+"lager is dan \"disable_fan_first_layers\" in welk geval de ventilator zal "
+"draaien op de maximaal toegestane snelheid op laag "
+"\"disable_fan_first_layers\" + 1."
 
 #: src/libslic3r/PrintConfig.cpp:1343
 msgid "Fuzzy skin type."
@@ -14785,8 +14837,7 @@ msgstr "Minimale printsnelheid"
 
 #: src/libslic3r/PrintConfig.cpp:1916
 msgid "Slic3r will not scale speed down below this speed."
-msgstr ""
-"QIDISlicer zal de printsnelheid niet verlagen tot onder deze snelheid."
+msgstr "QIDISlicer zal de printsnelheid niet verlagen tot onder deze snelheid."
 
 #: src/libslic3r/PrintConfig.cpp:1923
 msgid "Minimal filament extrusion length"
@@ -14828,8 +14879,8 @@ msgid ""
 "Slic3r can upload G-code files to a printer host. This field must contain "
 "the kind of the host."
 msgstr ""
-"QIDISlicer kan .gcode-bestanden uploaden naar een printerhost. Dit veld "
-"moet het type host bevatten."
+"QIDISlicer kan .gcode-bestanden uploaden naar een printerhost. Dit veld moet "
+"het type host bevatten."
 
 #: src/libslic3r/PrintConfig.cpp:1968
 msgid "Only retract when crossing perimeters"
@@ -14859,12 +14910,12 @@ msgid ""
 "You can use all configuration options as variables inside this template. For "
 "example: [layer_height], [fill_density] etc. You can also use [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 msgstr ""
 "U kunt alle instellingen gebruiken in deze template. U kunt hier ook andere "
 "variabelen gebruiken, zoals 'layer_height', 'fill_density', 'timestamp', "
 "'year', 'month', 'day', 'hour', 'minute', 'second', 'version', "
-"'input_filename', 'input_filename_base', etc."
+"'input_filename', 'input_filename_base', 'default_output_extension', etc."
 
 #: src/libslic3r/PrintConfig.cpp:1992
 msgid "Detect bridging perimeters"
@@ -16135,11 +16186,11 @@ msgid ""
 "behaviour both before and after the toolchange."
 msgstr ""
 "Deze custom code wordt ingevoegd voor elke toolwisseling. Variabelen voor "
-"alle QIDISlicer-instellingen kunnen gebruikt worden, evenals "
-"{toolchange_z}, {previous_extruder} en {next_extruder}. Als een "
-"toolwisseling-commando is toegevoegd die wisselt naar dezelfde extruder "
-"(zoals T{next_extruder}), zal QIDISlicer deze verder negeren. Het is daarom "
-"mogelijk om een custom script toe te passen voor en na de toolwisseling."
+"alle QIDISlicer-instellingen kunnen gebruikt worden, evenals {toolchange_z}, "
+"{previous_extruder} en {next_extruder}. Als een toolwisseling-commando is "
+"toegevoegd die wisselt naar dezelfde extruder (zoals T{next_extruder}), zal "
+"QIDISlicer deze verder negeren. Het is daarom mogelijk om een custom script "
+"toe te passen voor en na de toolwisseling."
 
 #: src/libslic3r/PrintConfig.cpp:3035
 msgid ""
@@ -16410,6 +16461,16 @@ msgid "Maximal distance between supports on sparse infill sections."
 msgstr "Maximale afstand tussen support op dunne vullingsdelen."
 
 #: src/libslic3r/PrintConfig.cpp:3239
+msgid "Wipe tower extruder"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:3241
+msgid ""
+"The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
+"use the one that is available (non-soluble would be preferred)."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:3260
 msgid "XY Size Compensation"
 msgstr "Compensatie voor X- en Y-grootte"
 
@@ -17522,16 +17583,15 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4836
 msgid ""
-"This version of QIDISlicer may not understand configurations produced by "
-"the newest QIDISlicer versions. For example, newer QIDISlicer may extend "
-"the list of supported firmware flavors. One may decide to bail out or to "
+"This version of QIDISlicer may not understand configurations produced by the "
+"newest QIDISlicer versions. For example, newer QIDISlicer may extend the "
+"list of supported firmware flavors. One may decide to bail out or to "
 "substitute an unknown value with a default silently or verbosely."
 msgstr ""
 "Deze versie van QIDISlicer snapt configuraties geproduceerd door nieuwere "
-"versie van QIDISlicer niet. Ter illustratie: nieuwere versies van "
-"QIDISlicer ondersteunen meer firmwarevarianten. Besloten kan worden om een "
-"onbekende waarde zonder melding of woordelijk te vervangen door een "
-"standaardwaarde."
+"versie van QIDISlicer niet. Ter illustratie: nieuwere versies van QIDISlicer "
+"ondersteunen meer firmwarevarianten. Besloten kan worden om een onbekende "
+"waarde zonder melding of woordelijk te vervangen door een standaardwaarde."
 
 #: src/libslic3r/PrintConfig.cpp:4840
 msgid "Bail out on unknown configuration values"
@@ -17584,12 +17644,12 @@ msgstr "Enkele instantiemodus"
 #: src/libslic3r/PrintConfig.cpp:4857
 msgid ""
 "If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides the "
+"\"single_instance\" configuration value from application preferences."
 msgstr ""
 "Als dit is ingeschakeld worden de commando-argumenten naar een bestaande "
-"instantie van de QIDISlicer GUI of een geopend QIDISlicer venster "
-"gestuurd. Dit overschrijft de \"enkele instantie\"-configuratiewaarde van de "
+"instantie van de QIDISlicer GUI of een geopend QIDISlicer venster gestuurd. "
+"Dit overschrijft de \"enkele instantie\"-configuratiewaarde van de "
 "programmavoorkeuren."
 
 #: src/libslic3r/PrintConfig.cpp:4862
@@ -17748,8 +17808,9 @@ msgstr ""
 #: resources/data/hints.ini: [hint:Hiding sidebar]
 msgid ""
 "Hiding sidebar\n"
-"Did you know that you can hide the right sidebar using the shortcut <b>Shift"
-"+Tab</b>? You can also enable the icon for this from the<a>Preferences</a>."
+"Did you know that you can hide the right sidebar using the shortcut "
+"<b>Shift+Tab</b>? You can also enable the icon for this from "
+"the<a>Preferences</a>."
 msgstr ""
 "Verberg zijbalk\n"
 "Wist u dat u de rechter zijbalk kan verbergen met de sneltoets <b>Shift+Tab</"
@@ -17865,8 +17926,8 @@ msgid ""
 msgstr ""
 "Zoekfuncties\n"
 "Wist u dat u de <a>Zoekfunctie</a> kunt gebruiken om snel een specifieke "
-"instelling in QIDISlicer te vinden? Of gebruik de bekende sneltoets <b>Ctrl"
-"+F</b>."
+"instelling in QIDISlicer te vinden? Of gebruik de bekende sneltoets "
+"<b>Ctrl+F</b>."
 
 #: resources/data/hints.ini: [hint:Box selection]
 msgid ""
@@ -22273,10 +22334,6 @@ msgstr "Japanse Briefkaart 100 x 148 mm"
 msgid "Japanese Postcard Rotated 148 x 100 mm"
 msgstr "Japanse Breifkaart Gedraaid 148 x 100 mm"
 
-#: ../src/common/stockitem.cpp:169
-msgid "Jump to"
-msgstr "Spring naar"
-
 #: ../src/common/stockitem.cpp:171
 msgid "Justified"
 msgstr "Uitgevuld"
@@ -24939,8 +24996,8 @@ msgid ""
 "Type operation \"%s\" failed: Property labeled \"%s\" is of type \"%s\", NOT "
 "\"%s\"."
 msgstr ""
-"Type handeling \"%s\" mislukt: Eigenschap met label \"%s\" is van type \"%s"
-"\", NIET \"%s\"."
+"Type handeling \"%s\" mislukt: Eigenschap met label \"%s\" is van type "
+"\"%s\", NIET \"%s\"."
 
 #: ../src/common/paper.cpp:133
 msgid "US Std Fanfold, 14 7/8 x 11 in"

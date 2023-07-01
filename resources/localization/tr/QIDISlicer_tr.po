@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-26 13:11+0200\n"
-"PO-Revision-Date: 2023-04-10 05:30+0300\n"
+"PO-Revision-Date: 2023-07-01 15:34+0800\n"
 "Last-Translator: Mehmet Sutas <msutas@gmail.com>\n"
 "Language-Team: \n"
 "Language: tr_TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.3\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: src/slic3r/GUI/AboutDialog.cpp:46 src/slic3r/GUI/AboutDialog.cpp:304
 msgid "Portions copyright"
@@ -2811,7 +2811,24 @@ msgstr ""
 "Yazdırma alanının dışında bir nesne algılandı.\n"
 "Dilimlemeye devam etmek için sorunu çözün."
 
-#: src/slic3r/GUI/GLCanvas3D.cpp:7539
+#. TRN %3% is name of Object1, %4% is name of Object2
+#: src/slic3r/GUI/GLCanvas3D.cpp:7496
+#, boost-format
+msgid ""
+"Conflicts in G-code paths have been detected at layer %1%, z=%2$.2f mm. "
+"Please reposition the conflicting objects (%3% <-> %4%) further apart."
+msgstr ""
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7529
+#: src/slic3r/GUI/NotificationManager.cpp:2101
+#: src/slic3r/GUI/NotificationManager.cpp:2108
+#: src/slic3r/GUI/NotificationManager.cpp:2124
+#: src/slic3r/GUI/NotificationManager.cpp:2130
+#: src/slic3r/GUI/NotificationManager.cpp:2201
+msgid "ERROR:"
+msgstr "HATA:"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7606
 msgid "Selection-Add from rectangle"
 msgstr "Seçim-Dörtgenden ekle"
 
@@ -4571,7 +4588,13 @@ msgstr "Çıkış, verilerimi şimdi taşıyacağım"
 msgid "Start the application"
 msgstr "Uygulamayı başlat"
 
-#: src/slic3r/GUI/GUI_App.cpp:736
+#. TRN %s = type of file
+#: src/slic3r/GUI/GUI_App.cpp:609
+#, c-format, boost-format
+msgid "%s files"
+msgstr ""
+
+#: src/slic3r/GUI/GUI_App.cpp:772
 #, c-format, boost-format
 msgid ""
 "%s has encountered an error. It was likely caused by running out of memory. "
@@ -4592,9 +4615,9 @@ msgstr "Önemli hata"
 
 #: src/slic3r/GUI/GUI_App.cpp:743
 msgid ""
-"QIDISlicer has encountered a localization error. Please report to "
-"QIDISlicer team, what language was active and in which scenario this issue "
-"happened. Thank you.\n"
+"QIDISlicer has encountered a localization error. Please report to QIDISlicer "
+"team, what language was active and in which scenario this issue happened. "
+"Thank you.\n"
 "\n"
 "The application will now terminate."
 msgstr ""
@@ -4671,8 +4694,7 @@ msgid ""
 "qidi3d.cz/qidislicer/.\n"
 "Do you wish to continue?"
 msgstr ""
-"64-bit Windows üzerinde 32 bit QIDISlicer yapılandırması "
-"çalıştırıyorsunuz.\n"
+"64-bit Windows üzerinde 32 bit QIDISlicer yapılandırması çalıştırıyorsunuz.\n"
 "QIDISlicer'ın 32 bit yapısı muhtemelen sistemde bulunan tüm RAM'i "
 "kullanamayacaktır.\n"
 "Lütfen https://www.qidi3d.cz/qidislicer/'dan 64 bitlik bir QIDISlicer "
@@ -7898,14 +7920,6 @@ msgstr "G-kodu Dışa Aktar"
 msgid "Export."
 msgstr "Dışa Aktar"
 
-#: src/slic3r/GUI/NotificationManager.cpp:2101
-#: src/slic3r/GUI/NotificationManager.cpp:2108
-#: src/slic3r/GUI/NotificationManager.cpp:2124
-#: src/slic3r/GUI/NotificationManager.cpp:2130
-#: src/slic3r/GUI/NotificationManager.cpp:2201
-msgid "ERROR:"
-msgstr "HATA:"
-
 #: src/slic3r/GUI/NotificationManager.cpp:2113
 #: src/slic3r/GUI/NotificationManager.cpp:2140
 #: src/slic3r/GUI/NotificationManager.cpp:2148
@@ -7990,8 +8004,8 @@ msgstr "Grafik kartı sürücünüzü güncellemeniz gerekebilir."
 
 #: src/slic3r/GUI/OpenGLManager.cpp:390
 msgid ""
-"As a workaround, you may run QIDISlicer with a software rendered 3D "
-"graphics by running qidi-slicer.exe with the --sw-renderer parameter."
+"As a workaround, you may run QIDISlicer with a software rendered 3D graphics "
+"by running qidi-slicer.exe with the --sw-renderer parameter."
 msgstr ""
 "Geçici bir çözüm olarak, qidi-slicer.exe --sw-renderer parametresiyle "
 "çalıştırarak QIDISlicer'ı yazılımla işlenmiş 3B grafiklerle "
@@ -8101,7 +8115,11 @@ msgstr ""
 "Özel bir CA dosyası kullanmak için, lütfen CA dosyanızı Sertifika Deposu/"
 "Anahtarlık içine aktarın."
 
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:705
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:667
+msgid "Unexpected character"
+msgstr ""
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:723
 msgid "You have to enter a printer name."
 msgstr "Bir yazıcı adı girmeniz gerekir."
 
@@ -8367,8 +8385,7 @@ msgid_plural ""
 "The presets below were temporarily installed on the active instance of "
 "QIDISlicer"
 msgstr[0] ""
-"Aşağıdaki hazır ayar, QIDISlicer'ın etkin örneğine geçici olarak "
-"yüklenmiştir"
+"Aşağıdaki hazır ayar, QIDISlicer'ın etkin örneğine geçici olarak yüklenmiştir"
 msgstr[1] ""
 "Aşağıdaki hazır ayarlar, QIDISlicer'ın etkin örneğine geçici olarak "
 "yüklenmiştir"
@@ -8568,7 +8585,11 @@ msgstr ""
 msgid "Enable supports for enforcers only"
 msgstr "Yalnızca uygulayıcılar için destekleri etkinleştir"
 
-#: src/slic3r/GUI/Plater.cpp:3362 src/slic3r/GUI/Plater.cpp:4258
+#: src/slic3r/GUI/Plater.cpp:3229
+msgid "Bed temperatures for the used filaments differ significantly."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:3367 src/slic3r/GUI/Plater.cpp:4294
 msgid "Invalid data"
 msgstr "Geçersiz veri"
 
@@ -8629,7 +8650,24 @@ msgstr "Yeniden yükleme sırasında hata oluştu"
 msgid "Reload all from disk"
 msgstr "Tümünü diskten yeniden yükle"
 
-#: src/slic3r/GUI/Plater.cpp:4211
+#: src/slic3r/GUI/Plater.cpp:4103 src/slic3r/GUI/Plater.cpp:4109
+msgid "You are using template filament preset."
+msgid_plural "You are using template filament presets."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/slic3r/GUI/Plater.cpp:4104 src/slic3r/GUI/Plater.cpp:4110
+msgid ""
+"Please note that template presets are not customized for specific printer "
+"and should only be used as a starting point for creating your own user "
+"presets."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:4106
+msgid "More info at"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:4247
 msgid "There are active warnings concerning sliced models:"
 msgstr "Dilimlenmiş modellerle ilgili aktif uyarılar var:"
 
@@ -8878,7 +8916,11 @@ msgstr ""
 msgid "Save project"
 msgstr "Projeyi kaydet"
 
-#: src/slic3r/GUI/Plater.cpp:6826
+#: src/slic3r/GUI/Plater.cpp:6681
+msgid "Unable to save file"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6875
 msgid "Is the printer ready? Is the print sheet in place, empty and clean?"
 msgstr "Yazıcı hazır mı? Baskı tablası  yerinde, boş ve temiz mi?"
 
@@ -9353,8 +9395,7 @@ msgstr "Printables.com'dan indirmelere izin ver"
 #: src/slic3r/GUI/Preferences.cpp:578
 msgid "If enabled, QIDISlicer will be allowed to download from Printables.com"
 msgstr ""
-"Etkinleştirilirse, QIDISlicer'ın Printables.com'dan indirmesine izin "
-"verilir."
+"Etkinleştirilirse, QIDISlicer'ın Printables.com'dan indirmesine izin verilir."
 
 #: src/slic3r/GUI/Preferences.cpp:588
 msgid "Render"
@@ -9504,7 +9545,11 @@ msgstr "Hazır ayarı düzenle"
 msgid "Change extruder color"
 msgstr "Ekstruder rengini değiştir"
 
-#: src/slic3r/GUI/PresetComboBoxes.cpp:767 src/slic3r/GUI/Tab.cpp:3503
+#: src/slic3r/GUI/PresetComboBoxes.cpp:787
+msgid "Show/Hide template presets"
+msgstr ""
+
+#: src/slic3r/GUI/PresetComboBoxes.cpp:795 src/slic3r/GUI/Tab.cpp:3520
 msgid "Edit physical printer"
 msgstr "Fiziksel yazıcıyı düzenle"
 
@@ -11990,8 +12035,8 @@ msgid ""
 "Could not detect system SSL certificate store. QIDISlicer will be unable to "
 "establish secure network connections."
 msgstr ""
-"Sistem SSL sertifika deposu algılanamadı. QIDISlicer güvenli ağ "
-"bağlantıları kuramaz."
+"Sistem SSL sertifika deposu algılanamadı. QIDISlicer güvenli ağ bağlantıları "
+"kuramaz."
 
 #: src/slic3r/Utils/Http.cpp:78
 #, boost-format
@@ -13473,8 +13518,8 @@ msgid ""
 "This end procedure is inserted at the end of the output file. Note that you "
 "can use placeholder variables for all QIDISlicer settings."
 msgstr ""
-"Bu bitiş prosedürü, çıktı dosyasının sonuna eklenir. Tüm QIDISlicer "
-"ayarları için yer tutucu değişkenleri kullanabileceğinizi unutmayın."
+"Bu bitiş prosedürü, çıktı dosyasının sonuna eklenir. Tüm QIDISlicer ayarları "
+"için yer tutucu değişkenleri kullanabileceğinizi unutmayın."
 
 #: src/libslic3r/PrintConfig.cpp:797
 msgid ""
@@ -14966,12 +15011,12 @@ msgid ""
 "You can use all configuration options as variables inside this template. For "
 "example: [layer_height], [fill_density] etc. You can also use [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 msgstr ""
 "Tüm konfigürasyon seçeneklerini bu şablon içindeki değişkenler olarak "
 "kullanabilirsiniz. Örneğin: [layer_height], [fill_density], [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 
 #: src/libslic3r/PrintConfig.cpp:1992
 msgid "Detect bridging perimeters"
@@ -16280,9 +16325,8 @@ msgstr ""
 "ayarlarının yer tutucu değişkenleri yanı sıra {toolchange_z}, "
 "{previous_extruder} ve {next_extruder} kullanılabilir. Doğru ekstrüdere "
 "değişen bir takım değiştirme komutu dahil edildiğinde (T{next_extruder} "
-"gibi), QIDISlicer başka bir komut eklemez. Bu nedenle, takım "
-"değişikliğinden önce ve sonra özel davranış komut dosyası oluşturmak "
-"mümkündür."
+"gibi), QIDISlicer başka bir komut eklemez. Bu nedenle, takım değişikliğinden "
+"önce ve sonra özel davranış komut dosyası oluşturmak mümkündür."
 
 #: src/libslic3r/PrintConfig.cpp:3035
 msgid ""
@@ -16552,6 +16596,16 @@ msgid "Maximal distance between supports on sparse infill sections."
 msgstr "Seyrek dolgu bölümlerinde destekler arasındaki azami mesafe."
 
 #: src/libslic3r/PrintConfig.cpp:3239
+msgid "Wipe tower extruder"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:3241
+msgid ""
+"The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
+"use the one that is available (non-soluble would be preferred)."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:3260
 msgid "XY Size Compensation"
 msgstr "XY Boyut Telafisi"
 
@@ -17670,9 +17724,9 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4836
 msgid ""
-"This version of QIDISlicer may not understand configurations produced by "
-"the newest QIDISlicer versions. For example, newer QIDISlicer may extend "
-"the list of supported firmware flavors. One may decide to bail out or to "
+"This version of QIDISlicer may not understand configurations produced by the "
+"newest QIDISlicer versions. For example, newer QIDISlicer may extend the "
+"list of supported firmware flavors. One may decide to bail out or to "
 "substitute an unknown value with a default silently or verbosely."
 msgstr ""
 "QIDISlicer'ın bu sürümü, en yeni QIDISlicer sürümleri tarafından üretilen "
@@ -17731,8 +17785,8 @@ msgstr "Tek örnek modu"
 #: src/libslic3r/PrintConfig.cpp:4857
 msgid ""
 "If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides the "
+"\"single_instance\" configuration value from application preferences."
 msgstr ""
 "Etkinleştirilirse, komut satırı bağımsız değişkenleri varolan bir GUI "
 "QIDISlicer örneğine gönderilir veya varolan bir QIDISlicer penceresi "
@@ -17898,8 +17952,9 @@ msgstr ""
 #: resources/data/hints.ini: [hint:Hiding sidebar]
 msgid ""
 "Hiding sidebar\n"
-"Did you know that you can hide the right sidebar using the shortcut <b>Shift"
-"+Tab</b>? You can also enable the icon for this from the<a>Preferences</a>."
+"Did you know that you can hide the right sidebar using the shortcut "
+"<b>Shift+Tab</b>? You can also enable the icon for this from "
+"the<a>Preferences</a>."
 msgstr ""
 "Kenar çubuğunu gizleme\n"
 " <b>Shift+Sekme</b> kısayolunu kullanarak sağ kenar çubuğunu "
@@ -18377,6 +18432,7 @@ msgstr "%i / %u"
 msgid "%ld byte"
 msgid_plural "%ld bytes"
 msgstr[0] "%ld bayt"
+msgstr[1] ""
 
 #: ../src/html/helpwnd.cpp:1033
 #, c-format
@@ -22586,6 +22642,7 @@ msgstr "Son sayfa"
 msgid "Last repeated message (\"%s\", %u time) wasn't output"
 msgid_plural "Last repeated message (\"%s\", %u times) wasn't output"
 msgstr[0] "Son yinelenen ileti (\"%s\", %u kez) çıkartılmadı"
+msgstr[1] ""
 
 #: ../src/common/paper.cpp:103
 msgid "Ledger, 17 x 11 in"
@@ -24777,6 +24834,7 @@ msgstr "Taslak düzeyi."
 msgid "The previous message repeated %u time."
 msgid_plural "The previous message repeated %u times."
 msgstr[0] "Önceki ileti %u kez yinelendi."
+msgstr[1] ""
 
 #: ../src/common/log.cpp:270
 msgid "The previous message repeated once."
@@ -25074,8 +25132,8 @@ msgid ""
 "Type operation \"%s\" failed: Property labeled \"%s\" is of type \"%s\", NOT "
 "\"%s\"."
 msgstr ""
-"\"%s\" tür işlemi yapılamadı: Etiketlenen özellik \"%s\" \"%s\" türünde, \"%s"
-"\" türünde DEĞİL."
+"\"%s\" tür işlemi yapılamadı: Etiketlenen özellik \"%s\" \"%s\" türünde, "
+"\"%s\" türünde DEĞİL."
 
 #: ../src/common/paper.cpp:133
 msgid "US Std Fanfold, 14 7/8 x 11 in"

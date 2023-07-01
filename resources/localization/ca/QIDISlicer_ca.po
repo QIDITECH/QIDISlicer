@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-26 13:11+0200\n"
-"PO-Revision-Date: 2023-05-17 19:36+0200\n"
+"PO-Revision-Date: 2023-07-01 15:03+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ca\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: src/slic3r/GUI/AboutDialog.cpp:46 src/slic3r/GUI/AboutDialog.cpp:304
 msgid "Portions copyright"
@@ -1498,23 +1498,23 @@ msgstr "Col·loca els rodaments a les ranures i segueix imprimint"
 #: src/slic3r/GUI/DoubleSlider.cpp:711 src/libslic3r/Utils.cpp:1015
 #, boost-format
 msgid "%1%d"
-msgstr ""
+msgstr "%1%d"
 
 #: src/slic3r/GUI/DoubleSlider.cpp:712 src/libslic3r/Utils.cpp:1016
 #, boost-format
 msgid "%1%h"
-msgstr ""
+msgstr "%1%h"
 
 #. TRN "m" means "minutes"
 #: src/slic3r/GUI/DoubleSlider.cpp:713 src/libslic3r/Utils.cpp:1018
 #, boost-format
 msgid "%1%m"
-msgstr ""
+msgstr "%1%m"
 
 #: src/slic3r/GUI/DoubleSlider.cpp:714 src/libslic3r/Utils.cpp:1026
 #, boost-format
 msgid "%1%s"
-msgstr ""
+msgstr "%1%s"
 
 #: src/slic3r/GUI/DoubleSlider.cpp:1448
 msgid "One layer mode"
@@ -2303,7 +2303,7 @@ msgstr "a"
 #: src/slic3r/GUI/GCodeViewer.cpp:3278
 msgctxt "Metre"
 msgid "m"
-msgstr ""
+msgstr "m"
 
 #: src/slic3r/GUI/GCodeViewer.cpp:3289
 msgid "Click to hide"
@@ -2451,11 +2451,11 @@ msgstr "Filament"
 
 #: src/slic3r/GUI/GCodeViewer.cpp:3961
 msgid "Hide Custom G-code"
-msgstr ""
+msgstr "Ocultar Codi G personalitzat"
 
 #: src/slic3r/GUI/GCodeViewer.cpp:3961
 msgid "Show Custom G-code"
-msgstr ""
+msgstr "Mostrar Codi G personalitzat"
 
 #: src/slic3r/GUI/GCodeViewer.cpp:3974
 msgid "Estimated printing times"
@@ -2614,15 +2614,15 @@ msgstr "Seq."
 
 #: src/slic3r/GUI/GLCanvas3D.cpp:1305
 msgid "SLA view"
-msgstr ""
+msgstr "Vista SLA"
 
 #: src/slic3r/GUI/GLCanvas3D.cpp:1324
 msgid "Show as processed"
-msgstr ""
+msgstr "Mostrar com a processat"
 
 #: src/slic3r/GUI/GLCanvas3D.cpp:1325
 msgid "Show as original"
-msgstr ""
+msgstr "Mostrar com a original"
 
 #: src/slic3r/GUI/GLCanvas3D.cpp:1758
 msgid "Variable layer height - Reset"
@@ -2849,7 +2849,31 @@ msgstr ""
 "S'ha detectat un objecte fora de l'àrea d'impressió.\n"
 "Resol el problema actual per continuar laminant."
 
-#: src/slic3r/GUI/GLCanvas3D.cpp:7539
+#. TRN %3% is name of Object1, %4% is name of Object2
+#: src/slic3r/GUI/GLCanvas3D.cpp:7496
+#, boost-format
+msgid ""
+"Conflicts in G-code paths have been detected at layer %1%, z=%2$.2f mm. "
+"Please reposition the conflicting objects (%3% <-> %4%) further apart."
+msgstr ""
+"S'han detectat conflictes en les trajectòries del codi G a la capa %1%, z "
+"=%2$.2f mm. Si us plau, reposicioneu els objectes conflictius (%3% <-> %4%) "
+"més separats."
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7526
+msgid "Jump to"
+msgstr "Anar a"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7529
+#: src/slic3r/GUI/NotificationManager.cpp:2101
+#: src/slic3r/GUI/NotificationManager.cpp:2108
+#: src/slic3r/GUI/NotificationManager.cpp:2124
+#: src/slic3r/GUI/NotificationManager.cpp:2130
+#: src/slic3r/GUI/NotificationManager.cpp:2201
+msgid "ERROR:"
+msgstr "ERROR:"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7606
 msgid "Selection-Add from rectangle"
 msgstr "Selecció-Afegir del rectangle"
 
@@ -2948,6 +2972,9 @@ msgid ""
 "Drag to move the cut plane\n"
 "Right-click a part to assign it to the other side"
 msgstr ""
+"Feu clic per capgirar el pla de tall\n"
+"Arrossegueu per moure el pla tallat\n"
+"Feu clic amb el botó dret a una part per assignar-la a l'altre costat"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:259 src/libslic3r/PrintConfig.cpp:495
 #: src/libslic3r/PrintConfig.cpp:1189 src/libslic3r/PrintConfig.cpp:2324
@@ -3836,7 +3863,7 @@ msgstr "La pintura automàtica requereix una configuració d'impressió vàlida.
 
 #: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:527
 msgid "Automatic painting requires printable object."
-msgstr ""
+msgstr "La pintura automàtica requereix un objecte imprimible."
 
 #: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:537
 msgid "Automatic painting will erase all currently painted areas."
@@ -4134,13 +4161,13 @@ msgstr "Farciment de cubs"
 #: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:340
 #: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:356
 msgid "Current"
-msgstr ""
+msgstr "Actual"
 
 #. TRN Means "original color"
 #: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:342
 #: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:356
 msgid "Original"
-msgstr ""
+msgstr "Original"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.cpp:404
 msgid "Paints neighboring facets that have the same color."
@@ -4606,7 +4633,13 @@ msgstr "Surt, mouré les meves dades ara"
 msgid "Start the application"
 msgstr "Inicia l'aplicació"
 
-#: src/slic3r/GUI/GUI_App.cpp:736
+#. TRN %s = type of file
+#: src/slic3r/GUI/GUI_App.cpp:609
+#, c-format, boost-format
+msgid "%s files"
+msgstr "%s fitxers"
+
+#: src/slic3r/GUI/GUI_App.cpp:772
 #, c-format, boost-format
 msgid ""
 "%s has encountered an error. It was likely caused by running out of memory. "
@@ -4627,15 +4660,15 @@ msgstr "Error fatal"
 
 #: src/slic3r/GUI/GUI_App.cpp:743
 msgid ""
-"QIDISlicer has encountered a localization error. Please report to "
-"QIDISlicer team, what language was active and in which scenario this issue "
-"happened. Thank you.\n"
+"QIDISlicer has encountered a localization error. Please report to QIDISlicer "
+"team, what language was active and in which scenario this issue happened. "
+"Thank you.\n"
 "\n"
 "The application will now terminate."
 msgstr ""
-"QIDISlicer ha trobat un error de localització. Si us plau, informa a "
-"l'equip de QIDISlicer quin idioma estava actiu i en quin escenari va passar "
-"aquest problema. Gràcies.\n"
+"QIDISlicer ha trobat un error de localització. Si us plau, informa a l'equip "
+"de QIDISlicer quin idioma estava actiu i en quin escenari va passar aquest "
+"problema. Gràcies.\n"
 "\n"
 "L'aplicació es tancarà ara."
 
@@ -4764,17 +4797,17 @@ msgid ""
 "To avoid this problem, consider disabling \"%4%\" in \"Preferences\". "
 "Otherwise, the application will most likely crash again next time."
 msgstr ""
-"QIDISlicer va crashejar la darrera vegada en intentar establir la posició "
-"de la finestra.\n"
+"QIDISlicer va crashejar la darrera vegada en intentar establir la posició de "
+"la finestra.\n"
 "Lamentem les molèsties, malauradament passa amb certes configuracions de "
 "monitor múltiple.\n"
 "El motiu més precís de l'accident: \"%1%\".\n"
 "Per obtenir més informació, consulteu el nostre rastrejador d'incidències de "
 "GitHub: \"%2%\" i \"%3%\"\n"
 "\n"
-"Per evitar aquest problema, considereu desactivar \"%4%\" a \"Preferències"
-"\". En cas contrari, és probable que l'aplicació es torni a crashejar la "
-"propera vegada."
+"Per evitar aquest problema, considereu desactivar \"%4%\" a "
+"\"Preferències\". En cas contrari, és probable que l'aplicació es torni a "
+"crashejar la propera vegada."
 
 #: src/slic3r/GUI/GUI_App.cpp:1415
 #, boost-format
@@ -5129,6 +5162,7 @@ msgstr "Actualment esteu executant l'última versió publicada %1%."
 msgid ""
 "There are no new released versions online. The latest release version is %1%."
 msgstr ""
+"No hi ha noves versions en línia. L'última versió de llançament és %1%."
 
 #: src/slic3r/GUI/GUI_App.cpp:3437
 #, boost-format
@@ -7854,8 +7888,8 @@ msgid ""
 "QIDISlicer recieved a download request from Printables.com, but it's not "
 "allowed. You can allow it"
 msgstr ""
-"QIDISlicer ha rebut una sol·licitud de descàrrega de Printables.com, però "
-"no està permès. Pots permetre-ho"
+"QIDISlicer ha rebut una sol·licitud de descàrrega de Printables.com, però no "
+"està permès. Pots permetre-ho"
 
 #: src/slic3r/GUI/NotificationManager.hpp:925
 msgid "here."
@@ -7950,14 +7984,6 @@ msgstr "Exportar el codi G."
 msgid "Export."
 msgstr "Exportar."
 
-#: src/slic3r/GUI/NotificationManager.cpp:2101
-#: src/slic3r/GUI/NotificationManager.cpp:2108
-#: src/slic3r/GUI/NotificationManager.cpp:2124
-#: src/slic3r/GUI/NotificationManager.cpp:2130
-#: src/slic3r/GUI/NotificationManager.cpp:2201
-msgid "ERROR:"
-msgstr "ERROR:"
-
 #: src/slic3r/GUI/NotificationManager.cpp:2113
 #: src/slic3r/GUI/NotificationManager.cpp:2140
 #: src/slic3r/GUI/NotificationManager.cpp:2148
@@ -8045,8 +8071,8 @@ msgstr "Potser necessiteu actualitzar la vostra targeta gràfica."
 
 #: src/slic3r/GUI/OpenGLManager.cpp:390
 msgid ""
-"As a workaround, you may run QIDISlicer with a software rendered 3D "
-"graphics by running qidi-slicer.exe with the --sw-renderer parameter."
+"As a workaround, you may run QIDISlicer with a software rendered 3D graphics "
+"by running qidi-slicer.exe with the --sw-renderer parameter."
 msgstr ""
 "Com a solució, podeu executar QIDISlicer amb gràfics 3D renderitzats per "
 "programari executant qidi-slicer.exe amb el paràmetre --sw-renderer."
@@ -8157,7 +8183,16 @@ msgstr ""
 "Per utilitzar un fitxer CA personalitzat, importa el teu fitxer CA al "
 "Magatzem de Certificats/Clauer."
 
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:705
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:667
+msgid "Unexpected character"
+msgstr "Caracter inesperat"
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:668
+#: src/slic3r/GUI/SavePresetDialog.cpp:169
+msgid "The following characters are not allowed in the name"
+msgstr "No es permeten els següents caràcters al nom"
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:723
 msgid "You have to enter a printer name."
 msgstr "Heu d'introduir un nom d'impressora."
 
@@ -8625,7 +8660,13 @@ msgstr ""
 msgid "Enable supports for enforcers only"
 msgstr "Habilitar suports només per als reforçadors"
 
-#: src/slic3r/GUI/Plater.cpp:3362 src/slic3r/GUI/Plater.cpp:4258
+#: src/slic3r/GUI/Plater.cpp:3229
+msgid "Bed temperatures for the used filaments differ significantly."
+msgstr ""
+"Les temperatures del llit per als filaments utilitzats difereixen "
+"significativament."
+
+#: src/slic3r/GUI/Plater.cpp:3367 src/slic3r/GUI/Plater.cpp:4294
 msgid "Invalid data"
 msgstr "Les dades no són vàlides"
 
@@ -8686,7 +8727,27 @@ msgstr "S'ha produït un error durant la recàrrega"
 msgid "Reload all from disk"
 msgstr "Torna a carregar-ho tot des del disc"
 
-#: src/slic3r/GUI/Plater.cpp:4211
+#: src/slic3r/GUI/Plater.cpp:4103 src/slic3r/GUI/Plater.cpp:4109
+msgid "You are using template filament preset."
+msgid_plural "You are using template filament presets."
+msgstr[0] "Esteu utilitzant plantilla de filament predefinit."
+msgstr[1] "Esteu utilitzant plantilles de filament predefinits."
+
+#: src/slic3r/GUI/Plater.cpp:4104 src/slic3r/GUI/Plater.cpp:4110
+msgid ""
+"Please note that template presets are not customized for specific printer "
+"and should only be used as a starting point for creating your own user "
+"presets."
+msgstr ""
+"Tingueu en compte que els valors predefinits de plantilles no es "
+"personalitzen per a impressores específiques i només s'han d'utilitzar com a "
+"punt de partida per crear els vostres propis valors predefinits d'usuari."
+
+#: src/slic3r/GUI/Plater.cpp:4106
+msgid "More info at"
+msgstr "Més informació a"
+
+#: src/slic3r/GUI/Plater.cpp:4247
 msgid "There are active warnings concerning sliced models:"
 msgstr "Hi ha advertiments actius sobre els models laminats:"
 
@@ -8940,7 +9001,11 @@ msgstr ""
 msgid "Save project"
 msgstr "Desar projecte"
 
-#: src/slic3r/GUI/Plater.cpp:6826
+#: src/slic3r/GUI/Plater.cpp:6681
+msgid "Unable to save file"
+msgstr "No es pot desar el fitxer"
+
+#: src/slic3r/GUI/Plater.cpp:6875
 msgid "Is the printer ready? Is the print sheet in place, empty and clean?"
 msgstr ""
 "La impressora està preparada? El full d'impressió està col·locat, buit i net?"
@@ -9126,8 +9191,7 @@ msgid ""
 "instead."
 msgstr ""
 "Si està habilitat, en iniciar QIDISlicer i ja s'està executant una altra "
-"instància del mateix QIDISlicer, aquesta instància es reactivarà al seu "
-"lloc."
+"instància del mateix QIDISlicer, aquesta instància es reactivarà al seu lloc."
 
 #: src/slic3r/GUI/Preferences.cpp:332
 msgid ""
@@ -9194,8 +9258,8 @@ msgid ""
 "If enabled, sets QIDISlicer G-code Viewer as default application to open ."
 "gcode files."
 msgstr ""
-"Si està habilitat, estableix el Visor de CodiG de QIDISlicer com a "
-"aplicació predeterminada per obrir fitxers .gcode."
+"Si està habilitat, estableix el Visor de CodiG de QIDISlicer com a aplicació "
+"predeterminada per obrir fitxers .gcode."
 
 #: src/slic3r/GUI/Preferences.cpp:367
 msgid "Use Retina resolution for the 3D scene"
@@ -9569,7 +9633,11 @@ msgstr "Edita el predefinit"
 msgid "Change extruder color"
 msgstr "Canvia el color de l'extrusora"
 
-#: src/slic3r/GUI/PresetComboBoxes.cpp:767 src/slic3r/GUI/Tab.cpp:3503
+#: src/slic3r/GUI/PresetComboBoxes.cpp:787
+msgid "Show/Hide template presets"
+msgstr "Mostrar/Amagar predefinicions de plantilles"
+
+#: src/slic3r/GUI/PresetComboBoxes.cpp:795 src/slic3r/GUI/Tab.cpp:3520
 msgid "Edit physical printer"
 msgstr "Edita la impressora física"
 
@@ -9632,8 +9700,8 @@ msgid ""
 "If estimated layer time is greater, but still below ~%1%s, fan will run at "
 "%2%%%"
 msgstr ""
-"Si el temps de capa estimat és més gran, però continua sent inferior a ~"
-"%1%s, el ventilador funcionarà al %2%%%"
+"Si el temps de capa estimat és més gran, però continua sent inferior a "
+"~%1%s, el ventilador funcionarà al %2%%%"
 
 #: src/slic3r/GUI/PresetHints.cpp:55
 #, boost-format
@@ -9935,10 +10003,6 @@ msgstr "Deseu la configuració del material com a"
 #: src/slic3r/GUI/SavePresetDialog.cpp:95
 msgid "Save printer settings as"
 msgstr "Deseu la configuració de la impressora com a"
-
-#: src/slic3r/GUI/SavePresetDialog.cpp:169
-msgid "The following characters are not allowed in the name"
-msgstr "No es permeten els següents caràcters al nom"
 
 #: src/slic3r/GUI/SavePresetDialog.cpp:176
 msgid "The following suffix is not allowed in the name"
@@ -10634,12 +10698,13 @@ msgstr ""
 "Nota: Tots els paràmetres d'aquest grup s'han desplaçat a la configuració de "
 "la impressora física (vegeu el registre de canvis).\n"
 "\n"
-"Es crea un nou perfil d'impressora física fent clic a la icona \"engranatge"
-"\" a la dreta del quadre combinat de perfils d'impressora, seleccionant "
-"l'element \"Afegeix impressora física\" al quadre combinat d'impressora. "
-"L'editor de perfil d'impressora física també s'obre en fer clic a la icona "
-"\"engranatge\" a la pestanya Configuració d'impressora. Els perfils de la "
-"impressora física s'emmagatzemen al directori QIDISlicer/physical_printer."
+"Es crea un nou perfil d'impressora física fent clic a la icona "
+"\"engranatge\" a la dreta del quadre combinat de perfils d'impressora, "
+"seleccionant l'element \"Afegeix impressora física\" al quadre combinat "
+"d'impressora. L'editor de perfil d'impressora física també s'obre en fer "
+"clic a la icona \"engranatge\" a la pestanya Configuració d'impressora. Els "
+"perfils de la impressora física s'emmagatzemen al directori QIDISlicer/"
+"physical_printer."
 
 #: src/slic3r/GUI/Tab.cpp:2366
 msgid ""
@@ -11181,7 +11246,7 @@ msgstr "Connexió de les varetes de suport i unions"
 
 #: src/slic3r/GUI/Tab.cpp:5157
 msgid "Branching"
-msgstr ""
+msgstr "Ramificació"
 
 #: src/slic3r/GUI/Tab.cpp:5159
 msgid "Automatic generation"
@@ -12099,6 +12164,8 @@ msgid ""
 "Couldn't locate index file for vendor %1% when performing updates. The "
 "profile will not be installed."
 msgstr ""
+"No s'ha pogut localitzar el fitxer d'índex per als %1% del proveïdor en "
+"realitzar actualitzacions. El perfil no s'instal·larà."
 
 #: src/slic3r/Utils/PresetUpdater.cpp:1344
 #, boost-format
@@ -12106,6 +12173,8 @@ msgid ""
 "Couldn't load index file for vendor %1% when performing updates. The profile "
 "will not be installed. Reason: Corrupted index file %2%."
 msgstr ""
+"No s'ha pogut carregar el fitxer d'índex per al proveïdor %1% en realitzar "
+"actualitzacions. El perfil no s'instal·larà. Motiu: fitxer índex malmès %2%."
 
 #: src/slic3r/Utils/PresetUpdater.cpp:1382
 #, boost-format
@@ -12113,6 +12182,9 @@ msgid ""
 "Couldn't open profile file for vendor %1% when performing updates. The "
 "profile will not be installed. This installation might be corrupted."
 msgstr ""
+"No s'ha pogut obrir el fitxer de perfil per al proveïdor %1% en realitzar "
+"actualitzacions. El perfil no s'instal·larà. Aquesta instal·lació pot estar "
+"corrompuda."
 
 #: src/slic3r/Utils/Http.cpp:73
 msgid ""
@@ -12200,8 +12272,7 @@ msgstr "No s'ha pogut prendre una instantània de configuració."
 msgid ""
 "QIDISlicer has encountered an error while taking a configuration snapshot."
 msgstr ""
-"El QIDISlicer ha trobat un error mentre feia una instantània de "
-"configuració."
+"El QIDISlicer ha trobat un error mentre feia una instantània de configuració."
 
 #: src/slic3r/Config/Snapshot.cpp:599
 msgid "QIDISlicer error"
@@ -12276,19 +12347,19 @@ msgstr ""
 
 #: src/libslic3r/ExtrusionRole.cpp:38 src/libslic3r/ExtrusionRole.cpp:59
 msgid "Perimeter"
-msgstr ""
+msgstr "Perímetre"
 
 #: src/libslic3r/ExtrusionRole.cpp:39 src/libslic3r/ExtrusionRole.cpp:61
 msgid "External perimeter"
-msgstr ""
+msgstr "Perímetre extern"
 
 #: src/libslic3r/ExtrusionRole.cpp:40 src/libslic3r/ExtrusionRole.cpp:63
 msgid "Overhang perimeter"
-msgstr ""
+msgstr "Perímetre de voladís"
 
 #: src/libslic3r/ExtrusionRole.cpp:41 src/libslic3r/ExtrusionRole.cpp:65
 msgid "Internal infill"
-msgstr ""
+msgstr "Farciment intern"
 
 #: src/libslic3r/ExtrusionRole.cpp:42 src/libslic3r/ExtrusionRole.cpp:67
 #: src/libslic3r/PrintConfig.cpp:1452 src/libslic3r/PrintConfig.cpp:2432
@@ -12304,7 +12375,7 @@ msgstr "Farciment sòlid superior"
 
 #: src/libslic3r/ExtrusionRole.cpp:45 src/libslic3r/ExtrusionRole.cpp:73
 msgid "Bridge infill"
-msgstr ""
+msgstr "Farciment del pont"
 
 #: src/libslic3r/ExtrusionRole.cpp:46 src/libslic3r/ExtrusionRole.cpp:75
 #: src/libslic3r/PrintConfig.cpp:1380
@@ -12313,7 +12384,7 @@ msgstr "Farciment del buit"
 
 #: src/libslic3r/ExtrusionRole.cpp:47 src/libslic3r/ExtrusionRole.cpp:77
 msgid "Skirt/Brim"
-msgstr ""
+msgstr "Faldilla/Bassa"
 
 #: src/libslic3r/ExtrusionRole.cpp:49 src/libslic3r/ExtrusionRole.cpp:81
 #: src/libslic3r/PrintConfig.cpp:2781
@@ -12570,7 +12641,7 @@ msgstr ""
 #: src/libslic3r/Print.cpp:525
 #, boost-format
 msgid "The object %1% exceeds the maximum build volume height."
-msgstr ""
+msgstr "L'objecte %1% supera l'alçada màxima de volum de construcció."
 
 #: src/libslic3r/Print.cpp:526
 #, boost-format
@@ -12578,12 +12649,16 @@ msgid ""
 "While the object %1% itself fits the build volume, its last layer exceeds "
 "the maximum build volume height."
 msgstr ""
+"Tot i que l'objecte %1% s'adapta al volum de construcció, la seva última "
+"capa supera l'alçada màxima del volum de construcció."
 
 #: src/libslic3r/Print.cpp:527
 msgid ""
 "You might want to reduce the size of your model or change current print "
 "settings and retry."
 msgstr ""
+"És possible que vulgueu reduir la mida del model o canviar la configuració "
+"d'impressió actual i tornar-ho a provar."
 
 #: src/libslic3r/Print.cpp:543
 msgid "Variable layer height is not supported with Organic supports."
@@ -14804,8 +14879,8 @@ msgid ""
 msgstr ""
 "Emetre M73 P[percentatge imprès] R[temps restant en minuts] en intervals d'1 "
 "minut al codi G per permetre que el firmware mostri el temps restant precís. "
-"A partir d'ara només el firmware QIDI i3 MK3 reconeix M73. També el "
-"firmware i3 MK3 és compatible amb M73 Qxx Sxx per a la manera silenciosa."
+"A partir d'ara només el firmware QIDI i3 MK3 reconeix M73. També el firmware "
+"i3 MK3 és compatible amb M73 Qxx Sxx per a la manera silenciosa."
 
 #: src/libslic3r/PrintConfig.cpp:1693
 msgid "Supports stealth mode"
@@ -15167,11 +15242,13 @@ msgid ""
 "You can use all configuration options as variables inside this template. For "
 "example: [layer_height], [fill_density] etc. You can also use [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 msgstr ""
 "Podeu utilitzar totes les opcions de configuració com a variables dins "
-"d'aquesta mostra. Per exemple, [layer_height], [fill_density] etc. "
-"[input_filename_base]."
+"d'aquesta plantilla. Per exemple: [layer_height], [fill_density], etc. També "
+"podeu utilitzar [marca de temps], [any], [mes], [dia], [hora], [minut], "
+"[segon], [versió], [input_filename], [input_filename_base], "
+"[default_output_extension]."
 
 #: src/libslic3r/PrintConfig.cpp:1992
 msgid "Detect bridging perimeters"
@@ -16410,7 +16487,7 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:2943
 msgid "Branch Diameter with double walls"
-msgstr ""
+msgstr "Diàmetre de branca amb parets dobles"
 
 #. TRN PrintSettings: "Organic supports" > "Branch Diameter"
 #: src/libslic3r/PrintConfig.cpp:2946
@@ -16419,6 +16496,9 @@ msgid ""
 "printed with double walls for stability. Set this value to zero for no "
 "double walls."
 msgstr ""
+"Les branques amb una superfície més gran que l'àrea d'un cercle d'aquest "
+"diàmetre s'imprimiran amb parets dobles per a l'estabilitat. Establiu aquest "
+"valor a zero per a cap paret doble."
 
 #. TRN PrintSettings: #lmFIXME
 #: src/libslic3r/PrintConfig.cpp:2959
@@ -16520,8 +16600,8 @@ msgstr ""
 "utilitzar variables de marcador de posició per a tots els paràmetres de "
 "QIDISlicer, així com {toolchange_z}, {previous_extruder} i {next_extruder}. "
 "Quan s'inclou una ordre de canvi d'eina que canvia a l'extrusor correcte "
-"(com T{next_extruder}), QIDISlicer no emetrà cap altra ordre d'aquest "
-"tipus. Per tant, és possible programar un comportament personalitzat abans i "
+"(com T{next_extruder}), QIDISlicer no emetrà cap altra ordre d'aquest tipus. "
+"Per tant, és possible programar un comportament personalitzat abans i "
 "després del canvi d'eina."
 
 #: src/libslic3r/PrintConfig.cpp:3035
@@ -16801,6 +16881,18 @@ msgid "Maximal distance between supports on sparse infill sections."
 msgstr "Distància màxima entre suports a les seccions amb farciment lleuger."
 
 #: src/libslic3r/PrintConfig.cpp:3239
+msgid "Wipe tower extruder"
+msgstr "Extrusor de la Torre de Neteja"
+
+#: src/libslic3r/PrintConfig.cpp:3241
+msgid ""
+"The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
+"use the one that is available (non-soluble would be preferred)."
+msgstr ""
+"L'extrusora a usar per imprimir el perímetre de la Torre de Neteja. Establiu "
+"0 per utilitzar el que estigui disponible (seria preferible no soluble)."
+
+#: src/libslic3r/PrintConfig.cpp:3260
 msgid "XY Size Compensation"
 msgstr "Compensació de mida XY"
 
@@ -17930,9 +18022,9 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4836
 msgid ""
-"This version of QIDISlicer may not understand configurations produced by "
-"the newest QIDISlicer versions. For example, newer QIDISlicer may extend "
-"the list of supported firmware flavors. One may decide to bail out or to "
+"This version of QIDISlicer may not understand configurations produced by the "
+"newest QIDISlicer versions. For example, newer QIDISlicer may extend the "
+"list of supported firmware flavors. One may decide to bail out or to "
 "substitute an unknown value with a default silently or verbosely."
 msgstr ""
 "Aquesta versió de QIDISlicer pot no entendre les configuracions produïdes "
@@ -17992,8 +18084,8 @@ msgstr "Mode d'instància única"
 #: src/libslic3r/PrintConfig.cpp:4857
 msgid ""
 "If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides the "
+"\"single_instance\" configuration value from application preferences."
 msgstr ""
 "Si s'habilita, els arguments de la línia de comandes s'envien a una "
 "instància existent de la interfície gràfica d'usuari qidiSlicer o s'activa "
@@ -18161,8 +18253,9 @@ msgstr ""
 #: resources/data/hints.ini: [hint:Hiding sidebar]
 msgid ""
 "Hiding sidebar\n"
-"Did you know that you can hide the right sidebar using the shortcut <b>Shift"
-"+Tab</b>? You can also enable the icon for this from the<a>Preferences</a>."
+"Did you know that you can hide the right sidebar using the shortcut "
+"<b>Shift+Tab</b>? You can also enable the icon for this from "
+"the<a>Preferences</a>."
 msgstr ""
 "Amagar la barra lateral\n"
 "Sabies que pots amagar la barra lateral dreta amb la drecera <b>Majús+Tab</"
@@ -18279,8 +18372,8 @@ msgid ""
 msgstr ""
 "Funcionalitat de cerca\n"
 "Sabíeu que podeu utilitzar l'eina <a>Cerca</a> per trobar ràpidament un "
-"paràmetre específic de QIDISlicer? O utilitzar la coneguda drecera <b>Ctrl"
-"+F</b>."
+"paràmetre específic de QIDISlicer? O utilitzar la coneguda drecera "
+"<b>Ctrl+F</b>."
 
 #: resources/data/hints.ini: [hint:Box selection]
 msgid ""
@@ -22718,10 +22811,6 @@ msgstr "Postal japonesa, 100 x 148 mm"
 #: ../src/common/paper.cpp:175
 msgid "Japanese Postcard Rotated 148 x 100 mm"
 msgstr "Postal japonesa girada, 148 x 100 mm"
-
-#: ../src/common/stockitem.cpp:169
-msgid "Jump to"
-msgstr "Vés a"
 
 #: ../src/common/stockitem.cpp:171
 msgid "Justified"

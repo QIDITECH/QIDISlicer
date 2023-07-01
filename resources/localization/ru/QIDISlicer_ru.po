@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: QIDISlicer 2.6.0-beta1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-26 13:11+0200\n"
-"PO-Revision-Date: 2023-05-15 20:43+0700\n"
+"PO-Revision-Date: 2023-07-01 15:18+0800\n"
 "Last-Translator: Andylg <andylg@yandex.ru>\n"
 "Language-Team: \n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
-"X-Generator: Poedit 3.3\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: src/slic3r/GUI/AboutDialog.cpp:46 src/slic3r/GUI/AboutDialog.cpp:304
 msgid "Portions copyright"
@@ -1431,8 +1431,8 @@ msgid ""
 "file. QIDISlicer desktop file was probably created successfully."
 msgstr ""
 "Не удалось выполнить интеграцию с рабочим столом - не удалось установить "
-"ссылку на Gcodeviewer на рабочем столе. Ссылка на QIDISlicer, вероятно, "
-"была успешно создана на рабочем столе."
+"ссылку на Gcodeviewer на рабочем столе. Ссылка на QIDISlicer, вероятно, была "
+"успешно создана на рабочем столе."
 
 #: src/slic3r/GUI/DesktopIntegrationDialog.cpp:472
 msgid ""
@@ -2843,7 +2843,24 @@ msgstr ""
 "Обнаружена модель вне области печати. \n"
 "Решите текущую проблему, чтобы продолжить нарезку."
 
-#: src/slic3r/GUI/GLCanvas3D.cpp:7539
+#. TRN %3% is name of Object1, %4% is name of Object2
+#: src/slic3r/GUI/GLCanvas3D.cpp:7496
+#, boost-format
+msgid ""
+"Conflicts in G-code paths have been detected at layer %1%, z=%2$.2f mm. "
+"Please reposition the conflicting objects (%3% <-> %4%) further apart."
+msgstr ""
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7529
+#: src/slic3r/GUI/NotificationManager.cpp:2101
+#: src/slic3r/GUI/NotificationManager.cpp:2108
+#: src/slic3r/GUI/NotificationManager.cpp:2124
+#: src/slic3r/GUI/NotificationManager.cpp:2130
+#: src/slic3r/GUI/NotificationManager.cpp:2201
+msgid "ERROR:"
+msgstr "ОШИБКА:"
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7606
 msgid "Selection-Add from rectangle"
 msgstr "Выбор\\Добавление из прямоугольника"
 
@@ -4598,7 +4615,13 @@ msgstr "Выйти и перенести свои данные"
 msgid "Start the application"
 msgstr "Запустить приложение"
 
-#: src/slic3r/GUI/GUI_App.cpp:736
+#. TRN %s = type of file
+#: src/slic3r/GUI/GUI_App.cpp:609
+#, c-format, boost-format
+msgid "%s files"
+msgstr ""
+
+#: src/slic3r/GUI/GUI_App.cpp:772
 #, c-format, boost-format
 msgid ""
 "%s has encountered an error. It was likely caused by running out of memory. "
@@ -4619,9 +4642,9 @@ msgstr "Критическая ошибка"
 
 #: src/slic3r/GUI/GUI_App.cpp:743
 msgid ""
-"QIDISlicer has encountered a localization error. Please report to "
-"QIDISlicer team, what language was active and in which scenario this issue "
-"happened. Thank you.\n"
+"QIDISlicer has encountered a localization error. Please report to QIDISlicer "
+"team, what language was active and in which scenario this issue happened. "
+"Thank you.\n"
 "\n"
 "The application will now terminate."
 msgstr ""
@@ -7953,14 +7976,6 @@ msgstr "Экспорт в G-код."
 msgid "Export."
 msgstr "Экспорт."
 
-#: src/slic3r/GUI/NotificationManager.cpp:2101
-#: src/slic3r/GUI/NotificationManager.cpp:2108
-#: src/slic3r/GUI/NotificationManager.cpp:2124
-#: src/slic3r/GUI/NotificationManager.cpp:2130
-#: src/slic3r/GUI/NotificationManager.cpp:2201
-msgid "ERROR:"
-msgstr "ОШИБКА:"
-
 #: src/slic3r/GUI/NotificationManager.cpp:2113
 #: src/slic3r/GUI/NotificationManager.cpp:2140
 #: src/slic3r/GUI/NotificationManager.cpp:2148
@@ -8048,8 +8063,8 @@ msgstr "Возможно, вам потребуется обновить дра�
 
 #: src/slic3r/GUI/OpenGLManager.cpp:390
 msgid ""
-"As a workaround, you may run QIDISlicer with a software rendered 3D "
-"graphics by running qidi-slicer.exe with the --sw-renderer parameter."
+"As a workaround, you may run QIDISlicer with a software rendered 3D graphics "
+"by running qidi-slicer.exe with the --sw-renderer parameter."
 msgstr ""
 "В качестве обходного пути вы можете запустить QIDISlicer с программной "
 "рендерингом 3D-графики, запустив qidi-sler.exe с параметром --sw-renderer."
@@ -8158,7 +8173,16 @@ msgstr ""
 "Чтобы использовать пользовательский файл CA, импортируйте его в хранилище "
 "сертификатов/Keychain."
 
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:705
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:667
+msgid "Unexpected character"
+msgstr ""
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:668
+#: src/slic3r/GUI/SavePresetDialog.cpp:169
+msgid "The following characters are not allowed in the name"
+msgstr "В имени не допустимы следующие символы"
+
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:723
 msgid "You have to enter a printer name."
 msgstr "Введите имя принтера."
 
@@ -8431,8 +8455,7 @@ msgid_plural ""
 "The presets below were temporarily installed on the active instance of "
 "QIDISlicer"
 msgstr[0] ""
-"Приведённый ниже профиль был временно установлен на активной копии "
-"QIDISlicer"
+"Приведённый ниже профиль был временно установлен на активной копии QIDISlicer"
 msgstr[1] ""
 "Приведённые ниже профили были временно установлены на активной копии "
 "QIDISlicer"
@@ -8510,8 +8533,8 @@ msgid_plural ""
 "the dimensions of these objects?"
 msgstr[0] ""
 "Похоже, что размеры модели из файла %s заданы в метрах.\n"
-"Внутренней единицей измерения QIDISlicer являются дюймы. Пересчитать "
-"размеры модели?"
+"Внутренней единицей измерения QIDISlicer являются дюймы. Пересчитать размеры "
+"модели?"
 msgstr[1] ""
 "Похоже, что размеры моделей из файла %s заданы в дюймы.\n"
 "Внутренней единицей измерения QIDISlicer являются миллиметры. Пересчитать "
@@ -8705,7 +8728,25 @@ msgstr "Ошибка во время перезагрузки"
 msgid "Reload all from disk"
 msgstr "Перезагрузить всё с диска"
 
-#: src/slic3r/GUI/Plater.cpp:4211
+#: src/slic3r/GUI/Plater.cpp:4103 src/slic3r/GUI/Plater.cpp:4109
+msgid "You are using template filament preset."
+msgid_plural "You are using template filament presets."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: src/slic3r/GUI/Plater.cpp:4104 src/slic3r/GUI/Plater.cpp:4110
+msgid ""
+"Please note that template presets are not customized for specific printer "
+"and should only be used as a starting point for creating your own user "
+"presets."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:4106
+msgid "More info at"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:4247
 msgid "There are active warnings concerning sliced models:"
 msgstr "Имеются активные предупреждения о нарезанных моделях:"
 
@@ -8954,7 +8995,11 @@ msgstr ""
 msgid "Save project"
 msgstr "Сохранение проекта"
 
-#: src/slic3r/GUI/Plater.cpp:6826
+#: src/slic3r/GUI/Plater.cpp:6681
+msgid "Unable to save file"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6875
 msgid "Is the printer ready? Is the print sheet in place, empty and clean?"
 msgstr "Готов ли принтер? Лист для печати на месте, пустой и чистый?"
 
@@ -9059,10 +9104,10 @@ msgid ""
 "When a new preset version becomes available it is offered at application "
 "startup."
 msgstr ""
-"Если включено, то QIDISlicer будет загружать обновления встроенных "
-"системных профилей в фоновом режиме. Эти обновления загружаются в отдельную "
-"временную папку. Когда новые профили становятся доступны, они предлагаются "
-"при запуске приложения."
+"Если включено, то QIDISlicer будет загружать обновления встроенных системных "
+"профилей в фоновом режиме. Эти обновления загружаются в отдельную временную "
+"папку. Когда новые профили становятся доступны, они предлагаются при запуске "
+"приложения."
 
 #: src/slic3r/GUI/Preferences.cpp:294
 msgid "Suppress \" - default - \" presets"
@@ -9582,7 +9627,11 @@ msgstr "Изменить профиль"
 msgid "Change extruder color"
 msgstr "Изменить цвет экструдера"
 
-#: src/slic3r/GUI/PresetComboBoxes.cpp:767 src/slic3r/GUI/Tab.cpp:3503
+#: src/slic3r/GUI/PresetComboBoxes.cpp:787
+msgid "Show/Hide template presets"
+msgstr ""
+
+#: src/slic3r/GUI/PresetComboBoxes.cpp:795 src/slic3r/GUI/Tab.cpp:3520
 msgid "Edit physical printer"
 msgstr "Изменить физический профиль"
 
@@ -9945,10 +9994,6 @@ msgstr "Сохранить настройки марериала как"
 #: src/slic3r/GUI/SavePresetDialog.cpp:95
 msgid "Save printer settings as"
 msgstr "Сохранить настройки принтера как"
-
-#: src/slic3r/GUI/SavePresetDialog.cpp:169
-msgid "The following characters are not allowed in the name"
-msgstr "В имени не допустимы следующие символы"
 
 #: src/slic3r/GUI/SavePresetDialog.cpp:176
 msgid "The following suffix is not allowed in the name"
@@ -10639,11 +10684,12 @@ msgstr ""
 "Примечание: все параметры из этой группы перенесены в настройки физического "
 "принтера (см. список изменений).\n"
 "\n"
-"Новый профиль физического принтера создаётся нажатием по значку \"шестеренка"
-"\" справа от поля со списком профилей принтеров, выбрав «Добавить физический "
-"принтер». Редактор профиля физического принтера открывается также при "
-"нажатии на значок шестеренки на вкладке настройки принтера. Профили "
-"физического принтера сохраняются в папке QIDISlicer/physical_printer."
+"Новый профиль физического принтера создаётся нажатием по значку "
+"\"шестеренка\" справа от поля со списком профилей принтеров, выбрав "
+"«Добавить физический принтер». Редактор профиля физического принтера "
+"открывается также при нажатии на значок шестеренки на вкладке настройки "
+"принтера. Профили физического принтера сохраняются в папке QIDISlicer/"
+"physical_printer."
 
 #: src/slic3r/GUI/Tab.cpp:2366
 msgid ""
@@ -13204,8 +13250,8 @@ msgid ""
 msgstr ""
 "Этот пользовательский код вставляется при каждой смене слоя, непосредственно "
 "перед перемещения оси Z. Обратите внимание, что вы можете использовать "
-"шаблонные переменные для всех параметров QIDISlicer, в том числе "
-"[layer_num] и [layer_z]."
+"шаблонные переменные для всех параметров QIDISlicer, в том числе [layer_num] "
+"и [layer_z]."
 
 #: src/libslic3r/PrintConfig.cpp:453
 msgid "Between objects G-code"
@@ -14371,10 +14417,11 @@ msgid ""
 "maximum allowed speed at layer \"disable_fan_first_layers\" + 1."
 msgstr ""
 "Скорость вентилятора будет линейно увеличиваться от нуля на слое "
-"\"disable_fan_first_layers\" до максимальной на слое \"full_fan_speed_layer"
-"\". \"full_fan_speed_layer\" будет игнорироваться, если она ниже, чем "
-"\"disable_fan_first_layers\", и в этом случае вентилятор будет работать с "
-"максимально допустимой скоростью на слое \"disable_fan_first_layers\" +1."
+"\"disable_fan_first_layers\" до максимальной на слое "
+"\"full_fan_speed_layer\". \"full_fan_speed_layer\" будет игнорироваться, "
+"если она ниже, чем \"disable_fan_first_layers\", и в этом случае вентилятор "
+"будет работать с максимально допустимой скоростью на слое "
+"\"disable_fan_first_layers\" +1."
 
 #: src/libslic3r/PrintConfig.cpp:1343
 msgid "Fuzzy skin type."
@@ -15167,13 +15214,13 @@ msgid ""
 "You can use all configuration options as variables inside this template. For "
 "example: [layer_height], [fill_density] etc. You can also use [timestamp], "
 "[year], [month], [day], [hour], [minute], [second], [version], "
-"[input_filename], [input_filename_base]."
+"[input_filename], [input_filename_base], [default_output_extension]."
 msgstr ""
 "Вы можете использовать все параметры в качестве переменных внутри этого "
 "шаблона. Они будят добавлены к имени файла. Например: [layer_height], "
 "[fill_density]. Так же вы можете использовать [timestamp], [year], [month], "
 "[day], [hour], [minute], [second], [version], [input_filename], "
-"[input_filename_base]."
+"[input_filename_base], [default_output_extension]."
 
 #: src/libslic3r/PrintConfig.cpp:1992
 msgid "Detect bridging perimeters"
@@ -15280,8 +15327,8 @@ msgstr ""
 "Количество слоёв контура модели (или количество вертикальных слоёв стенки "
 "модели). Чем меньше число, тем меньше толщина стенки модели, а значит, "
 "модель будет более хрупкая. Обратите внимание, если включена опция "
-"«Дополнительные периметры при необходимости», QIDISlicer может "
-"автоматически увеличить это значение, если обнаружит наклонные поверхности."
+"«Дополнительные периметры при необходимости», QIDISlicer может автоматически "
+"увеличить это значение, если обнаружит наклонные поверхности."
 
 #: src/libslic3r/PrintConfig.cpp:2073
 msgid "(minimum)"
@@ -15860,11 +15907,11 @@ msgid ""
 "When disabled, QIDISlicer will NOT emit commands to heat up extruder and "
 "bed, leaving both to Custom Start G-Code."
 msgstr ""
-"Если включено, QIDISlicer будет проверять, присутствуют ли в вашем "
-"стартовом g-коде температурные команды M104 или M190. Если эти команды "
-"присутствуют, то температуры не будут вставляться автоматически, и вы "
-"сможете настроить порядок команд нагрева и другие пользовательские действия. "
-"Обратите внимание, что вы можете использовать шаблонные переменные для всех "
+"Если включено, QIDISlicer будет проверять, присутствуют ли в вашем стартовом "
+"g-коде температурные команды M104 или M190. Если эти команды присутствуют, "
+"то температуры не будут вставляться автоматически, и вы сможете настроить "
+"порядок команд нагрева и другие пользовательские действия. Обратите "
+"внимание, что вы можете использовать шаблонные переменные для всех "
 "параметров QIDISlicer, поэтому вы можете вставить команду \"M109 "
 "S[first_layer_temperature]\" где угодно. \n"
 "Если в вашем стартовом G-коде отсутствует команды M104 или M190, QIDISlicer "
@@ -16808,6 +16855,16 @@ msgstr ""
 "Максимальное расстояние между опорами на разряженных участках заполнения."
 
 #: src/libslic3r/PrintConfig.cpp:3239
+msgid "Wipe tower extruder"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:3241
+msgid ""
+"The extruder to use when printing perimeter of the wipe tower. Set to 0 to "
+"use the one that is available (non-soluble would be preferred)."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:3260
 msgid "XY Size Compensation"
 msgstr "Коррекция горизонтальных размеров модели"
 
@@ -17951,9 +18008,9 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4836
 msgid ""
-"This version of QIDISlicer may not understand configurations produced by "
-"the newest QIDISlicer versions. For example, newer QIDISlicer may extend "
-"the list of supported firmware flavors. One may decide to bail out or to "
+"This version of QIDISlicer may not understand configurations produced by the "
+"newest QIDISlicer versions. For example, newer QIDISlicer may extend the "
+"list of supported firmware flavors. One may decide to bail out or to "
 "substitute an unknown value with a default silently or verbosely."
 msgstr ""
 "Эта версия QIDISlicer может не понимать конфигурации, созданные новейшими "
@@ -18013,8 +18070,8 @@ msgstr "Одни экземпляр программы"
 #: src/libslic3r/PrintConfig.cpp:4857
 msgid ""
 "If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides the "
+"\"single_instance\" configuration value from application preferences."
 msgstr ""
 "Если включено, аргументы командной строки посылаются в существующий "
 "экземпляр GUI QIDISlicer, либо активируется существующее окно QIDISlicer. "
@@ -18175,15 +18232,16 @@ msgid ""
 msgstr ""
 "Перезагрузить с диска\n"
 "Знаете ли вы, что если вы создали новую версию своей модели, вы можете "
-"просто перезагрузить ее в QIDISlicer? Щелкните правой кнопкой мыши на "
-"модели в окне 3D просмотра и выберите Перезагрузить с диска. Подробнее "
-"читайте в документации."
+"просто перезагрузить ее в QIDISlicer? Щелкните правой кнопкой мыши на модели "
+"в окне 3D просмотра и выберите Перезагрузить с диска. Подробнее читайте в "
+"документации."
 
 #: resources/data/hints.ini: [hint:Hiding sidebar]
 msgid ""
 "Hiding sidebar\n"
-"Did you know that you can hide the right sidebar using the shortcut <b>Shift"
-"+Tab</b>? You can also enable the icon for this from the<a>Preferences</a>."
+"Did you know that you can hide the right sidebar using the shortcut "
+"<b>Shift+Tab</b>? You can also enable the icon for this from "
+"the<a>Preferences</a>."
 msgstr ""
 "Свернуть боковую панель\n"
 "Знаете ли вы, что правую боковую панель можно скрыть с помощью сочетания "
