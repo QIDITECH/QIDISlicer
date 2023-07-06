@@ -1,85 +1,144 @@
-*
-{
-	padding:0px;
+* {
+	padding: 0px;
 	border: 0px;
 	margin: 0px;
-    font-family: "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-sans;
+	font-family: "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-sans;
 	border-color: #4479FB;
 }
 
 html, body {
 	height: 100%;
 	width: 100%;
-    margin: 0px;
-    padding: 0px;
+	margin: 0px;
+	padding: 0px;
 	line-height: 20px;
-    font-size: 16px;	
-	background-color:#F4F7FE;
+	font-size: 16px;
+	background-color: #F4F7FE;
 }
 
-.ZScrol::-webkit-scrollbar {/*滚动条整体样式*/
-    width: 12px;     /*高宽分别对应横竖滚动条的尺寸*/
-    height: 1px;
-	padding: 2px;
-}
-
-.ZScrol::-webkit-scrollbar:hover {
-    color: #4479FB;
-}
-
-.ZScrol::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
-    border-radius: 6px;
-    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-	box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    background-color: #AAAAAA;
-}
-
-.ZScrol::-webkit-scrollbar-track {/*滚动条里面轨道*/
-        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-	    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        border-radius: 10px;
-        background: #EDEDED;
-}
-
-
-.RedFont
-{
-	font-size:12px;
-	color: #F07E4A;		
-}
-
-.LinkBtn
-{
-	font-size:12px;
-	color: #1200FF;	
+.LinkBtn {
+	font-size: 12px;
+	color: #1200FF;
 	cursor: pointer;
 }
 
-.LinkBtn:hover
-{
-	text-decoration:underline;
+.LinkBtn:hover {
+	text-decoration: underline;
 }
 
 /*------------------*/
-body
-{
-	display:flex;
+* {
+	/* 页面初始化 清除元素原有的内外边距 */
+	padding: 0;
+	margin: 0;
+	/* 盒子模型 */
+	box-sizing: border-box;
+}
+body {
+	display: flex;
 	justify-content: flex-start;
+	align-items: center;
+	/* 让页面占浏览器可视区域的高度 */
+	height: 100vh;
 }
 
-#LeftBoard
-{
+#LeftBoard {
 	/*border-right-width: 1px;
 	border-right-style: solid;*/
-	background:#414345;
-	width: 248px;
+	background: #414345;
+	width:360px;
+	min-width: 280px;
 	height: 100%;
 }
 
-#GuideArea
-{
-	border-bottom-width:1px;
-	border-bottom-style:inset;
+li {
+	/* 清除li元素前面的项目符号 */
+	list-style: none;
+}
+
+.accordion {
+	/* 溢出隐藏 */
+	overflow: hidden;
+	/* 圆角属性 */
+	border-radius: 0 8px 8px 0;
+	/* 盒子阴影 */
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+.accordion > li {
+	width: 100%;
+}
+.accordion > li input {
+	/* 将单选按钮隐藏起来 */
+	display: none;
+}
+.accordion > li label {
+	/* 相对定位 */
+	position: relative;
+	/* label元素是行内元素 需要将其转为块级元素 才能设置宽度和高度 */
+	display: block;
+	width: 100%;
+	padding: 20px 50px;
+	color: #fff;
+	background-color: #4479FB;
+	/* 鼠标移入变小手 */
+	cursor: pointer;
+}
+.accordion > li label i {
+	/* 绝对定位 */
+	position: absolute;
+	/* calc方法自动计算数值 让字体图标垂直居中 */
+	top: calc(50% - 12px);
+	left: 20px;
+	font-size: 24px;
+	/* 加过渡 */
+	transition: all 0.5s;
+}
+.accordion > li label:hover {
+	border-left-color: #F1F1FF;
+	border-left-width: 4px;
+	border-style: solid;
+}
+/* :not()选择器选取的是除括号里的元素以外的其它元素 :first-child选择器是第一个元素 */
+.accordion > li:not(:first-child) label {
+	border-top: 1px solid #38814d;
+}
+.accordion > li ol {
+	width: 100%;
+	background-color: #333;
+}
+.accordion > li ol li {
+	position: relative;
+	width: 100%;
+	height: 0;
+	line-height: 50px;
+	padding-left: 20px;
+	cursor: pointer;
+	transition: all 0.5s;
+}
+.accordion > li ol li::before {
+	content: "";
+	position: absolute;
+	top: 3px;
+	left: 0;
+	width: 4px;
+	height: 44px;
+	background-color: #4479FB;
+	transform: scaleY(0);
+	transition: all 0.5s;
+}
+.accordion > li ol li:hover::before {
+	transform: scaleY(1);
+}
+.accordion > li input:checked ~ label i {
+	transform: rotate(90deg);
+}
+.accordion > li input:checked ~ ol li {
+	height: 50px;
+}
+
+#GuideArea {
+	/*border-bottom-width:1px;
+	border-bottom-style:inset;*/
 	height: 100px;
 	display: flex;
 	flex-direction: column;
@@ -87,24 +146,23 @@ body
 	justify-content: center;
 	flex-wrap: nowrap;
 	position: relative;
-	width:248px;
+	width: 100%;
 }
 
 
-#Guide1
-{
-	height:36px;
+#Guide1 {
+	height: 36px;
 	line-height: 36px;
 	display: flex;
 	justify-content: center;
 	user-select: none;
 }
 
-#GuideBtn
-{
+#GuideBtn {
 	cursor: pointer;
 	color: #4479FB;
 }
+
 .TbItem {
 	font-size: 24px;
 	display: flex;
@@ -114,75 +172,76 @@ body
 }
 
 .TbItem:hover {
-	font-size:25px;
+	font-size: 25px;
 }
 
 .TbItemSelected {
-
 }
 
-#Icon1
-{
-	margin-right: 10px;	
+#Icon1 {
+	margin-right: 10px;
 }
 
-#QDIcon
-{
-	height:36px;
+#QDIcon {
+	height: 36px;
 }
 
 /*------------------*/
-#BtnArea
-{
-	
+#BtnArea {
+	padding: 0;
+	margin: 0;
 }
 
-
-.BtnItem
-{
-	border-bottom-width:1px;
-	border-bottom-style:inset;
-    padding-left:30px;	
-	height:50px;
+.BtnItem {
+	padding-left: 30px;
+	height: 50px;
 	line-height: 50px;
+	text-indent: 10px;
 	display: flex;
-	justify-content:flex-start;
+	justify-content: flex-start;
 	cursor: pointer;
-	color:#ffffff;
+	color: white;
+	transition: all 0.5s;
+}
+.BtnItem:hover {
+	color: #4479FB
 }
 
-.BtnItem:hover
-{
-	color:#4479FB
-}
-
-.BtnItemSelected
-{
+.BtnItemSelected {
 	background-color: #CED1D9;
-	color:#4479FB
+	color: #4479FB
 }
 
-.BtnIcon
-{
-	margin-right:6px;
+.BtnIcon {
+	margin-left: 15px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 }
 
-.LeftIcon
-{
-	width:20px;
+.BookIcon {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.MainIcon {
+	width: 20px;
 	height: 20px;
 }
 
+.LeftIcon {
+	width: 30px;
+	height: 30px;
+	padding-left: 10px;
+}
+
 /*--------------------*/
-#RightBoard
-{
+#RightBoard {
 	width: 100%;
 	height: 100%;
 	min-width: 835px;
-	overflow-y:auto;
+	overflow-y: auto;
 }
 
 #ThumbBoard
@@ -312,19 +371,74 @@ body
 	}
 }
 
-#HotspotWEB
-{
-	width:100%;
-	height: 420px;
-}
-/*------Gif------*/
-#GifBigBoard
-{
-	display:none;
+#FilaBigBoard {
+	display: none;
 }
 
-#GifBoard
-{
+#FilaBoard {
+	display: flex;
+	flex-wrap: wrap;
+	text-align: center;
+	justify-content: center;
+	height: 100vh;
+	overflow-y: auto;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+	box-sizing: border-box;
+}
+
+.main {
+	margin: 50px 50px;
+	width: 100%;
+	overflow: auto;
+}
+
+td, th {
+	/* 设置td,th宽度高度 */
+	border: 1px solid gray;
+	font-size: 12px;
+	width: 100px;
+	height: 50px;
+}
+
+th {
+	background-color: lightblue;
+}
+
+table {
+	table-layout: fixed;
+	width: 200px; /* 固定宽度 */
+}
+
+td:first-child, th:first-child {
+	position: sticky;
+	left: 0; /* 首行永远固定在左侧 */
+	z-index: 1;
+	background-color: lightpink;
+}
+
+td:not(:first-child), th:not(:first-child) {
+	padding
+}
+
+thead tr th {
+	position: sticky;
+	top: 0; /* 列首永远固定在头部  */
+}
+
+th:first-child {
+	z-index: 2;
+	background-color: lightblue;
+}
+
+/*------Gif------*/
+#GifBigBoard {
+	display: none;
+}
+
+#GifBoard {
 	display: flex;
 	flex-wrap: wrap;
 	align-content: flex-start;
@@ -340,38 +454,32 @@ body
 }
 
 @media screen {
-.GifBlock
-{
-	margin: 0px 0px 0px 0px;
-	cursor: pointer;
-}
-}
-
-.UG_PRINTER
-{
-	text-align:center;
-	width:100%;
+	.GifBlock {
+		margin: 0px 0px 0px 0px;
+		cursor: pointer;
+	}
 }
 
-.UG_PRINTER img
-{
-	width:15%;
+.UG_PRINTER {
+	text-align: center;
+	width: 100%;
 }
 
-.UG_IMG
-{
-	width: 100%;	
+.UG_PRINTER img {
+	width: 15%;
 }
 
-.UG_IMG img
-{
+.UG_IMG {
+	width: 100%;
+}
+
+.UG_IMG img {
 	width: 100%;
 	border-radius: 5px 5px 5px 5px;
 }
 
-.UG_TITLE
-{
-	text-align:center;
+.UG_TITLE {
+	text-align: center;
 	font-size: 18px;
 	font-weight: 700;
 	line-height: 25px;
@@ -381,24 +489,21 @@ body
 	color: #4479FB;
 }
 
-.UG_DESC
-{
+.UG_DESC {
 	font-size: 14px;
 	width: 100%;
 	line-height: 20px;
 }
 
-.UG_CDESC
-{
-	text-align:center;
+.UG_CDESC {
+	text-align: center;
 	font-size: 14px;
 	width: 100%;
 	line-height: 20px;
 }
 
-.UG_B_TITLE
-{
-	text-align:center;
+.UG_B_TITLE {
+	text-align: center;
 	font-size: 36px;
 	font-weight: 700;
 	line-height: 25px;
@@ -408,8 +513,7 @@ body
 	color: #4479FB;
 }
 
-.UG_B_DESC
-{
+.UG_B_DESC {
 	font-size: 16px;
 	width: 100%;
 	line-height: 20px;
