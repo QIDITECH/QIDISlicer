@@ -48,6 +48,18 @@
 						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
 						<div class="trans" tid="t4">UserGuide</div>
 					</li>
+					<li menu="addtext" class="BtnItem" onClick="GotoMenu('addtext')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t11">UserGuide</div>
+					</li>
+					<li menu="cutmodel" class="BtnItem" onClick="GotoMenu('cutmodel')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t12">UserGuide</div>
+					</li>
+					<li menu="downloadm" class="BtnItem" onClick="GotoMenu('downloadm')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t13">UserGuide</div>
+					</li>
 				</ol>
 			</li>
 			<li>
@@ -100,13 +112,25 @@
 				<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
 				<div class="UG_TITLE trans TextS1" tid="t3">AddSupport</div>
 			</div>
+			<div class="GuideBlock" onClick="GotoMenu('wifisend');">
+				<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t5">WifiSend</div>
+			</div>
 			<div class="GuideBlock" onClick="GotoMenu('connectdevice');">
 				<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
 				<div class="UG_TITLE trans TextS1" tid="t4">ConnectDevice</div>
 			</div>
-			<div class="GuideBlock" onClick="GotoMenu('wifisend');">
-				<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
-				<div class="UG_TITLE trans TextS1" tid="t5">WifiSend</div>
+			<div class="GuideBlock" onClick="GotoMenu('addtext');">
+				<div class="UG_IMG"><img src="img/AddText.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t11">AddText</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('cutmodel');">
+				<div class="UG_IMG"><img src="img/CutModel.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t12">CutModel</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('downloadm');">
+				<div class="UG_IMG"><img src="img/DownloadModel.png" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t13">AddText</div>
 			</div>
 			<div class="GuideBlock" onClick="GotoMenu('issuereport');">
 				<div class="UG_IMG"><img src="img/IssueReport.png" /></div>
@@ -146,16 +170,72 @@
 			</div>
 		</div>
 
+		<div id="GifBigBoard" board="addtext">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/AddText.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="cutmodel">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/CutModel.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="downloadm">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_B_TITLE trans TextS1" tid="t13">download</div>
+					<div class="UG_CDESC trans" tid="ls1"></div>
+				</div>
+			</div>
+			<div id="IssueBoard">
+				<div class="halfBlock">
+					<div class="UG_DESC">URL:https://www.thingiverse.com/</div>
+					<div class="UG_IMG"><img src="img/thingiverse.png" /></div>
+				</div>
+				<div class="halfBlock">
+					<div class="UG_DESC">URL:https://www.printables.com/model</div>
+					<div class="UG_IMG"><img src="img/printables.png" /></div>
+				</div>
+			</div>
+		</div>
+		<!--<div id="GifBigBoard" board="downloadm">
+		<div id="GifBoard">
+			<div class="GifBlock">
+				<div class="UG_B_TITLE trans" tid="t13">downloadm</div>
+			</div>
+			<div id="IssueBoard">
+				<div class="halfBlock">
+					<div class="UG_CDESC">URL:https://www.thingiverse.com/</div>
+					<div class="UG_IMG"><img src="img/thingiverse.png" /></div>
+					<div class="UG_CDESC">URL:https://www.printables.com/model</div>
+					<div class="UG_IMG"><img src="img/printables.png" /></div>
+				</div>
+			</div>
+		</div>
+	</div>-->
+
 		<div id="GifBigBoard" board="infomax3">
-			<div class="UG_IMG"><img src="img/info1.png" /></div>
+			<div id="GifBoard">
+				<div class="UG_IMG"><img src="img/info1.png" /></div>
+			</div>
 		</div>
 
 		<div id="GifBigBoard" board="infoplus3">
-			<div class="UG_IMG"><img src="img/info2.png" /></div>
+			<div id="GifBoard">
+				<div class="UG_IMG"><img src="img/info2.png" /></div>
+			</div>
 		</div>
 
 		<div id="GifBigBoard" board="infosmart3">
-			<div class="UG_IMG"><img src="img/info3.png" /></div>
+			<div id="GifBoard">
+				<div class="UG_IMG"><img src="img/info3.png" /></div>
+			</div>
 		</div>
 
 		<div id="FilaBigBoard" board="infof1">
@@ -334,11 +414,9 @@
 		<div id="GifBigBoard" board="issuereport">
 			<div id="GifBoard">
 				<div class="GifBlock">
-					<div class="UG_B_TITLE trans TextS1" tid="wk1">Issue Report</div>
-					<div class="UG_B_DESC trans" tid="wk2">
-						If you have any questions about the Printer or QIDISlicer, please contact us via the appropriate E-mail address or Skype.<br />
-						Note: please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information.
-					</div>
+					<div class="UG_B_TITLE trans TextS1" tid="t6"></div>
+					<div class="trans" tid="ls2"></div>
+					<div class="UG_B_DESC trans" tid="ls3"></div>
 				</div>
 			</div>
 			<div id="IssueBoard">

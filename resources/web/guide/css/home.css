@@ -322,6 +322,15 @@ li {
 	left: 0px;
 }
 
+@media screen{
+	.halfBlock {
+		text-align: center;
+		justify-content: center;
+		width: calc(50% - 20px);
+		margin: 0px 10px;
+	}
+}
+
 @media screen and (max-width: 1100px) {
 	.PrintBlock {
 		text-align:center;
@@ -404,7 +413,8 @@ td, th {
 }
 
 th {
-	background-color: lightblue;
+	background-color: #4F6EBC;
+	color: #fff;
 }
 
 table {
@@ -416,11 +426,11 @@ td:first-child, th:first-child {
 	position: sticky;
 	left: 0; /* 首行永远固定在左侧 */
 	z-index: 1;
-	background-color: lightpink;
+	background: #CDDBFB;
 }
 
-td:not(:first-child), th:not(:first-child) {
-	padding
+th:nth-child(odd) { /*奇表头*/
+	background-color: #6993FB;
 }
 
 thead tr th {
@@ -428,9 +438,12 @@ thead tr th {
 	top: 0; /* 列首永远固定在头部  */
 }
 
+tbody tr:nth-child(odd) {
+	background: #B7B9BF;
+}
+
 th:first-child {
 	z-index: 2;
-	background-color: lightblue;
 }
 
 /*------Gif------*/
@@ -470,6 +483,8 @@ th:first-child {
 }
 
 .UG_IMG {
+	justify-content:center;
+	text-align:center;
 	width: 100%;
 }
 
@@ -496,8 +511,10 @@ th:first-child {
 }
 
 .UG_CDESC {
+	margin-top:35px;
+	margin-bottom:5px;
 	text-align: center;
-	font-size: 14px;
+	font-size: 24px;
 	width: 100%;
 	line-height: 20px;
 }
@@ -509,7 +526,7 @@ th:first-child {
 	line-height: 25px;
 	width: 100%;
 	margin-top: 20px;
-	margin-bottom: 4px;
+	margin-bottom: 25px;
 	color: #4479FB;
 }
 
@@ -517,6 +534,5 @@ th:first-child {
 	font-size: 16px;
 	width: 100%;
 	line-height: 20px;
-	margin-top: 30px;
 	margin-bottom: 50px;
 }

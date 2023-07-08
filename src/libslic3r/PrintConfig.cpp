@@ -888,9 +888,8 @@ void PrintConfigDef::init_fff_params()
     def = this->add("extra_perimeters", coBool);
     def->label = L("Extra perimeters if needed");
     def->category = L("Layers and Perimeters");
-    def->tooltip = L("Add more perimeters when needed for avoiding gaps in sloping walls. "
-                   "Slic3r keeps adding perimeters, until more than 70% of the loop immediately above "
-                   "is supported.");
+    def->tooltip = L("Add more perimeters when needed for avoiding gaps in sloping walls. Slic3r keeps adding "
+                   "perimeters, until more than 70% of the loop immediately above is supported.");
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBool(true));
 

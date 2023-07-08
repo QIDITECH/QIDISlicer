@@ -1291,6 +1291,8 @@ bool GUI_App::on_init_inner()
             associate_3mf_files();
         if (app_config->get_bool("associate_stl"))
             associate_stl_files();
+        if (app_config->get_bool("associate_step"))
+            associate_step_files();
 #endif // __WXMSW__
 
         preset_updater = new PresetUpdater();
@@ -2605,6 +2607,8 @@ void GUI_App::open_preferences(const std::string& highlight_option /*= std::stri
             associate_3mf_files();
         if (app_config->get_bool("associate_stl"))
             associate_stl_files();
+        if (app_config->get_bool("associate_step"))
+            associate_step_files();
     }
     else {
         if (app_config->get_bool("associate_gcode"))
@@ -3387,6 +3391,12 @@ void GUI_App::associate_3mf_files()
 void GUI_App::associate_stl_files()
 {
     associate_file_type(L".stl", L"QIDI.Slicer.1", L"QIDISlicer", true);
+}
+
+void GUI_App::associate_step_files()
+{
+    associate_file_type(L".step", L"QIDI.Slicer.1", L"QIDISlicer", true);
+    associate_file_type(L".stp", L"QIDI.Slicer.1", L"QIDISlicer", true);
 }
 
 void GUI_App::associate_gcode_files()

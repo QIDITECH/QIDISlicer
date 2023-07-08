@@ -439,6 +439,7 @@ struct PageFilesAssociation : ConfigWizardPage
 private:
     wxCheckBox* cb_3mf{ nullptr };
     wxCheckBox* cb_stl{ nullptr };
+    wxCheckBox* cb_step{ nullptr };
 //    wxCheckBox* cb_gcode;
 
 public:
@@ -446,7 +447,8 @@ public:
 
     bool associate_3mf() const { return cb_3mf->IsChecked(); }
     bool associate_stl() const { return cb_stl->IsChecked(); }
-//    bool associate_gcode() const { return cb_gcode->IsChecked(); }
+    bool associate_step() const { return cb_step->IsChecked(); }
+    //    bool associate_gcode() const { return cb_gcode->IsChecked(); }
 };
 #endif // _WIN32
 

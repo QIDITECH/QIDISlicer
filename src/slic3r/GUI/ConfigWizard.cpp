@@ -1610,11 +1610,13 @@ PageFilesAssociation::PageFilesAssociation(ConfigWizard* parent)
 {
     cb_3mf = new wxCheckBox(this, wxID_ANY, _L("Associate .3mf files to QIDISlicer"));
     cb_stl = new wxCheckBox(this, wxID_ANY, _L("Associate .stl files to QIDISlicer"));
-//    cb_gcode = new wxCheckBox(this, wxID_ANY, _L("Associate .gcode files to QIDISlicer G-code Viewer"));
+    cb_step = new wxCheckBox(this, wxID_ANY, _L("Associate .step/.stp files to QIDISlicer"));
+    //    cb_gcode = new wxCheckBox(this, wxID_ANY, _L("Associate .gcode files to QIDISlicer G-code Viewer"));
 
     append(cb_3mf);
     append(cb_stl);
-//    append(cb_gcode);
+    append(cb_step);
+    //    append(cb_gcode);
 }
 #endif // _WIN32
 
@@ -3268,13 +3270,16 @@ bool ConfigWizard::priv::apply_config(AppConfig *app_config, PresetBundle *prese
 #ifdef _WIN32
     app_config->set("associate_3mf", page_files_association->associate_3mf() ? "1" : "0");
     app_config->set("associate_stl", page_files_association->associate_stl() ? "1" : "0");
-//    app_config->set("associate_gcode", page_files_association->associate_gcode() ? "1" : "0");
+    app_config->set("associate_step", page_files_association->associate_step() ? "1" : "0");
+    //    app_config->set("associate_gcode", page_files_association->associate_gcode() ? "1" : "0");
 
     if (wxGetApp().is_editor()) {
         if (page_files_association->associate_3mf())
             wxGetApp().associate_3mf_files();
         if (page_files_association->associate_stl())
             wxGetApp().associate_stl_files();
+        if (page_files_association->associate_step())
+            wxGetApp().associate_step_files();
     }
 //    else {
 //        if (page_files_association->associate_gcode())
