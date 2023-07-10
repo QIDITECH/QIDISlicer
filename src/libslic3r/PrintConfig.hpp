@@ -137,10 +137,6 @@ enum class PerimeterGeneratorType
 enum class GCodeThumbnailsFormat {
     QIDI, PNG, JPG, QOI
 };
-//Y7
-enum class WaterResistance {
-    None, Weak, Fine, Strong
-};
 
 #define CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(NAME) \
     template<> const t_config_enum_names& ConfigOptionEnum<NAME>::get_enum_names(); \
@@ -167,9 +163,6 @@ CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(DraftShield)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(GCodeThumbnailsFormat)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(ForwardCompatibilitySubstitutionRule)
 CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(PerimeterGeneratorType)
-//Y7
-CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(WaterResistance)
-
 
 #undef CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS
 
@@ -795,21 +788,6 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloatOrPercent,     first_layer_height))
     ((ConfigOptionFloatOrPercent,     first_layer_speed))
     ((ConfigOptionInts,               first_layer_temperature))
-    //Y7
-    ((ConfigOptionIntsNullable,       filament_property_drying_box))
-    ((ConfigOptionIntsNullable,       filament_property_anneal_temperature))
-    ((ConfigOptionEnum<WaterResistance>, filament_property_water_resistance))
-    ((ConfigOptionEnum<WaterResistance>, filament_property_corrosion_resistance))
-    ((ConfigOptionEnum<WaterResistance>, filament_property_creep_resistance))
-    ((ConfigOptionFloats,             filament_property_hdt_045))
-    ((ConfigOptionFloats,             filament_property_hdt_180))
-    ((ConfigOptionStrings,            filament_property_tensile_strength))
-    ((ConfigOptionStrings,            filament_property_tensile_modulus))
-    ((ConfigOptionStrings,            filament_property_elongation_at_break))
-    ((ConfigOptionStrings,            filament_property_flexural_strength))
-    ((ConfigOptionStrings,            filament_property_flexural_modulus))
-    ((ConfigOptionStrings,            filament_property_notch_impact_strength))
-
     ((ConfigOptionIntsNullable,       idle_temperature))
     //B26
     ((ConfigOptionBools,              enable_advance_pressure))
