@@ -279,6 +279,11 @@ void PreferencesDialog::build()
 			L("Associate .stl files to QIDISlicer"),
 			L("If enabled, sets QIDISlicer as default application to open .stl files."),
 			app_config->get_bool("associate_stl"));
+
+		append_bool_option(m_optgroup_general, "associate_step",
+			L("Associate .stp files to QIDISlicer"),
+			L("If enabled, sets QIDISlicer as default application to open .stp files."),
+			app_config->get_bool("associate_step"));
 #endif // _WIN32
 
 		m_optgroup_general->append_separator();

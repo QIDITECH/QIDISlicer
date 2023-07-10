@@ -13010,14 +13010,12 @@ msgid "Extra perimeters if needed"
 msgstr "如果需要，打印额外轮廓"
 
 #: src/libslic3r/PrintConfig.cpp:871
-#, fuzzy
 msgid ""
-"Add more perimeters when needed for avoiding gaps in sloping walls. Slic3r "
-"keeps adding perimeters, until more than 70% of the loop immediately above is "
-"supported."
+"Add more perimeters when needed for avoiding gaps in sloping walls. Slic3r keeps adding "
+"perimeters, until more than 70% of the loop immediately above is supported."
 msgstr ""
-"在需要时添加更多轮廓,以避免倾斜的墙壁出现间隙，Slic3r 不断添加轮廓,直到支撑超"
-"过 70% 的正上方循环。"
+"在需要时添加更多轮廓，以避免倾斜的墙壁出现间隙。Slic3r 不断添加轮廓，直到上方 "
+"70% 以上的环路得到支撑。"
 
 #: src/libslic3r/PrintConfig.cpp:878
 msgid "Extra perimeters on overhangs (Experimental)"

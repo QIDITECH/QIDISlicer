@@ -90,6 +90,8 @@ void AppConfig::set_defaults()
             set("associate_3mf", "0");
         if (get("associate_stl").empty())
             set("associate_stl", "0");
+        if (get("associate_step").empty())
+            set("associate_step", "0");
 
         if (get("tabs_as_menu").empty())
             set("tabs_as_menu", "0");

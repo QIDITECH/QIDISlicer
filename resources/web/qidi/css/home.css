@@ -1,18 +1,60 @@
-body
-{
-    background-color:#F4F7FE;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/* 让页面占浏览器可视区域的高度 */
+	height: 100vh;
 }
 
-.container {
-    text-align: center;
-    padding: 30px;
-    border-radius: 10px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 6px rgba(39, 39, 39, 0.1);
+#GifBoard {
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	align-items: center;
+	justify-content: center;
+	overflow-y: auto;
+	margin: 30px 40px;
+	position: relative;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+@media screen {
+	.GifBlock {
+		margin: 0px 0px 0px 0px;
+		cursor: pointer;
+	}
+}
+
+.UG_IMG {
+	justify-content:center;
+	text-align:center;
+	width: 100%;
+}
+
+.UG_IMG img {
+	width: 100%;
+	border-radius: 5px 5px 5px 5px;
+}
+
+.UG_TITLE {
+	text-align: center;
+	font-size: 36px;
+	font-weight: 700;
+	line-height: 25px;
+	width: 100%;
+	margin-top: 20px;
+	color: #4479FB;
+}
+
+.UG_DESC {
+	text-align:center;
+	font-size: 24px;
+	font-weight:lighter;
+	width: 100%;
+	line-height: 20px;
+	margin-top: 30px;
+	margin-bottom: 20px;
 }

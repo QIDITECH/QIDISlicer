@@ -1,196 +1,451 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="max-age=7200" />
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />	
-<title>homepage</title>
-<link rel="stylesheet" type="text/css" href="css/home.css" />
-<link rel="stylesheet" type="text/css" href="css/dark.css" />	
-<script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
-<script type="text/javascript" src="../data/text.js"></script>	
-<script type="text/javascript" src="js/json2.js"></script>
-<script type="text/javascript" src="js/globalapi.js"></script>
-<script type="text/javascript" src="js/home.js"></script>
+	<meta charset="utf-8">
+	<meta http-equiv="Cache-Control" content="max-age=7200" />
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+	<title>homepage</title>
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/home.css" />
+	<link rel="stylesheet" type="text/css" href="css/dark.css" />
+	<script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" src="../data/text.js"></script>
+	<script type="text/javascript" src="js/json2.js"></script>
+	<script type="text/javascript" src="js/globalapi.js"></script>
+	<script type="text/javascript" src="js/home.js"></script>
 </head>
 <body class="ZScrol" onLoad="OnInit()">
-<div id="LeftBoard">
-	<div id="GuideArea">
-		<!--<div menu="userguide" class="BtnItem" onClick="GotoMenu('userguide')">
-			<div class="BtnIcon "><img class="LeftIcon" src="img/logo2.png" /></div>
-			<div class="trans" tid="t2">UserGuide</div>
-		</div>-->
-	<div id="Guide1">
-		<div id="Icon1"><img id="QDIcon" src="img/logo.png" /></div>
-		<div menu="userguide" class="TbItem" onClick="GotoMain('userguide')">
-			<div class="trans" tid="t1">UserGuide</div>
+	<div id="LeftBoard">
+		<div id="GuideArea">
+			<div id="Guide1">
+				<div id="Icon1"><img id="QDIcon" src="img/logo.png" /></div>
+				<div menu="userguide" class="TbItem" onClick="GotoMain('userguide');">
+					<div class="trans" tid="t1">UserGuide</div>
+				</div>
+			</div>
+		</div>
+		<ul class="accordion">
+			<li>
+				<input type="radio" name="item" id="item1" />
+				<label for="item1">
+					<a class="trans" tid="t7"></a>
+					<i class="fa fa-caret-right"></i>
+				</label>
+				<ol>
+					<li menu="firstprint" class="BtnItem" onClick="GotoMenu('firstprint')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t2">UserGuide</div>
+					</li>
+					<li menu="addsupport" class="BtnItem" onClick="GotoMenu('addsupport')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t3">UserGuide</div>
+					</li>
+					<li menu="wifisend" class="BtnItem" onClick="GotoMenu('wifisend')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t5">UserGuide</div>
+					</li>
+					<li menu="connectdevice" class="BtnItem" onClick="GotoMenu('connectdevice')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t4">UserGuide</div>
+					</li>
+					<li menu="addtext" class="BtnItem" onClick="GotoMenu('addtext')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t11">UserGuide</div>
+					</li>
+					<li menu="cutmodel" class="BtnItem" onClick="GotoMenu('cutmodel')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t12">UserGuide</div>
+					</li>
+					<li menu="downloadm" class="BtnItem" onClick="GotoMenu('downloadm')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t13">UserGuide</div>
+					</li>
+				</ol>
+			</li>
+			<li>
+				<input type="radio" name="item" id="item2" />
+				<label for="item2">
+					<a class="trans" tid="t8"></a>
+					<i class="fa fa-caret-right"></i>
+				</label>
+				<ol>
+					<li menu="infomax3" class="BtnItem" onClick="GotoMenu('infomax3')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="TextS1">X-MAX 3</div>
+					</li>
+					<li menu="infoplus3" class="BtnItem" onClick="GotoMenu('infoplus3')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="TextS1">X-Plus 3</div>
+					</li>
+					<li menu="infosmart3" class="BtnItem" onClick="GotoMenu('infosmart3')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="TextS1">X-Smart 3</div>
+					</li>
+					<li menu="infof1" class="BtnItem" onClick="GotoMenu('infof1')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t10">FInfo</div>
+					</li>
+				</ol>
+			</li>
+			<li>
+				<input type="radio" name="item" id="item3" />
+				<label for="item3">
+					<a class="trans" tid="t9"></a>
+					<i class="fa fa-caret-right"></i>
+				</label>
+				<ol>
+					<li menu="issuereport" class="BtnItem" onClick="GotoMenu('issuereport')">
+						<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
+						<div class="trans" tid="t6">UserGuide</div>
+					</li>
+				</ol>
+			</li>
+		</ul>
+	</div>
+	<div id="RightBoard">
+		<div id="ThumbBoard" class="ZScrol" board="userguide">
+			<div class="GuideBlock" onClick="GotoMenu('firstprint');">
+				<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t2">FirstPrint</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('addsupport');">
+				<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t3">AddSupport</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('wifisend');">
+				<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t5">WifiSend</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('connectdevice');">
+				<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t4">ConnectDevice</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('addtext');">
+				<div class="UG_IMG"><img src="img/AddText.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t11">AddText</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('cutmodel');">
+				<div class="UG_IMG"><img src="img/CutModel.gif" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t12">CutModel</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('downloadm');">
+				<div class="UG_IMG"><img src="img/DownloadModel.png" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t13">AddText</div>
+			</div>
+			<div class="GuideBlock" onClick="GotoMenu('issuereport');">
+				<div class="UG_IMG"><img src="img/IssueReport.png" /></div>
+				<div class="UG_TITLE trans TextS1" tid="t6">IssueReport</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="firstprint">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="addsupport">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="connectdevice">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="wifisend">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="addtext">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/AddText.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="cutmodel">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_IMG"><img src="img/CutModel.gif" /></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="downloadm">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_B_TITLE trans TextS1" tid="t13">download</div>
+					<div class="UG_CDESC trans" tid="ls1"></div>
+				</div>
+			</div>
+			<div id="IssueBoard">
+				<div class="halfBlock">
+					<div class="UG_DESC">URL:https://www.thingiverse.com/</div>
+					<div class="UG_IMG"><img src="img/thingiverse.png" /></div>
+				</div>
+				<div class="halfBlock">
+					<div class="UG_DESC">URL:https://www.printables.com/model</div>
+					<div class="UG_IMG"><img src="img/printables.png" /></div>
+				</div>
+			</div>
+		</div>
+		<!--<div id="GifBigBoard" board="downloadm">
+		<div id="GifBoard">
+			<div class="GifBlock">
+				<div class="UG_B_TITLE trans" tid="t13">downloadm</div>
+			</div>
+			<div id="IssueBoard">
+				<div class="halfBlock">
+					<div class="UG_CDESC">URL:https://www.thingiverse.com/</div>
+					<div class="UG_IMG"><img src="img/thingiverse.png" /></div>
+					<div class="UG_CDESC">URL:https://www.printables.com/model</div>
+					<div class="UG_IMG"><img src="img/printables.png" /></div>
+				</div>
+			</div>
+		</div>
+	</div>-->
+
+		<div id="GifBigBoard" board="infomax3">
+			<div id="GifBoard">
+				<div class="UG_IMG"><img src="img/info1.png" /></div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="infoplus3">
+			<div id="GifBoard">
+				<div class="UG_IMG"><img src="img/info2.png" /></div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="infosmart3">
+			<div id="GifBoard">
+				<div class="UG_IMG"><img src="img/info3.png" /></div>
+			</div>
+		</div>
+
+		<div id="FilaBigBoard" board="infof1">
+			<div id="FilaBoard">
+				<div class="main">
+					<table cellspacing="0">
+						<thead>
+							<tr>
+								<th>Filament</th>
+								<th>Drying box</th>
+								<th>Anneal</th>
+								<th>Water resistance</th>
+								<th>Corrosion resistance</th>
+								<th>Creep resistance</th>
+								<th>HDT 0.45</th>
+								<th>HDT 1.80</th>
+								<th>Tensile strength(MPa)</th>
+								<th>Tensile modulus(MPa)</th>
+								<th>Elongation at break(%)</th>
+								<th>Flexural strength(MPa)</th>
+								<th>Flexural modulus(MPa)</th>
+								<th>Notch impact strength(KJ/㎡)</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>ToughPETG</td>
+								<td>≤20％</td>
+								<td>/</td>
+								<td>+++</td>
+								<td>++</td>
+								<td>+++</td>
+								<td>78℃</td>
+								<td>73℃</td>
+								<td>40.3±0.6</td>
+								<td>1780±80</td>
+								<td>4.0±0.2</td>
+								<td>62.8±0.4</td>
+								<td>1919±54</td>
+								<td>13.9±2.3</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>UltraABS-GF25</td>
+								<td>≤30％</td>
+								<td>/</td>
+								<td>+++</td>
+								<td>+</td>
+								<td>+++</td>
+								<td>97℃</td>
+								<td>93℃</td>
+								<td>48.48 ± 0.61</td>
+								<td>3752.13 ± 68.39</td>
+								<td>2.10 ± 0.10</td>
+								<td>78.80 ± 1.26</td>
+								<td>3531.71 ± 75.79</td>
+								<td>8.91 ± 0.63</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>ABS Rapido</td>
+								<td>≤30％</td>
+								<td>/</td>
+								<td>++</td>
+								<td>+</td>
+								<td>+++</td>
+								<td>85℃</td>
+								<td>/</td>
+								<td>41 ± 1</td>
+								<td>3850 ± 150</td>
+								<td>11 ± 1</td>
+								<td>77.5 ± 2.5</td>
+								<td>77.5 ± 2.5</td>
+								<td>20 ± 2</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>PA12-CF</td>
+								<td>≤15％</td>
+								<td>80-100℃</td>
+								<td>+</td>
+								<td>++</td>
+								<td>+</td>
+								<td>149.6℃</td>
+								<td>112.4℃</td>
+								<td>87.49 ± 2.81</td>
+								<td>5438.40 ± 282.82</td>
+								<td>2.59 ± 0.19</td>
+								<td>133.17 ± 4.66</td>
+								<td>4667.43 ± 339.80</td>
+								<td>6.11 ± 1.45</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>PATH-CF</td>
+								<td>≤15％</td>
+								<td>80-100℃</td>
+								<td>++</td>
+								<td>+++</td>
+								<td>+++</td>
+								<td>192.3℃</td>
+								<td>121.7℃</td>
+								<td>104.90 ± 1.99</td>
+								<td>8383.26 ± 419.53</td>
+								<td>1.60 ± 0.07</td>
+								<td>147.70 ± 4.09</td>
+								<td>5969.35 ± 145.28</td>
+								<td>6.17 ± 0.2</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>PET-CF</td>
+								<td>≤15％</td>
+								<td>80-100℃</td>
+								<td>+++</td>
+								<td>+++</td>
+								<td>+++</td>
+								<td>148.8℃</td>
+								<td>112.1℃</td>
+								<td>87.41 ± 3.57</td>
+								<td>6025.53 ± 355.46</td>
+								<td>1.99 ±0.18</td>
+								<td>122.69 ± 5.19</td>
+								<td>5313.21 ± 197.89</td>
+								<td>5.57 ± 0.58</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>PLA Rapido</td>
+								<td>≤30％</td>
+								<td>/</td>
+								<td>+</td>
+								<td>+</td>
+								<td>+</td>
+								<td>57℃</td>
+								<td>/</td>
+								<td>39 ± 3</td>
+								<td>4650 ± 150</td>
+								<td>12.5 ± 2.5</td>
+								<td>72.5 ± 2.5</td>
+								<td>2850 ± 150</td>
+								<td>6 ± 2</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>PLA Rapido Matte</td>
+								<td>≤30％</td>
+								<td>/</td>
+								<td>+</td>
+								<td>+</td>
+								<td>+</td>
+								<td>58℃</td>
+								<td>/</td>
+								<td>39 ± 3</td>
+								<td>2400 ± 200</td>
+								<td>3 ± 1</td>
+								<td>77.5 ± 2.5</td>
+								<td>2200 ± 200</td>
+								<td>7.5 ± 1.5</td>
+							</tr>
+							<tr v-for="(item, index) in 1" :key="index">
+								<td>UltraPA</td>
+								<td>≤15％</td>
+								<td>/</td>
+								<td>++</td>
+								<td>++</td>
+								<td>++</td>
+								<td>77.8℃</td>
+								<td>73.1℃</td>
+								<td>86.15 ± 0.56</td>
+								<td>3609.22 ± 153.31</td>
+								<td>11.68 ± 3.36</td>
+								<td>121.47 ± 3.14</td>
+								<td>3314.03 ±181.88</td>
+								<td>5.78 ± 0.30</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div id="GifBigBoard" board="issuereport">
+			<div id="GifBoard">
+				<div class="GifBlock">
+					<div class="UG_B_TITLE trans TextS1" tid="t6"></div>
+					<div class="trans" tid="ls2"></div>
+					<div class="UG_B_DESC trans" tid="ls3"></div>
+				</div>
+			</div>
+			<div id="IssueBoard">
+				<div class="PrintBlock">
+					<div class="UG_IMG"><img src="img/X-MAX3.png" /></div>
+					<div class="UG_TITLE">X-MAX 3</div>
+					<div class="UG_DESC">
+						E-mail:<br />MAX3support@qd3dprinter.com<br>MAX3AMS@qd3dprinter.com<br /><br>
+						Skype:<br />MAX3support@qd3dprinter.com
+					</div>
+				</div>
+				<div class="PrintBlock">
+					<div class="UG_IMG"><img src="img/X-Plus3.png" /></div>
+					<div class="UG_TITLE">X-Plus 3</div>
+					<div class="UG_DESC">
+						E-mail:<br />Plus3support01@qd3dprinter.com<br>Plus3support02@qd3dprinter.com<br /><br>
+						Skype:<br />Plus3support@qd3dprinter.com
+					</div>
+				</div>
+				<div class="PrintBlock">
+					<div class="UG_IMG"><img src="img/X-Smart3.png" /></div>
+					<div class="UG_TITLE">X-Smart 3</div>
+					<div class="UG_DESC">
+						E-mail:<br />Smart3support@qd3dprinter.com<br>Smart3AMS@qd3dprinter.com<br /><br>
+						Skype:<br />Smart3support@qd3dprinter.com
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
-	</div>
-
-	<div id="BtnArea">
-		<div menu="firstprint" class="BtnItem" onClick="GotoMenu('firstprint')">
-			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
-			<div class="trans" tid="t2">UserGuide</div>
-		</div>
-		<div menu="addsupport" class="BtnItem" onClick="GotoMenu('addsupport')">
-			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
-			<div class="trans" tid="t3">UserGuide</div>
-		</div>
-		<div menu="wifisend" class="BtnItem" onClick="GotoMenu('wifisend')">
-			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
-			<div class="trans" tid="t5">UserGuide</div>
-		</div>
-		<div menu="connectdevice" class="BtnItem" onClick="GotoMenu('connectdevice')">
-			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
-			<div class="trans" tid="t4">UserGuide</div>
-		</div>
-		<div menu="issuereport" class="BtnItem" onClick="GotoMenu('issuereport')">
-			<div class="BtnIcon "><img class="LeftIcon" src="img/i1.svg" /></div>
-			<div class="trans" tid="t6">UserGuide</div>
-		</div>
-	</div>
-</div>
-
-<div id="RightBoard">
-<div id="ThumbBoard" class="ZScrol" board="userguide">
-	<div class="GuideBlock" onClick="GotoMenu('firstprint')">
-		<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t2">FirstPrint</div>
-	</div>
-	<div class="GuideBlock" onClick="GotoMenu('addsupport')">
-		<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t3">AddSupport</div>
-	</div>
-	<div class="GuideBlock" onClick="GotoMenu('connectdevice')">
-		<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t4">ConnectDevice</div>
-	</div>
-	<div class="GuideBlock" onClick="GotoMenu('wifisend')">
-		<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t5">WifiSend</div>
-	</div>
-	<div class="GuideBlock" onClick="GotoMenu('issuereport')">
-		<div class="UG_IMG"><img src="img/IssueReport.png" /></div>
-		<div class="UG_TITLE trans TextS1" tid="t6">IssueReport</div>
-	</div>
-</div>
-
-<div id="GifBigBoard" board="firstprint">
-<div id="GifBoard" >
-	<div class="GifBlock">
-		<div class="UG_IMG"><img src="img/FirstPrint.gif" /></div>
-	</div>
-</div>
-</div>
-
-<div id="GifBigBoard" board="addsupport">
-<div id="GifBoard" >
-	<div class="GifBlock">
-		<div class="UG_IMG"><img src="img/AddSupport.gif" /></div>
-	</div>
-</div>
-</div>
-
-<div id="GifBigBoard" board="connectdevice">
-<div id="GifBoard" >
-	<div class="GifBlock">
-		<div class="UG_IMG"><img src="img/ConnectDevice.gif" /></div>
-	</div>
-</div>
-</div>
-
-<div id="GifBigBoard" board="wifisend">
-<div id="GifBoard" >
-	<div class="GifBlock">
-		<div class="UG_IMG"><img src="img/WifiSend.gif" /></div>
-	</div>
-</div>
-</div>
-
-<div id="GifBigBoard" board="issuereport">
-<div id="GifBoard" >
-	<div class="GifBlock">
-		<div class="UG_B_TITLE trans TextS1" tid="wk1">Issue Report</div>
-		<div class="UG_B_DESC trans" tid="wk2">If you have any questions about the Printer or QIDISlicer, please contact us via the appropriate E-mail address or Skype.<br />
-		Note: please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information.</div>
-	</div>
-</div>
-<div id="IssueBoard">
-	<div class="PrintBlock">
-		<div class="UG_IMG"><img src="img/X-MAX3.png" /></div>
-		<div class="UG_TITLE">X-MAX 3</div>
-		<div class="UG_DESC">E-mail:<br />MAX3support@qd3dprinter.com<br>MAX3AMS@qd3dprinter.com<br /><br>
-		Skype:<br />MAX3support@qd3dprinter.com</div>
-	</div>
-	<div class="PrintBlock">
-		<div class="UG_IMG"><img src="img/X-Plus3.png" /></div>
-		<div class="UG_TITLE">X-Plus 3</div>
-		<div class="UG_DESC">E-mail:<br />Plus3support01@qd3dprinter.com<br>Plus3support02@qd3dprinter.com<br /><br>
-		Skype:<br />Plus3support@qd3dprinter.com</div>
-	</div>
-	<div class="PrintBlock">
-		<div class="UG_IMG"><img src="img/X-Smart3.png" /></div>
-		<div class="UG_TITLE">X-Smart 3</div>
-		<div class="UG_DESC">E-mail:<br />Smart3support@qd3dprinter.com<br>Smart3AMS@qd3dprinter.com<br /><br>
-		Skype:<br />Smart3support@qd3dprinter.com</div>
-	</div>
-</div>
-</div>
-<!--<div id="GifBigBoard" board="issuereport">
-<div id="GifBoard" >
-	<div class="GifBlock">
-		<div class="UG_B_TITLE trans TextS1" tid="wk1">Issue Report</div>
-		<div class="UG_B_DESC trans" tid="wk2">You can copy the email address or skype to get in touch with us by clicking Help - Requirements Report. Please try to tell us your requirements in the form of video or pictures, and provide 3MF file, G-code file, machine number and other necessary information. </div>
-		<div class="UG_PRINTER"><img src="img/X-MAX3.png" /><img /><img src="img/X-Plus3.png" /><img /><img src="img/X-Smart3.png" /></div>
-	</div>
-</div>
-</div>-->
-	
-</div>	
 </body>
-<script type="text/javascript">
-	//HandleStudio(TestData);
-    document.onkeydown = function (event) {
-		var e = event || window.event || arguments.callee.caller.arguments[0];
-
-		if (e.ctrlKey && e.metaKey)
-			OutputKey(e.keyCode, true, false, true);
-		else if (e.ctrlKey)
-			OutputKey(e.keyCode, true, false, false);
-		else if (e.metaKey)
-			OutputKey(e.keyCode, false, false, true);
-
-		if (e.shiftKey && e.ctrlKey)
-			OutputKey(e.keyCode, true, true, false);
-
-		if (e.shiftKey && e.metaKey)
-			OutputKey(e.keyCode, false, true, true);
-
-		if (window.event) {
-			try { e.keyCode = 0; } catch (e) { }
-			e.returnValue = false;
-		}
-	};
-
-	window.addEventListener('mousewheel', function (event) {
-		if (event.ctrlKey === true || event.metaKey) {
-			event.preventDefault();
-		}
-	}, { passive: false });
-
-</script>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
