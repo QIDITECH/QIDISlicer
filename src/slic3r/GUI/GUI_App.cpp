@@ -285,9 +285,9 @@ private:
 
             // credits infornation
             credits = title + " " +
-                //B11
-                " ";
-                // _L("is based on Slic3r by Alessandro Ranellucci and the RepRap community.") + "\n" +
+                      // B11
+                      _L("is based on Slic3r by Alessandro Ranellucci and the RepRap community.") + "\n";
+                //+
                 // _L("Developed by QIDI Research.") + "\n\n" +
                 // title + " " + _L("is licensed under the") + " " + _L("GNU Affero General Public License, version 3") + ".\n\n" +
                 // _L("Contributions by Vojtech Bubnik, Enrico Turri, Oleksandra Iushchenko, Tamas Meszaros, Lukas Matena, Vojtech Kral, David Kocik and numerous others.") + "\n\n" +
