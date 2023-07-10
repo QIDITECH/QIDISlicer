@@ -71,9 +71,9 @@ typedef unsigned int      UINT32;
 typedef int               INT;
 #endif
 
-#ifndef INT32
-typedef int               INT32;
-#endif
+// #ifndef INT32
+// typedef int               INT32;
+// #endif
 
 typedef unsigned char  INT8U;                    /* Unsigned  8 bit quantity                           */
 typedef signed   char  INT8S;                    /* Signed    8 bit quantity                           */

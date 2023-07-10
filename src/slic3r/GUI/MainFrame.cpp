@@ -59,6 +59,7 @@ namespace Slic3r {
 namespace GUI {
 wxDEFINE_EVENT(EVT_LOAD_URL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_LOAD_PRINTER_URL, wxCommandEvent);
+int count = 0;
 enum class ERescaleTarget
 {
     Mainframe,
@@ -859,7 +860,12 @@ void MainFrame::create_preset_tabs()
     //B4
     m_printer_view = new PrinterWebView(m_tabpanel);
     m_printer_view->Hide();
-    dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_printer_view, _L("Device"), "tab_monitor_active");
+#ifdef _MSW_DARK_MODE
+    if (!wxGetApp().tabs_as_menu())
+        dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_printer_view, _L("Device"), "tab_monitor_active");
+    else
+#endif
+    m_tabpanel->AddPage(m_printer_view, _L("Device"));
     //B28
     m_guide_view = new GuideWebView(m_tabpanel);
     wxString url = wxString::Format("file://%s/web/guide/index.html", from_u8(resources_dir()));
@@ -868,7 +874,12 @@ void MainFrame::create_preset_tabs()
         url = wxString::Format("file://%s/web/guide/index.html?lang=%s", from_u8(resources_dir()), strlang);
     m_guide_view->load_url(url);
     m_guide_view->Hide();
-    dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "userguide");
+#ifdef _MSW_DARK_MODE
+    if (!wxGetApp().tabs_as_menu())
+        dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "userguide");
+    else
+#endif
+    m_tabpanel->AddPage(m_guide_view, _L("Guide"));
 }
 
 void MainFrame::add_created_tab(Tab* panel,  const std::string& bmp_name /*= ""*/)
@@ -2074,8 +2085,11 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 m_printer_view->load_url(url);
             }
         }
-        // if (m_tabpanel->GetSelection() != (int)new_selection)
-        //     m_tabpanel->SetSelection(new_selection);
+         if (count == 0 && m_tabpanel->GetSelection() != (int)new_selection)
+         {
+             m_tabpanel->SetSelection(new_selection);
+             count++;
+         }
 #ifdef _MSW_DARK_MODE
         if (wxGetApp().tabs_as_menu()) {
             if (Tab* cur_tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(new_selection)))

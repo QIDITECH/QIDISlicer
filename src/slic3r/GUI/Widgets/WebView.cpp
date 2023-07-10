@@ -259,7 +259,7 @@ bool WebView::RunScript(wxWebView *webView, wxString const &javascript)
 #elif defined __WXMAC__
         WKWebView *       wkWebView = (WKWebView *) webView->GetNativeBackend();
         int               count     = 0;
-        wxJSScriptWrapper wrapJS(javascript, &count);
+        wxJSScriptWrapper wrapJS(javascript, wxJSScriptWrapper::OutputType::JS_OUTPUT_RAW);
         Slic3r::GUI::WKWebView_evaluateJavaScript(wkWebView, wrapJS.GetWrappedCode(), nullptr);
         return true;
 #else

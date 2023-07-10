@@ -20,6 +20,12 @@ set(SLIC3R_GUI_SOURCES
     GUI/Widgets/StateColor.hpp
     GUI/Widgets/WebView.cpp
     GUI/Widgets/WebView.hpp
+    GUI/Widgets/Label.cpp
+    GUI/Widgets/Label.hpp
+    GUI/Widgets/StateHandler.cpp
+    GUI/Widgets/StateHandler.hpp
+    GUI/Widgets/StaticBox.cpp
+    GUI/Widgets/StaticBox.hpp
     GUI/ConfigSnapshotDialog.cpp
     GUI/ConfigSnapshotDialog.hpp
     GUI/3DScene.cpp
