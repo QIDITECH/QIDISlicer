@@ -2,7 +2,7 @@
 ![QIDISlicer logo](/resources/icons/QIDISlicer.png?raw=true)
 
 # QIDISlicer
-QIDISlicer is aprofessional 3D printer slicing software，which is perfectly compatible with all printers and 3D printing filaments of QIDI Technology. Multi-platform support, simple inerface, easy to use, complate functions, easy to learn 3D printing.
+QIDISlicer is professional 3D printer slicing software，which is perfectly compatible with all printers and 3D printing filaments of QIDI Technology. Multi-platform support, simple inerface, easy to use, complate functions, easy to learn 3D printing.
 
 **Notice:QIDISlicer as a new software dedicated to QIDI's new high speed printers, please make sure your firmware version is V 4.0.0 or above.**
 
