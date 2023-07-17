@@ -28,9 +28,6 @@ public:
     // versus top/bottom_min_shell_thickness. Which of the two values wins depends
     // on the active layer height.
     static std::string top_bottom_shell_thickness_explanation(const PresetBundle &preset_bundle);    
-    //Y7
-    static std::string drying_box_description(const Preset &preset);
-    static std::string anneal_temperature_description(const Preset &preset);
 };
 
 } // namespace Slic3r
