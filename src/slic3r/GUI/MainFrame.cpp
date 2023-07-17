@@ -2085,11 +2085,14 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 m_printer_view->load_url(url);
             }
         }
-         if (count == 0 && m_tabpanel->GetSelection() != (int)new_selection)
-         {
-             m_tabpanel->SetSelection(new_selection);
-             count++;
-         }
+        //B4
+#ifdef __APPLE__
+        if (count == 0 && m_tabpanel->GetSelection() != (int) new_selection) {
+            m_tabpanel->SetSelection(new_selection);
+            count++;
+        }
+#endif
+
 #ifdef _MSW_DARK_MODE
         if (wxGetApp().tabs_as_menu()) {
             if (Tab* cur_tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(new_selection)))
