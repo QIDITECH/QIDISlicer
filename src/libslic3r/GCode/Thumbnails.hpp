@@ -60,7 +60,7 @@ inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb,
         static constexpr const size_t max_row_length = 78;
         // ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{ sizes, true, true, true, true });
         //B3
-        ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{ sizes, true, false, false, true });
+        ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{ sizes, false, false, false, true });
         int count = 0;
         for (const ThumbnailData& data : thumbnails)
             if (data.is_valid()) {

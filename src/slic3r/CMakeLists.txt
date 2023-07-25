@@ -287,6 +287,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/PrintHost.hpp
     Utils/Bonjour.cpp
     Utils/Bonjour.hpp
+    Utils/UdpLinkServer.cpp
+    Utils/UdpLinkServer.hpp
     Utils/PresetUpdater.cpp
     Utils/PresetUpdater.hpp
     Utils/Process.cpp
