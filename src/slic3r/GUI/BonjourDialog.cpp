@@ -20,6 +20,91 @@
 #include "slic3r/GUI/format.hpp"
 #include "slic3r/Utils/Bonjour.hpp"
 
+// B29
+#include "slic3r/Utils/UdpLinkServer.hpp"
+#include <boost/thread/thread.hpp>
+#include <vector>
+
+const int MAX_BUF_LEN = 255;
+#define GET_HOST_COMMAND "mkswifi\r\n"
+#define CLIENT_PORT 11121
+#define SERVER_PORT 8989
+
+// B29
+
+typedef struct tagDeviceInfo
+{
+    unsigned short usFunction;
+    unsigned short usVersionFlag;
+    unsigned int   uiCompanyId;
+    char           szDeviceSerialNo[24];
+    unsigned short usServicePort;
+    char           szExtend[38];
+} DeviceInfo;
+
+// B29
+
+typedef struct tagWorkThreadParameter
+{
+    boost::asio::io_service *pIoService;
+    UdpLinkServer *          pUdpService;
+} WorkThreadParameter;
+
+bool                     g_WorkThreadExit         = false;
+int                      g_nBroastDataSendInteral = 3000;
+DeviceInfo               g_diDeviceInfo           = {0};
+std::vector<std::string> get_reply;
+// B29
+
+unsigned int __stdcall WorkThreadFunByDeviceServiceProcess(PVOID pParam)
+{
+    int                  nn            = 0;
+    int                  nDataSize     = sizeof(DeviceInfo);
+    WorkThreadParameter *pAllParameter = (WorkThreadParameter *) pParam;
+    while (true) {
+        if (g_WorkThreadExit) {
+            break;
+        }
+
+        pAllParameter->pUdpService->SendData((char *) GET_HOST_COMMAND, nDataSize, true);
+        pAllParameter->pIoService->poll();
+        // break;
+        for (nn = g_nBroastDataSendInteral; nn > 0; nn -= 200) {
+            if (g_WorkThreadExit) {
+                break;
+            }
+            Sleep(200);
+        }
+    }
+    return 0;
+}
+// B29
+
+static void WINAPI BroastDeviceInfoRecvDataCallback(const boost::system::error_code &error,
+                                                    char *                           pData,
+                                                    int                              nDataLength,
+                                                    char *                           pPeerIp,
+                                                    unsigned short                   usPeerPort,
+                                                    DWORD                            dwUserData1,
+                                                    DWORD                            dwUserData2)
+{
+    SYSTEMTIME sm;
+    GetLocalTime(&sm);
+    char        szInfo[256] = {0};
+    DeviceInfo *pDeviceInfo = (DeviceInfo *) pData;
+    //sprintf(szInfo, "%s %s:%d time:%04d-%02d-%0d %02d:%02d:%02d\n", pData, pPeerIp, usPeerPort, sm.wYear, sm.wMonth, sm.wDay, sm.wHour,
+    //        sm.wMinute, sm.wSecond);
+    //printf(szInfo);
+    int i = 0;
+    for (i = 0; i < get_reply.size(); i++)
+        if (get_reply[i] == pData)
+            break;
+    if (i == get_reply.size())
+        get_reply.push_back(pData);
+}
+
+
+
 namespace Slic3r {
 
 
@@ -72,8 +157,9 @@ BonjourDialog::BonjourDialog(wxWindow *parent, Slic3r::PrinterTechnology tech)
 
 	list->SetSingleStyle(wxLC_SINGLE_SEL);
 	list->SetSingleStyle(wxLC_SORT_DESCENDING);
-	list->AppendColumn(_(L("Address")), wxLIST_FORMAT_LEFT, 5 * em);
-	list->AppendColumn(_(L("Hostname")), wxLIST_FORMAT_LEFT, 10 * em);
+	//B29
+	list->AppendColumn(_(L("Address")), wxLIST_FORMAT_LEFT, 10 * em);
+	list->AppendColumn(_(L("Hostname")), wxLIST_FORMAT_LEFT, 15 * em);
 	list->AppendColumn(_(L("Service name")), wxLIST_FORMAT_LEFT, 20 * em);
 	if (tech == ptFFF) {
 		list->AppendColumn(_(L("OctoPrint version")), wxLIST_FORMAT_LEFT, 5 * em);
@@ -91,9 +177,15 @@ BonjourDialog::BonjourDialog(wxWindow *parent, Slic3r::PrinterTechnology tech)
 
 	Bind(EVT_BONJOUR_REPLY, &BonjourDialog::on_reply, this);
 
-	Bind(EVT_BONJOUR_COMPLETE, [this](wxCommandEvent &) {
-		this->timer_state = 0;
-	});
+    // B29
+    Bind(EVT_BONJOUR_COMPLETE, [this](wxCommandEvent &) {
+        this->timer_state = 0;
+        g_WorkThreadExit  = true;
+        for (int n = 0; n < get_reply.size(); n++) {
+            auto item = list->InsertItem(0, get_reply[n].substr(get_reply[n].find_last_of(",") + 1));
+            list->SetItem(item, 1, get_reply[n].substr(get_reply[n].find("mkswifi:") + 8, get_reply[n].find(",") - 8));
+        }
+    });
 
 	Bind(wxEVT_TIMER, &BonjourDialog::on_timer, this);
 	GUI::wxGetApp().UpdateDlgDarkUI(this);
@@ -113,6 +205,22 @@ bool BonjourDialog::show_and_lookup()
 	timer_state = 1;
 	timer->Start(1000);
     on_timer_process();
+
+	// B29
+    g_WorkThreadExit = false;
+    boost::asio::io_service ioService;
+    UdpLinkServer           usUdpService(8989, true);
+    usUdpService.SetRecvDataCallback(true, BroastDeviceInfoRecvDataCallback, 0, 0);
+    usUdpService.Start(ioService);
+    g_diDeviceInfo.usFunction    = 1;
+    g_diDeviceInfo.usVersionFlag = 0x0001;
+    strcpy(g_diDeviceInfo.szDeviceSerialNo, "ABCDEFG111111111");
+    g_diDeviceInfo.usServicePort = 8989;
+
+    WorkThreadParameter wtpWorkThreadParameter;
+    wtpWorkThreadParameter.pIoService  = &ioService;
+    wtpWorkThreadParameter.pUdpService = &usUdpService;
+    boost::thread thrd(WorkThreadFunByDeviceServiceProcess, &wtpWorkThreadParameter);
 
 	// The background thread needs to queue messages for this dialog
 	// and for that it needs a valid pointer to it (mandated by the wxWidgets API).
