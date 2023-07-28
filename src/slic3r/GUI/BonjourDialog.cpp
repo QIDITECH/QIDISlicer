@@ -1,5 +1,5 @@
 #include "slic3r/Utils/Bonjour.hpp"   // On Windows, boost needs to be included before wxWidgets headers
-
+#include "slic3r/Utils/Udp.hpp"
 #include "BonjourDialog.hpp"
 
 #include <set>
@@ -19,90 +19,7 @@
 #include "slic3r/GUI/I18N.hpp"
 #include "slic3r/GUI/format.hpp"
 #include "slic3r/Utils/Bonjour.hpp"
-
-// B29
-#include "slic3r/Utils/UdpLinkServer.hpp"
-#include <boost/thread/thread.hpp>
-#include <vector>
-
-const int MAX_BUF_LEN = 255;
-#define GET_HOST_COMMAND "mkswifi\r\n"
-#define CLIENT_PORT 11121
-#define SERVER_PORT 8989
-
-// B29
-
-typedef struct tagDeviceInfo
-{
-    unsigned short usFunction;
-    unsigned short usVersionFlag;
-    unsigned int   uiCompanyId;
-    char           szDeviceSerialNo[24];
-    unsigned short usServicePort;
-    char           szExtend[38];
-} DeviceInfo;
-
-// B29
-
-typedef struct tagWorkThreadParameter
-{
-    boost::asio::io_service *pIoService;
-    UdpLinkServer *          pUdpService;
-} WorkThreadParameter;
-
-bool                     g_WorkThreadExit         = false;
-int                      g_nBroastDataSendInteral = 3000;
-DeviceInfo               g_diDeviceInfo           = {0};
-std::vector<std::string> get_reply;
-// B29
-
-unsigned int __stdcall WorkThreadFunByDeviceServiceProcess(PVOID pParam)
-{
-    int                  nn            = 0;
-    int                  nDataSize     = sizeof(DeviceInfo);
-    WorkThreadParameter *pAllParameter = (WorkThreadParameter *) pParam;
-    while (true) {
-        if (g_WorkThreadExit) {
-            break;
-        }
-
-        pAllParameter->pUdpService->SendData((char *) GET_HOST_COMMAND, nDataSize, true);
-        pAllParameter->pIoService->poll();
-        // break;
-        for (nn = g_nBroastDataSendInteral; nn > 0; nn -= 200) {
-            if (g_WorkThreadExit) {
-                break;
-            }
-            Sleep(200);
-        }
-    }
-    return 0;
-}
-// B29
-
-static void WINAPI BroastDeviceInfoRecvDataCallback(const boost::system::error_code &error,
-                                                    char *                           pData,
-                                                    int                              nDataLength,
-                                                    char *                           pPeerIp,
-                                                    unsigned short                   usPeerPort,
-                                                    DWORD                            dwUserData1,
-                                                    DWORD                            dwUserData2)
-{
-    SYSTEMTIME sm;
-    GetLocalTime(&sm);
-    char        szInfo[256] = {0};
-    DeviceInfo *pDeviceInfo = (DeviceInfo *) pData;
-    //sprintf(szInfo, "%s %s:%d time:%04d-%02d-%0d %02d:%02d:%02d\n", pData, pPeerIp, usPeerPort, sm.wYear, sm.wMonth, sm.wDay, sm.wHour,
-    //        sm.wMinute, sm.wSecond);
-    //printf(szInfo);
-    int i = 0;
-    for (i = 0; i < get_reply.size(); i++)
-        if (get_reply[i] == pData)
-            break;
-    if (i == get_reply.size())
-        get_reply.push_back(pData);
-}
-
+#include "slic3r/Utils/Udp.hpp"
 
 
 namespace Slic3r {
@@ -123,13 +40,29 @@ public:
 		return new BonjourReplyEvent(*this);
 	}
 };
+// B29
+class UdpReplyEvent : public wxEvent
+{
+public:
+    UdpReply reply;
+
+    UdpReplyEvent(wxEventType eventType, int winid, UdpReply &&reply) : wxEvent(winid, eventType), reply(std::move(reply)) {}
+
+    virtual wxEvent *Clone() const { return new UdpReplyEvent(*this); }
+};
+// B29
+wxDEFINE_EVENT(EVT_UDP_REPLY, UdpReplyEvent);
 
 wxDEFINE_EVENT(EVT_BONJOUR_REPLY, BonjourReplyEvent);
+
+wxDECLARE_EVENT(EVT_UDP_COMPLETE, wxCommandEvent);
+wxDEFINE_EVENT(EVT_UDP_COMPLETE, wxCommandEvent);
 
 wxDECLARE_EVENT(EVT_BONJOUR_COMPLETE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_BONJOUR_COMPLETE, wxCommandEvent);
 
 class ReplySet: public std::set<BonjourReply> {};
+class UdpReplySet : public std::set<UdpReply> {};
 
 struct LifetimeGuard
 {
@@ -142,7 +75,8 @@ struct LifetimeGuard
 BonjourDialog::BonjourDialog(wxWindow *parent, Slic3r::PrinterTechnology tech)
 	: wxDialog(parent, wxID_ANY, _(L("Network lookup")), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
 	, list(new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxSIMPLE_BORDER))
-	, replies(new ReplySet)
+    , replies(new ReplySet)
+    , udp_replies(new UdpReplySet)
 	, label(new wxStaticText(this, wxID_ANY, ""))
 	, timer(new wxTimer())
 	, timer_state(0)
@@ -177,14 +111,11 @@ BonjourDialog::BonjourDialog(wxWindow *parent, Slic3r::PrinterTechnology tech)
 
 	Bind(EVT_BONJOUR_REPLY, &BonjourDialog::on_reply, this);
 
+    Bind(EVT_UDP_REPLY, &BonjourDialog::on_udp_reply, this);
+
     // B29
     Bind(EVT_BONJOUR_COMPLETE, [this](wxCommandEvent &) {
         this->timer_state = 0;
-        g_WorkThreadExit  = true;
-        for (int n = 0; n < get_reply.size(); n++) {
-            auto item = list->InsertItem(0, get_reply[n].substr(get_reply[n].find_last_of(",") + 1));
-            list->SetItem(item, 1, get_reply[n].substr(get_reply[n].find("mkswifi:") + 8, get_reply[n].find(",") - 8));
-        }
     });
 
 	Bind(wxEVT_TIMER, &BonjourDialog::on_timer, this);
@@ -206,21 +137,6 @@ bool BonjourDialog::show_and_lookup()
 	timer->Start(1000);
     on_timer_process();
 
-	// B29
-    g_WorkThreadExit = false;
-    boost::asio::io_service ioService;
-    UdpLinkServer           usUdpService(8989, true);
-    usUdpService.SetRecvDataCallback(true, BroastDeviceInfoRecvDataCallback, 0, 0);
-    usUdpService.Start(ioService);
-    g_diDeviceInfo.usFunction    = 1;
-    g_diDeviceInfo.usVersionFlag = 0x0001;
-    strcpy(g_diDeviceInfo.szDeviceSerialNo, "ABCDEFG111111111");
-    g_diDeviceInfo.usServicePort = 8989;
-
-    WorkThreadParameter wtpWorkThreadParameter;
-    wtpWorkThreadParameter.pIoService  = &ioService;
-    wtpWorkThreadParameter.pUdpService = &usUdpService;
-    boost::thread thrd(WorkThreadFunByDeviceServiceProcess, &wtpWorkThreadParameter);
 
 	// The background thread needs to queue messages for this dialog
 	// and for that it needs a valid pointer to it (mandated by the wxWidgets API).
@@ -228,8 +144,34 @@ bool BonjourDialog::show_and_lookup()
 	// so that both threads can access it safely.
 	auto dguard = std::make_shared<LifetimeGuard>(this);
 
+	// B29
+	Udp::TxtKeys udp_txt_keys{"version", "model"};
+
+    udp = Udp("octoprint")
+              .set_txt_keys(std::move(udp_txt_keys))
+                  .set_retries(3)
+                  .set_timeout(4)
+                  .on_udp_reply([dguard](UdpReply &&reply) {
+                      std::lock_guard<std::mutex> lock_guard(dguard->mutex);
+                      auto                        dialog = dguard->dialog;
+                      if (dialog != nullptr) {
+                          auto evt = new UdpReplyEvent(EVT_UDP_REPLY, dialog->GetId(), std::move(reply));
+                          wxQueueEvent(dialog, evt);
+                      }
+                  })
+                  .on_complete([dguard]() {
+                      std::lock_guard<std::mutex> lock_guard(dguard->mutex);
+                      auto                        dialog = dguard->dialog;
+                      if (dialog != nullptr) {
+                          auto evt = new wxCommandEvent(EVT_UDP_COMPLETE, dialog->GetId());
+                          wxQueueEvent(dialog, evt);
+                      }
+                  })
+                  .lookup();
+
+
 	// Note: More can be done here when we support discovery of hosts other than Octoprint and SL1
-	Bonjour::TxtKeys txt_keys { "version", "model" };
+    Bonjour::TxtKeys txt_keys{"version", "model"};
 
     bonjour = Bonjour("octoprint")
 		.set_txt_keys(std::move(txt_keys))
@@ -273,55 +215,109 @@ wxString BonjourDialog::get_selected() const
 
 void BonjourDialog::on_reply(BonjourReplyEvent &e)
 {
-	if (replies->find(e.reply) != replies->end()) {
-		// We already have this reply
-		return;
-	}
+    if (replies->find(e.reply) != replies->end()) {
+        // We already have this reply
+        return;
+    }
 
-	// Filter replies based on selected technology
-	const auto model = e.reply.txt_data.find("model");
-	const bool sl1 = model != e.reply.txt_data.end() && model->second == "SL1";
-	if ((tech == ptFFF && sl1) || (tech == ptSLA && !sl1)) {
-		return;
-	}
+    // Filter replies based on selected technology
+    const auto model = e.reply.txt_data.find("model");
+    const bool sl1   = model != e.reply.txt_data.end() && model->second == "SL1";
+    if ((tech == ptFFF && sl1) || (tech == ptSLA && !sl1)) {
+        return;
+    }
 
-	replies->insert(std::move(e.reply));
+    replies->insert(std::move(e.reply));
 
-	auto selected = get_selected();
+    auto selected = get_selected();
 
-	wxWindowUpdateLocker freeze_guard(this);
-	(void)freeze_guard;
+    wxWindowUpdateLocker freeze_guard(this);
+    (void) freeze_guard;
 
-	list->DeleteAllItems();
+    list->DeleteAllItems();
 
-	// The whole list is recreated so that we benefit from it already being sorted in the set.
-	// (And also because wxListView's sorting API is bananas.)
-	for (const auto &reply : *replies) {
-		auto item = list->InsertItem(0, reply.full_address);
-		list->SetItem(item, 1, reply.hostname);
-		list->SetItem(item, 2, reply.service_name);
+    // The whole list is recreated so that we benefit from it already being sorted in the set.
+    // (And also because wxListView's sorting API is bananas.)
+    for (const auto &reply : *replies) {
+        auto item = list->InsertItem(0, reply.full_address);
+        list->SetItem(item, 1, reply.hostname);
+        list->SetItem(item, 2, reply.service_name);
 
-		if (tech == ptFFF) {
-			const auto it = reply.txt_data.find("version");
-			if (it != reply.txt_data.end()) {
-				list->SetItem(item, 3, GUI::from_u8(it->second));
-			}
-		}
-	}
+        if (tech == ptFFF) {
+            const auto it = reply.txt_data.find("version");
+            if (it != reply.txt_data.end()) {
+                list->SetItem(item, 3, GUI::from_u8(it->second));
+            }
+        }
+    }
 
-	const int em = GUI::wxGetApp().em_unit();
+    const int em = GUI::wxGetApp().em_unit();
 
-	for (int i = 0; i < list->GetColumnCount(); i++) {
-		list->SetColumnWidth(i, wxLIST_AUTOSIZE);
-		if (list->GetColumnWidth(i) < 10 * em) { list->SetColumnWidth(i, 10 * em); }
-	}
+    for (int i = 0; i < list->GetColumnCount(); i++) {
+        list->SetColumnWidth(i, wxLIST_AUTOSIZE);
+        if (list->GetColumnWidth(i) < 10 * em) {
+            list->SetColumnWidth(i, 10 * em);
+        }
+    }
 
-	if (!selected.IsEmpty()) {
-		// Attempt to preserve selection
-		auto hit = list->FindItem(-1, selected);
-		if (hit >= 0) { list->SetItemState(hit, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED); }
-	}
+    if (!selected.IsEmpty()) {
+        // Attempt to preserve selection
+        auto hit = list->FindItem(-1, selected);
+        if (hit >= 0) {
+            list->SetItemState(hit, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+        }
+    }
 }
+
+// B29
+void BonjourDialog::on_udp_reply(UdpReplyEvent &e)
+{
+    if (udp_replies->find(e.reply) != udp_replies->end()) {
+        // We already have this reply
+        return;
+    }
+
+    //// Filter replies based on selected technology
+    // const auto model = e.reply.txt_data.find("model");
+    // const bool sl1 = model != e.reply.txt_data.end() && model->second == "SL1";
+    // if ((tech == ptFFF && sl1) || (tech == ptSLA && !sl1)) {
+    //	return;
+    //}
+
+    udp_replies->insert(std::move(e.reply));
+
+    auto selected = get_selected();
+
+    wxWindowUpdateLocker freeze_guard(this);
+    (void) freeze_guard;
+
+    list->DeleteAllItems();
+
+    // The whole list is recreated so that we benefit from it already being sorted in the set.
+    // (And also because wxListView's sorting API is bananas.)
+    for (const auto &reply : *udp_replies) {
+        auto item = list->InsertItem(0, reply.service_name);
+        list->SetItem(item, 1, reply.hostname);
+    }
+
+    const int em = GUI::wxGetApp().em_unit();
+
+    for (int i = 0; i < list->GetColumnCount(); i++) {
+        list->SetColumnWidth(i, wxLIST_AUTOSIZE);
+        if (list->GetColumnWidth(i) < 10 * em) {
+            list->SetColumnWidth(i, 10 * em);
+        }
+    }
+
+    if (!selected.IsEmpty()) {
+        // Attempt to preserve selection
+        auto hit = list->FindItem(-1, selected);
+        if (hit >= 0) {
+            list->SetItemState(hit, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+        }
+    }
+}
+
 
 void BonjourDialog::on_timer(wxTimerEvent &)
 {

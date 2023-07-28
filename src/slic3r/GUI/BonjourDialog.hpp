@@ -20,9 +20,14 @@ class address;
 namespace Slic3r {
 
 class Bonjour;
+//B29
+class Udp;
 class BonjourReplyEvent;
+//B29
+class UdpReplyEvent;
 class ReplySet;
-
+//B29
+class UdpReplySet;
 
 class BonjourDialog: public wxDialog
 {
@@ -39,13 +44,19 @@ public:
 private:
 	wxListView *list;
 	std::unique_ptr<ReplySet> replies;
+	//B29
+    std::unique_ptr<UdpReplySet> udp_replies;
 	wxStaticText *label;
 	std::shared_ptr<Bonjour> bonjour;
+	//B29
+    std::shared_ptr<Udp>  udp;
 	std::unique_ptr<wxTimer> timer;
 	unsigned timer_state;
 	Slic3r::PrinterTechnology tech;
 
 	virtual void on_reply(BonjourReplyEvent &);
+	//B29
+    virtual void on_udp_reply(UdpReplyEvent &);
 	void on_timer(wxTimerEvent &);
     void on_timer_process();
 };
