@@ -2085,13 +2085,15 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 m_printer_view->load_url(url);
             }
         }
-        //B4
-#ifdef __APPLE__
-        if (count == 0 && m_tabpanel->GetSelection() != (int) new_selection) {
+        // B30
+        if (m_tabpanel->GetSelection() != (int) new_selection && m_tabpanel->GetSelection() < 4)
             m_tabpanel->SetSelection(new_selection);
-            count++;
-        }
-#endif
+            //#ifdef __APPLE__
+            //        if (count == 0 && m_tabpanel->GetSelection() != (int) new_selection) {
+            //            m_tabpanel->SetSelection(new_selection);
+            //            count++;
+            //        }
+            //#endif
 
 #ifdef _MSW_DARK_MODE
         if (wxGetApp().tabs_as_menu()) {
