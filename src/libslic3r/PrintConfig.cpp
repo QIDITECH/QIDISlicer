@@ -442,7 +442,7 @@ void PrintConfigDef::init_fff_params()
     //B24
     def = this->add("volume_temperature", coInts);
     def->label = L("Other layers");
-    def->tooltip = L("Volume temperature for layers after the first one. "
+    def->tooltip = L("Chamber temperature for layers after the first one. "
                    "Set this to zero to disable bed temperature control commands in the output.");
     def->sidetext = L("°C");
     def->full_label = L("Volume temperature");
@@ -1297,7 +1297,7 @@ void PrintConfigDef::init_fff_params()
     def = this->add("first_layer_volume_temperature", coInts);
     def->label = L("First layer");
     def->full_label = L("First layer volume temperature");
-    def->tooltip = L("Volume temperature for the first layer. Set this to zero to disable "
+    def->tooltip = L("Chamber temperature for the first layer. Set this to zero to disable "
                    "bed temperature control commands in the output.");
     def->sidetext = L("°C");
     def->min = 0;

@@ -2042,7 +2042,7 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("bed_temperature"));
         optgroup->append_line(line);
         //B24
-        line = { L("Volume"), "" };
+        line = { L("Chamber"), "" };
         line.append_option(optgroup->get_option("first_layer_volume_temperature"));
         line.append_option(optgroup->get_option("volume_temperature"));
         optgroup->append_line(line);
