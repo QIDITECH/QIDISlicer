@@ -1019,14 +1019,31 @@ void Choice::BUILD() {
 	// recast as a wxWindow to fit the calling convention
 	window = dynamic_cast<wxWindow*>(temp);
 
-    if (m_opt.enum_def) {
+    /*if (m_opt.enum_def) {
         if (auto& labels = m_opt.enum_def->labels(); !labels.empty()) {
             bool localized = m_opt.enum_def->has_labels();
             for (const std::string& el : labels)
                 temp->Append(localized ? _(from_u8(el)) : from_u8(el));
             set_selection();
         }
-	}
+	}*/
+    if (m_opt.enum_def) {
+        // Append localized enum_labels
+        int i = 0;
+        boost::filesystem::path image_path(Slic3r::resources_dir());
+        image_path /= "icons";
+        for (auto el : m_opt.enum_def->labels()) {
+            auto icon_name = "param_" + m_opt.enum_def->labels()[i];
+            if (boost::filesystem::exists(image_path / (icon_name + ".svg"))) {
+                ScalableBitmap bm(temp, icon_name, 24);
+                temp->Append(_(el), bm.bmp());
+            } else {
+                temp->Append(_(el));
+            }
+            ++i;
+        }
+        set_selection();
+    }
 
     temp->Bind(wxEVT_MOUSEWHEEL, [this](wxMouseEvent& e) {
         if (m_suppress_scroll && !m_is_dropped)
