@@ -510,6 +510,20 @@ th:first-child {
 	line-height: 20px;
 }
 
+.UG_DESC_RED {
+	font-size: 14px;
+	width: 100%;
+	line-height: 20px;
+	color: #ED1C24;
+}
+
+.UG_DESC_GREEN {
+	font-size: 14px;
+	width: 100%;
+	line-height: 20px;
+	color: #24AB4D;
+}
+
 .UG_CDESC {
 	margin-top:35px;
 	margin-bottom:5px;
@@ -535,4 +549,17 @@ th:first-child {
 	width: 100%;
 	line-height: 20px;
 	margin-bottom: 50px;
+}
+
+.UG_AMB_DESC {
+	font-size: 16px;
+	font-weight: 700;
+	width: 100%;
+	line-height: 20px;
+}
+
+.UG_AM_DESC {
+	font-size: 16px;
+	width: 100%;
+	line-height: 20px;
 }
