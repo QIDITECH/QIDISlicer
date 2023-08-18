@@ -696,7 +696,11 @@ bool NotificationManager::PopNotification::update_state(bool paused, const int64
 	} else if (m_state != EState::NotFading && m_state != EState::FadingOut && m_state != EState::ClosePending && m_state != EState::Finished && get_duration() != 0 && !paused) {
 		int64_t up_time = now - m_notification_start;
 		if (up_time >= get_duration() * 1000) {
-			m_state					= EState::FadingOut;
+            if (get_duration_level() == NotificationLevel::ExportingNotificationLevel) {
+                m_state = EState::Finished;
+            } else {
+                m_state = EState::FadingOut;
+            }
 			m_fading_start			= now;
 		} else {
 			m_next_render = get_duration() * 1000 - up_time;
@@ -2873,8 +2877,11 @@ bool NotificationManager::update_notifications(GLCanvas3D& canvas)
 //Y9
 	if (export_on_going)
 	{
-		message = message + ".";
-		push_notification(NotificationType::ExportOngoing, NotificationManager::NotificationLevel::ProgressBarNotificationLevel, message);
+        if (message == "Exporting...")
+            message = "Exporting";
+		else
+			message = message + ".";
+		push_notification(NotificationType::ExportOngoing, NotificationManager::NotificationLevel::ExportingNotificationLevel, message);
 	}
 
 	// delayed notifications

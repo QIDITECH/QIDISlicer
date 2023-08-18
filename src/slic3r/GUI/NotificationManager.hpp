@@ -148,6 +148,8 @@ public:
 		WarningNotificationLevel,
 		// Error, no fade-out. Top most position.
 		ErrorNotificationLevel,
+		// test
+		ExportingNotificationLevel,
 	};
 
 	NotificationManager(wxEvtHandler* evt_handler);
@@ -381,6 +383,7 @@ private:
 		virtual bool push_background_color();
 		// used this function instead of reading directly m_data.duration. Some notifications might need to return changing value.
 		virtual int  get_duration() { return m_data.duration; }
+        virtual NotificationLevel  get_duration_level() { return m_data.level; }
 
 		const NotificationData m_data;
 		// For reusing ImGUI windows.
@@ -863,6 +866,7 @@ private:
 		case NotificationLevel::RegularNotificationLevel: 			return 10;
 		case NotificationLevel::PrintInfoNotificationLevel:			return 10;
 		case NotificationLevel::HintNotificationLevel:				return 300;
+        case NotificationLevel::ExportingNotificationLevel:			return 1;
 		default: return 10;
 		}
 	}
