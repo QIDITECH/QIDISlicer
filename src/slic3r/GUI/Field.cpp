@@ -1018,7 +1018,7 @@ void Choice::BUILD() {
 
 	// recast as a wxWindow to fit the calling convention
 	window = dynamic_cast<wxWindow*>(temp);
-
+//Y10
     /*if (m_opt.enum_def) {
         if (auto& labels = m_opt.enum_def->labels(); !labels.empty()) {
             bool localized = m_opt.enum_def->has_labels();
@@ -1026,23 +1026,38 @@ void Choice::BUILD() {
                 temp->Append(localized ? _(from_u8(el)) : from_u8(el));
             set_selection();
         }
-	}*/
+    }*/
     if (m_opt.enum_def) {
-        // Append localized enum_labels
-        int i = 0;
-        boost::filesystem::path image_path(Slic3r::resources_dir());
-        image_path /= "icons";
-        for (auto el : m_opt.enum_def->labels()) {
-            auto icon_name = "param_" + m_opt.enum_def->labels()[i];
-            if (boost::filesystem::exists(image_path / (icon_name + ".svg"))) {
-                ScalableBitmap bm(temp, icon_name, 24);
-                temp->Append(_(el), bm.bmp());
-            } else {
-                temp->Append(_(el));
+        if (auto& labels = m_opt.enum_def->labels(); !labels.empty())
+        {
+            bool localized = m_opt.enum_def->has_labels();
+            boost::filesystem::path image_path(Slic3r::resources_dir());
+            image_path /= "icons";
+            for (const std::string& el : labels)
+            {
+                std::vector <std::string> show_pattern_options{ "fill_pattern", "top_fill_pattern", "bottom_fill_pattern", "support_material_pattern","support_material_interface_pattern" };
+                bool show_pattern = false;
+                for (auto sp_option : show_pattern_options)
+                    if (m_opt.opt_key == sp_option)
+                        {
+                            show_pattern = true;
+                            break;
+                        }
+                if (show_pattern)
+                    {
+                        auto icon_name = "param_" + el;
+                        transform(icon_name.begin(), icon_name.end(), icon_name.begin(), ::tolower);
+                        if (boost::filesystem::exists(image_path / (icon_name + ".svg")))
+                        {
+                            ScalableBitmap bm(temp, icon_name);
+                            temp->Append(localized ? _(from_u8(el)) : from_u8(el), bm.bmp());
+                        }
+                    }
+                else
+                    temp->Append(localized ? _(from_u8(el)) : from_u8(el));
             }
-            ++i;
+            set_selection();
         }
-        set_selection();
     }
 
     temp->Bind(wxEVT_MOUSEWHEEL, [this](wxMouseEvent& e) {

@@ -1948,7 +1948,7 @@ void PrintConfigDef::init_fff_params()
 
     //B25
     def = this->add("enable_volume_fan", coInts);
-    def->label = L("Volume Fan Speed");
+    def->label = L("Chamber Fan Speed");
     def->tooltip = L("This setting represents the PWM your volume fan needs to work.");
     def->sidetext = L("%");
     def->min = 0;
@@ -2893,9 +2893,9 @@ void PrintConfigDef::init_fff_params()
                      "will create more stable supports, while snug support towers will save material and reduce "
                      "object scarring.");
     def->set_enum<SupportMaterialStyle>({
-        { "grid", L("Grid ") }, 
-        { "snug", L("Snug ") },
-        { "organic", L("Organic ") }
+        { "grid", L("Grid") }, 
+        { "snug", L("Snug") },
+        { "organic", L("Organic") }
     });
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<SupportMaterialStyle>(smsGrid));
