@@ -696,11 +696,11 @@ bool NotificationManager::PopNotification::update_state(bool paused, const int64
 	} else if (m_state != EState::NotFading && m_state != EState::FadingOut && m_state != EState::ClosePending && m_state != EState::Finished && get_duration() != 0 && !paused) {
 		int64_t up_time = now - m_notification_start;
 		if (up_time >= get_duration() * 1000) {
-            if (get_duration_level() == NotificationLevel::ExportingNotificationLevel) {
-                m_state = EState::Finished;
-            } else {
-                m_state = EState::FadingOut;
-            }
+//Y9
+			if (get_type() == NotificationType::ExportOngoing)
+				m_state = EState::Exporting;
+			else
+				m_state = EState::FadingOut;
 			m_fading_start			= now;
 		} else {
 			m_next_render = get_duration() * 1000 - up_time;
@@ -2847,41 +2847,31 @@ bool NotificationManager::update_notifications(GLCanvas3D& canvas)
 	// update state of all notif and erase finished
 //Y9
 	bool export_on_going = false;
-	bool export_finished = false;
-	std::string message = "12";
+	std::string message = _u8L("Exporting.");
 	for (auto it = m_pop_notifications.begin(); it != m_pop_notifications.end();) {
 		std::unique_ptr<PopNotification>& notification = *it;
 		request_render |= notification->update_state(hover, time_since_render);
 		next_render = std::min<int64_t>(next_render, notification->next_render());
 //Y9
-		if (notification->get_data().type == NotificationType::ExportFinished)
+		if (notification->get_state() == PopNotification::EState::Exporting)
 		{
-			export_finished = true;
-			export_on_going = false;
-		}
-		if (notification->get_state() == PopNotification::EState::Finished)
-		{
-			if (!export_finished)
-			{
-				if (notification->get_data().type == NotificationType::ExportOngoing)
-				{
-					message = notification->get_data().text1;
-					export_on_going = true;
-				}
-			}
+			message = notification->get_data().text1;
+			export_on_going = true;
 			it = m_pop_notifications.erase(it);
 		}
+		else if (notification->get_state() == PopNotification::EState::Finished)
+			it = m_pop_notifications.erase(it);
 		else 
 			++it;
 	}
 //Y9
 	if (export_on_going)
 	{
-        if (message == "Exporting...")
-            message = "Exporting";
+		if (message == _u8L("Exporting.") + " . . .")
+			message = _u8L("Exporting.");
 		else
-			message = message + ".";
-		push_notification(NotificationType::ExportOngoing, NotificationManager::NotificationLevel::ExportingNotificationLevel, message);
+			message = message + " .";
+		push_notification(NotificationType::ExportOngoing, NotificationManager::NotificationLevel::ProgressBarNotificationLevel, message);
 	}
 
 	// delayed notifications

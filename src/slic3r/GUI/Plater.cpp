@@ -3463,7 +3463,7 @@ void Plater::priv::export_gcode(fs::path output_path, bool output_path_on_remova
         background_process.schedule_export(output_path.string(), output_path_on_removable_media);
 //Y9
         //notification_manager->push_delayed_notification(NotificationType::ExportOngoing, []() {return true; }, 1000, 0);
-        notification_manager->push_notification(NotificationType::ExportOngoing, NotificationManager::NotificationLevel::ProgressBarNotificationLevel, "Exporting");
+        notification_manager->push_notification(NotificationType::ExportOngoing, NotificationManager::NotificationLevel::ProgressBarNotificationLevel, _u8L("Exporting."));
     } else {
         background_process.schedule_upload(std::move(upload_job));
     }
