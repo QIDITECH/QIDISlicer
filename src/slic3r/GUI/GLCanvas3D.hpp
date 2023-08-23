@@ -461,7 +461,8 @@ public:
 
     struct ArrangeSettings
     {
-        float distance           = 6.f;
+        //B
+        float distance           = 8.f;
         float distance_from_bed  = 0.f;
 //        float distance_seq_print = 6.;    // Used when sequential print is ON
 //        float distance_sla       = 6.;
