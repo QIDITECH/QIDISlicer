@@ -1,21 +1,21 @@
-1.0.2
-alpha=1.0.2-alpha1
-beta=1.0.2-beta1
+1.0.5
+alpha=1.0.5-alpha1
+beta=1.0.5-beta1
 
 [common]
-release = 1.0.2
-alpha = 1.0.2-alpha1
-beta = 1.0.2-beta1
-rc = 1.0.2-rc2
+release = 1.0.5
+alpha = 1.0.5-alpha1
+beta = 1.0.5-beta1
+rc = 1.0.5-rc2
 
 [release:win64]
-url = https://github.com/QIDITECH/QIDISlicer/releases/download/V1.0.2/QIDISlicer_Setup_1.0.2.exe
+url = https://github.com/QIDITECH/QIDISlicer/releases/download/V1.0.5/QIDISlicer_Setup_1.0.5_Win64.exe
 size = 71118761
 
 [release:linux]
-url = https://qidi3d.com
+url = https://github.com/QIDITECH/QIDISlicer/releases/download/V1.0.4/QIDISlicer-1.0.4.AppImage
 size = 69915840
 
 [release:osx]
-url = https://qidi3d.com/
+url = https://github.com/QIDITECH/QIDISlicer/releases/download/V1.0.5/QIDISlicer_Setup_1.0.5_Win64.exe
 size = 90237989
