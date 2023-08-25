@@ -880,6 +880,7 @@ void MainFrame::create_preset_tabs()
     else
 #endif
     m_tabpanel->AddPage(m_guide_view, _L("Guide"));
+
 }
 
 void MainFrame::add_created_tab(Tab* panel,  const std::string& bmp_name /*= ""*/)
@@ -1566,6 +1567,45 @@ void MainFrame::init_menubar_as_editor()
 
     // Help menu
     auto helpMenu = generate_help_menu();
+    
+    //B34
+    //auto calibrationMenu = generate_calibration_menu();
+    auto calibrationMenu = new wxMenu();
+    auto flowrate_menu   = new wxMenu();
+    append_menu_item(flowrate_menu, wxID_ANY, _L("Pass 1"), _L("Flow rate test - Pass 1"), [this](wxCommandEvent &) {
+        if (m_plater)
+            m_plater->calib_flowrate(1);
+        },
+        "", nullptr,
+        [this]() {
+            return m_plater->is_view3D_shown();
+            ;
+        },
+        this);
+    append_menu_item(flowrate_menu, wxID_ANY, _L("Pass 2"), _L("Flow rate test - Pass 2"), [this](wxCommandEvent &) {
+        if (m_plater)
+            m_plater->calib_flowrate(2);
+        },
+        "", nullptr,
+        [this]() {
+            return m_plater->is_view3D_shown();
+            ;
+        },
+        this);
+    calibrationMenu->AppendSubMenu(flowrate_menu, _L("Flow rate"));
+    append_menu_item(
+        calibrationMenu, wxID_ANY, _L("Pressure advance"), _L("Pressure advance"),
+        [this](wxCommandEvent &) {
+            if (!m_pa_calib_dlg)
+                m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+            m_pa_calib_dlg->ShowModal();
+        },
+        "", nullptr,
+        [this]() {
+            return m_plater->is_view3D_shown();
+            ;
+        },
+        this);
 
     // menubar
     // assign menubar to frame after appending items, otherwise special items
@@ -1579,6 +1619,8 @@ void MainFrame::init_menubar_as_editor()
     // Add additional menus from C++
     wxGetApp().add_config_menu(m_menubar);
     m_menubar->Append(helpMenu, _L("&Help"));
+    //B34
+    m_menubar->Append(calibrationMenu, _L("&Calibration"));
 
 #ifdef _MSW_DARK_MODE
     if (wxGetApp().tabs_as_menu()) {

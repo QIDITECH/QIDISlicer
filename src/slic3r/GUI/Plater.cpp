@@ -5363,6 +5363,81 @@ void Plater::add_model(bool imperial_units/* = false*/)
     if (! load_files(paths, true, false, imperial_units).empty())
         wxGetApp().mainframe->update_title();
 }
+//B34
+void Plater::add_model_calibration(bool imperial_units /* = false*/, std::string fname /* = ""*/)
+{
+    std::vector<fs::path> paths;
+
+    if (fname.empty()) {
+        wxArrayString input_files;
+        wxGetApp().import_model(this, input_files);
+        if (input_files.empty())
+            return;
+
+        for (const auto &file : input_files)
+            paths.emplace_back(into_path(file));
+    } else {
+        paths.emplace_back(fname);
+    }
+
+    wxString snapshot_label;
+    assert(!paths.empty());
+    if (paths.size() == 1) {
+        snapshot_label = "Import Object";
+        snapshot_label += ": ";
+        snapshot_label += wxString::FromUTF8(paths.front().filename().string().c_str());
+    } else {
+        snapshot_label = "Import Objects";
+        snapshot_label += ": ";
+        snapshot_label += paths.front().filename().string().c_str();
+        for (size_t i = 1; i < paths.size(); ++i) {
+            snapshot_label += ", ";
+            snapshot_label += wxString::FromUTF8(paths[i].filename().string().c_str());
+        }
+    }
+
+    Plater::TakeSnapshot snapshot(this, snapshot_label);
+    if (!load_files(paths, true, false, imperial_units).empty())
+        wxGetApp().mainframe->update_title();
+}
+
+//B34
+void Plater::calib_flowrate(int pass)
+{
+    if (pass != 1 && pass != 2)
+        return;
+    const auto calib_name = wxString::Format(L"Flowrate Test - Pass%d", pass);
+    new_project();
+
+    wxGetApp().mainframe->select_tab(size_t(0));
+
+    if (pass == 1)
+        add_model_calibration(false,
+                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass1.3mf").string());
+    else
+        add_model_calibration(false,
+                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass2.3mf").string());
+
+}
+//B34
+void Plater::calib_pa(const Calib_Params &params)
+{
+    const auto calib_pa_name = wxString::Format(L"Pressure Advance Test");
+    new_project();
+    wxGetApp().mainframe->select_tab(size_t(0));
+
+    switch (params.mode) {
+    case CalibMode::Calib_PA_Line:
+        add_model_calibration(false, Slic3r::resources_dir() + "/calib/PressureAdvance/pressure_advance_test.stl");
+        break;
+    //case CalibMode::Calib_PA_Pattern: _calib_pa_pattern(params); break;
+    //case CalibMode::Calib_PA_Tower: _calib_pa_tower(params); break;
+    default: break;
+    }
+
+    //p->background_process.fff_print()->set_calib_params(params);
+}
+
 
 void Plater::import_zip_archive()
 {

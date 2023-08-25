@@ -158,6 +158,9 @@ public:
         return m_bmp.GetDefaultSize();
 #endif
     }
+    //B34
+    void msw_rescale();
+
     int                 GetWidth()  const { return GetSize().GetWidth(); }
     int                 GetHeight() const { return GetSize().GetHeight(); }
 
@@ -167,6 +170,9 @@ private:
     wxBitmap        m_bitmap = wxBitmap();
     std::string     m_icon_name = "";
     int             m_px_cnt {16};
+    //B34
+    bool m_grayscale{false};
+    bool m_resize{false};
 };
 
 

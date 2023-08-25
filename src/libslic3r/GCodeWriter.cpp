@@ -162,6 +162,25 @@ std::string GCodeWriter::set_bed_temperature(unsigned int temperature, bool wait
     
     return gcode.str();
 }
+
+
+//B34
+std::string GCodeWriter::set_pressure_advance(double pa) const
+{
+    std::ostringstream gcode;
+    if (pa < 0)
+        return gcode.str();
+    else{
+        if (FLAVOR_IS(gcfKlipper))
+            gcode << "SET_PRESSURE_ADVANCE ADVANCE=" << std::setprecision(4) << pa << "; Override pressure advance value\n";
+        else if(FLAVOR_IS(gcfRepRapFirmware))
+            gcode << ("M572 D0 S") << std::setprecision(4) << pa << "; Override pressure advance value\n";
+        else
+            gcode << "M900 K" <<std::setprecision(4)<< pa << "; Override pressure advance value\n";
+    }
+    return gcode.str();
+}
+
 //B24
 std::string GCodeWriter::set_volume_temperature(unsigned int temperature, bool wait)
 {

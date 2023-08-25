@@ -26,8 +26,27 @@ set(SLIC3R_GUI_SOURCES
     GUI/Widgets/StateHandler.hpp
     GUI/Widgets/StaticBox.cpp
     GUI/Widgets/StaticBox.hpp
+    GUI/Widgets/Button.cpp
+    GUI/Widgets/Button.hpp
+    GUI/Widgets/CheckBoxInWT.cpp
+    GUI/Widgets/CheckBoxInWT.hpp
+    GUI/Widgets/ComboBox.cpp
+    GUI/Widgets/ComboBox.hpp
+    GUI/Widgets/TextInput.cpp
+    GUI/Widgets/TextInput.hpp
+    GUI/Widgets/TextCtrl.h
+    GUI/Widgets/RoundedRectangle.cpp
+    GUI/Widgets/RoundedRectangle.hpp
+    GUI/Widgets/RadioBox.cpp
+    GUI/Widgets/RadioBox.hpp
+    GUI/Widgets/DropDown.cpp
+    GUI/Widgets/DropDown.hpp
+    GUI/Widgets/PopupWindow.cpp
+    GUI/Widgets/PopupWindow.hpp
     GUI/ConfigSnapshotDialog.cpp
     GUI/ConfigSnapshotDialog.hpp
+    GUI/calib_dlg.cpp
+    GUI/calib_dlg.hpp
     GUI/3DScene.cpp
     GUI/3DScene.hpp
     GUI/format.hpp

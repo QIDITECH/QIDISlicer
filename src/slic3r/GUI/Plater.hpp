@@ -16,6 +16,8 @@
 #include "Jobs/Job.hpp"
 #include "Jobs/Worker.hpp"
 #include "Search.hpp"
+//B34
+ #include "libslic3r/Calib.hpp"
 
 class wxButton;
 class ScalableButton;
@@ -164,10 +166,17 @@ public:
     const SLAPrint& sla_print() const;
     SLAPrint& sla_print();
 
+    //B34
+    void calib_pa(const Calib_Params &params);
+    void calib_flowrate(int pass);
+
+
     void new_project();
     void load_project();
     void load_project(const wxString& filename);
     void add_model(bool imperial_units = false);
+    //B34
+    void add_model_calibration(bool imperial_units = false, std::string fname = "");
     void import_zip_archive();
     void import_sl1_archive();
     void extract_config_from_project();

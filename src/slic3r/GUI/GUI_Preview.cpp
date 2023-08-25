@@ -831,7 +831,8 @@ void Preview::load_print_as_fff(bool keep_z_range)
             unsigned int number_extruders = wxGetApp().is_editor() ?
                 (unsigned int)print->extruders().size() :
                 m_canvas->get_gcode_extruders_count();
-            std::vector<Item> gcodes = wxGetApp().is_editor() ?
+            //B34
+            std::vector<CustomGCode::Item> gcodes = wxGetApp().is_editor() ?
                 wxGetApp().plater()->model().custom_gcode_per_print_z.gcodes :
                 m_canvas->get_custom_gcode_per_print_z();
             const bool contains_color_gcodes = std::any_of(std::begin(gcodes), std::end(gcodes),

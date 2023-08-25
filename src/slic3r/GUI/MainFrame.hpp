@@ -21,6 +21,8 @@
 #include "PrinterWebView.hpp"
 // B28
 #include "GuideWebView.hpp"
+//B34
+#include "calib_dlg.hpp"
 
 class wxBookCtrlBase;
 class wxProgressDialog;
@@ -210,7 +212,8 @@ public:
 
 
     Plater *m_plater{nullptr};
-
+    //B34
+    PA_Calibration_Dlg *m_pa_calib_dlg{nullptr};
     //B4
     wxString              tem_host;
     PrinterWebView *      m_printer_view{nullptr};

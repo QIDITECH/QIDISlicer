@@ -45,6 +45,8 @@ public:
     std::string postamble() const;
     std::string set_temperature(unsigned int temperature, bool wait = false, int tool = -1) const;
     std::string set_bed_temperature(unsigned int temperature, bool wait = false);
+    //B34
+    std::string set_pressure_advance(double pa) const;
     //B24
     std::string set_volume_temperature(unsigned int temperature, bool wait = false);
     std::string set_print_acceleration(unsigned int acceleration)   { return set_acceleration_internal(Acceleration::Print, acceleration); }
