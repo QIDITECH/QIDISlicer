@@ -5413,10 +5413,10 @@ void Plater::calib_flowrate(int pass)
 
     if (pass == 1)
         add_model_calibration(false,
-                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass1.3mf").string());
+                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_coarse.3mf").string());
     else
         add_model_calibration(false,
-                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass2.3mf").string());
+                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_fine.3mf").string());
 
 }
 //B34

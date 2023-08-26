@@ -1572,7 +1572,7 @@ void MainFrame::init_menubar_as_editor()
     //auto calibrationMenu = generate_calibration_menu();
     auto calibrationMenu = new wxMenu();
     auto flowrate_menu   = new wxMenu();
-    append_menu_item(flowrate_menu, wxID_ANY, _L("Pass 1"), _L("Flow rate test - Pass 1"), [this](wxCommandEvent &) {
+    append_menu_item(flowrate_menu, wxID_ANY, _L("Coarse"), _L("Flow rate test - Pass 1"), [this](wxCommandEvent &) {
         if (m_plater)
             m_plater->calib_flowrate(1);
         },
@@ -1582,7 +1582,7 @@ void MainFrame::init_menubar_as_editor()
             ;
         },
         this);
-    append_menu_item(flowrate_menu, wxID_ANY, _L("Pass 2"), _L("Flow rate test - Pass 2"), [this](wxCommandEvent &) {
+    append_menu_item(flowrate_menu, wxID_ANY, _L("Fine"), _L("Flow rate test - Pass 2"), [this](wxCommandEvent &) {
         if (m_plater)
             m_plater->calib_flowrate(2);
         },
