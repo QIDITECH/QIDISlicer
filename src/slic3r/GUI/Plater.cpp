@@ -5408,16 +5408,48 @@ void Plater::calib_flowrate(int pass)
         return;
     const auto calib_name = wxString::Format(L"Flowrate Test - Pass%d", pass);
     new_project();
-
+    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
+    Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
+    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+    DynamicPrintConfig new_config;
     wxGetApp().mainframe->select_tab(size_t(0));
 
-    if (pass == 1)
+    if (pass == 1) {
+        new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
+        new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
+        new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1.});
+        new_config.set_key_value("between_objects_gcode",
+            new ConfigOptionString("{if current_object_idx==1}M221 S105{endif}"
+                                   "{if current_object_idx==2}M221 S110{endif}"
+                                   "{if current_object_idx==3}M221 S115{endif}"
+                                   "{if current_object_idx==4}M221 S120{endif}"
+                                   "{if current_object_idx==5}M221 S95{endif}"
+                                   "{if current_object_idx==6}M221 S90{endif}"
+                                   "{if current_object_idx==7}M221 S85{endif}"
+                                   "{if current_object_idx==8}M221 S80{endif}"));
+        tab_print->load_config(new_config);
+        tab_filament->load_config(new_config);
+        tab_printer->load_config(new_config);
         add_model_calibration(false,
-                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_coarse.3mf").string());
-    else
+            (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_coarse.3mf").string());
+    } else {
+        new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
+        new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
+        new_config.set_key_value("between_objects_gcode",
+            new ConfigOptionString("{if current_object_idx==1}M221 S101{endif}"
+                                   "{if current_object_idx==2}M221 S102{endif}"
+                                   "{if current_object_idx==3}M221 S103{endif}"
+                                   "{if current_object_idx==4}M221 S104{endif}"
+                                   "{if current_object_idx==5}M221 S99{endif}"
+                                   "{if current_object_idx==6}M221 S98{endif}"
+                                   "{if current_object_idx==7}M221 S97{endif}"
+                                   "{if current_object_idx==8}M221 S96{endif}"));
+        tab_print->load_config(new_config);
+        tab_filament->load_config(new_config);
+        tab_printer->load_config(new_config);
         add_model_calibration(false,
-                  (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_fine.3mf").string());
-
+            (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_fine.3mf").string());
+    }
 }
 //B34
 void Plater::calib_pa(const Calib_Params &params)
