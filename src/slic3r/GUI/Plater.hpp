@@ -169,6 +169,7 @@ public:
     //B34
     void calib_pa(const Calib_Params &params);
     void calib_flowrate(int pass);
+    void calib_flowrate_f(int pass, const Calib_Params &params);
 
 
     void new_project();

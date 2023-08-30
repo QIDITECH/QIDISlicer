@@ -5404,7 +5404,7 @@ void Plater::add_model_calibration(bool imperial_units /* = false*/, std::string
 //B34
 void Plater::calib_flowrate(int pass)
 {
-    if (pass != 1 && pass != 2)
+    if (pass != 1 /*&& pass != 2*/)
         return;
     const auto calib_name = wxString::Format(L"Flowrate Test - Pass%d", pass);
     new_project();
@@ -5432,7 +5432,7 @@ void Plater::calib_flowrate(int pass)
         tab_printer->load_config(new_config);
         add_model_calibration(false,
             (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_coarse.3mf").string());
-    } else {
+    } /*else {
         new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
         new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
         new_config.set_key_value("between_objects_gcode",
@@ -5449,8 +5449,45 @@ void Plater::calib_flowrate(int pass)
         tab_printer->load_config(new_config);
         add_model_calibration(false,
             (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_fine.3mf").string());
-    }
+    }*/
 }
+
+void Plater::calib_flowrate_f(int pass, const Calib_Params &params)
+{
+    if (pass != 2)
+        return;
+    const auto calib_name = wxString::Format(L"Flowrate Test - Pass%d", pass);
+    new_project();
+    wxGetApp().mainframe->select_tab(size_t(0));
+    if (params.mode != CalibMode::Calib_FRF)
+        return;
+
+    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
+    Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
+    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+    DynamicPrintConfig new_config;
+    int extru_multip = params.start * 100;
+    new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
+    new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
+    new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1.});
+    new_config.set_key_value("start_gcode",
+            new ConfigOptionString("G28\nM141 S0\nG0 Z50 F600\nM190 S[first_layer_bed_temperature]\nG28 Z\nG29 ; mesh bed leveling ,comment this code to close it\nG0 X0 Y0 Z50 F6000\nM109 S[first_layer_temperature]\nM83\nG0 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0)} Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0)} Z5 F6000\nG0 Z0.2 F600\nG1 E3 F1800\nG1 X{(min(print_bed_max[0], first_layer_print_min[0] + 80))} E{85 * 0.04} F3000\nG1 Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0) + 2} E{2 * 0.04} F3000\nG1 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0)} E{85 * 0.04} F3000\nG1 Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0) + 85} E{83 * 0.04} F3000\nG1 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0) + 2} E{2 * 0.04} F3000\nG1 Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0) + 3} E{82 * 0.04} F3000\nG1 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0) + 12} E{-10 * 0.04} F3000\nG1 E{10 * 0.04} F3000\nM221 S"+std::to_string(extru_multip)));
+    new_config.set_key_value("between_objects_gcode",
+            new ConfigOptionString("{if current_object_idx==1}M221 S"+std::to_string(extru_multip+1)+"{endif}"
+                                   "{if current_object_idx==2}M221 S"+std::to_string(extru_multip+2)+"{endif}"
+                                   "{if current_object_idx==3}M221 S"+std::to_string(extru_multip+3)+"{endif}"
+                                   "{if current_object_idx==4}M221 S"+std::to_string(extru_multip+4)+"{endif}"
+                                   "{if current_object_idx==5}M221 S"+std::to_string(extru_multip-1)+"{endif}"
+                                   "{if current_object_idx==6}M221 S"+std::to_string(extru_multip-2)+"{endif}"
+                                   "{if current_object_idx==7}M221 S"+std::to_string(extru_multip-3)+"{endif}"
+                                   "{if current_object_idx==8}M221 S"+std::to_string(extru_multip-4)+"{endif}"));
+    tab_print->load_config(new_config);
+    tab_filament->load_config(new_config);
+    tab_printer->load_config(new_config);
+    add_model_calibration(false,
+            (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_fine.3mf").string());
+}
+
 //B34
 void Plater::calib_pa(const Calib_Params &params)
 {

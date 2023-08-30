@@ -1575,6 +1575,9 @@ void MainFrame::init_menubar_as_editor()
     append_menu_item(flowrate_menu, wxID_ANY, _L("Coarse"), _L("Flow rate test - Pass 1"), [this](wxCommandEvent &) {
         if (m_plater)
             m_plater->calib_flowrate(1);
+        m_plater->get_notification_manager()->push_notification(NotificationType::CustomNotification,NotificationManager::NotificationLevel::PrintInfoNotificationLevel,
+                    _u8L("NOTICE: The configuration parameters may be changed "
+                         "after using the calibration feature. "));
         },
         "", nullptr,
         [this]() {
@@ -1583,8 +1586,12 @@ void MainFrame::init_menubar_as_editor()
         },
         this);
     append_menu_item(flowrate_menu, wxID_ANY, _L("Fine"), _L("Flow rate test - Pass 2"), [this](wxCommandEvent &) {
-        if (m_plater)
-            m_plater->calib_flowrate(2);
+        if (!m_frf_calib_dlg)
+            m_frf_calib_dlg = new FRF_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+        m_frf_calib_dlg->ShowModal();
+        m_plater->get_notification_manager()->push_notification(NotificationType::CustomNotification,NotificationManager::NotificationLevel::PrintInfoNotificationLevel,
+                    _u8L("NOTICE: The configuration parameters may be changed "
+                         "after using the calibration feature. "));
         },
         "", nullptr,
         [this]() {
@@ -1599,6 +1606,9 @@ void MainFrame::init_menubar_as_editor()
             if (!m_pa_calib_dlg)
                 m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
             m_pa_calib_dlg->ShowModal();
+            m_plater->get_notification_manager()->push_notification(NotificationType::CustomNotification,NotificationManager::NotificationLevel::PrintInfoNotificationLevel,
+                    _u8L("NOTICE: The configuration parameters may be changed "
+                         "after using the calibration feature. "));
         },
         "", nullptr,
         [this]() {

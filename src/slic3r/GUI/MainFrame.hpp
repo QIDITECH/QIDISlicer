@@ -212,6 +212,7 @@ public:
 
 
     Plater *m_plater{nullptr};
+    FRF_Calibration_Dlg *m_frf_calib_dlg{nullptr};
     //B34
     PA_Calibration_Dlg *m_pa_calib_dlg{nullptr};
     //B4

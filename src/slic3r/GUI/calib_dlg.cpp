@@ -34,6 +34,82 @@ wxBoxSizer *create_item_checkbox(wxString title, wxWindow *parent, bool *value, 
     return m_sizer_checkbox;
 }
 
+FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)
+    : DPIDialog(parent, id, _L("Flowrate-Fine Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER), m_plater(plater)
+{
+    wxBoxSizer* v_sizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(v_sizer);
+
+    // Settings
+    DynamicPrintConfig m_config;
+    wxString start_length_str = _L("Extrusion Multipler: ");
+    auto text_size = wxWindow::GetTextExtent(start_length_str);
+    text_size.x = text_size.x * 1.5;
+    wxStaticBoxSizer* settings_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _L("Settings"));
+
+    auto st_size = FromDIP(wxSize(text_size.x, -1));
+    auto ti_size = FromDIP(wxSize(90, -1));
+    // extru length
+    auto start_length_sizer = new wxBoxSizer(wxHORIZONTAL);
+    auto start_length_text = new wxStaticText(this, wxID_ANY, start_length_str, wxDefaultPosition, st_size, wxALIGN_LEFT);
+    m_tiExtru = new TextInput(this, "", "", "", wxDefaultPosition, ti_size, wxTE_CENTRE);
+    m_tiExtru->GetTextCtrl()->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+
+    start_length_sizer->Add(start_length_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+    start_length_sizer->Add(m_tiExtru, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+    settings_sizer->Add(start_length_sizer);
+
+    v_sizer->Add(settings_sizer);
+    v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
+    m_btnStart = new Button(this, _L("OK"));
+    StateColor btn_bg_green(std::pair<wxColour, int>(wxColour(0, 137, 123), StateColor::Pressed),
+        std::pair<wxColour, int>(wxColour(38, 166, 154), StateColor::Hovered),
+        std::pair<wxColour, int>(wxColour(0, 150, 136), StateColor::Normal));
+
+    m_btnStart->SetBackgroundColor(btn_bg_green);
+    m_btnStart->SetBorderColor(wxColour(0, 150, 136));
+    m_btnStart->SetTextColor(wxColour("#FFFFFE"));
+    m_btnStart->SetSize(wxSize(FromDIP(48), FromDIP(24)));
+    m_btnStart->SetMinSize(wxSize(FromDIP(48), FromDIP(24)));
+    m_btnStart->SetCornerRadius(FromDIP(3));
+    m_btnStart->Bind(wxEVT_BUTTON, &FRF_Calibration_Dlg::on_start, this);
+    v_sizer->Add(m_btnStart, 0, wxALL | wxALIGN_RIGHT, FromDIP(5));
+
+    m_btnStart->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FRF_Calibration_Dlg::on_start), NULL, this);
+
+    //wxGetApp().UpdateDlgDarkUI(this);
+
+    Layout();
+    Fit();
+}
+
+FRF_Calibration_Dlg::~FRF_Calibration_Dlg() {
+    // Disconnect Events
+    m_btnStart->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FRF_Calibration_Dlg::on_start), NULL, this);
+}
+
+void FRF_Calibration_Dlg::on_start(wxCommandEvent& event) {
+    bool read_double = false;
+    read_double = m_tiExtru->GetTextCtrl()->GetValue().ToDouble(&m_params.start);
+
+    if (!read_double || m_params.start <= 0 || m_params.start > 2) {
+        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n0 < Extru <= 2.)"), wxEmptyString, wxICON_WARNING | wxOK);
+        msg_dlg.ShowModal();
+        return;
+    }
+
+    m_params.mode = CalibMode::Calib_FRF;
+    m_plater->calib_flowrate_f(2, m_params);
+    EndModal(wxID_OK);
+
+}
+
+void FRF_Calibration_Dlg::on_dpi_changed(const wxRect& suggested_rect) {
+    this->Refresh();
+    Fit();
+
+}
+
 PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)
     : DPIDialog(parent, id, _L("PA Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER), m_plater(plater)
 {
