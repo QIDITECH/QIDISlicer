@@ -125,15 +125,13 @@ void FRF_Calibration_Dlg::on_start(wxCommandEvent& event) {
     }
 
     m_params.mode = CalibMode::Calib_FRF;
-    m_plater->calib_flowrate_f(2, m_params);
+    m_plater->calib_flowrate_fine(m_params);
     EndModal(wxID_OK);
-
 }
 
 void FRF_Calibration_Dlg::on_dpi_changed(const wxRect& suggested_rect) {
     this->Refresh();
     Fit();
-
 }
 
 PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)

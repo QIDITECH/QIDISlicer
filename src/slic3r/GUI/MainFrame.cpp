@@ -1567,55 +1567,34 @@ void MainFrame::init_menubar_as_editor()
 
     // Help menu
     auto helpMenu = generate_help_menu();
-    
+
     //B34
-    //auto calibrationMenu = generate_calibration_menu();
     auto calibrationMenu = new wxMenu();
-    auto flowrate_menu   = new wxMenu();
-    append_menu_item(flowrate_menu, wxID_ANY, _L("Coarse"), _L("Flow rate test - Pass 1"), [this](wxCommandEvent &) {
-        if (m_plater)
-            m_plater->calib_flowrate(1);
-        m_plater->get_notification_manager()->push_notification(NotificationType::CustomNotification,NotificationManager::NotificationLevel::PrintInfoNotificationLevel,
-                    _u8L("NOTICE: The configuration parameters may be changed "
-                         "after using the calibration feature. "));
-        },
-        "", nullptr,
-        [this]() {
-            return m_plater->is_view3D_shown();
-            ;
-        },
-        this);
-    append_menu_item(flowrate_menu, wxID_ANY, _L("Fine"), _L("Flow rate test - Pass 2"), [this](wxCommandEvent &) {
-        if (!m_frf_calib_dlg)
-            m_frf_calib_dlg = new FRF_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
-        m_frf_calib_dlg->ShowModal();
-        m_plater->get_notification_manager()->push_notification(NotificationType::CustomNotification,NotificationManager::NotificationLevel::PrintInfoNotificationLevel,
-                    _u8L("NOTICE: The configuration parameters may be changed "
-                         "after using the calibration feature. "));
-        },
-        "", nullptr,
-        [this]() {
-            return m_plater->is_view3D_shown();
-            ;
-        },
-        this);
-    calibrationMenu->AppendSubMenu(flowrate_menu, _L("Flow rate"));
-    append_menu_item(
-        calibrationMenu, wxID_ANY, _L("Pressure advance"), _L("Pressure advance"),
-        [this](wxCommandEvent &) {
-            if (!m_pa_calib_dlg)
-                m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
-            m_pa_calib_dlg->ShowModal();
-            m_plater->get_notification_manager()->push_notification(NotificationType::CustomNotification,NotificationManager::NotificationLevel::PrintInfoNotificationLevel,
-                    _u8L("NOTICE: The configuration parameters may be changed "
-                         "after using the calibration feature. "));
-        },
-        "", nullptr,
-        [this]() {
-            return m_plater->is_view3D_shown();
-            ;
-        },
-        this);
+    if (m_plater)
+    {
+        auto flowrateMenu   = new wxMenu();
+        append_menu_item(flowrateMenu, wxID_ANY, _L("Coarse"), _L("Flow Rate Coarse"),
+            [this](wxCommandEvent &) { m_plater->calib_flowrate_coarse(); },
+            "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
+
+        append_menu_item(flowrateMenu, wxID_ANY, _L("Fine"), _L("Flow Rate Fine"),
+            [this](wxCommandEvent &) {
+                if (!m_frf_calib_dlg)
+                    m_frf_calib_dlg = new FRF_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+                m_frf_calib_dlg->ShowModal();
+            },
+            "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
+
+        calibrationMenu->AppendSubMenu(flowrateMenu, _L("Flow rate"));
+
+        append_menu_item(calibrationMenu, wxID_ANY, _L("Pressure advance"), _L("Pressure advance"),
+            [this](wxCommandEvent &) {
+                if (!m_pa_calib_dlg)
+                    m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+                m_pa_calib_dlg->ShowModal();
+            },
+            "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
+    }
 
     // menubar
     // assign menubar to frame after appending items, otherwise special items
