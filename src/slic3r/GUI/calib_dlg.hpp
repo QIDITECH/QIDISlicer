@@ -18,6 +18,22 @@
 
 namespace Slic3r { namespace GUI {
 
+class FRF_Calibration_Dlg : public DPIDialog
+{
+public:
+    FRF_Calibration_Dlg(wxWindow *parent, wxWindowID id, Plater *plater);
+    ~FRF_Calibration_Dlg();
+    void on_dpi_changed(const wxRect &suggested_rect) override;
+
+protected:
+    virtual void on_start(wxCommandEvent &event);
+    Calib_Params m_params;
+
+    TextInput *m_tiExtru;
+    Button *   m_btnStart;
+    Plater *   m_plater;
+};
+
 class PA_Calibration_Dlg : public DPIDialog
 {
 public:
