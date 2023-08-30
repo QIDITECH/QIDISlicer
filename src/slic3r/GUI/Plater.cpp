@@ -5466,12 +5466,14 @@ void Plater::calib_flowrate_f(int pass, const Calib_Params &params)
     Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
     DynamicPrintConfig new_config;
+    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     int extru_multip = params.start * 100;
+    auto start_gcode = printerConfig->opt_string("start_gcode");
     new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
     new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
     new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1.});
     new_config.set_key_value("start_gcode",
-            new ConfigOptionString("G28\nM141 S0\nG0 Z50 F600\nM190 S[first_layer_bed_temperature]\nG28 Z\nG29 ; mesh bed leveling ,comment this code to close it\nG0 X0 Y0 Z50 F6000\nM109 S[first_layer_temperature]\nM83\nG0 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0)} Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0)} Z5 F6000\nG0 Z0.2 F600\nG1 E3 F1800\nG1 X{(min(print_bed_max[0], first_layer_print_min[0] + 80))} E{85 * 0.04} F3000\nG1 Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0) + 2} E{2 * 0.04} F3000\nG1 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0)} E{85 * 0.04} F3000\nG1 Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0) + 85} E{83 * 0.04} F3000\nG1 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0) + 2} E{2 * 0.04} F3000\nG1 Y{max((min(print_bed_max[1], first_layer_print_min[1] + 80) - 85),0) + 3} E{82 * 0.04} F3000\nG1 X{max((min(print_bed_max[0], first_layer_print_min[0] + 80) - 85),0) + 12} E{-10 * 0.04} F3000\nG1 E{10 * 0.04} F3000\nM221 S"+std::to_string(extru_multip)));
+            new ConfigOptionString(start_gcode + "\nM221 S"+std::to_string(extru_multip)));
     new_config.set_key_value("between_objects_gcode",
             new ConfigOptionString("{if current_object_idx==1}M221 S"+std::to_string(extru_multip+1)+"{endif}"
                                    "{if current_object_idx==2}M221 S"+std::to_string(extru_multip+2)+"{endif}"
