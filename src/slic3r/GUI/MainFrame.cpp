@@ -1572,7 +1572,7 @@ void MainFrame::init_menubar_as_editor()
     auto calibrationMenu = new wxMenu();
     if (m_plater)
     {
-        auto flowrateMenu   = new wxMenu();
+        auto flowrateMenu = new wxMenu();
         append_menu_item(flowrateMenu, wxID_ANY, _L("Coarse"), _L("Flow Rate Coarse"),
             [this](wxCommandEvent &) { m_plater->calib_flowrate_coarse(); },
             "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
@@ -1585,7 +1585,8 @@ void MainFrame::init_menubar_as_editor()
             },
             "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
 
-        calibrationMenu->AppendSubMenu(flowrateMenu, _L("Flow rate"));
+        //calibrationMenu->AppendSubMenu(flowrateMenu, _L("Flow rate"));
+        append_submenu(calibrationMenu, flowrateMenu, wxID_ANY, _L("Flow rate"), "");
 
         append_menu_item(calibrationMenu, wxID_ANY, _L("Pressure advance"), _L("Pressure advance"),
             [this](wxCommandEvent &) {

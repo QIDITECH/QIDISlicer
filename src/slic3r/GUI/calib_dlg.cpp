@@ -35,7 +35,7 @@ wxBoxSizer *create_item_checkbox(wxString title, wxWindow *parent, bool *value, 
 }
 
 FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)
-    : DPIDialog(parent, id, _L("Flowrate-Fine Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER), m_plater(plater)
+    : DPIDialog(parent, id, _L("Flowrate Fine Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER), m_plater(plater)
 {
     wxBoxSizer* v_sizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(v_sizer);
@@ -73,7 +73,7 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     m_tiExtru->GetTextCtrl()->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
 
     // desc
-    auto setting_desc = new wxStaticText(this, wxID_ANY, _u8L("Please note that modifying the extrusion multiplier parameter will affect different extrusion ratios.\nValid values area:0.9-1.1"),
+    auto setting_desc = new wxStaticText(this, wxID_ANY, _u8L("Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."),
                          wxDefaultPosition, desc_size, wxALIGN_LEFT);
     setting_desc->Wrap(setting_desc->GetClientSize().x);
 
