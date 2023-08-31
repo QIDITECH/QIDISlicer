@@ -44,22 +44,15 @@ public:
 protected:
     void reset_params();
 	virtual void on_start(wxCommandEvent& event);
-	virtual void on_extruder_type_changed(wxCommandEvent& event);
 	virtual void on_method_changed(wxCommandEvent& event);
 
 protected:
-	bool m_bDDE;
 	Calib_Params m_params;
-
-
-	wxRadioBox* m_rbExtruderType;
 	wxRadioBox* m_rbMethod;
 	TextInput* m_tiStartPA;
 	TextInput* m_tiEndPA;
 	TextInput* m_tiPAStep;
-    CheckBoxInWT *m_cbPrintNum;
 	Button* m_btnStart;
-
 	Plater* m_plater;
 };
 

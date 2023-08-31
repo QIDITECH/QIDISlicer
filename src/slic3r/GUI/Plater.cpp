@@ -5363,52 +5363,16 @@ void Plater::add_model(bool imperial_units/* = false*/)
     if (! load_files(paths, true, false, imperial_units).empty())
         wxGetApp().mainframe->update_title();
 }
-//B34
-void Plater::add_model_calibration(bool imperial_units /* = false*/, std::string fname /* = ""*/)
-{
-    std::vector<fs::path> paths;
-
-    if (fname.empty()) {
-        wxArrayString input_files;
-        wxGetApp().import_model(this, input_files);
-        if (input_files.empty())
-            return;
-
-        for (const auto &file : input_files)
-            paths.emplace_back(into_path(file));
-    } else {
-        paths.emplace_back(fname);
-    }
-
-    wxString snapshot_label;
-    assert(!paths.empty());
-    if (paths.size() == 1) {
-        snapshot_label = "Import Object";
-        snapshot_label += ": ";
-        snapshot_label += wxString::FromUTF8(paths.front().filename().string().c_str());
-    } else {
-        snapshot_label = "Import Objects";
-        snapshot_label += ": ";
-        snapshot_label += paths.front().filename().string().c_str();
-        for (size_t i = 1; i < paths.size(); ++i) {
-            snapshot_label += ", ";
-            snapshot_label += wxString::FromUTF8(paths[i].filename().string().c_str());
-        }
-    }
-
-    Plater::TakeSnapshot snapshot(this, snapshot_label);
-    if (!load_files(paths, true, false, imperial_units).empty())
-        wxGetApp().mainframe->update_title();
-}
 
 //B34
 void Plater::calib_flowrate_coarse()
 {
+    new_project();
+    wxGetApp().mainframe->select_tab(size_t(0));
     Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
     DynamicPrintConfig new_config;
-    wxGetApp().mainframe->select_tab(size_t(0));
 
     new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
     new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
@@ -5425,7 +5389,10 @@ void Plater::calib_flowrate_coarse()
     tab_print->load_config(new_config);
     tab_filament->load_config(new_config);
     tab_printer->load_config(new_config);
-    add_model_calibration(false, (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_coarse.3mf").string());
+
+    std::vector<fs::path> model_path;
+    model_path.emplace_back(Slic3r::resources_dir() + "/calib/FlowRate/flowrate_coarse.3mf");
+    load_files(model_path, true, false, false);
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
@@ -5433,6 +5400,7 @@ void Plater::calib_flowrate_coarse()
 
 void Plater::calib_flowrate_fine(const Calib_Params &params)
 {
+    new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
     if (params.mode != CalibMode::Calib_FRF)
         return;
@@ -5460,31 +5428,57 @@ void Plater::calib_flowrate_fine(const Calib_Params &params)
     tab_print->load_config(new_config);
     tab_filament->load_config(new_config);
     tab_printer->load_config(new_config);
-    add_model_calibration(false, (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "FlowRate" / "flowrate_fine.3mf").string());
+
+    std::vector<fs::path> model_path;
+    model_path.emplace_back(Slic3r::resources_dir() + "/calib/FlowRate/flowrate_fine.3mf");
+    load_files(model_path, true, false, false);
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
 
 //B34
-void Plater::calib_pa(const Calib_Params &params)
+void Plater::calib_pa(const int pa_method, wxString StartPA, wxString EndPA, wxString PAStep)
 {
-    const auto calib_pa_name = wxString::Format(L"Pressure Advance Test");
     new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
+    std::vector<fs::path> model_path;
+    //double pa = StartPA;
 
-    switch (params.mode) {
-    case CalibMode::Calib_PA_Line:
-        add_model_calibration(false, Slic3r::resources_dir() + "/calib/PressureAdvance/pa_line.stl");
-        break;
-    //case CalibMode::Calib_PA_Pattern: _calib_pa_pattern(params); break;
-    //case CalibMode::Calib_PA_Tower: _calib_pa_tower(params); break;
-    default: break;
+    switch (pa_method) {
+        case 0:
+        {
+            Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+            DynamicPrintConfig new_config;
+            auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+
+            auto end_gcode = printerConfig->opt_string("end_gcode");
+            std::string set_pa_gcode = "M900 K";
+            end_gcode = set_pa_gcode + end_gcode;
+            new_config.set_key_value("end_gcode", new ConfigOptionString(end_gcode));
+            tab_printer->load_config(new_config);
+
+            model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_line.stl");
+            load_files(model_path, true, false, false);
+            break;
+        }
+
+        case 1:
+        {
+            model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_pattern.stl");
+            load_files(model_path, true, false, false);
+            break;
+        }
+
+        case 2:
+        {
+            model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_tower.stl");
+            load_files(model_path, true, false, false);
+            break;
+        }
+        default: break;
     }
-
-    //p->background_process.fff_print()->set_calib_params(params);
 }
-
 
 void Plater::import_zip_archive()
 {
