@@ -35,7 +35,7 @@ wxBoxSizer *create_item_checkbox(wxString title, wxWindow *parent, bool *value, 
 }
 
 FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)
-    : DPIDialog(parent, id, _L("Flowrate Fine Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER), m_plater(plater)
+    : DPIDialog(parent, id, _L("Flowrate Fine Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxNO_BORDER), m_plater(plater)
 {
     wxBoxSizer* v_sizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(v_sizer);
@@ -45,10 +45,11 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     wxString start_length_str = _L("Extrusion Multiplier: ");
     auto text_size = wxWindow::GetTextExtent(start_length_str);
     text_size.x = text_size.x * 1.5;
+    wxStaticBoxSizer *settings_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _L("Settings"));
 
     auto st_size = FromDIP(wxSize(text_size.x, -1));
     auto ti_size = FromDIP(wxSize(90, -1));
-    auto desc_size = FromDIP(wxSize(300, -1));
+    auto desc_size = FromDIP(wxSize(307, -1));
 
     // extru
     auto multip = filament_config->opt_float("extrusion_multiplier",0);
@@ -69,8 +70,8 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     }
     auto start_length_sizer = new wxBoxSizer(wxHORIZONTAL);
     auto start_length_text = new wxStaticText(this, wxID_ANY, start_length_str, wxDefaultPosition, st_size, wxALIGN_LEFT);
-    m_tiExtru = new TextInput(this, multip_str, "", "", wxDefaultPosition, ti_size, wxTE_CENTRE);
-    m_tiExtru->GetTextCtrl()->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    m_tiExtru = new wxTextCtrl(this, wxID_ANY, multip_str, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
+    m_tiExtru->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
 
     // desc
     auto setting_desc = new wxStaticText(this, wxID_ANY, _u8L("Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."),
@@ -80,27 +81,19 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     // delay
     start_length_sizer->Add(start_length_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     start_length_sizer->Add(m_tiExtru, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
-    v_sizer->Add(setting_desc, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    v_sizer->Add(start_length_sizer);
-    v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
-    m_btnStart = new Button(this, _L("OK"));
-    StateColor btn_bg_blue(std::pair<wxColour, int>(wxColour(51, 91, 188), StateColor::Pressed),
-        std::pair<wxColour, int>(wxColour(51, 109, 251), StateColor::Hovered),
-        std::pair<wxColour, int>(wxColour(68, 121, 251), StateColor::Normal));
-
-    m_btnStart->SetBackgroundColor(btn_bg_blue);
-    m_btnStart->SetBorderColor(wxColour(68, 121, 251));
-    m_btnStart->SetTextColor(wxColour("#FFFFFE"));
-    m_btnStart->SetSize(wxSize(FromDIP(48), FromDIP(24)));
-    m_btnStart->SetMinSize(wxSize(FromDIP(48), FromDIP(24)));
-    m_btnStart->SetCornerRadius(FromDIP(3));
+    settings_sizer->Add(start_length_sizer);
+    v_sizer->Add(setting_desc, 0, wxTOP | wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
+    //v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
+    v_sizer->Add(settings_sizer, 0, wxTOP | wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
+    v_sizer->Add(0, FromDIP(5), 0, wxEXPAND, 5);
+    m_btnStart = new wxButton(this, wxID_OK, _L("OK"));
     m_btnStart->Bind(wxEVT_BUTTON, &FRF_Calibration_Dlg::on_start, this);
-    v_sizer->Add(m_btnStart, 0, wxALL | wxALIGN_RIGHT, FromDIP(5));
+    v_sizer->Add(m_btnStart, 0, wxRIGHT | wxALIGN_RIGHT, 15);
+    v_sizer->Add(0, FromDIP(8), 0, wxEXPAND, 5);
 
     m_btnStart->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FRF_Calibration_Dlg::on_start), NULL, this);
 
-    //wxGetApp().UpdateDlgDarkUI(this);
+    wxGetApp().UpdateDlgDarkUI(this);
 
     Layout();
     Fit();
@@ -113,17 +106,17 @@ FRF_Calibration_Dlg::~FRF_Calibration_Dlg() {
 
 void FRF_Calibration_Dlg::on_start(wxCommandEvent& event) {
     bool read_double = false;
-    read_double = m_tiExtru->GetTextCtrl()->GetValue().ToDouble(&m_params.start);
+    read_double = m_tiExtru->GetValue().ToDouble(&m_params.start);
 
     if (!read_double || m_params.start < 0.9) {
         MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.9 <= Extrusion Multiplier <= 1.1\n"), wxEmptyString, wxICON_WARNING | wxOK);
         msg_dlg.ShowModal();
-        m_tiExtru->GetTextCtrl()->SetValue("0.9");
+        m_tiExtru->SetValue("0.9");
         return;
     } else if (!read_double || m_params.start > 1.1) {
         MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.9 <= Extrusion Multiplier <= 1.1\n"), wxEmptyString, wxICON_WARNING | wxOK);
         msg_dlg.ShowModal();
-        m_tiExtru->GetTextCtrl()->SetValue("1.1");
+        m_tiExtru->SetValue("1.1");
         return;
     }
 

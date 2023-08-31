@@ -29,9 +29,9 @@ protected:
     virtual void on_start(wxCommandEvent &event);
     Calib_Params m_params;
 
-    TextInput *m_tiExtru;
-    Button *   m_btnStart;
-    Plater *   m_plater;
+    wxTextCtrl *m_tiExtru;
+    wxButton *  m_btnStart;
+    Plater *    m_plater;
 };
 
 class PA_Calibration_Dlg : public DPIDialog
