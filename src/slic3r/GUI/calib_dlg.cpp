@@ -42,7 +42,7 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
 
     // Settings
     auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
-    wxString start_length_str = _L("Extrusion Multipler: ");
+    wxString start_length_str = _L("Extrusion Multiplier: ");
     auto text_size = wxWindow::GetTextExtent(start_length_str);
     text_size.x = text_size.x * 1.5;
 
@@ -76,14 +76,13 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     auto setting_desc = new wxStaticText(this, wxID_ANY, _u8L("Please note that modifying the extrusion multiplier parameter will affect different extrusion ratios.\nValid values area:0.9-1.1"),
                          wxDefaultPosition, desc_size, wxALIGN_LEFT);
     setting_desc->Wrap(setting_desc->GetClientSize().x);
-    setting_desc->SetForegroundColour(wxColour(*wxRED));
 
     // delay
     start_length_sizer->Add(start_length_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     start_length_sizer->Add(m_tiExtru, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
-    v_sizer->Add(start_length_sizer);
     v_sizer->Add(setting_desc, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+    v_sizer->Add(start_length_sizer);
     v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
     m_btnStart = new Button(this, _L("OK"));
     StateColor btn_bg_blue(std::pair<wxColour, int>(wxColour(51, 91, 188), StateColor::Pressed),
@@ -117,9 +116,13 @@ void FRF_Calibration_Dlg::on_start(wxCommandEvent& event) {
     read_double = m_tiExtru->GetTextCtrl()->GetValue().ToDouble(&m_params.start);
 
     if (!read_double || m_params.start < 0.9) {
+        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.9 <= Extrusion Multiplier <= 1.1\n"), wxEmptyString, wxICON_WARNING | wxOK);
+        msg_dlg.ShowModal();
         m_tiExtru->GetTextCtrl()->SetValue("0.9");
         return;
     } else if (!read_double || m_params.start > 1.1) {
+        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.9 <= Extrusion Multiplier <= 1.1\n"), wxEmptyString, wxICON_WARNING | wxOK);
+        msg_dlg.ShowModal();
         m_tiExtru->GetTextCtrl()->SetValue("1.1");
         return;
     }
