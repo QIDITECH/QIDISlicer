@@ -13,7 +13,6 @@
 #include "GUI_App.hpp"
 #include "wx/hyperlink.h"
 #include <wx/radiobox.h>
-#include "libslic3r/calib.hpp"
 #include "Plater.hpp"
 
 namespace Slic3r { namespace GUI {
@@ -27,11 +26,10 @@ public:
 
 protected:
     virtual void on_start(wxCommandEvent &event);
-    Calib_Params m_params;
 
-    wxTextCtrl *m_tiExtru;
-    wxButton *  m_btnStart;
-    Plater *    m_plater;
+    wxTextCtrl* m_tc_extrusion_multiplier;
+    wxButton*   m_btnStart;
+    Plater*     m_plater;
 };
 
 class PA_Calibration_Dlg : public DPIDialog
@@ -40,20 +38,17 @@ public:
     PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater);
     ~PA_Calibration_Dlg();
     void on_dpi_changed(const wxRect& suggested_rect) override;
-	void on_show(wxShowEvent& event);
-protected:
-    void reset_params();
-	virtual void on_start(wxCommandEvent& event);
-	virtual void on_method_changed(wxCommandEvent& event);
 
 protected:
-	Calib_Params m_params;
-	wxRadioBox* m_rbMethod;
-	TextInput* m_tiStartPA;
-	TextInput* m_tiEndPA;
-	TextInput* m_tiPAStep;
-	Button* m_btnStart;
-	Plater* m_plater;
+    virtual void on_start(wxCommandEvent& event);
+    virtual void on_method_changed(wxCommandEvent& event);
+
+    wxRadioBox*  m_rbMethod;
+    wxTextCtrl*  m_tcStartPA;
+    wxTextCtrl*  m_tcEndPA;
+    wxTextCtrl*  m_tcPAStep;
+    wxButton*    m_btnStart;
+    Plater*      m_plater;
 };
 
 }} // namespace Slic3r::GUI

@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 #include <string>
@@ -5369,14 +5370,11 @@ void Plater::calib_flowrate_coarse()
 {
     new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
-    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
-    Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
-    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
-    DynamicPrintConfig new_config;
 
+    DynamicPrintConfig new_config;
     new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
     new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
-    new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1.});
+    new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1});
     new_config.set_key_value("between_objects_gcode",
         new ConfigOptionString("{if current_object_idx==1}M221 S105{endif}"
                                 "{if current_object_idx==2}M221 S110{endif}"
@@ -5386,6 +5384,10 @@ void Plater::calib_flowrate_coarse()
                                 "{if current_object_idx==6}M221 S90{endif}"
                                 "{if current_object_idx==7}M221 S85{endif}"
                                 "{if current_object_idx==8}M221 S80{endif}"));
+
+    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
+    Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
+    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
     tab_print->load_config(new_config);
     tab_filament->load_config(new_config);
     tab_printer->load_config(new_config);
@@ -5398,33 +5400,33 @@ void Plater::calib_flowrate_coarse()
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
 
-void Plater::calib_flowrate_fine(const Calib_Params &params)
+void Plater::calib_flowrate_fine(const double target_extrusion_multiplier)
 {
     new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
-    if (params.mode != CalibMode::Calib_FRF)
-        return;
+
+    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    int em = target_extrusion_multiplier * 100;
+    auto start_gcode = printerConfig->opt_string("start_gcode");
+
+    DynamicPrintConfig new_config;
+    new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
+    new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
+    new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1});
+    new_config.set_key_value("start_gcode", new ConfigOptionString(start_gcode + "\nM221 S"+std::to_string(em)));
+    new_config.set_key_value("between_objects_gcode",
+            new ConfigOptionString("{if current_object_idx==1}M221 S"+std::to_string(em+1)+"{endif}"
+                                   "{if current_object_idx==2}M221 S"+std::to_string(em+2)+"{endif}"
+                                   "{if current_object_idx==3}M221 S"+std::to_string(em+3)+"{endif}"
+                                   "{if current_object_idx==4}M221 S"+std::to_string(em+4)+"{endif}"
+                                   "{if current_object_idx==5}M221 S"+std::to_string(em-1)+"{endif}"
+                                   "{if current_object_idx==6}M221 S"+std::to_string(em-2)+"{endif}"
+                                   "{if current_object_idx==7}M221 S"+std::to_string(em-3)+"{endif}"
+                                   "{if current_object_idx==8}M221 S"+std::to_string(em-4)+"{endif}"));
 
     Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
-    DynamicPrintConfig new_config;
-    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
-    int extru_multip = params.start * 100;
-    auto start_gcode = printerConfig->opt_string("start_gcode");
-    new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
-    new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
-    new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1.});
-    new_config.set_key_value("start_gcode", new ConfigOptionString(start_gcode + "\nM221 S"+std::to_string(extru_multip)));
-    new_config.set_key_value("between_objects_gcode",
-            new ConfigOptionString("{if current_object_idx==1}M221 S"+std::to_string(extru_multip+1)+"{endif}"
-                                   "{if current_object_idx==2}M221 S"+std::to_string(extru_multip+2)+"{endif}"
-                                   "{if current_object_idx==3}M221 S"+std::to_string(extru_multip+3)+"{endif}"
-                                   "{if current_object_idx==4}M221 S"+std::to_string(extru_multip+4)+"{endif}"
-                                   "{if current_object_idx==5}M221 S"+std::to_string(extru_multip-1)+"{endif}"
-                                   "{if current_object_idx==6}M221 S"+std::to_string(extru_multip-2)+"{endif}"
-                                   "{if current_object_idx==7}M221 S"+std::to_string(extru_multip-3)+"{endif}"
-                                   "{if current_object_idx==8}M221 S"+std::to_string(extru_multip-4)+"{endif}"));
     tab_print->load_config(new_config);
     tab_filament->load_config(new_config);
     tab_printer->load_config(new_config);
@@ -5438,46 +5440,95 @@ void Plater::calib_flowrate_fine(const Calib_Params &params)
 }
 
 //B34
-void Plater::calib_pa(const int pa_method, wxString StartPA, wxString EndPA, wxString PAStep)
+void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
 {
     new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
+//Load model
     std::vector<fs::path> model_path;
-    //double pa = StartPA;
-
-    switch (pa_method) {
-        case 0:
-        {
-            Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
-            DynamicPrintConfig new_config;
-            auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
-
-            auto end_gcode = printerConfig->opt_string("end_gcode");
-            std::string set_pa_gcode = "M900 K";
-            end_gcode = set_pa_gcode + end_gcode;
-            new_config.set_key_value("end_gcode", new ConfigOptionString(end_gcode));
-            tab_printer->load_config(new_config);
-
-            model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_line.stl");
-            load_files(model_path, true, false, false);
-            break;
-        }
-
-        case 1:
-        {
-            model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_pattern.stl");
-            load_files(model_path, true, false, false);
-            break;
-        }
-
-        case 2:
-        {
-            model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_tower.stl");
-            load_files(model_path, true, false, false);
-            break;
-        }
-        default: break;
+    model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_line.stl");
+    load_files(model_path, true, false, false);
+//Check step count
+    const Vec2d plate_center = build_volume().bed_center();
+    double count = floor((EndPA - StartPA) / PAStep);
+    double max_count = floor(plate_center.y() / 2.5) - 2;
+    if (count > max_count)
+    {
+        count = max_count;
     }
+
+    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+//Position aided model
+    sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
+    sidebar().obj_manipul()->set_uniform_scaling(false);
+    sidebar().obj_manipul()->on_change("size", 1, count * 5);
+    auto first_layer_height = printerConfig->opt_float("first_layer_height");
+    sidebar().obj_manipul()->on_change("size", 2, first_layer_height);
+    sidebar().obj_manipul()->set_uniform_scaling(true);
+
+//Generate line gcode
+    double start_x = plate_center.x() - 40;
+    double end_x = plate_center.x() + 40;
+    double start_y = plate_center.y() - count *2.5;
+    double end_y = plate_center.y() + count *2.5;
+    std::string pa_line_gcode = "M900 K";
+
+
+//Generate number gcode
+    std::string pa_number_gcode = "M900 K";
+
+
+//Set and load end gcode
+    auto end_gcode = printerConfig->opt_string("end_gcode");
+    end_gcode = pa_line_gcode + pa_number_gcode + end_gcode;
+
+    DynamicPrintConfig new_config;
+    new_config.set_key_value("end_gcode", new ConfigOptionString(end_gcode));
+
+    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+    tab_printer->load_config(new_config);
+
+    std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
+    get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
+}
+
+void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
+{
+    new_project();
+    wxGetApp().mainframe->select_tab(size_t(0));
+
+    std::vector<fs::path> model_path;
+    model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_pattern.stl");
+    load_files(model_path, true, false, false);
+
+    const Vec2d plate_center = build_volume().bed_center();
+    sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
+
+    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+    DynamicPrintConfig new_config;
+    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+
+    auto end_gcode = printerConfig->opt_string("end_gcode");
+    std::string set_pa_gcode = "M900 K";
+    end_gcode = set_pa_gcode + end_gcode;
+    new_config.set_key_value("end_gcode", new ConfigOptionString(end_gcode));
+    tab_printer->load_config(new_config);
+
+    std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
+    get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
+}
+
+void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
+{
+    new_project();
+    wxGetApp().mainframe->select_tab(size_t(0));
+
+    std::vector<fs::path> model_path;
+    model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_tower.stl");
+    load_files(model_path, true, false, false);
+
+    std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
+    get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
 
 void Plater::import_zip_archive()

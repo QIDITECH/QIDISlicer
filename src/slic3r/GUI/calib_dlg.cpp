@@ -5,91 +5,45 @@
 #include <wx/dcgraph.h>
 #include "MainFrame.hpp"
 #include <string>
+#include <sstream>
+#include <iomanip>
 namespace Slic3r { 
 namespace GUI {
-    
-wxBoxSizer *create_item_checkbox(wxString title, wxWindow *parent, bool *value, CheckBoxInWT *&checkbox)
-{
-    wxBoxSizer* m_sizer_checkbox = new wxBoxSizer(wxHORIZONTAL);
-
-    m_sizer_checkbox->Add(0, 0, 0, wxEXPAND | wxLEFT, 5);
-
-    checkbox = new ::CheckBoxInWT(parent);
-    m_sizer_checkbox->Add(checkbox, 0, wxALIGN_CENTER, 0);
-    m_sizer_checkbox->Add(0, 0, 0, wxEXPAND | wxLEFT, 8);
-
-    auto checkbox_title = new wxStaticText(parent, wxID_ANY, title, wxDefaultPosition, wxSize(-1, -1), 0);
-    checkbox_title->SetForegroundColour(wxColour(144, 144, 144));
-    checkbox_title->SetFont(::Label::Body_13);
-    checkbox_title->Wrap(-1);
-    m_sizer_checkbox->Add(checkbox_title, 0, wxALIGN_CENTER | wxALL, 3);
-
-    checkbox->SetValue(true);
-
-    checkbox->Bind(wxEVT_TOGGLEBUTTON, [parent, checkbox, value](wxCommandEvent& e) {
-        (*value) = (*value) ? false : true;
-        e.Skip();
-        });
-
-    return m_sizer_checkbox;
-}
 
 FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)
-    : DPIDialog(parent, id, _L("Flowrate Fine Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxNO_BORDER), m_plater(plater)
+    : DPIDialog(parent, id, _L("Flowrate Fine Calibration"), wxDefaultPosition, wxSize(-1, 280), wxDEFAULT_DIALOG_STYLE | wxNO_BORDER), m_plater(plater)
 {
     wxBoxSizer* v_sizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(v_sizer);
 
-    // Settings
-    auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
-    wxString start_length_str = _L("Extrusion Multiplier: ");
-    auto text_size = wxWindow::GetTextExtent(start_length_str);
-    text_size.x = text_size.x * 1.5;
-    wxStaticBoxSizer *settings_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _L("Settings"));
+    // desc
+    std::string setting_desc_message = _u8L("Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier.");
+    auto setting_desc = new wxStaticText(this, wxID_ANY, setting_desc_message, wxDefaultPosition, wxSize(340, -1), wxALIGN_LEFT);
+    setting_desc->Wrap(setting_desc->GetClientSize().x);
+    v_sizer->Add(setting_desc, 0, wxTOP | wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
 
-    auto st_size = FromDIP(wxSize(text_size.x, -1));
-    auto ti_size = FromDIP(wxSize(90, -1));
-    auto desc_size = FromDIP(wxSize(307, -1));
+    // Settings
+    wxStaticBoxSizer *settings_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _L("Settings"));
+
+    auto extrusion_multiplier_text = new wxStaticText(this, wxID_ANY, _L("Extrusion Multiplier: "), wxDefaultPosition, wxSize(230, -1), wxALIGN_LEFT);
+    settings_sizer->Add(extrusion_multiplier_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     // extru
-    auto multip = filament_config->opt_float("extrusion_multiplier",0);
-    std::string multip_str = std::to_string(multip);
-    if (multip_str.find(".") > 0) {
-        size_t fp = multip_str.rfind(".");
-        size_t f  = multip_str.rfind("0");
-        while (f > fp) {
-            if (f != -1) {
-                multip_str = multip_str.erase(f);
-            }
-            f = multip_str.rfind("0");
-        }
-        fp = multip_str.rfind(".");
-        if (fp == multip_str.size() - 1) {
-            multip_str = multip_str.erase(fp);
-        }
-    }
-    auto start_length_sizer = new wxBoxSizer(wxHORIZONTAL);
-    auto start_length_text = new wxStaticText(this, wxID_ANY, start_length_str, wxDefaultPosition, st_size, wxALIGN_LEFT);
-    m_tiExtru = new wxTextCtrl(this, wxID_ANY, multip_str, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
-    m_tiExtru->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
+    auto read_extrusion_multiplier = filament_config->opt_float("extrusion_multiplier", 0);
+    std::stringstream ss;
+    ss << std::setprecision(2) << read_extrusion_multiplier;
+    m_tc_extrusion_multiplier = new wxTextCtrl(this, wxID_ANY, ss.str(), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tc_extrusion_multiplier->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    settings_sizer->Add(m_tc_extrusion_multiplier, 0, wxRIGHT | wxALIGN_RIGHT, 0);
 
-    // desc
-    auto setting_desc = new wxStaticText(this, wxID_ANY, _u8L("Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."),
-                         wxDefaultPosition, desc_size, wxALIGN_LEFT);
-    setting_desc->Wrap(setting_desc->GetClientSize().x);
-
-    // delay
-    start_length_sizer->Add(start_length_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    start_length_sizer->Add(m_tiExtru, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    settings_sizer->Add(start_length_sizer);
-    v_sizer->Add(setting_desc, 0, wxTOP | wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
-    //v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
     v_sizer->Add(settings_sizer, 0, wxTOP | wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
-    v_sizer->Add(0, FromDIP(5), 0, wxEXPAND, 5);
-    m_btnStart = new wxButton(this, wxID_OK, _L("OK"));
+    v_sizer->Add(0, 5, 0, wxEXPAND, 5);
+
+    m_btnStart = new wxButton(this, wxID_ANY, _L("OK"));
     m_btnStart->Bind(wxEVT_BUTTON, &FRF_Calibration_Dlg::on_start, this);
     v_sizer->Add(m_btnStart, 0, wxRIGHT | wxALIGN_RIGHT, 15);
-    v_sizer->Add(0, FromDIP(8), 0, wxEXPAND, 5);
+    v_sizer->Add(0, 8, 0, wxEXPAND, 5);
 
     m_btnStart->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FRF_Calibration_Dlg::on_start), NULL, this);
 
@@ -106,22 +60,22 @@ FRF_Calibration_Dlg::~FRF_Calibration_Dlg() {
 
 void FRF_Calibration_Dlg::on_start(wxCommandEvent& event) {
     bool read_double = false;
-    read_double = m_tiExtru->GetValue().ToDouble(&m_params.start);
+    double target_extrusion_multiplier;
+    read_double = m_tc_extrusion_multiplier->GetValue().ToDouble(&target_extrusion_multiplier);
 
-    if (!read_double || m_params.start < 0.9) {
-        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.9 <= Extrusion Multiplier <= 1.1\n"), wxEmptyString, wxICON_WARNING | wxOK);
+    if (!read_double || target_extrusion_multiplier < 0.5) {
+        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"), wxEmptyString, wxICON_WARNING | wxOK);
         msg_dlg.ShowModal();
-        m_tiExtru->SetValue("0.9");
+        m_tc_extrusion_multiplier->SetValue("0.5");
         return;
-    } else if (!read_double || m_params.start > 1.1) {
-        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.9 <= Extrusion Multiplier <= 1.1\n"), wxEmptyString, wxICON_WARNING | wxOK);
+    } else if (!read_double || target_extrusion_multiplier > 1.5) {
+        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"), wxEmptyString, wxICON_WARNING | wxOK);
         msg_dlg.ShowModal();
-        m_tiExtru->SetValue("1.1");
+        m_tc_extrusion_multiplier->SetValue("1.5");
         return;
     }
 
-    m_params.mode = CalibMode::Calib_FRF;
-    m_plater->calib_flowrate_fine(m_params);
+    m_plater->calib_flowrate_fine(target_extrusion_multiplier);
     EndModal(wxID_OK);
 }
 
@@ -131,83 +85,62 @@ void FRF_Calibration_Dlg::on_dpi_changed(const wxRect& suggested_rect) {
 }
 
 PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater)
-    : DPIDialog(parent, id, _L("Pressure Advance Calibration"), wxDefaultPosition, parent->FromDIP(wxSize(-1, 280)), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER), m_plater(plater)
+    : DPIDialog(parent, id, _L("Pressure Advance Calibration"), wxDefaultPosition, wxSize(-1, 280), wxDEFAULT_DIALOG_STYLE | wxNO_BORDER), m_plater(plater)
 {
     wxBoxSizer* v_sizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(v_sizer);
-	wxBoxSizer* choice_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-	choice_sizer->Add(FromDIP(5), 0, 0, wxEXPAND, 5);
-	wxString m_rbMethodChoices[] = { _L("PA Line"), _L("PA Pattern"), _L("PA Tower") };
-	int m_rbMethodNChoices = sizeof(m_rbMethodChoices) / sizeof(wxString);
-	m_rbMethod = new wxRadioBox(this, wxID_ANY, _L("Method"), wxDefaultPosition, wxDefaultSize, m_rbMethodNChoices, m_rbMethodChoices, 1, wxRA_SPECIFY_COLS);
-	m_rbMethod->SetSelection(0);
-	choice_sizer->Add(m_rbMethod, 0, wxALL, 5);
-
-	v_sizer->Add(choice_sizer);
+    wxString m_rbMethodChoices[] = { _L("PA Line"), _L("PA Pattern"), _L("PA Tower") };
+    int m_rbMethodNChoices = sizeof(m_rbMethodChoices) / sizeof(wxString);
+    m_rbMethod = new wxRadioBox(this, wxID_ANY, _L("Method"), wxDefaultPosition, wxDefaultSize, m_rbMethodNChoices, m_rbMethodChoices, 1, wxRA_SPECIFY_COLS);
+    m_rbMethod->SetSelection(0);
+    v_sizer->Add(m_rbMethod, 0, wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
 
     // Settings
-    //
-    wxString start_pa_str = _L("Start PA: ");
-    wxString end_pa_str = _L("End PA: ");
-    wxString PA_step_str = _L("PA step: ");
-	auto text_size = wxWindow::GetTextExtent(start_pa_str);
-	text_size.IncTo(wxWindow::GetTextExtent(end_pa_str));
-	text_size.IncTo(wxWindow::GetTextExtent(PA_step_str));
-	text_size.x = text_size.x * 1.5;
-	wxStaticBoxSizer* settings_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _L("Settings"));
+    wxStaticBoxSizer* settings_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _L("Settings"));
 
-	auto st_size = FromDIP(wxSize(text_size.x, -1));
-	auto ti_size = FromDIP(wxSize(90, -1));
     // start PA
     auto start_PA_sizer = new wxBoxSizer(wxHORIZONTAL);
-    auto start_pa_text = new wxStaticText(this, wxID_ANY, start_pa_str, wxDefaultPosition, st_size, wxALIGN_LEFT);
-    m_tiStartPA = new TextInput(this, "", "", "", wxDefaultPosition, ti_size, wxTE_CENTRE | wxTE_PROCESS_ENTER);
-    m_tiStartPA->GetTextCtrl()->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    auto start_pa_text = new wxStaticText(this, wxID_ANY, _L("Start PA: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
+    start_PA_sizer->Add(start_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
-	start_PA_sizer->Add(start_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    start_PA_sizer->Add(m_tiStartPA, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+    m_tcStartPA = new wxTextCtrl(this, wxID_ANY, "0", wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tcStartPA->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    start_PA_sizer->Add(m_tcStartPA, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     settings_sizer->Add(start_PA_sizer);
 
     // end PA
     auto end_PA_sizer = new wxBoxSizer(wxHORIZONTAL);
-    auto end_pa_text = new wxStaticText(this, wxID_ANY, end_pa_str, wxDefaultPosition, st_size, wxALIGN_LEFT);
-    m_tiEndPA = new TextInput(this, "", "", "", wxDefaultPosition, ti_size, wxTE_CENTRE | wxTE_PROCESS_ENTER);
-    m_tiStartPA->GetTextCtrl()->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    auto end_pa_text = new wxStaticText(this, wxID_ANY, _L("End PA: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     end_PA_sizer->Add(end_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    end_PA_sizer->Add(m_tiEndPA, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+
+    m_tcEndPA = new wxTextCtrl(this, wxID_ANY, "0.04", wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tcStartPA->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    end_PA_sizer->Add(m_tcEndPA, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     settings_sizer->Add(end_PA_sizer);
 
     // PA step
     auto PA_step_sizer = new wxBoxSizer(wxHORIZONTAL);
-    auto PA_step_text = new wxStaticText(this, wxID_ANY, PA_step_str, wxDefaultPosition, st_size, wxALIGN_LEFT);
-    m_tiPAStep = new TextInput(this, "", "", "", wxDefaultPosition, ti_size, wxTE_CENTRE | wxTE_PROCESS_ENTER);
-    m_tiStartPA->GetTextCtrl()->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    auto PA_step_text = new wxStaticText(this, wxID_ANY, _L("PA step: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     PA_step_sizer->Add(PA_step_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
-    PA_step_sizer->Add(m_tiPAStep, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+
+    m_tcPAStep = new wxTextCtrl(this, wxID_ANY, "0.002", wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tcStartPA->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
+    PA_step_sizer->Add(m_tcPAStep, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     settings_sizer->Add(PA_step_sizer);
 
-    v_sizer->Add(settings_sizer);
-	v_sizer->Add(0, FromDIP(10), 0, wxEXPAND, 5);
-    m_btnStart = new Button(this, _L("OK"));
-    StateColor btn_bg_green(std::pair<wxColour, int>(wxColour(51, 91, 188), StateColor::Pressed),
-		std::pair<wxColour, int>(wxColour(51, 109, 251), StateColor::Hovered),
-		std::pair<wxColour, int>(wxColour(68, 121, 251), StateColor::Normal));
+    v_sizer->Add(0, 5, 0, wxEXPAND, 5);
+    v_sizer->Add(settings_sizer, 0, wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
+    v_sizer->Add(0, 5, 0, wxEXPAND, 5);
 
-	m_btnStart->SetBackgroundColor(btn_bg_green);
-	m_btnStart->SetBorderColor(wxColour(0, 150, 136));
-	m_btnStart->SetTextColor(wxColour("#FFFFFE"));
-	m_btnStart->SetSize(wxSize(FromDIP(48), FromDIP(24)));
-	m_btnStart->SetMinSize(wxSize(FromDIP(48), FromDIP(24)));
-	m_btnStart->SetCornerRadius(FromDIP(3));
-	m_btnStart->Bind(wxEVT_BUTTON, &PA_Calibration_Dlg::on_start, this);
-	v_sizer->Add(m_btnStart, 0, wxALL | wxALIGN_RIGHT, FromDIP(5));
+    m_btnStart = new wxButton(this, wxID_ANY, _L("OK"));
+    m_btnStart->Bind(wxEVT_BUTTON, &PA_Calibration_Dlg::on_start, this);
+    v_sizer->Add(m_btnStart, 0, wxRIGHT | wxALIGN_RIGHT, 15);
+    v_sizer->Add(0, 8, 0, wxEXPAND, 5);
 
-    PA_Calibration_Dlg::reset_params();
-
-    // Connect Events
     m_rbMethod->Connect(wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler(PA_Calibration_Dlg::on_method_changed), NULL, this);
-    this->Connect(wxEVT_SHOW, wxShowEventHandler(PA_Calibration_Dlg::on_show));
+    m_btnStart->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PA_Calibration_Dlg::on_start), NULL, this);
+    wxGetApp().UpdateDlgDarkUI(this);
 
     Layout();
     Fit();
@@ -219,68 +152,46 @@ PA_Calibration_Dlg::~PA_Calibration_Dlg() {
     m_btnStart->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(PA_Calibration_Dlg::on_start), NULL, this);
 }
 
-void PA_Calibration_Dlg::reset_params() {
-    int method = m_rbMethod->GetSelection();
-
-    m_tiStartPA->GetTextCtrl()->SetValue(wxString::FromDouble(0.0));
-
-    switch (method) {
-        case 1:
-            m_params.mode = CalibMode::Calib_PA_Pattern;
-            m_tiEndPA->GetTextCtrl()->SetValue(wxString::FromDouble(0.08));
-            m_tiPAStep->GetTextCtrl()->SetValue(wxString::FromDouble(0.005));
-            break;
-        case 2:
-            m_params.mode = CalibMode::Calib_PA_Tower;
-            m_tiEndPA->GetTextCtrl()->SetValue(wxString::FromDouble(0.1));
-            m_tiPAStep->GetTextCtrl()->SetValue(wxString::FromDouble(0.002));
-            break;
-        default:
-            m_params.mode = CalibMode::Calib_PA_Line;
-            m_tiEndPA->GetTextCtrl()->SetValue(wxString::FromDouble(0.1));
-            m_tiPAStep->GetTextCtrl()->SetValue(wxString::FromDouble(0.002));
-            break;
-    }
-}
-
 void PA_Calibration_Dlg::on_start(wxCommandEvent& event) { 
     bool read_double = false;
-    read_double = m_tiStartPA->GetTextCtrl()->GetValue().ToDouble(&m_params.start);
-    read_double = read_double && m_tiEndPA->GetTextCtrl()->GetValue().ToDouble(&m_params.end);
-    read_double = read_double && m_tiPAStep->GetTextCtrl()->GetValue().ToDouble(&m_params.step);
-    if (!read_double || m_params.start < 0 || m_params.step < EPSILON || m_params.end < m_params.start + m_params.step) {
-        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA\nPA step: >= 0.001)"), wxEmptyString, wxICON_WARNING | wxOK);
+    double start_pa;
+    double end_pa;
+    double pa_step;
+    read_double = m_tcStartPA->GetValue().ToDouble(&start_pa);
+    read_double = read_double && m_tcEndPA->GetValue().ToDouble(&end_pa);
+    read_double = read_double && m_tcPAStep->GetValue().ToDouble(&pa_step);
+    if (!read_double || start_pa < 0 || pa_step < EPSILON || end_pa < start_pa + pa_step) {
+        MessageDialog msg_dlg(nullptr, _L("Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"), wxEmptyString, wxICON_WARNING | wxOK);
         msg_dlg.ShowModal();
         return;
     }
 
     switch (m_rbMethod->GetSelection()) {
-        case 1:
-            m_params.mode = CalibMode::Calib_PA_Pattern;
+        case 0:{
+            m_plater->calib_pa_line( start_pa, end_pa, pa_step);
             break;
-        case 2:
-            m_params.mode = CalibMode::Calib_PA_Tower;
+        }
+        case 1:{
+            m_plater->calib_pa_pattern( start_pa, end_pa, pa_step);
             break;
-        default:
-            m_params.mode = CalibMode::Calib_PA_Line;
+        }
+        case 2:{
+            m_plater->calib_pa_tower( start_pa, end_pa, pa_step);
+            break;
+        }
+        default: break;
     }
 
-    m_plater->calib_pa(m_rbMethod->GetSelection(), m_tiStartPA->GetTextCtrl()->GetValue(), m_tiEndPA->GetTextCtrl()->GetValue(), m_tiPAStep->GetTextCtrl()->GetValue());
     EndModal(wxID_OK);
 }
 
 void PA_Calibration_Dlg::on_method_changed(wxCommandEvent& event) { 
-    PA_Calibration_Dlg::reset_params();
     event.Skip(); 
 }
 
 void PA_Calibration_Dlg::on_dpi_changed(const wxRect& suggested_rect) {
     this->Refresh(); 
     Fit();
-}
-
-void PA_Calibration_Dlg::on_show(wxShowEvent& event) {
-    PA_Calibration_Dlg::reset_params();
 }
 
 }} // namespace Slic3r::GUI

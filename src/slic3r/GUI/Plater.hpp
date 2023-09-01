@@ -16,8 +16,6 @@
 #include "Jobs/Job.hpp"
 #include "Jobs/Worker.hpp"
 #include "Search.hpp"
-//B34
- #include "libslic3r/Calib.hpp"
 
 class wxButton;
 class ScalableButton;
@@ -167,9 +165,11 @@ public:
     SLAPrint& sla_print();
 
     //B34
-    void calib_pa(const int pa_method, wxString StartPA, wxString EndPA, wxString PAStep);
+    void calib_pa_line(const double StartPA, double EndPA, double PAStep);
+    void calib_pa_pattern(const double StartPA, double EndPA, double PAStep);
+    void calib_pa_tower(const double StartPA, double EndPA, double PAStep);
     void calib_flowrate_coarse();
-    void calib_flowrate_fine(const Calib_Params &params);
+    void calib_flowrate_fine(const double target_extrusion_multiplier);
 
 
     void new_project();
