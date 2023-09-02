@@ -7,6 +7,8 @@
 #include <numeric>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <regex>
 #include <future>
 #include <boost/algorithm/string.hpp>
@@ -5366,6 +5368,14 @@ void Plater::add_model(bool imperial_units/* = false*/)
 }
 
 //B34
+std::string Plater::double_to_str(const double value)
+{
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
+//B34
 void Plater::calib_flowrate_coarse()
 {
     new_project();
@@ -5405,15 +5415,15 @@ void Plater::calib_flowrate_fine(const double target_extrusion_multiplier)
     new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
 
-    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    DynamicPrintConfig* printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     int em = target_extrusion_multiplier * 100;
-    auto start_gcode = printerConfig->opt_string("start_gcode");
+    const std::string frf_start_gcode = printer_config->opt_string("start_gcode");
 
     DynamicPrintConfig new_config;
     new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
     new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
     new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1});
-    new_config.set_key_value("start_gcode", new ConfigOptionString(start_gcode + "\nM221 S"+std::to_string(em)));
+    new_config.set_key_value("start_gcode", new ConfigOptionString(frf_start_gcode + "\nM221 S"+std::to_string(em)));
     new_config.set_key_value("between_objects_gcode",
             new ConfigOptionString("{if current_object_idx==1}M221 S"+std::to_string(em+1)+"{endif}"
                                    "{if current_object_idx==2}M221 S"+std::to_string(em+2)+"{endif}"
@@ -5457,33 +5467,53 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
         count = max_count;
     }
 
-    auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    DynamicPrintConfig* print_config = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
+    DynamicPrintConfig* filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
+    DynamicPrintConfig* printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
 //Position aided model
     sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
     sidebar().obj_manipul()->set_uniform_scaling(false);
     sidebar().obj_manipul()->on_change("size", 1, count * 5);
-    auto first_layer_height = printerConfig->opt_float("first_layer_height");
-    sidebar().obj_manipul()->on_change("size", 2, first_layer_height);
+    double pa_first_layer_height = print_config->get_abs_value("first_layer_height");
+    sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
     sidebar().obj_manipul()->set_uniform_scaling(true);
 
 //Generate line gcode
-    double start_x = plate_center.x() - 40;
-    double end_x = plate_center.x() + 40;
-    double start_y = plate_center.y() - count *2.5;
-    double end_y = plate_center.y() + count *2.5;
-    std::string pa_line_gcode = "M900 K";
+    std::string start_x = double_to_str(plate_center.x() - 40);
+    std::string x1 = double_to_str(plate_center.x() - 20);
+    std::string x2 = double_to_str(plate_center.x() + 20);
+    std::string end_x = double_to_str(plate_center.x() + 40);
+    std::string start_y = double_to_str(plate_center.y() - count * 2.5);
+    std::string end_y = double_to_str(plate_center.y() + count * 2.5);
+
+    std::string pa_layer_height = double_to_str(print_config->get_abs_value("layer_height"));
+    std::string pa_external_perimeter_speed = double_to_str(print_config->get_abs_value("external_perimeter_speed") * 60);
+    std::string pa_travel_speed = double_to_str(print_config->get_abs_value("travel_speed") * 60);
+    double pa_external_perimeter_extrusion_width = print_config->get_abs_value("external_perimeter_extrusion_width");
+    double pa_extrusion_multiplier = filament_config->opt_float("extrusion_multiplier", 0);
+    double pa_retract_length = printer_config->opt_float("retract_length", 0);
+    std::string pa_retract_speed = double_to_str(printer_config->opt_float("retract_speed", 0) * 60);
+
+    double e_step = print_config->get_abs_value("layer_height") * pa_external_perimeter_extrusion_width * 0.4;
+    std::string value_E;
+
+    std::string pa_line_gcode = "G0 X" + end_x + " Y" + start_y + " F" + pa_travel_speed;
+    pa_line_gcode += "\nG0 Z" + pa_layer_height;
+    value_E = double_to_str(count * 5 * e_step);
+    pa_line_gcode += "\nG1 X" + end_x + " Y" + end_y + " E" + value_E + " F" + pa_external_perimeter_speed;
+    pa_line_gcode += "\nG0 X" + start_x + " Y" + start_y + " F" + pa_travel_speed;
 
 
 //Generate number gcode
-    std::string pa_number_gcode = "M900 K";
+    std::string pa_number_gcode = "\nM900 K\n";
 
 
 //Set and load end gcode
-    auto end_gcode = printerConfig->opt_string("end_gcode");
-    end_gcode = pa_line_gcode + pa_number_gcode + end_gcode;
+    auto pa_end_gcode = printer_config->opt_string("end_gcode");
+    pa_end_gcode = pa_line_gcode + pa_number_gcode + pa_end_gcode;
 
     DynamicPrintConfig new_config;
-    new_config.set_key_value("end_gcode", new ConfigOptionString(end_gcode));
+    new_config.set_key_value("end_gcode", new ConfigOptionString(pa_end_gcode));
 
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
     tab_printer->load_config(new_config);

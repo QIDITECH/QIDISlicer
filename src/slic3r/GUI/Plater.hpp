@@ -165,12 +165,12 @@ public:
     SLAPrint& sla_print();
 
     //B34
+    std::string double_to_str(const double value);
     void calib_pa_line(const double StartPA, double EndPA, double PAStep);
     void calib_pa_pattern(const double StartPA, double EndPA, double PAStep);
     void calib_pa_tower(const double StartPA, double EndPA, double PAStep);
     void calib_flowrate_coarse();
     void calib_flowrate_fine(const double target_extrusion_multiplier);
-
 
     void new_project();
     void load_project();

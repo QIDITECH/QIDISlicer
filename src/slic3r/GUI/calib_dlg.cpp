@@ -32,7 +32,7 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
     auto read_extrusion_multiplier = filament_config->opt_float("extrusion_multiplier", 0);
     std::stringstream ss;
-    ss << std::setprecision(2) << read_extrusion_multiplier;
+    ss << read_extrusion_multiplier;
     m_tc_extrusion_multiplier = new wxTextCtrl(this, wxID_ANY, ss.str(), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
     m_tc_extrusion_multiplier->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
     settings_sizer->Add(m_tc_extrusion_multiplier, 0, wxRIGHT | wxALIGN_RIGHT, 0);
