@@ -5,6 +5,12 @@
 #include "../wxExtensions.hpp"
 #include "StateHandler.hpp"
 #include "PopupWindow.hpp"
+//B35
+#if defined __linux__
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include "wx/dcbuffer.h"
+#include "wx/display.h"
+#endif
 
 #define DD_NO_CHECK_ICON    0x0001
 #define DD_NO_TEXT          0x0002

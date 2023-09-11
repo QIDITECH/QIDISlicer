@@ -25,6 +25,11 @@
 #include "wx/textctrl.h"
 #include <wx/timer.h>
 
+//B35
+#if defined __linux__
+#include <boost/log/trivial.hpp>
+#endif
+
 
 namespace Slic3r {
 namespace GUI {

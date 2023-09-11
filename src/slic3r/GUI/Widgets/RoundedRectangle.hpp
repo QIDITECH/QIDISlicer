@@ -3,6 +3,13 @@
 
 #include "../wxExtensions.hpp"
 
+
+//B35
+#if defined __linux__
+#include <wx/panel.h> 
+#include <wx/wx.h> 
+#endif
+
 class RoundedRectangle : public wxWindow
 {
 public:

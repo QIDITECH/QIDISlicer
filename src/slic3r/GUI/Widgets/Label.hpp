@@ -6,6 +6,11 @@
 #define LB_HYPERLINK 0x0020
 #define LB_PROPAGATE_MOUSE_EVENT 0x0040
 
+//B35
+#if defined __linux__
+#include <wx/settings.h>
+#include "wx/dcclient.h"
+#endif
 
 class Label : public wxStaticText
 {

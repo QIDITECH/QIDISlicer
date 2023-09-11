@@ -1027,6 +1027,8 @@ void Choice::BUILD() {
             set_selection();
         }
     }*/
+    //B35
+#if defined(__WIN32__) || defined(__WXMAC__)
     if (m_opt.enum_def) {
         if (auto& labels = m_opt.enum_def->labels(); !labels.empty())
         {
@@ -1059,6 +1061,17 @@ void Choice::BUILD() {
             set_selection();
         }
     }
+#elif defined __linux__
+    if (m_opt.enum_def) {
+        if (auto& labels = m_opt.enum_def->labels(); !labels.empty()) {
+            bool localized = m_opt.enum_def->has_labels();
+            for (const std::string& el : labels)
+                temp->Append(localized ? _(from_u8(el)) : from_u8(el));
+            set_selection();
+        }
+    }
+#endif
+
 
     temp->Bind(wxEVT_MOUSEWHEEL, [this](wxMouseEvent& e) {
         if (m_suppress_scroll && !m_is_dropped)

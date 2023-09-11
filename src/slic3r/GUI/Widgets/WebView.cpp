@@ -19,6 +19,11 @@
 #elif defined __linux__
 #include <gtk/gtk.h>
 #define WEBKIT_API
+//B35
+#if defined __linux__
+#include <boost/log/trivial.hpp>
+#endif
+
 struct WebKitWebView;
 struct WebKitJavascriptResult;
 extern "C" {

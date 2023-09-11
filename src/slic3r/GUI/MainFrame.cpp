@@ -859,7 +859,10 @@ void MainFrame::create_preset_tabs()
     add_created_tab(new TabPrinter(m_tabpanel), wxGetApp().preset_bundle->printers.get_edited_preset().printer_technology() == ptFFF ? "printer" : "sla_printer");
     //B4
     m_printer_view = new PrinterWebView(m_tabpanel);
-    m_printer_view->Hide();
+    //B35
+    #if defined(__WIN32__) || defined(__WXMAC__)
+        m_printer_view->Hide();
+    #endif
 #ifdef _MSW_DARK_MODE
     if (!wxGetApp().tabs_as_menu())
         dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_printer_view, _L("Device"), "tab_monitor_active");
@@ -873,7 +876,10 @@ void MainFrame::create_preset_tabs()
     if (strlang != "")
         url = wxString::Format("file://%s/web/guide/index.html?lang=%s", from_u8(resources_dir()), strlang);
     m_guide_view->load_url(url);
-    m_guide_view->Hide();
+    //B35
+    #if defined(__WIN32__) || defined(__WXMAC__)
+        m_guide_view->Hide();
+    #endif
 #ifdef _MSW_DARK_MODE
     if (!wxGetApp().tabs_as_menu())
         dynamic_cast<Notebook *>(m_tabpanel)->AddPage(m_guide_view, _L("Guide"), "userguide");
