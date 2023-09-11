@@ -5478,7 +5478,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
     sidebar().obj_manipul()->set_uniform_scaling(true);
 
-//Generate line gcode
+//Get parameter
     std::string start_x = double_to_str(plate_center.x() - 40);
     std::string x1 = double_to_str(plate_center.x() - 20);
     std::string x2 = double_to_str(plate_center.x() + 20);
@@ -5489,7 +5489,23 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     std::string pa_layer_height = double_to_str(print_config->get_abs_value("layer_height"));
     std::string pa_external_perimeter_speed = double_to_str(print_config->get_abs_value("external_perimeter_speed") * 60);
     std::string pa_travel_speed = double_to_str(print_config->get_abs_value("travel_speed") * 60);
-    double pa_external_perimeter_extrusion_width = print_config->get_abs_value("external_perimeter_extrusion_width");
+    double pa_external_perimeter_extrusion_width = print_config->get_abs_value("external_perimeter_extrusion_width", 0);
+    if (pa_external_perimeter_extrusion_width == 0)
+        {
+            double pa_extrusion_width = print_config->get_abs_value("extrusion_width", 0);
+            if (pa_extrusion_width == 0)
+                pa_extrusion_width = print_config->get_abs_value("extrusion_width", 1);
+                if (pa_extrusion_width == 0)
+                    pa_extrusion_width = print_config->opt_float("nozzle_diameter", 0);
+                else
+                    pa_extrusion_width = print_config->opt_float("nozzle_diameter", 0) * pa_extrusion_width;
+
+            pa_external_perimeter_extrusion_width = print_config->get_abs_value("external_perimeter_extrusion_width", 1);
+            if (pa_external_perimeter_extrusion_width == 0)
+                pa_external_perimeter_extrusion_width = pa_extrusion_width;
+            else
+                pa_external_perimeter_extrusion_width = pa_extrusion_width * pa_external_perimeter_extrusion_width;
+        }
     double pa_extrusion_multiplier = filament_config->opt_float("extrusion_multiplier", 0);
     double pa_retract_length = printer_config->opt_float("retract_length", 0);
     std::string pa_retract_speed = double_to_str(printer_config->opt_float("retract_speed", 0) * 60);
@@ -5497,15 +5513,15 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     double e_step = print_config->get_abs_value("layer_height") * pa_external_perimeter_extrusion_width * 0.4;
     std::string value_E;
 
+//Generate line gcode
     std::string pa_line_gcode = "G0 X" + end_x + " Y" + start_y + " F" + pa_travel_speed;
     pa_line_gcode += "\nG0 Z" + pa_layer_height;
     value_E = double_to_str(count * 5 * e_step);
     pa_line_gcode += "\nG1 X" + end_x + " Y" + end_y + " E" + value_E + " F" + pa_external_perimeter_speed;
     pa_line_gcode += "\nG0 X" + start_x + " Y" + start_y + " F" + pa_travel_speed;
 
-
 //Generate number gcode
-    std::string pa_number_gcode = "\nM900 K\n";
+    std::string pa_number_gcode = "\n\nM900 K\n\n";
 
 
 //Set and load end gcode
