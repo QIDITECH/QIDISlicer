@@ -17,6 +17,7 @@
 #include "Jobs/Worker.hpp"
 #include "Search.hpp"
 
+
 class wxButton;
 class ScalableButton;
 class wxScrolledWindow;
@@ -53,6 +54,7 @@ class ObjectSettings;
 class ObjectLayers;
 class ObjectList;
 class GLCanvas3D;
+class GLGizmoEmboss;
 class Mouse3DController;
 class NotificationManager;
 struct Camera;
@@ -137,6 +139,7 @@ class Plater: public wxPanel
 public:
     using fs_path = boost::filesystem::path;
 
+
     Plater(wxWindow *parent, MainFrame *main_frame);
     Plater(Plater &&) = delete;
     Plater(const Plater &) = delete;
@@ -171,13 +174,16 @@ public:
     void calib_pa_tower(const double StartPA, double EndPA, double PAStep);
     void calib_flowrate_coarse();
     void calib_flowrate_fine(const double target_extrusion_multiplier);
+    std::string move_to(const Vec2d &point, double speed);
+    std::string move_to(const Vec2d &point, double speed, double e);
+    std::string move_to(double height);
+    std::string set_pressure_advance(double pa);
+
 
     void new_project();
     void load_project();
     void load_project(const wxString& filename);
     void add_model(bool imperial_units = false);
-    //B34
-    void add_model_calibration(bool imperial_units = false, std::string fname = "");
     void import_zip_archive();
     void import_sl1_archive();
     void extract_config_from_project();
@@ -447,6 +453,7 @@ public:
 		}
 	private:
 		Plater *m_plater;
+
 	};
 
     // RAII wrapper for taking an Undo / Redo snapshot while disabling the snapshot taking by the methods called from inside this snapshot.
