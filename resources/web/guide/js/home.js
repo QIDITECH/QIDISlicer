@@ -1,11 +1,6 @@
 function OnInit()
-{	
-	//-----Test-----
-	//Set_RecentFile_MouseRightBtn_Event();
-	
-	
-	//-----Official-----
-    TranslatePage();
+{
+	TranslatePage();
 
 	SendMsg_GetLoginInfo();
 	SendMsg_GetRecentFile();
@@ -13,40 +8,27 @@ function OnInit()
 
 function GotoMenu( strMenu )
 {
-	let MenuList = $(".BtnItem");
-	let nAll=MenuList.length;
-	
-	for(let n=0;n<nAll;n++)
+	if (strMenu == "UserGuide")
 	{
-		let OneBtn=MenuList[n];
-		
-		if( $(OneBtn).attr("menu")==strMenu )
-		{
-			$(".BtnItem").removeClass("BtnItemSelected");			
-			
-			$(OneBtn).addClass("BtnItemSelected");
-			
-			$("div[board]").hide();
-			$("div[board=\'"+strMenu+"\']").show();
-		}
+		$(".MenuBtnSelected").removeClass("MenuBtnSelected");
+		$("div[board]").hide();
+		$("div[board=\'" + strMenu + "\']").show();
 	}
-}
+	else
+	{
+		let MenuList = $(".MenuBtn");
+		let nAll=MenuList.length;
 
-function GotoMain(strMenu) {
-	let MenuList = $(".TbItem")
-	let nAll = MenuList.length;
-
-	for (let n = 0; n < nAll; n++) {
-		let OneBtn = MenuList[n];
-
-		if ($(OneBtn).attr("menu") == strMenu) {
-			$(".TbItem").removeClass("TbItemSelected");
-
-			$(OneBtn).addClass("TbItemSelected");
-			$(".BtnItem").removeClass("BtnItemSelected");
-
-			$("div[board]").hide();
-			$("div[board=\'" + strMenu + "\']").show();
+		for(let n=0;n<nAll;n++)
+		{
+			let OneBtn=MenuList[n];
+			if ($(OneBtn).attr("menu")==strMenu)
+			{
+				$(".MenuBtnSelected").removeClass("MenuBtnSelected");
+				$(OneBtn).addClass("MenuBtnSelected");
+				$("div[board]").hide();
+				$("div[board=\'"+strMenu+"\']").show();
+			}
 		}
 	}
 }

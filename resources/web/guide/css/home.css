@@ -16,91 +16,80 @@ html, body {
 	background-color: #F4F7FE;
 }
 
-.LinkBtn {
-	font-size: 12px;
-	color: #1200FF;
-	cursor: pointer;
-}
-
-.LinkBtn:hover {
-	text-decoration: underline;
-}
-
-/*------------------*/
-* {
-	/* 页面初始化 清除元素原有的内外边距 */
-	padding: 0;
-	margin: 0;
-	/* 盒子模型 */
-	box-sizing: border-box;
-}
 body {
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
-	/* 让页面占浏览器可视区域的高度 */
 	height: 100vh;
 }
 
-#LeftBoard {
-	/*border-right-width: 1px;
-	border-right-style: solid;*/
+.LeftBoard {
 	background: #414345;
 	width:360px;
 	min-width: 280px;
 	height: 100%;
 }
 
+.GuideBtn {
+	height: 100px;
+	display: flex;
+	flex-direction: line;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: #4479FB;
+	font-size: 24px;
+}
+
+.GuideBtn:hover {
+	font-size: 26px;
+}
+
+.Logo {
+	height: 40px;
+	display: flex;
+	margin-right: 10px;
+}
+
+/*导航栏属性*/
 li {
-	/* 清除li元素前面的项目符号 */
 	list-style: none;
 }
 
 .accordion {
-	/* 溢出隐藏 */
 	overflow: hidden;
-	/* 圆角属性 */
 	border-radius: 0 8px 8px 0;
-	/* 盒子阴影 */
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 .accordion > li {
 	width: 100%;
 }
 .accordion > li input {
-	/* 将单选按钮隐藏起来 */
 	display: none;
 }
 .accordion > li label {
-	/* 相对定位 */
 	position: relative;
-	/* label元素是行内元素 需要将其转为块级元素 才能设置宽度和高度 */
 	display: block;
 	width: 100%;
 	padding: 20px 50px;
-	color: #fff;
+	color: #FFFFFF;
 	background-color: #4479FB;
-	/* 鼠标移入变小手 */
 	cursor: pointer;
 }
 .accordion > li label i {
-	/* 绝对定位 */
 	position: absolute;
-	/* calc方法自动计算数值 让字体图标垂直居中 */
 	top: calc(50% - 12px);
 	left: 20px;
 	font-size: 24px;
-	/* 加过渡 */
 	transition: all 0.5s;
 }
 .accordion > li label:hover {
-	border-left-color: #F1F1FF;
+	border-left-color: #FFFFFF;
 	border-left-width: 4px;
 	border-style: solid;
 }
-/* :not()选择器选取的是除括号里的元素以外的其它元素 :first-child选择器是第一个元素 */
 .accordion > li:not(:first-child) label {
-	border-top: 1px solid #38814d;
+	border-top: 1px solid #38814D;
 }
 .accordion > li ol {
 	width: 100%;
@@ -135,307 +124,168 @@ li {
 .accordion > li input:checked ~ ol li {
 	height: 50px;
 }
+/*导航栏属性*/
 
-#GuideArea {
-	/*border-bottom-width:1px;
-	border-bottom-style:inset;*/
-	height: 100px;
+.MenuBtn {
+	height: 50px;
 	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	flex-wrap: nowrap;
-	position: relative;
-	width: 100%;
-}
-
-
-#Guide1 {
-	height: 36px;
-	line-height: 36px;
-	display: flex;
-	justify-content: center;
-	user-select: none;
-}
-
-#GuideBtn {
+	flex-direction: line;
 	cursor: pointer;
+	color: #FFFFFF;
+	transition: all 0.5s;
+}
+
+.MenuBtn:hover {
 	color: #4479FB;
 }
 
-.TbItem {
-	font-size: 24px;
-	display: flex;
-	justify-content: flex-start;
-	cursor: pointer;
-	color: #4479FB
-}
-
-.TbItem:hover {
-	font-size: 25px;
-}
-
-.TbItemSelected {
-}
-
-#Icon1 {
-	margin-right: 10px;
-}
-
-#QDIcon {
-	height: 36px;
-}
-
-/*------------------*/
-#BtnArea {
-	padding: 0;
-	margin: 0;
-}
-
-.BtnItem {
-	padding-left: 30px;
-	height: 50px;
-	line-height: 50px;
-	text-indent: 10px;
-	display: flex;
-	justify-content: flex-start;
-	cursor: pointer;
-	color: white;
-	transition: all 0.5s;
-}
-.BtnItem:hover {
-	color: #4479FB
-}
-
-.BtnItemSelected {
+.MenuBtnSelected {
 	background-color: #CED1D9;
-	color: #4479FB
+	color: #4479FB;
 }
 
-.BtnIcon {
-	margin-left: 15px;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.BookIcon {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.MainIcon {
+.MenuBtnIcon {
+	margin: auto 15px;
 	width: 20px;
 	height: 20px;
+	display: flex;
 }
 
-.LeftIcon {
-	width: 30px;
-	height: 30px;
-	padding-left: 10px;
-}
-
-/*--------------------*/
-#RightBoard {
+.RightBoard {
 	width: 100%;
 	height: 100%;
-	min-width: 835px;
+	min-width: 700px;
+	padding: 0px 50px;
 	overflow-y: auto;
 }
 
-#ThumbBoard
-{
-	overflow-y:auto;
-	padding: 0px 40px;
+.GuideBoard {
+	margin-top: 20px;
 	display: flex;
 	flex-wrap: wrap;
-	align-content: flex-start;
-	margin: 30px 40px;
-	position: relative;
-	top: 0px;
-	bottom: 0px;
-	right: 0px;
-	left: 0px;
 }
 
-@media screen and (max-width: 1100px) {
-	.GuideBlock {
-		width: calc(50% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and ( min-width:1101px) and ( max-width:1680px ) {
-	.GuideBlock {
-		width: calc(33% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and ( min-width:1681px) and (max-width:2120px ) {
-	.GuideBlock {
-		width: calc(25% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and ( min-width:2121px) and (max-width:2620px ) {
-	.GuideBlock {
-		width: calc(20% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and (min-width:2621px ) and (max-width:3120px ) {
-	.GuideBlock {
-		width: calc(16.6% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and (min-width:3121px ) {
-	.GuideBlock {
-		width: calc(14.2% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-#IssueBoard {
-	overflow-y: auto;
-	padding: 0px 40px;
+.Thumbnail {
+	min-width: 300px;
+	max-width: 600px;
+	width: 23%;
+	margin: 10px auto;
 	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	align-items: center;
-	margin: 30px 40px;
-	position: relative;
-	top: 0px;
-	bottom: 0px;
-	right: 0px;
-	left: 0px;
+	flex-direction: column;
+	cursor: pointer;
 }
 
-@media screen{
-	.halfBlock {
-		text-align: center;
-		justify-content: center;
-		width: calc(50% - 20px);
-		margin: 0px 10px;
-	}
+.ThumbnailTitle {
+	text-align: center;
+	font-size: 18px;
+	font-weight: 700;
+	width: 100%;
+	color: #4479FB;
 }
 
-@media screen and (max-width: 1100px) {
-	.PrintBlock {
-		text-align:center;
-		width: calc(50% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and ( min-width:1101px) and ( max-width:1680px ) {
-	.PrintBlock {
-		width: calc(33% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and ( min-width:1681px) and (max-width:2120px ) {
-	.PrintBlock {
-		width: calc(25% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and ( min-width:2121px) and (max-width:2620px ) {
-	.PrintBlock {
-		width: calc(20% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and (min-width:2621px ) and (max-width:3120px ) {
-	.PrintBlock {
-		width: calc(16.6% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-@media screen and (min-width:3121px ) {
-	.PrintBlock {
-		width: calc(14.2% - 20px);
-		margin: 0px 10px 40px 10px;
-		cursor: pointer;
-	}
-}
-
-#FilaBigBoard {
+.ImageBoard {
+	margin: 50px auto;
 	display: none;
 }
 
-#FilaBoard {
+.AutozoomImage img {
+	width: 100%;
+	max-width: 1200px;
+	border-radius: 5px;
+	border: 1px solid #4479FB;
+	margin: 20px auto;
 	display: flex;
-	flex-wrap: wrap;
-	text-align: center;
 	justify-content: center;
-	height: 100vh;
-	overflow-y: auto;
-	top: 0px;
-	bottom: 0px;
-	right: 0px;
-	left: 0px;
-	box-sizing: border-box;
 }
 
-.main {
-	margin: 50px 50px;
+.IntroduceBoard {
+	margin: 50px auto;
+	display: none;
+}
+
+.IntroduceTitle {
+	text-align: center;
+	font-size: 36px;
+	font-weight: 700;
+	margin: 30px 0;
+	color: #4479FB;
+	line-height: 50px;
+}
+
+.IntroduceText {
+	font-size: 16px;
+	line-height: 20px;
+}
+
+.IntroduceTextBold {
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 25px;
+}
+
+.CenterImage img{
+	margin: 20px auto;
+	max-width: 1200px;
+	border-radius: 5px;
+	border: 1px solid #4479FB;
+	display: flex;
+	justify-content: center;
+}
+
+.IntroduceTextRed {
+	font-size: 16px;
+	color: #ED1C24;
+	line-height: 20px;
+	text-align: center;
+}
+
+.IntroduceTextGreen {
+	font-size: 16px;
+	color: #24AB4D;
+	line-height: 20px;
+	text-align: center;
+}
+
+.FilamentsTable {
+	display: flex;
+	justify-content: center;
 	width: 100%;
 	overflow: auto;
 }
 
+/*表格属性*/
 td, th {
-	/* 设置td,th宽度高度 */
 	border: 1px solid gray;
 	font-size: 12px;
 	width: 100px;
 	height: 50px;
+	text-align: center;
 }
 
 th {
 	background-color: #4F6EBC;
-	color: #fff;
+	color: #FFFFFF;
 }
 
 table {
 	table-layout: fixed;
-	width: 200px; /* 固定宽度 */
+	width: 200px;
 }
 
 td:first-child, th:first-child {
 	position: sticky;
-	left: 0; /* 首行永远固定在左侧 */
+	left: 0;
 	z-index: 1;
 	background: #CDDBFB;
 }
 
-th:nth-child(odd) { /*奇表头*/
+th:nth-child(odd) {
 	background-color: #6993FB;
 }
 
 thead tr th {
 	position: sticky;
-	top: 0; /* 列首永远固定在头部  */
+	top: 0;
 }
 
 tbody tr:nth-child(odd) {
@@ -445,121 +295,22 @@ tbody tr:nth-child(odd) {
 th:first-child {
 	z-index: 2;
 }
+/*表格属性*/
 
-/*------Gif------*/
-#GifBigBoard {
+.IssueBoard {
+	margin-top: 20px;
 	display: none;
 }
 
-#GifBoard {
+.EmailBlock {
+	margin: 10px auto;
 	display: flex;
-	flex-wrap: wrap;
-	align-content: flex-start;
-	align-items: center;
 	justify-content: center;
-	overflow-y: auto;
-	margin: 30px 40px;
-	position: relative;
-	top: 0px;
-	bottom: 0px;
-	right: 0px;
-	left: 0px;
+	flex-wrap: wrap;
 }
 
-@media screen {
-	.GifBlock {
-		margin: 0px 0px 0px 0px;
-		cursor: pointer;
-	}
-}
-
-.UG_PRINTER {
-	text-align: center;
-	width: 100%;
-}
-
-.UG_PRINTER img {
-	width: 15%;
-}
-
-.UG_IMG {
-	justify-content:center;
-	text-align:center;
-	width: 100%;
-}
-
-.UG_IMG img {
-	width: 100%;
-	border-radius: 5px 5px 5px 5px;
-}
-
-.UG_TITLE {
-	text-align: center;
-	font-size: 18px;
-	font-weight: 700;
-	line-height: 25px;
-	width: 100%;
-	margin-top: 20px;
-	margin-bottom: 4px;
-	color: #4479FB;
-}
-
-.UG_DESC {
-	font-size: 14px;
-	width: 100%;
-	line-height: 20px;
-}
-
-.UG_DESC_RED {
-	font-size: 14px;
-	width: 100%;
-	line-height: 20px;
-	color: #ED1C24;
-}
-
-.UG_DESC_GREEN {
-	font-size: 14px;
-	width: 100%;
-	line-height: 20px;
-	color: #24AB4D;
-}
-
-.UG_CDESC {
-	margin-top:35px;
-	margin-bottom:5px;
-	text-align: center;
-	font-size: 24px;
-	width: 100%;
-	line-height: 20px;
-}
-
-.UG_B_TITLE {
-	text-align: center;
-	font-size: 36px;
-	font-weight: 700;
-	line-height: 25px;
-	width: 100%;
-	margin-top: 20px;
-	margin-bottom: 25px;
-	color: #4479FB;
-}
-
-.UG_B_DESC {
-	font-size: 16px;
-	width: 100%;
-	line-height: 20px;
-	margin-bottom: 50px;
-}
-
-.UG_AMB_DESC {
-	font-size: 16px;
-	font-weight: 700;
-	width: 100%;
-	line-height: 20px;
-}
-
-.UG_AM_DESC {
-	font-size: 16px;
-	width: 100%;
-	line-height: 20px;
+.PrinterBlock {
+	margin: 0 10px;
+	display: flex;
+	flex-direction: column;
 }
