@@ -5386,18 +5386,14 @@ void Plater::calib_flowrate_coarse()
     wxGetApp().mainframe->select_tab(size_t(0));
 
     DynamicPrintConfig new_config;
+    DynamicPrintConfig *printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
     new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
     new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1});
-    new_config.set_key_value("between_objects_gcode",
-        new ConfigOptionString("{if current_object_idx==1}M221 S105{endif}"
-                                "{if current_object_idx==2}M221 S110{endif}"
-                                "{if current_object_idx==3}M221 S115{endif}"
-                                "{if current_object_idx==4}M221 S120{endif}"
-                                "{if current_object_idx==5}M221 S95{endif}"
-                                "{if current_object_idx==6}M221 S90{endif}"
-                                "{if current_object_idx==7}M221 S85{endif}"
-                                "{if current_object_idx==8}M221 S80{endif}"));
+    //B34
+    const std::string frf_start_gcode = printer_config->opt_string("start_gcode");
+    new_config.set_key_value("start_gcode", new ConfigOptionString(frf_start_gcode + "\nM221 S120"));
+    new_config.set_key_value("between_objects_gcode",new ConfigOptionString("M221 S{120 - 5 * current_object_idx}" ));
 
     Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
@@ -5427,17 +5423,9 @@ void Plater::calib_flowrate_fine(const double target_extrusion_multiplier)
     new_config.set_key_value("complete_objects", new ConfigOptionBool(true));
     new_config.set_key_value("extruder_clearance_radius", new ConfigOptionFloat(1));
     new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1});
-    new_config.set_key_value("start_gcode", new ConfigOptionString(frf_start_gcode + "\nM221 S"+std::to_string(em)));
-    new_config.set_key_value("between_objects_gcode",
-            new ConfigOptionString("{if current_object_idx==1}M221 S"+std::to_string(em+1)+"{endif}"
-                                   "{if current_object_idx==2}M221 S"+std::to_string(em+2)+"{endif}"
-                                   "{if current_object_idx==3}M221 S"+std::to_string(em+3)+"{endif}"
-                                   "{if current_object_idx==4}M221 S"+std::to_string(em+4)+"{endif}"
-                                   "{if current_object_idx==5}M221 S"+std::to_string(em-1)+"{endif}"
-                                   "{if current_object_idx==6}M221 S"+std::to_string(em-2)+"{endif}"
-                                   "{if current_object_idx==7}M221 S"+std::to_string(em-3)+"{endif}"
-                                   "{if current_object_idx==8}M221 S"+std::to_string(em-4)+"{endif}"));
-
+    //B34
+    new_config.set_key_value("start_gcode", new ConfigOptionString(frf_start_gcode + "\nM221 S" + std::to_string(em + 4)));
+    new_config.set_key_value("between_objects_gcode", new ConfigOptionString("M221 S{ " +std::to_string( em + 4 ) + " - current_object_idx}"));
     Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
@@ -5530,7 +5518,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     if (volume_type == ModelVolumeType::INVALID)
         volume_type = ModelVolumeType::MODEL_PART;
 
-    //emboss->create_volume(volume_type, Vec2d(plate_center.x() - 10, plate_center.y() - count * 2.5), "0.0");
+    emboss->create_volume(volume_type, Vec2d(plate_center.x() - 10, plate_center.y() - count * 2.5), "0.0");
     //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
     //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "1.0");
     //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
@@ -5574,7 +5562,6 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     get_notification_manager()->push_notification(NotificationType::CustomNotification,
                                                   NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
-
 
 void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
 {
