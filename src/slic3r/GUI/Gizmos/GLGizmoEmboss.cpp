@@ -42,6 +42,7 @@
 #include <GL/glew.h>
 #include <chrono> // measure enumeration of fonts
 
+
 // uncomment for easier debug
 //#define ALLOW_DEBUG_MODE
 #ifdef ALLOW_DEBUG_MODE
@@ -202,6 +203,8 @@ static void find_closest_volume(const Selection       &selection,
 /// <param name="coor">Screen coordinat, where to create new object laying on bed</param>
 static void start_create_object_job(DataBase &emboss_data, const Vec2d &coor);
 
+
+
 // Loaded icons enum
 // Have to match order of files in function GLGizmoEmboss::init_icons()
 enum class IconType : unsigned {
@@ -241,6 +244,77 @@ static bool apply_camera_dir(const Camera &camera, GLCanvas3D &canvas);
 
 } // namespace priv
 
+//B34
+void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos, std::string str)
+{
+    if (!init_create(volume_type))
+        return;
+
+    // select position by camera position and view direction
+    const Selection &selection  = m_parent.get_selection();
+    int              object_idx = selection.get_object_idx();
+
+    Size s = m_parent.get_canvas_size();
+
+    Vec2d                  screen_center(s.get_width() / 2., s.get_height() / 2.);
+    DataBase               emboss_data    = priv::create_emboss_data_base(str, m_style_manager, m_job_cancel);
+    const ModelObjectPtrs &objects        = selection.get_model()->objects;
+    bool                   is_simple_mode = wxGetApp().get_mode() == comSimple;
+    // No selected object so create new object
+    if (selection.is_empty() || object_idx < 0 || static_cast<size_t>(object_idx) >= objects.size() || is_simple_mode) {
+        // create Object on center of screen
+        // when ray throw center of screen not hit bed it create object on center of bed
+        priv::start_create_object_job(emboss_data, screen_center);
+        return;
+    }
+
+    // create volume inside of selected object
+    Vec2d           coor;
+    const GLVolume *vol    = nullptr;
+    const Camera &  camera = wxGetApp().plater()->get_camera();
+    priv::find_closest_volume(selection, screen_center, camera, objects, &coor, &vol);
+
+    // there is no point on surface so no use of surface will be applied
+    FontProp &prop = emboss_data.text_configuration.style.prop;
+    if (prop.use_surface)
+        prop.use_surface = false;
+
+
+    Plater *plater = wxGetApp().plater();
+    // Transformation is inspired add generic volumes in ObjectList::load_generic_subobject
+    const ModelObject *obj         = objects[vol->object_idx()];
+    BoundingBoxf3      instance_bb = obj->instance_bounding_box(vol->instance_idx());
+
+    size_t vol_id = obj->volumes[vol->volume_idx()]->id().id;
+
+    auto cond = RaycastManager::AllowVolumes({vol_id});
+
+    RaycastManager::Meshes meshes = create_meshes(m_parent, cond);
+    m_raycast_manager.actualize(*obj, &cond, &meshes);
+    std::optional<RaycastManager::Hit> hit    = ray_from_camera(m_raycast_manager, coor, camera, &cond);
+
+    Transform3d surface_trmat = create_transformation_onto_surface(Vec3d(mouse_pos.x(), mouse_pos.y(), 0.2),
+                                                                   hit->normal,
+                                                                    priv::up_limit);
+    emboss_data.text_configuration.style.prop.emboss     = 0.2;
+    emboss_data.text_configuration.style.prop.size_in_mm = 7;
+
+    const FontProp &font_prop     = emboss_data.text_configuration.style.prop;
+    apply_transformation(font_prop, surface_trmat);
+    Transform3d instance     = vol->get_instance_transformation().get_matrix();
+    Transform3d volume_trmat = instance.inverse() * surface_trmat;
+    start_create_volume_job(obj, volume_trmat, emboss_data, volume_type);
+
+}
+
+
+
+
+
+void GLGizmoEmboss::change_height(double height) { 
+    set_height(); 
+}
+
 void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d& mouse_pos)
 {
     if (!init_create(volume_type))
@@ -273,6 +347,9 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type)
     int object_idx = selection.get_object_idx();
 
     Size s = m_parent.get_canvas_size();
+
+
+
     Vec2d screen_center(s.get_width() / 2., s.get_height() / 2.);
     DataBase emboss_data = priv::create_emboss_data_base(m_text, m_style_manager, m_job_cancel);
     const ModelObjectPtrs &objects = selection.get_model()->objects;
@@ -2769,6 +2846,7 @@ bool GLGizmoEmboss::set_height() {
     return true;
 }
 
+
 void GLGizmoEmboss::draw_height(bool use_inch)
 {
     float &value = m_style_manager.get_style().prop.size_in_mm;
@@ -2777,6 +2855,7 @@ void GLGizmoEmboss::draw_height(bool use_inch)
     const char *size_format = use_inch ? "%.2f in" : "%.1f mm";
     const std::string revert_text_size = _u8L("Revert text size.");
     const std::string& name = m_gui_cfg->translations.height;
+
     if (rev_input_mm(name, value, stored, revert_text_size, 0.1f, 1.f, size_format, use_inch, m_scale_height))
         if (set_height())
             process();
@@ -3543,7 +3622,8 @@ bool priv::start_create_volume_on_surface_job(
         return false;
 
     // Create result volume transformation
-    Transform3d surface_trmat = create_transformation_onto_surface(hit->position, hit->normal, priv::up_limit);
+    Transform3d     surface_trmat = create_transformation_onto_surface(hit->position, hit->normal,
+                                                                   priv::up_limit);
     const FontProp &font_prop = emboss_data.text_configuration.style.prop;
     apply_transformation(font_prop, surface_trmat);
     Transform3d instance = gl_volume->get_instance_transformation().get_matrix();

@@ -2292,6 +2292,7 @@ Plater::priv::~priv()
 
 void Plater::priv::update(unsigned int flags)
 {
+
     // the following line, when enabled, causes flickering on NVIDIA graphics cards
 //    wxWindowUpdateLocker freeze_guard(q);
     if (get_config_bool("autocenter"))
@@ -5409,7 +5410,7 @@ void Plater::calib_flowrate_coarse()
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
-
+//B34
 void Plater::calib_flowrate_fine(const double target_extrusion_multiplier)
 {
     new_project();
@@ -5440,8 +5441,6 @@ void Plater::calib_flowrate_fine(const double target_extrusion_multiplier)
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
-
-
 //B34
 void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
 {
@@ -5454,9 +5453,10 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     load_files(model_path, true, false, false);
 
     // Check step count
+    double      interval     = 4.62;
     const Vec2d plate_center = build_volume().bed_center();
     double      count        = floor((EndPA - StartPA) / PAStep);
-    double      max_count    = floor(plate_center.y() / 2.5) - 2;
+    double      max_count    = floor(plate_center.y() / interval *2) - 2;
     if (count > max_count) {
         count = max_count;
     }
@@ -5468,14 +5468,14 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     // Position aided model
     sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
     sidebar().obj_manipul()->set_uniform_scaling(false);
-    sidebar().obj_manipul()->on_change("size", 1, count * 5);
+    sidebar().obj_manipul()->on_change("size", 1, count * interval);
     double pa_first_layer_height = print_config->get_abs_value("first_layer_height");
     sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
     sidebar().obj_manipul()->set_uniform_scaling(true);
 
     //B34 Get parameter
     double       start_x = plate_center.x() - 40;
-    double       start_y = plate_center.y() - count * 2.5;
+    double       start_y = plate_center.y() - count * interval / 2;
     const double speed_fast = print_config->get_abs_value("external_perimeter_speed") * 60;
     const double speed_slow = speed_fast * 0.8;
     const double line_short = 20;
@@ -5504,48 +5504,32 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
 
     const double e_step = print_config->get_abs_value("layer_height") * pa_external_perimeter_extrusion_width * 0.4;
 
-    //B34  Add Text
-    GLCanvas3D *     canvas = wxGetApp().plater()->canvas3D();
-    GLGizmosManager  &mng    = canvas->get_gizmos_manager();
-    GLGizmoBase *    gizmo  = mng.get_gizmo(GLGizmosManager::Emboss);
-    GLGizmoEmboss *  emboss = dynamic_cast<GLGizmoEmboss *>(gizmo);
-    assert(emboss != nullptr);
-    if (emboss == nullptr)
-        return;
-
-    ModelVolumeType volume_type = ModelVolumeType::MODEL_PART;
-    // no selected object means create new object
-    if (volume_type == ModelVolumeType::INVALID)
-        volume_type = ModelVolumeType::MODEL_PART;
-
-    emboss->create_volume(volume_type, Vec2d(plate_center.x() - 10, plate_center.y() - count * 2.5), "0.0");
-    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
-    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "1.0");
-    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
-    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "2.0");
-    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
-    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "3.0");
-    //model().objects[0]->scale(2);
-
+    std::string num_str = double_to_str(StartPA + (count-1) * PAStep) ;
+    for (int i = 1; i < count/2; i++) {
+        num_str += "\n" + double_to_str(StartPA + (count - 1 - i * 2) * PAStep) ;
+    }
+    add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y()));
+    //add_num_text("2.0");
+    // add_num_text("1.0", Vec2d(100, 200));
     //B34 Generate line gcode
     std::stringstream gcode;
     gcode << move_to(Vec2d(start_x + 80, start_y), pa_travel_speed);
     gcode << move_to(pa_layer_height);
-    gcode << move_to(Vec2d(start_x + 80, start_y + count * 5), speed_fast, count * 5 * e_step);
+    gcode << move_to(Vec2d(start_x + 80, start_y + count * interval), speed_fast, count * interval * e_step);
 
     for (int i = 0; i <= count; i++) {
         gcode << set_pressure_advance(StartPA + i * PAStep);
-        gcode << move_to(Vec2d(start_x, start_y + i * 5), pa_travel_speed);
-        gcode << move_to(Vec2d(start_x + line_short, start_y + i * 5), speed_fast, line_short * e_step);
-        gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + i * 5), speed_slow, line_long * e_step);
-        gcode << move_to(Vec2d(start_x + line_short + line_long + line_short, start_y + i * 5), speed_fast, line_short * e_step);
+        gcode << move_to(Vec2d(start_x, start_y + i * interval), pa_travel_speed);
+        gcode << move_to(Vec2d(start_x + line_short, start_y + i * interval), speed_fast, line_short * e_step);
+        gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + i * interval), speed_slow, line_long * e_step);
+        gcode << move_to(Vec2d(start_x + line_short + line_long + line_short, start_y + i * interval), speed_fast, line_short * e_step);
     }
 
     gcode << set_pressure_advance(0);
-    gcode << move_to(Vec2d(start_x + line_short, start_y + count * 5 + 1), pa_travel_speed);
-    gcode << move_to(Vec2d(start_x + line_short, start_y + count * 5 + 3), speed_fast, 2 * e_step);
-    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * 5 + 1), pa_travel_speed);
-    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * 5 + 3), speed_fast, 2 * e_step);
+    gcode << move_to(Vec2d(start_x + line_short, start_y + count * interval + 1), pa_travel_speed);
+    gcode << move_to(Vec2d(start_x + line_short, start_y + count * interval + 3), speed_fast, 2 * e_step);
+    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * interval + 1), pa_travel_speed);
+    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * interval + 3), speed_fast, 2 * e_step);
 
     // Set and load end gcode
     auto pa_end_gcode = printer_config->opt_string("end_gcode");
@@ -5562,7 +5546,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     get_notification_manager()->push_notification(NotificationType::CustomNotification,
                                                   NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
-
+//B34
 void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
 {
     new_project();
@@ -5607,11 +5591,11 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
             pa_external_perimeter_extrusion_width = pa_extrusion_width * pa_external_perimeter_extrusion_width;
     }
 
-    const double step_spacing                          = 5;
+    const double step_spacing                          = 4.62;
     double       line_spacing                          = pa_external_perimeter_extrusion_width - pa_layer_height * (1 - M_PI / 4);
     const double m_wall_side_length{64.0};
 
-    double max_count = floor(plate_center.y() - line_spacing - m_wall_side_length / (2 * step_spacing)) - 3;
+    double max_count = floor((plate_center.y() * 2 - 2 * line_spacing - m_wall_side_length / 2) / step_spacing) - 3;
     if (count > max_count) {
         count = max_count;
     }
@@ -5634,6 +5618,15 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     //B34 Generate Gcode
     std::stringstream gcode;
     gcode << move_to(pa_layer_height);
+
+
+    //B34 Add Num
+    std::string num_str = double_to_str(StartPA + 1 * PAStep);
+    for (int i = 1; i < count / 2; i++) {
+        num_str += "\n" + double_to_str(StartPA + (1 + i * 2) * PAStep);
+    }
+
+    add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y() + m_wall_side_length / 4));
 
     // Draw Box
     for (int i = 0; i < 3; i++) {
@@ -5713,7 +5706,6 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
-
 //B34
 std::string Plater::move_to(const Vec2d &point, double speed)
 {
@@ -5741,6 +5733,24 @@ std::string Plater::set_pressure_advance(double pa)
     std::stringstream gcode;
     gcode << "\nM900 K" << pa;
     return gcode.str();
+}
+
+void Plater::add_num_text(std::string num, Vec2d posotion)
+{
+    GLCanvas3D *     canvas = wxGetApp().plater()->canvas3D();
+    GLGizmosManager &mng    = canvas->get_gizmos_manager();
+    GLGizmoBase *    gizmo  = mng.get_gizmo(GLGizmosManager::Emboss);
+    GLGizmoEmboss *  emboss = dynamic_cast<GLGizmoEmboss *>(gizmo);
+    assert(emboss != nullptr);
+    if (emboss == nullptr)
+        return;
+
+    ModelVolumeType volume_type = ModelVolumeType::MODEL_PART;
+    // no selected object means create new object
+    if (volume_type == ModelVolumeType::INVALID)
+        volume_type = ModelVolumeType::MODEL_PART;
+
+    emboss->create_volume(volume_type, posotion, num);
 }
 
 

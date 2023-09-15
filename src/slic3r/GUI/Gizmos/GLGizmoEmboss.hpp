@@ -34,18 +34,22 @@ class GLGizmoEmboss : public GLGizmoBase
 public:
     GLGizmoEmboss(GLCanvas3D& parent);
 
+    //B34
+    void create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos, std::string m_text);
+
     /// <summary>
     /// Create new embossed text volume by type on position of mouse
     /// </summary>
     /// <param name="volume_type">Object part / Negative volume / Modifier</param>
     /// <param name="mouse_pos">Define position of new volume</param>
     void create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos);
-
     /// <summary>
     /// Create new text without given position
     /// </summary>
     /// <param name="volume_type">Object part / Negative volume / Modifier</param>
     void create_volume(ModelVolumeType volume_type);
+    //B34
+    void change_height(double height);
 
     /// <summary>
     /// Handle pressing of shortcut
@@ -109,6 +113,7 @@ private:
     void draw_font_list();
     void draw_height(bool use_inch);
     void draw_depth(bool use_inch);
+
 
     // call after set m_style_manager.get_style().prop.size_in_mm
     bool set_height();

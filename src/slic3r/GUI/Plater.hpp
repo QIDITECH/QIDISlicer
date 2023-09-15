@@ -178,7 +178,7 @@ public:
     std::string move_to(const Vec2d &point, double speed, double e);
     std::string move_to(double height);
     std::string set_pressure_advance(double pa);
-
+    void        add_num_text(std::string num, Vec2d posotion);
 
     void new_project();
     void load_project();
@@ -208,6 +208,7 @@ public:
         FORCE_BACKGROUND_PROCESSING_UPDATE = 2,
         POSTPONE_VALIDATION_ERROR_MESSAGE = 4,
     };
+
     void update(unsigned int flags = 0);
 
     // Get the worker handling the UI jobs (arrange, fill bed, etc...)
