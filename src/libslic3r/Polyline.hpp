@@ -78,6 +78,9 @@ public:
     void split_at(const Point &point, Polyline* p1, Polyline* p2) const;
     bool is_straight() const;
     bool is_closed() const { return this->points.front() == this->points.back(); }
+
+    using iterator = Points::iterator;
+    using const_iterator = Points::const_iterator;
 };
 
 inline bool operator==(const Polyline &lhs, const Polyline &rhs) { return lhs.points == rhs.points; }

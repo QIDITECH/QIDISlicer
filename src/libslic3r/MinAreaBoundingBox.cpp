@@ -1,6 +1,7 @@
 #include "MinAreaBoundingBox.hpp"
 
 #include <libslic3r/ExPolygon.hpp>
+#include <BoundingBox.hpp>
 
 #if defined(_MSC_VER) && defined(__clang__)
 #define BOOST_NO_CXX17_HDR_STRING_VIEW
@@ -103,4 +104,16 @@ void remove_collinear_points(ExPolygon &p)
 {
     p = libnest2d::removeCollinearPoints<ExPolygon>(p, Unit(0));
 }
+
+double fit_into_box_rotation(const Polygon &shape, const BoundingBox &bb)
+{
+    using namespace libnest2d;
+
+    _Box<Point> box{{bb.min.x(), bb.min.y()}, {bb.max.x(), bb.max.y()}};
+
+    return fitIntoBoxRotation<Polygon, TCompute<Polygon>, Rational>(shape,
+                                                                    box,
+                                                                    EPSILON);
+}
+
 } // namespace Slic3r

@@ -740,6 +740,7 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
     m_max_print_height = gcode_result.max_print_height;
 
     load_toolpaths(gcode_result);
+    load_wipetower_shell(print);
 
     if (m_layers.empty())
         return;
@@ -748,9 +749,7 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
     m_filament_diameters = gcode_result.filament_diameters;
     m_filament_densities = gcode_result.filament_densities;
 
-    if (wxGetApp().is_editor())
-        load_shells(print);
-    else {
+    if (!wxGetApp().is_editor()) {
         Pointfs bed_shape;
         std::string texture;
         std::string model;
@@ -895,8 +894,8 @@ void GCodeViewer::reset()
         buffer.reset();
     }
 
-    m_paths_bounding_box = BoundingBoxf3();
-    m_max_bounding_box = BoundingBoxf3();
+    m_paths_bounding_box.reset();
+    m_max_bounding_box.reset();
     m_max_print_height = 0.0f;
     m_tool_colors = std::vector<ColorRGBA>();
     m_extruders_count = 0;
@@ -904,7 +903,6 @@ void GCodeViewer::reset()
     m_filament_diameters = std::vector<float>();
     m_filament_densities = std::vector<float>();
     m_extrusions.reset_ranges();
-    m_shells.volumes.clear();
     m_layers.reset();
     m_layers_z_range = { 0, 0 };
     m_roles = std::vector<GCodeExtrusionRole>();
@@ -928,12 +926,13 @@ void GCodeViewer::render()
     m_statistics.total_instances_gpu_size = 0;
 #endif // ENABLE_GCODE_VIEWER_STATISTICS
 
+    glsafe(::glEnable(GL_DEPTH_TEST));
+    render_shells();
+
     if (m_roles.empty())
         return;
 
-    glsafe(::glEnable(GL_DEPTH_TEST));
     render_toolpaths();
-    render_shells();
     float legend_height = 0.0f;
     if (!m_layers.empty()) {
         render_legend(legend_height);
@@ -1544,6 +1543,8 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
     m_statistics.results_time = gcode_result.time;
 #endif // ENABLE_GCODE_VIEWER_STATISTICS
 
+    m_max_bounding_box.reset();
+
     m_moves_count = gcode_result.moves.size();
     if (m_moves_count == 0)
         return;
@@ -1568,10 +1569,6 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
                 m_paths_bounding_box.merge(move.position.cast<double>());
         }
     }
-
-    // set approximate max bounding box (take in account also the tool marker)
-    m_max_bounding_box = m_paths_bounding_box;
-    m_max_bounding_box.merge(m_paths_bounding_box.max + m_sequential_view.marker.get_bounding_box().size().z() * Vec3d::UnitZ());
 
     if (wxGetApp().is_editor())
         m_contained_in_bed = wxGetApp().plater()->build_volume().all_paths_inside(gcode_result, m_paths_bounding_box);
@@ -2227,6 +2224,8 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
 
 void GCodeViewer::load_shells(const Print& print)
 {
+    m_shells.volumes.clear();
+
     if (print.objects().empty())
         // no shells, return
         return;
@@ -2257,7 +2256,64 @@ void GCodeViewer::load_shells(const Print& print)
         ++object_id;
     }
 
-    if (wxGetApp().preset_bundle->printers.get_edited_preset().printer_technology() == ptFFF) {
+    wxGetApp().plater()->get_current_canvas3D()->check_volumes_outside_state(m_shells.volumes);
+
+    // remove modifiers, non-printable and out-of-bed volumes
+    while (true) {
+        GLVolumePtrs::iterator it = std::find_if(m_shells.volumes.volumes.begin(), m_shells.volumes.volumes.end(),
+            [](GLVolume* volume) { return volume->is_modifier || !volume->printable || volume->is_outside; });
+        if (it != m_shells.volumes.volumes.end()) {
+            delete *it;
+            m_shells.volumes.volumes.erase(it);
+        }
+        else
+            break;
+    }
+
+    // removes volumes which are completely below bed
+    int i = 0;
+    while (i < (int)m_shells.volumes.volumes.size()) {
+        GLVolume* v = m_shells.volumes.volumes[i];
+        if (v->transformed_bounding_box().max.z() < SINKING_MIN_Z_THRESHOLD + EPSILON) {
+            delete v;
+            m_shells.volumes.volumes.erase(m_shells.volumes.volumes.begin() + i);
+            --i;
+        }
+        ++i;
+    }
+
+    // search for sinking volumes and replace their mesh with the part of it with positive z
+    for (GLVolume* v : m_shells.volumes.volumes) {
+        if (v->is_sinking()) {
+            TriangleMesh mesh(wxGetApp().plater()->model().objects[v->object_idx()]->volumes[v->volume_idx()]->mesh());
+            mesh.transform(v->world_matrix(), true);
+            indexed_triangle_set upper_its;
+            cut_mesh(mesh.its, 0.0f, &upper_its, nullptr);
+            v->model.reset();
+            v->model.init_from(upper_its);
+            v->set_instance_transformation(Transform3d::Identity());
+            v->set_volume_transformation(Transform3d::Identity());
+        }
+    }
+
+    for (GLVolume* volume : m_shells.volumes.volumes) {
+        volume->zoom_to_volumes = false;
+        volume->color.a(0.25f);
+        volume->force_native_color = true;
+        volume->set_render_color(true);
+    }
+
+    m_shells_bounding_box.reset();
+    for (const GLVolume* volume : m_shells.volumes.volumes) {
+        m_shells_bounding_box.merge(volume->transformed_bounding_box());
+    }
+
+    m_max_bounding_box.reset();
+}
+
+void GCodeViewer::load_wipetower_shell(const Print& print)
+{
+    if (wxGetApp().preset_bundle->printers.get_edited_preset().printer_technology() == ptFFF && print.is_step_done(psWipeTower)) {
         // adds wipe tower's volume
         const double max_z = print.objects()[0]->model_object()->get_model()->max_z();
         const PrintConfig& config = print.config();
@@ -2267,28 +2323,17 @@ void GCodeViewer::load_shells(const Print& print)
             const float depth = wipe_tower_data.depth;
             const std::vector<std::pair<float, float>> z_and_depth_pairs = print.wipe_tower_data(extruders_count).z_and_depth_pairs;
             const float brim_width = wipe_tower_data.brim_width;
-            if (depth != 0.)
-                m_shells.volumes.load_wipe_tower_preview(config.wipe_tower_x, config.wipe_tower_y, config.wipe_tower_width, depth, z_and_depth_pairs, max_z, config.wipe_tower_cone_angle, config.wipe_tower_rotation_angle,
-                    !print.is_step_done(psWipeTower), brim_width);
+            if (depth != 0.) {
+                m_shells.volumes.load_wipe_tower_preview(config.wipe_tower_x, config.wipe_tower_y, config.wipe_tower_width, depth, z_and_depth_pairs,
+                    max_z, config.wipe_tower_cone_angle, config.wipe_tower_rotation_angle, false, brim_width);
+                GLVolume* volume = m_shells.volumes.volumes.back();
+                volume->color.a(0.25f);
+                volume->force_native_color = true;
+                volume->set_render_color(true);
+                m_shells_bounding_box.merge(volume->transformed_bounding_box());
+                m_max_bounding_box.reset();
+            }
         }
-    }
-
-    // remove modifiers
-    while (true) {
-        GLVolumePtrs::iterator it = std::find_if(m_shells.volumes.volumes.begin(), m_shells.volumes.volumes.end(), [](GLVolume* volume) { return volume->is_modifier; });
-        if (it != m_shells.volumes.volumes.end()) {
-            delete (*it);
-            m_shells.volumes.volumes.erase(it);
-        }
-        else
-            break;
-    } 
-
-    for (GLVolume* volume : m_shells.volumes.volumes) {
-        volume->zoom_to_volumes = false;
-        volume->color.a(0.25f);
-        volume->force_native_color = true;
-        volume->set_render_color(true);
     }
 }
 
@@ -3202,7 +3247,7 @@ void GCodeViewer::render_toolpaths()
 
 void GCodeViewer::render_shells()
 {
-    if (!m_shells.visible || m_shells.volumes.empty())
+    if (m_shells.volumes.empty() || (!m_shells.visible && !m_shells.force_visible))
         return;
 
     GLShaderProgram* shader = wxGetApp().get_shader("gouraud_light");
@@ -3210,8 +3255,10 @@ void GCodeViewer::render_shells()
         return;
 
     shader->start_using();
+    shader->set_uniform("emission_factor", 0.1f);
     const Camera& camera = wxGetApp().plater()->get_camera();
     m_shells.volumes.render(GLVolumeCollection::ERenderType::Transparent, true, camera.get_view_matrix(), camera.get_projection_matrix());
+    shader->set_uniform("emission_factor", 0.0f);
     shader->stop_using();
 }
 
@@ -3230,6 +3277,7 @@ void GCodeViewer::render_legend(float& legend_height)
     const float max_height = 0.75f * static_cast<float>(cnv_size.get_height());
     const float child_height = 0.3333f * max_height;
     ImGui::SetNextWindowSizeConstraints({ 0.0f, 0.0f }, { -1.0f, max_height });
+//Y
     imgui.begin(std::string("Legend"), ImGuiWindowFlags_AlwaysAutoResize| ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
     enum class EItemType : unsigned char

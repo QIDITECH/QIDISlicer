@@ -469,6 +469,7 @@ public:
     // set actiev extruder and update preset combobox if needed
     // return false, if new preset wasn't selected
     bool        set_active_extruder(int new_selected_extruder);
+    void        invalidate_active_extruder() { m_active_extruder = -1; }
     void        update_extruder_combobox();
     int         get_active_extruder() const { return m_active_extruder; }
 

@@ -675,7 +675,9 @@ void PresetBundle::load_selections(AppConfig &config, const PresetPreferences& p
 void PresetBundle::export_selections(AppConfig &config)
 {
 	assert(this->printers.get_edited_preset().printer_technology() != ptFFF || extruders_filaments.size() >= 1);
-    assert(this->printers.get_edited_preset().printer_technology() != ptFFF || extruders_filaments.size() > 1 || filaments.get_selected_preset().alias == extruders_filaments.front().get_selected_preset()->alias);
+    // #ysFIXME_delete_after_test !All filament selections are always saved in extruder_filaments (for MM and SM printers),
+    // so there is no need to control a correspondence between filaments and extruders_filaments
+    //assert(this->printers.get_edited_preset().printer_technology() != ptFFF || extruders_filaments.size() > 1 || filaments.get_selected_preset().alias == extruders_filaments.front().get_selected_preset()->alias);
     config.clear_section("presets");
     config.set("presets", "print",        prints.get_selected_preset_name());
     config.set("presets", "filament", extruders_filaments.front().get_selected_preset_name());
@@ -1044,11 +1046,8 @@ void PresetBundle::load_config_file_config(const std::string &name_or_path, bool
             }
             // Load the configs into this->filaments and make them active.
             std::vector<std::string> extr_names = std::vector<std::string>(configs.size());
-            // To avoid incorrect selection of the first filament preset (means a value of Preset->m_idx_selected) 
-            // in a case when next added preset take a place of previosly selected preset,
-            // we should add presets from last to first
             bool any_modified = false;
-            for (int i = (int)configs.size()-1; i >= 0; i--) {
+            for (int i = 0; i < (int)configs.size(); i++) {
                 DynamicPrintConfig &cfg = configs[i];
                 // Split the "compatible_printers_condition" and "inherits" from the cummulative vectors to separate filament presets.
                 cfg.opt_string("compatible_printers_condition", true) = compatible_printers_condition_values[i + 1];
@@ -1057,15 +1056,18 @@ void PresetBundle::load_config_file_config(const std::string &name_or_path, bool
                 // Load all filament presets, but only select the first one in the preset dialog.
                 auto [loaded, modified] = this->filaments.load_external_preset(name_or_path, name,
                     (i < int(old_filament_profile_names->values.size())) ? old_filament_profile_names->values[i] : "",
-                    std::move(cfg), 
-                    i == 0 ? 
-                        PresetCollection::LoadAndSelect::Always : 
-                    any_modified ?
-                        PresetCollection::LoadAndSelect::Never :
-                        PresetCollection::LoadAndSelect::OnlyIfModified);
+                    std::move(cfg),
+                    any_modified ? PresetCollection::LoadAndSelect::Never : 
+                                   PresetCollection::LoadAndSelect::OnlyIfModified);
                 any_modified |= modified;
                 extr_names[i] = loaded->name;
             }
+
+            // Check if some preset was selected after loading from config file.
+            // ! Selected preset name is always the same as name of edited preset, if selection was applied
+            if (this->filaments.get_selected_preset_name() != this->filaments.get_edited_preset().name)
+                this->filaments.select_preset_by_name(extr_names[0], true);
+
             // create extruders_filaments only when all filaments are loaded
             for (size_t id = 0; id < extr_names.size(); ++id)
                 this->extruders_filaments.emplace_back(ExtruderFilaments(&filaments, id, extr_names[id]));
@@ -1804,7 +1806,21 @@ void PresetBundle::update_filaments_compatible(PresetSelectCompatibleType select
     else
         update_filament_compatible(extruder_idx);
 
-    if (this->filaments.get_idx_selected() == size_t(-1))
+    // validate selection in filaments
+    bool invalid_selection = this->filaments.get_idx_selected() == size_t(-1);
+    if (!invalid_selection) {
+        invalid_selection = true;
+        const std::string selected_filament_name = this->filaments.get_selected_preset_name();
+        for (const auto& extruder : extruders_filaments)
+            if (const std::string& selected_extr_filament_name = extruder.get_selected_preset_name();
+                selected_extr_filament_name == selected_filament_name) {
+                invalid_selection = false;
+                break;
+            }
+    }
+
+    // select valid filament from first extruder
+    if (invalid_selection)
         this->filaments.select_preset(extruders_filaments[0].get_selected_idx());
 }
 

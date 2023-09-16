@@ -187,7 +187,9 @@ public:
     
     const AABBMesh &get_aabb_mesh() const { return m_emesh; }
 
-    bool is_valid_intersection(Vec3d point, Vec3d direction, const Transform3d& trafo) const;
+    // Given a point and direction in world coords, returns whether the respective line
+    // intersects the mesh if it is transformed into world by trafo.
+    bool intersects_line(Vec3d point, Vec3d direction, const Transform3d& trafo) const;
 
     // Given a vector of points in woorld coordinates, this returns vector
     // of indices of points that are visible (i.e. not cut by clipping plane

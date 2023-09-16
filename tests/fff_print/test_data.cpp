@@ -228,7 +228,7 @@ void init_print(std::vector<TriangleMesh> &&meshes, Slic3r::Print &print, Slic3r
 		object->add_volume(std::move(t));
 		object->add_instance();
 	}
-    arrange_objects(model, InfiniteBed{}, ArrangeParams{ scaled(min_object_distance(config))});
+    arrange_objects(model, arr2::to_arrange_bed(get_bed_shape(config)), arr2::ArrangeSettings{}.set_distance_from_objects(min_object_distance(config)));
     model.center_instances_around_point({100, 100});
 	for (ModelObject *mo : model.objects) {
         mo->ensure_on_bed();

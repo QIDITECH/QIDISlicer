@@ -6,6 +6,7 @@
 #include "slic3r/GUI/IconManager.hpp"
 #include "slic3r/GUI/SurfaceDrag.hpp"
 #include "slic3r/GUI/I18N.hpp"
+#include "slic3r/GUI/TextLines.hpp"
 #include "slic3r/Utils/RaycastManager.hpp"
 #include "slic3r/Utils/EmbossStyleManager.hpp"
 
@@ -55,6 +56,15 @@ public:
     /// Handle pressing of shortcut
     /// </summary>
     void on_shortcut_key();
+
+    /// <summary>
+    /// Mirroring from object manipulation panel
+    /// !! Emboss gizmo must be active
+    /// </summary>
+    /// <param name="axis">Axis for mirroring must be one of {0,1,2}</param>
+    /// <returns>True on success start job otherwise False</returns>
+    bool do_mirror(size_t axis);
+
 protected:
     bool on_init() override;
     std::string on_get_name() const override;
@@ -85,6 +95,9 @@ protected:
     std::string get_gizmo_leaving_text() const override { return _u8L("Leave emboss gizmo"); }
     std::string get_action_snapshot_name() const override { return _u8L("Embossing actions"); }
 private:
+    void volume_transformation_changing();
+    void volume_transformation_changed();
+
     static EmbossStyles create_default_styles();
     // localized default text
     bool init_create(ModelVolumeType volume_type);
@@ -198,8 +211,7 @@ private:
 
         // maximal size of face name image
         Vec2i face_name_size             = Vec2i(100, 0);
-        float face_name_max_width        = 100.f;
-        float face_name_texture_offset_x = 105.f;
+        float face_name_texture_offset_x = 0.f;
 
         // maximal texture generate jobs running at once
         unsigned int max_count_opened_font_files = 10;
@@ -210,16 +222,17 @@ private:
             std::string font;
             std::string height;
             std::string depth;
-            std::string use_surface;
 
             // advanced
+            std::string use_surface;
+            std::string per_glyph;
+            std::string alignment;
             std::string char_gap;
             std::string line_gap;
             std::string boldness;
             std::string skew_ration;
             std::string from_surface;
             std::string rotation;
-            std::string keep_up;
             std::string collection;
         };
         Translations translations;
@@ -315,6 +328,10 @@ private:
 
     // cancel for previous update of volume to cancel finalize part
     std::shared_ptr<std::atomic<bool>> m_job_cancel;
+
+    // Keep information about curvature of text line around surface
+    TextLinesModel m_text_lines;
+    void reinit_text_lines(unsigned count_lines=0);
 
     // Rotation gizmo
     GLGizmoRotate m_rotate_gizmo;

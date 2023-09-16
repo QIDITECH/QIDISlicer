@@ -201,6 +201,8 @@ set(SLIC3R_SOURCES
     BlacklistedLibraryCheck.hpp
     LocalesUtils.cpp
     LocalesUtils.hpp
+    CutUtils.cpp
+    CutUtils.hpp
     Model.cpp
     Model.hpp
     ModelArrange.hpp
@@ -214,8 +216,55 @@ set(SLIC3R_SOURCES
     MeasureUtils.hpp
     CustomGCode.cpp
     CustomGCode.hpp
-    Arrange.hpp
-    Arrange.cpp
+    Arrange/Arrange.hpp
+    Arrange/ArrangeImpl.hpp
+    Arrange/Items/ArrangeItem.hpp
+    Arrange/Items/ArrangeItem.cpp
+    Arrange/Items/SimpleArrangeItem.hpp
+    Arrange/Items/SimpleArrangeItem.cpp
+    Arrange/Items/TrafoOnlyArrangeItem.hpp
+    Arrange/Items/MutableItemTraits.hpp
+    Arrange/Items/ArbitraryDataStore.hpp
+    Arrange/ArrangeSettingsView.hpp
+    Arrange/ArrangeSettingsDb_AppCfg.hpp
+    Arrange/ArrangeSettingsDb_AppCfg.cpp
+    Arrange/Scene.hpp
+    Arrange/Scene.cpp
+    Arrange/SceneBuilder.hpp
+    Arrange/SceneBuilder.cpp
+    Arrange/Tasks/ArrangeTask.hpp
+    Arrange/Tasks/ArrangeTaskImpl.hpp
+    Arrange/Tasks/FillBedTask.hpp
+    Arrange/Tasks/FillBedTaskImpl.hpp
+    Arrange/Tasks/MultiplySelectionTask.hpp
+    Arrange/Tasks/MultiplySelectionTaskImpl.hpp
+    Arrange/SegmentedRectangleBed.hpp
+    Arrange/Core/ArrangeItemTraits.hpp
+    Arrange/Core/DataStoreTraits.hpp
+    Arrange/Core/ArrangeBase.hpp
+    Arrange/Core/PackingContext.hpp
+    Arrange/Core/ArrangeFirstFit.hpp
+    Arrange/Core/Beds.hpp
+    Arrange/Core/Beds.cpp
+    Arrange/Core/NFP/NFP.hpp
+    Arrange/Core/NFP/NFP.cpp
+    Arrange/Core/NFP/NFPConcave_CGAL.hpp
+    Arrange/Core/NFP/NFPConcave_CGAL.cpp
+    Arrange/Core/NFP/NFPConcave_Tesselate.hpp
+    Arrange/Core/NFP/NFPConcave_Tesselate.cpp
+    Arrange/Core/NFP/EdgeCache.hpp
+    Arrange/Core/NFP/EdgeCache.cpp
+    Arrange/Core/NFP/CircularEdgeIterator.hpp
+    Arrange/Core/NFP/NFPArrangeItemTraits.hpp
+    Arrange/Core/NFP/PackStrategyNFP.hpp
+    Arrange/Core/NFP/RectangleOverfitPackingStrategy.hpp
+    Arrange/Core/NFP/Kernels/KernelTraits.hpp
+    Arrange/Core/NFP/Kernels/GravityKernel.hpp
+    Arrange/Core/NFP/Kernels/TMArrangeKernel.hpp
+    Arrange/Core/NFP/Kernels/CompactifyKernel.hpp
+    Arrange/Core/NFP/Kernels/RectangleOverfitKernelWrapper.hpp
+    Arrange/Core/NFP/Kernels/SVGDebugOutputKernelWrapper.hpp
+    Arrange/Core/NFP/Kernels/KernelUtils.hpp
     MultiPoint.cpp
     MultiPoint.hpp
     MutablePriorityQueue.hpp
@@ -430,6 +479,10 @@ set(SLIC3R_SOURCES
 )
 
 add_library(libslic3r STATIC ${SLIC3R_SOURCES})
+
+if (WIN32)
+    target_compile_definitions(libslic3r PUBLIC NOMINMAX)
+endif()
 
 foreach(_source IN ITEMS ${SLIC3R_SOURCES})
     get_filename_component(_source_path "${_source}" PATH)

@@ -10,6 +10,11 @@
 #include <cassert>
 #include <optional>
 
+#ifdef WIN32
+#undef min
+#undef max
+#endif
+
 namespace Slic3r { namespace opt {
 
 template<class T, class O = T>

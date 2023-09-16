@@ -15,7 +15,7 @@
 //#include "libnest2d/tools/benchmark.h"
 #include "libslic3r/SVG.hpp"
 
-#include "../libnest2d/printer_parts.hpp"
+#include "../data/qidiparts.hpp"
 
 #include <unordered_set>
 
@@ -683,15 +683,15 @@ struct Pair
 template<> struct std::hash<Pair> {
     size_t operator()(const Pair &c) const
     {
-        return c.first * PRINTER_PART_POLYGONS.size() + c.second;
+        return c.first * QIDI_PART_POLYGONS.size() + c.second;
     }
 };
 
 TEST_CASE("Convex polygon intersection test qidi polygons", "[Geometry][Rotcalip]") {
 
     // Overlap of the same polygon should always be an intersection
-    for (size_t i = 0; i < PRINTER_PART_POLYGONS.size(); ++i) {
-        Polygon P = PRINTER_PART_POLYGONS[i];
+    for (size_t i = 0; i < QIDI_PART_POLYGONS.size(); ++i) {
+        Polygon P = QIDI_PART_POLYGONS[i];
         P = Geometry::convex_hull(P.points);
         bool res = Geometry::convex_polygons_intersect(P, P);
         if (!res) {
@@ -703,8 +703,8 @@ TEST_CASE("Convex polygon intersection test qidi polygons", "[Geometry][Rotcalip
     }
 
     std::unordered_set<Pair> combos;
-    for (size_t i = 0; i < PRINTER_PART_POLYGONS.size(); ++i) {
-        for (size_t j = 0; j < PRINTER_PART_POLYGONS.size(); ++j) {
+    for (size_t i = 0; i < QIDI_PART_POLYGONS.size(); ++i) {
+        for (size_t j = 0; j < QIDI_PART_POLYGONS.size(); ++j) {
             if (i != j) {
                 size_t a = std::min(i, j), b = std::max(i, j);
                 combos.insert(Pair{a, b});
@@ -714,7 +714,7 @@ TEST_CASE("Convex polygon intersection test qidi polygons", "[Geometry][Rotcalip
 
     // All disjoint
     for (const auto &combo : combos) {
-        Polygon A = PRINTER_PART_POLYGONS[combo.first], B = PRINTER_PART_POLYGONS[combo.second];
+        Polygon A = QIDI_PART_POLYGONS[combo.first], B = QIDI_PART_POLYGONS[combo.second];
         A = Geometry::convex_hull(A.points);
         B = Geometry::convex_hull(B.points);
 
@@ -741,7 +741,7 @@ TEST_CASE("Convex polygon intersection test qidi polygons", "[Geometry][Rotcalip
 
     // All intersecting
     for (const auto &combo : combos) {
-        Polygon A = PRINTER_PART_POLYGONS[combo.first], B = PRINTER_PART_POLYGONS[combo.second];
+        Polygon A = QIDI_PART_POLYGONS[combo.first], B = QIDI_PART_POLYGONS[combo.second];
         A = Geometry::convex_hull(A.points);
         B = Geometry::convex_hull(B.points);
 

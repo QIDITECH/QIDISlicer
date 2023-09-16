@@ -165,6 +165,7 @@ struct indexed_triangle_set
     std::vector<stl_vertex>       				vertices;
 
     bool empty() const { return indices.empty() || vertices.empty(); }
+    bool operator==(const indexed_triangle_set& other) const { return this->indices == other.indices && this->vertices == other.vertices; }
 };
 
 extern bool stl_open(stl_file *stl, const char *file);

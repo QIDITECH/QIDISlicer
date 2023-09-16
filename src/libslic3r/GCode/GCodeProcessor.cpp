@@ -3610,7 +3610,8 @@ void GCodeProcessor::post_process()
                 while (rev_it != m_lines.rend() && rev_it->time > time_threshold_i && curr_cmd != cmd && curr_cmd != "G28" && curr_cmd != "G29") {
                     rev_it->line = line_replacer(rev_it->line);
                     ++rev_it;
-                    curr_cmd = GCodeReader::GCodeLine::extract_cmd(rev_it->line);
+                    if (rev_it != m_lines.rend())
+                        curr_cmd = GCodeReader::GCodeLine::extract_cmd(rev_it->line);
                 }
 
                 // we met the previous evenience of cmd, or a G28/G29 command. stop inserting lines

@@ -450,6 +450,19 @@ MedialAxis::MedialAxis(double min_width, double max_width, const ExPolygon &expo
 
 void MedialAxis::build(ThickPolylines* polylines)
 {
+#ifndef NDEBUG
+    // Verify the scaling of the coordinates of input line segments.
+    for (const Line& l : m_lines) {
+        auto test = [](int32_t v) {
+            static constexpr const int32_t hi = 65536 * 16383;
+            assert(v <= hi && -v < hi);
+        };
+        test(l.a.x());
+        test(l.a.y());
+        test(l.b.x());
+        test(l.b.y());
+    }
+#endif // NDEBUG
     construct_voronoi(m_lines.begin(), m_lines.end(), &m_vd);
     Slic3r::Voronoi::annotate_inside_outside(m_vd, m_lines);
 //    static constexpr double threshold_alpha = M_PI / 12.; // 30 degrees

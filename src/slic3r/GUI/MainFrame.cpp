@@ -1182,6 +1182,18 @@ static wxMenu* generate_help_menu()
 {
     wxMenu* helpMenu = new wxMenu();
     //B6
+    append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("%s &Website"), SLIC3R_APP_NAME),
+        wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
+        [](wxCommandEvent&) { wxGetApp().open_web_page_localized("https://www.qidi3d.com"); });
+    // TRN Item from "Help" menu
+    //append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("&Quick Start"), SLIC3R_APP_NAME),
+    //    wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
+    //    [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://www.qidi3d.com", nullptr, false); });
+    // TRN Item from "Help" menu
+    //append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("Sample &G-codes and Models"), SLIC3R_APP_NAME),
+    //    wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
+    //    [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://www.qidi3d.com", nullptr, false); });
+    //helpMenu->AppendSeparator();
     // append_menu_item(helpMenu, wxID_ANY, _L("QIDI 3D &Drivers"), _L("Open the QIDI3D drivers download page in your browser"),
     //     [](wxCommandEvent&) { wxGetApp().open_web_page_localized("https://www.qidi3d.com/downloads"); });
     // append_menu_item(helpMenu, wxID_ANY, _L("Software &Releases"), _L("Open the software releases page in your browser"),
@@ -1190,10 +1202,6 @@ static wxMenu* generate_help_menu()
 //#            wxTheApp->check_version(1);
 //#        });
 //#        $versioncheck->Enable(wxTheApp->have_version_check);
-    //B6
-    // append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("%s &Website"), SLIC3R_APP_NAME),
-    //     wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
-    //     [](wxCommandEvent&) { wxGetApp().open_web_page_localized("https://www.qidi3d.com/slicerweb"); });
 //        append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("%s &Manual"), SLIC3R_APP_NAME),
 //                                             wxString::Format(_L("Open the %s manual in your browser"), SLIC3R_APP_NAME),
 //            [this](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("http://manual.slic3r.org/"); });

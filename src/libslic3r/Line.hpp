@@ -38,6 +38,32 @@ template<class L> using Scalar = typename Traits<remove_cvref_t<L>>::Scalar;
 template<class L> auto get_a(L &&l) { return Traits<remove_cvref_t<L>>::get_a(l); }
 template<class L> auto get_b(L &&l) { return Traits<remove_cvref_t<L>>::get_b(l); }
 
+template<class L> auto sqlength(L &&l)
+{
+    return (get_b(l) - get_a(l)).squaredNorm();
+}
+
+template<class Scalar, class L>
+auto sqlength(L &&l)
+{
+    return (get_b(l).template cast<Scalar>() - get_a(l).template cast<Scalar>()).squaredNorm();
+}
+
+template<class L, class = std::enable_if_t<Dim<L> == 2> >
+auto angle_to_x(const L &l)
+{
+    auto dx = double(get_b(l).x()) - get_a(l).x();
+    auto dy = double(get_b(l).y()) - get_a(l).y();
+
+    double a = std::atan2(dy, dx);
+    auto s   = std::signbit(a);
+
+    if(s)
+        a += 2. * PI;
+
+    return a;
+}
+
 // Distance to the closest point of line.
 template<class L>
 inline double distance_to_squared(const L &line, const Vec<Dim<L>, Scalar<L>> &point, Vec<Dim<L>, Scalar<L>> *nearest_point)
@@ -162,7 +188,7 @@ public:
     void   translate(double x, double y) { this->translate(Point(x, y)); }
     void   rotate(double angle, const Point &center) { this->a.rotate(angle, center); this->b.rotate(angle, center); }
     void   reverse() { std::swap(this->a, this->b); }
-    double length() const { return (b - a).cast<double>().norm(); }
+    double length() const { return (b.cast<double>() - a.cast<double>()).norm(); }
     Point  midpoint() const { return (this->a + this->b) / 2; }
     bool   intersection_infinite(const Line &other, Point* point) const;
     bool   operator==(const Line &rhs) const { return this->a == rhs.a && this->b == rhs.b; }

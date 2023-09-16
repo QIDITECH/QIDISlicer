@@ -79,8 +79,8 @@
     ModelObjectPtrs* objects()
         %code%{ RETVAL = &THIS->objects; %};
     
-    bool arrange_objects(double dist) %code%{ ArrangeParams ap{scaled(dist)}; arrange_objects(*THIS, InfiniteBed{}, ap); %};
-    void duplicate(unsigned int copies_num, double dist) %code%{ ArrangeParams ap{scaled(dist)};  duplicate(*THIS, copies_num, InfiniteBed{}, ap); %};
+    bool arrange_objects(double dist) %code%{ arrange_objects(*THIS, arr2::InfiniteBed{}, arr2::ArrangeSettings{}.set_distance_from_objects(dist) ); %};
+    void duplicate(unsigned int copies_num, double dist) %code%{ duplicate(*THIS, copies_num, arr2::InfiniteBed{}, arr2::ArrangeSettings{}.set_distance_from_objects(dist) ); %};
     bool looks_like_multipart_object() const;
     void convert_multipart_object(unsigned int max_extruders);
 

@@ -2758,6 +2758,10 @@ bool TickCodeInfo::add_tick(const int tick, Type type, const int extruder, doubl
 
 bool TickCodeInfo::edit_tick(std::set<TickCode>::iterator it, double print_z)
 {
+    // Save previously value of the tick before the call a Dialog from get_... functions,
+    // otherwise a background process can change ticks values and current iterator wouldn't be valid for the moment of a Dialog close
+    TickCode changed_tick = *it;
+
     std::string edited_value;
     if (it->type == ColorChange)
         edited_value = get_new_color(it->color);
@@ -2769,7 +2773,10 @@ bool TickCodeInfo::edit_tick(std::set<TickCode>::iterator it, double print_z)
     if (edited_value.empty())
         return false;
 
-    TickCode changed_tick = *it;
+    // Update iterator. For this moment its value can be invalid
+    if (it = ticks.find(changed_tick); it == ticks.end())
+        return false;
+
     if (it->type == ColorChange) {
         if (it->color == edited_value)
             return false;

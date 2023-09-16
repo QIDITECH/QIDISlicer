@@ -1,76 +1,13 @@
 #include "ModelArrange.hpp"
 
+#include <libslic3r/Arrange/SceneBuilder.hpp>
+#include <libslic3r/Arrange/Items/ArrangeItem.hpp>
+#include <libslic3r/Arrange/Tasks/MultiplySelectionTask.hpp>
+
 #include <libslic3r/Model.hpp>
 #include <libslic3r/Geometry/ConvexHull.hpp>
-#include "MTUtils.hpp"
 
 namespace Slic3r {
-
-arrangement::ArrangePolygons get_arrange_polys(const Model &model, ModelInstancePtrs &instances)
-{
-    size_t count = 0;
-    for (auto obj : model.objects) count += obj->instances.size();
-    
-    ArrangePolygons input;
-    input.reserve(count);
-    instances.clear(); instances.reserve(count);
-    for (ModelObject *mo : model.objects)
-        for (ModelInstance *minst : mo->instances) {
-            input.emplace_back(minst->get_arrange_polygon());
-            instances.emplace_back(minst);
-        }
-    
-    return input;
-}
-
-bool apply_arrange_polys(ArrangePolygons &input, ModelInstancePtrs &instances, VirtualBedFn vfn)
-{
-    bool ret = true;
-    
-    for(size_t i = 0; i < input.size(); ++i) {
-        if (input[i].bed_idx != 0) { ret = false; if (vfn) vfn(input[i]); }
-        if (input[i].bed_idx >= 0)
-            instances[i]->apply_arrange_result(input[i].translation.cast<double>(),
-                                               input[i].rotation);
-    }
-    
-    return ret;
-}
-
-Slic3r::arrangement::ArrangePolygon get_arrange_poly(const Model &model)
-{
-    ArrangePolygon ap;
-    Points &apts = ap.poly.contour.points;
-    for (const ModelObject *mo : model.objects)
-        for (const ModelInstance *minst : mo->instances) {
-            ArrangePolygon obj_ap = minst->get_arrange_polygon();
-            ap.poly.contour.rotate(obj_ap.rotation);
-            ap.poly.contour.translate(obj_ap.translation.x(), obj_ap.translation.y());
-            const Points &pts = obj_ap.poly.contour.points;
-            std::copy(pts.begin(), pts.end(), std::back_inserter(apts));
-        }
-    
-    apts = std::move(Geometry::convex_hull(apts).points);
-    return ap;
-}
-
-void duplicate(Model &model, Slic3r::arrangement::ArrangePolygons &copies, VirtualBedFn vfn)
-{
-    for (ModelObject *o : model.objects) {
-        // make a copy of the pointers in order to avoid recursion when appending their copies
-        ModelInstancePtrs instances = o->instances;
-        o->instances.clear();
-        for (const ModelInstance *i : instances) {
-            for (arrangement::ArrangePolygon &ap : copies) {
-                if (ap.bed_idx != 0) vfn(ap);
-                ModelInstance *instance = o->add_instance(*i);
-                Vec2d pos = unscale(ap.translation);
-                instance->set_offset(instance->get_offset() + to_3d(pos, 0.));
-            }
-        }
-        o->invalidate_bounding_box();
-    }
-}
 
 void duplicate_objects(Model &model, size_t copies_num)
 {
@@ -81,6 +18,47 @@ void duplicate_objects(Model &model, size_t copies_num)
             for (size_t k = 2; k <= copies_num; ++ k)
                 o->add_instance(*i);
     }
+}
+
+bool arrange_objects(Model &model,
+                     const arr2::ArrangeBed &bed,
+                     const arr2::ArrangeSettingsView &settings)
+{
+    return arrange(arr2::SceneBuilder{}
+                       .set_bed(bed)
+                       .set_arrange_settings(settings)
+                       .set_model(model));
+}
+
+void duplicate_objects(Model &model,
+                       size_t copies_num,
+                       const arr2::ArrangeBed &bed,
+                       const arr2::ArrangeSettingsView &settings)
+{
+    duplicate_objects(model, copies_num);
+    arrange_objects(model, bed, settings);
+}
+
+void duplicate(Model &model,
+               size_t copies_num,
+               const arr2::ArrangeBed &bed,
+               const arr2::ArrangeSettingsView &settings)
+{
+    auto vbh = arr2::VirtualBedHandler::create(bed);
+    arr2::DuplicableModel dup_model{&model, std::move(vbh), bounding_box(bed)};
+
+    arr2::Scene scene{arr2::BasicSceneBuilder{}
+                          .set_arrangeable_model(&dup_model)
+                          .set_arrange_settings(&settings)
+                          .set_bed(bed)};
+
+    if (copies_num >= 1)
+        copies_num -= 1;
+
+    auto task = arr2::MultiplySelectionTask<arr2::ArrangeItem>::create(scene, copies_num);
+    auto result = task->process_native(arr2::DummyCtl{});
+    if (result->apply_on(scene.model()))
+        dup_model.apply_duplicates();
 }
 
 } // namespace Slic3r

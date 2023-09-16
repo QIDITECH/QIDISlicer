@@ -136,7 +136,8 @@ void GLGizmoSlaSupports::on_render()
 
     m_selection_rectangle.render(m_parent);
     m_c->object_clipper()->render_cut();
-    m_c->supports_clipper()->render_cut();
+    if (are_sla_supports_shown())
+        m_c->supports_clipper()->render_cut();
 
     glsafe(::glDisable(GL_BLEND));
 }

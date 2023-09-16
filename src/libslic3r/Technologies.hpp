@@ -52,14 +52,4 @@
 // Enable OpenGL debug messages using debug context
 #define ENABLE_OPENGL_DEBUG_OPTION (1 && ENABLE_GL_CORE_PROFILE)
 
-
-//====================
-// 2.6.0.alpha1 techs
-//====================
-#define ENABLE_2_6_0_ALPHA1 1
-
-// Enable alternative version of file_wildcards()
-#define ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR (1 && ENABLE_2_6_0_ALPHA1)
-
-
 #endif // _qidislicer_technologies_h_

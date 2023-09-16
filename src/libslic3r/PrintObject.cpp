@@ -670,6 +670,7 @@ bool PrintObject::invalidate_state_by_config_options(
         } else if (
                opt_key == "layer_height"
             || opt_key == "mmu_segmented_region_max_width"
+            || opt_key == "mmu_segmented_region_interlocking_depth"
             || opt_key == "raft_layers"
             || opt_key == "raft_contact_distance"
             || opt_key == "slice_closing_radius"
@@ -814,15 +815,15 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "overhang_speed_2"
             || opt_key == "overhang_speed_3"
             || opt_key == "external_perimeter_speed"
-            || opt_key == "infill_speed"
-            || opt_key == "perimeter_speed"
             || opt_key == "small_perimeter_speed"
             || opt_key == "solid_infill_speed"
             || opt_key == "top_solid_infill_speed") {
             invalidated |= m_print->invalidate_step(psGCodeExport);
         } else if (
                opt_key == "wipe_into_infill"
-            || opt_key == "wipe_into_objects") {
+            || opt_key == "wipe_into_objects"
+            || opt_key == "infill_speed"
+            || opt_key == "perimeter_speed") {
             invalidated |= m_print->invalidate_step(psWipeTower);
             invalidated |= m_print->invalidate_step(psGCodeExport);
         } else {
@@ -1539,21 +1540,33 @@ void PrintObject::discover_vertical_shells()
                             // Finally expand the infill a bit to remove tiny gaps between solid infill and the other regions.
                             narrow_sparse_infill_region_radius - tiny_overlap_radius, ClipperLib::jtSquare);
 
+                        Polygons object_volume;
                         Polygons internal_volume;
                         {
                             Polygons shrinked_bottom_slice = idx_layer > 0 ? to_polygons(m_layers[idx_layer - 1]->lslices) : Polygons{};
                             Polygons shrinked_upper_slice  = (idx_layer + 1) < m_layers.size() ?
                                                                  to_polygons(m_layers[idx_layer + 1]->lslices) :
                                                                  Polygons{};
-                            internal_volume                = intersection(shrinked_bottom_slice, shrinked_upper_slice);
+                            object_volume = intersection(shrinked_bottom_slice, shrinked_upper_slice);
+                            internal_volume = closing(polygonsInternal, SCALED_EPSILON);
                         }
 
-                        // The opening operation may cause scattered tiny drops on the smooth parts of the model, filter them out
+                        // The regularization operation may cause scattered tiny drops on the smooth parts of the model, filter them out
+                        // If the region checks both following conditions, it is removed:
+                        //   1. the area is very small,
+                        //      OR the area is quite small and it is fully wrapped in model (not visible)
+                        //      the in-model condition is there due to small sloping surfaces, e.g. top of the hull of the benchy
+                        //   2. the area does not fully cover an internal polygon
+                        //         This is there mainly for a very thin parts, where the solid layers would be missing if the part area is quite small
                         regularized_shell.erase(std::remove_if(regularized_shell.begin(), regularized_shell.end(),
-                                                               [&min_perimeter_infill_spacing, &internal_volume](const ExPolygon &p) {
-                                                                   return p.area() < min_perimeter_infill_spacing * scaled(1.5) ||
-                                                                          (p.area() < min_perimeter_infill_spacing * scaled(8.0) &&
-                                                                           diff(to_polygons(p), internal_volume).empty());
+                                                               [&internal_volume, &min_perimeter_infill_spacing,
+                                                                &object_volume](const ExPolygon &p) {
+                                                                   return (p.area() < min_perimeter_infill_spacing * scaled(1.5) ||
+                                                                           (p.area() < min_perimeter_infill_spacing * scaled(8.0) &&
+                                                                            diff(to_polygons(p), object_volume).empty())) &&
+                                                                          diff(internal_volume,
+                                                                               expand(to_polygons(p), min_perimeter_infill_spacing))
+                                                                                  .size() >= internal_volume.size();
                                                                }),
                                                 regularized_shell.end());
                     }

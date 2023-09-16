@@ -50,6 +50,8 @@ public:
     const Point& axis()  const { return m_axis; }
 };
 
-}
+double fit_into_box_rotation(const Polygon &shape, const BoundingBox &box);
+
+} // namespace Slic3r
 
 #endif // MINAREABOUNDINGBOX_HPP

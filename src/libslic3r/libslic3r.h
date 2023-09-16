@@ -321,7 +321,8 @@ template<class T, class I, class... Args> // Arbitrary allocator can be used
 IntegerOnly<I, std::vector<T, Args...>> reserve_vector(I capacity)
 {
     std::vector<T, Args...> ret;
-    if (capacity > I(0)) ret.reserve(size_t(capacity));
+    if (capacity > I(0))
+        ret.reserve(size_t(capacity));
 
     return ret;
 }
@@ -329,6 +330,18 @@ IntegerOnly<I, std::vector<T, Args...>> reserve_vector(I capacity)
 // Borrowed from C++20
 template<class T>
 using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+namespace detail_strip_ref_wrappers {
+template<class T> struct StripCVRef_ { using type = remove_cvref_t<T>; };
+template<class T> struct StripCVRef_<std::reference_wrapper<T>>
+{
+    using type = std::remove_cv_t<T>;
+};
+} // namespace detail
+
+// Removes reference wrappers as well
+template<class T> using  StripCVRef =
+    typename detail_strip_ref_wrappers::StripCVRef_<remove_cvref_t<T>>::type;
 
 // A very simple range concept implementation with iterator-like objects.
 // This should be replaced by std::ranges::subrange (C++20)
@@ -358,6 +371,48 @@ template<class Cont> auto range(Cont &&cont)
     return Range{std::begin(cont), std::end(cont)};
 }
 
+template<class Cont> auto crange(Cont &&cont)
+{
+    return Range{std::cbegin(cont), std::cend(cont)};
+}
+
+template<class IntType = int, class = IntegerOnly<IntType, void>>
+class IntIterator {
+    IntType m_val;
+public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type   = std::ptrdiff_t;
+    using value_type        = IntType;
+    using pointer           = IntType*;  // or also value_type*
+    using reference         = IntType&;  // or also value_type&
+
+    IntIterator(IntType v): m_val{v} {}
+
+    IntIterator & operator++() { ++m_val; return *this; }
+    IntIterator operator++(int) { auto cpy = *this; ++m_val; return cpy; }
+    IntIterator & operator--() { --m_val; return *this; }
+    IntIterator operator--(int) { auto cpy = *this; --m_val; return cpy; }
+
+    IntType operator*() const { return m_val; }
+    IntType operator->() const { return m_val; }
+
+    bool operator==(const IntIterator& other) const
+    {
+        return m_val == other.m_val;
+    }
+
+    bool operator!=(const IntIterator& other) const
+    {
+        return !(*this == other);
+    }
+};
+
+template<class IntType, class = IntegerOnly<IntType>>
+auto range(IntType from, IntType to)
+{
+    return Range{IntIterator{from}, IntIterator{to}};
+}
+
 template<class T, class = FloatingOnly<T>>
 constexpr T NaN = std::numeric_limits<T>::quiet_NaN();
 
@@ -384,6 +439,32 @@ inline IntegerOnly<I, I> fast_round_up(double a)
 }
 
 template<class T> using SamePair = std::pair<T, T>;
+
+// Helper to be used in static_assert.
+template<class T> struct always_false { enum { value = false }; };
+
+// Map a generic function to each argument following the mapping function
+template<class Fn, class...Args>
+Fn for_each_argument(Fn &&fn, Args&&...args)
+{
+    // see https://www.fluentcpp.com/2019/03/05/for_each_arg-applying-a-function-to-each-argument-of-a-function-in-cpp/
+    (fn(std::forward<Args>(args)),...);
+
+    return fn;
+}
+
+// Call fn on each element of the input tuple tup.
+template<class Fn, class Tup>
+Fn for_each_in_tuple(Fn fn, Tup &&tup)
+{
+    auto mpfn = [&fn](auto&...pack) {
+        for_each_argument(fn, pack...);
+    };
+
+    std::apply(mpfn, tup);
+
+    return fn;
+}
 
 } // namespace Slic3r
 

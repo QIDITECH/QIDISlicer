@@ -134,7 +134,12 @@ GalleryDialog::GalleryDialog(wxWindow* parent) :
 }
 
 GalleryDialog::~GalleryDialog()
-{   
+{
+    // From wxWidgets docs:
+    // The method void wxListCtrl::SetImageList(wxImageList* imageList, int which)
+    // does not take ownership of the image list, you have to delete it yourself.
+    if (m_image_list)
+        delete m_image_list;
 }
 
 int GalleryDialog::show(bool show_from_menu) 

@@ -1,4 +1,7 @@
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+
 #include <catch2/catch.hpp>
 
 #include <numeric>

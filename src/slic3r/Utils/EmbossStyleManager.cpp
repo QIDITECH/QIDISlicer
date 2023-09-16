@@ -282,6 +282,25 @@ void StyleManager::clear_glyphs_cache()
 
 void StyleManager::clear_imgui_font() { m_style_cache.atlas.Clear(); }
 
+#include "slic3r/GUI/TextLines.hpp"
+double StyleManager::get_line_height()
+{
+    assert(is_active_font());
+    if (!is_active_font())
+        return -1;
+    const auto &ffc = get_font_file_with_cache();
+    assert(ffc.has_value());
+    if (!ffc.has_value())
+        return -1;
+    const auto &ff_ptr = ffc.font_file;
+    assert(ff_ptr != nullptr);
+    if (ff_ptr == nullptr)
+        return -1;
+    const FontProp &fp = get_font_prop();
+    const FontFile &ff = *ff_ptr;
+    return TextLinesModel::calc_line_height(ff, fp);
+}
+
 ImFont *StyleManager::get_imgui_font()
 {
     if (!is_active_font()) return nullptr;
@@ -430,12 +449,10 @@ float StyleManager::min_imgui_font_size = 18.f;
 float StyleManager::max_imgui_font_size = 60.f;
 float StyleManager::get_imgui_font_size(const FontProp &prop, const FontFile &file, double scale)
 {
-    const auto  &cn = prop.collection_number;
-    unsigned int font_index = (cn.has_value()) ? *cn : 0;
-    const auto  &font_info  = file.infos[font_index];
+    const FontFile::Info& info = get_font_info(file, prop);
     // coeficient for convert line height to font size
-    float c1 = (font_info.ascent - font_info.descent + font_info.linegap) /
-               (float) font_info.unit_per_em;
+    float c1 = (info.ascent - info.descent + info.linegap) /
+               (float) info.unit_per_em;
 
     // The point size is defined as 1/72 of the Anglo-Saxon inch (25.4 mm):
     // It is approximately 0.0139 inch or 352.8 um.
@@ -471,17 +488,12 @@ ImFont *StyleManager::create_imgui_font(const std::string &text, double scale)
     ImFontConfig font_config;
     // TODO: start using merge mode
     //font_config.MergeMode = true;
-
-    unsigned int font_index = font_prop.collection_number.value_or(0);
-    const auto  &font_info  = font_file.infos[font_index];
-    if (font_prop.char_gap.has_value()) {
-        float coef = font_size / (double) font_info.unit_per_em;
-        font_config.GlyphExtraSpacing.x = coef * (*font_prop.char_gap);
-    }
-    if (font_prop.line_gap.has_value()) {
-        float coef = font_size / (double) font_info.unit_per_em;
-        font_config.GlyphExtraSpacing.y = coef * (*font_prop.line_gap);
-    }
+    int unit_per_em = get_font_info(font_file, font_prop).unit_per_em;
+    float coef = font_size / (double) unit_per_em;
+    if (font_prop.char_gap.has_value())
+        font_config.GlyphExtraSpacing.x = coef * (*font_prop.char_gap);    
+    if (font_prop.line_gap.has_value())
+        font_config.GlyphExtraSpacing.y = coef * (*font_prop.line_gap);    
 
     font_config.FontDataOwnedByAtlas = false;
 

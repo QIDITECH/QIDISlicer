@@ -196,6 +196,9 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "filament_cooling_initial_speed"
             || opt_key == "filament_cooling_final_speed"
             || opt_key == "filament_ramming_parameters"
+            || opt_key == "filament_multitool_ramming"
+            || opt_key == "filament_multitool_ramming_volume"
+            || opt_key == "filament_multitool_ramming_flow"
             || opt_key == "filament_max_volumetric_speed"
             || opt_key == "gcode_flavor"
             || opt_key == "high_current_on_filament_swap"
@@ -666,7 +669,7 @@ std::string Print::validate(std::vector<std::string>* warnings) const
 //        	double extrusion_width_min = config.get_abs_value(opt_key, min_nozzle_diameter);
 //        	double extrusion_width_max = config.get_abs_value(opt_key, max_nozzle_diameter);
             double extrusion_width_min = config.get_abs_value(opt_key, layer_height);
-            double extrusion_width_max = config.get_abs_value(opt_key, layer_height);
+            double extrusion_width_max = extrusion_width_min;
         	if (extrusion_width_min == 0) {
         		// Default "auto-generated" extrusion width is always valid.
         	} else if (extrusion_width_min <= layer_height) {
@@ -699,6 +702,17 @@ std::string Print::validate(std::vector<std::string>* warnings) const
     						return _u8L("The Wipe Tower currently supports the non-soluble supports only if they are printed with the current extruder without triggering a tool change. "
     							     "(both support_material_extruder and support_material_interface_extruder need to be set to 0).");
     				}
+                }
+                if (object->config().support_material_style == smsOrganic) {
+                    float extrusion_width = std::min(
+                        support_material_flow(object).width(),
+                        support_material_interface_flow(object).width());
+                    if (object->config().support_tree_tip_diameter < extrusion_width - EPSILON)
+                        return _u8L("Organic support tree tip diameter must not be smaller than support material extrusion width.");
+                    if (object->config().support_tree_branch_diameter < 2. * extrusion_width - EPSILON)
+                        return _u8L("Organic support branch diameter must not be smaller than 2x support material extrusion width.");
+                    if (object->config().support_tree_branch_diameter < object->config().support_tree_tip_diameter)
+                        return _u8L("Organic support branch diameter must not be smaller than support tree tip diameter.");
                 }
             }
 
@@ -902,20 +916,29 @@ void Print::process()
     name_tbb_thread_pool_threads_set_locale();
 
     BOOST_LOG_TRIVIAL(info) << "Starting the slicing process." << log_memory_info();
-    for (PrintObject *obj : m_objects)
-        obj->make_perimeters();
-    for (PrintObject *obj : m_objects)
-        obj->infill();
-    for (PrintObject *obj : m_objects)
-        obj->ironing();
+
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, m_objects.size(), 1), [this](const tbb::blocked_range<size_t> &range) {
+        for (size_t idx = range.begin(); idx < range.end(); ++idx) {
+            m_objects[idx]->make_perimeters();
+            m_objects[idx]->infill();
+            m_objects[idx]->ironing();
+        }
+    }, tbb::simple_partitioner());
+
+    // The following step writes to m_shared_regions, it should not run in parallel.
     for (PrintObject *obj : m_objects)
         obj->generate_support_spots();
     // check data from previous step, format the error message(s) and send alert to ui
+    // this also has to be done sequentially.
     alert_when_supports_needed();
-    for (PrintObject *obj : m_objects)
-        obj->generate_support_material();
-    for (PrintObject *obj : m_objects)
-        obj->estimate_curled_extrusions();
+
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, m_objects.size(), 1), [this](const tbb::blocked_range<size_t> &range) {
+        for (size_t idx = range.begin(); idx < range.end(); ++idx) {
+            m_objects[idx]->generate_support_material();
+            m_objects[idx]->estimate_curled_extrusions();
+        }
+    }, tbb::simple_partitioner());
+
     if (this->set_started(psWipeTower)) {
         m_wipe_tower_data.clear();
         m_tool_ordering.clear();
@@ -1455,7 +1478,7 @@ void Print::_make_wipe_tower()
     this->throw_if_canceled();
 
     // Initialize the wipe tower.
-    WipeTower wipe_tower(m_config, wipe_volumes, m_wipe_tower_data.tool_ordering.first_extruder());
+    WipeTower wipe_tower(m_config, m_default_region_config, wipe_volumes, m_wipe_tower_data.tool_ordering.first_extruder());
 
     //wipe_tower.set_retract();
     //wipe_tower.set_zhop();

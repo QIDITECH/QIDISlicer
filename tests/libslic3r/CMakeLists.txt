@@ -31,13 +31,15 @@ add_executable(${_TEST_NAME}_tests
     test_png_io.cpp
     test_surface_mesh.cpp
     test_timeutils.cpp
-	test_quadric_edge_collapse.cpp
+        test_quadric_edge_collapse.cpp
     test_triangulation.cpp
     test_emboss.cpp
     test_indexed_triangle_set.cpp
     test_astar.cpp
-	test_jump_point_search.cpp
-    ../libnest2d/printer_parts.cpp
+    test_anyptr.cpp
+    test_jump_point_search.cpp
+    ../data/qidiparts.cpp
+    ../data/qidiparts.hpp
 	)
 
 if (TARGET OpenVDB::openvdb)

@@ -33,19 +33,6 @@ static const Slic3r::ColorRGBA TRANSPARENT_PLANE_COLOR = { 0.8f, 0.8f, 0.8f, 0.5
 namespace Slic3r {
 namespace GUI {
 
-Selection::VolumeCache::TransformCache::TransformCache(const Geometry::Transformation& transform)
-    : position(transform.get_offset())
-    , rotation(transform.get_rotation())
-    , scaling_factor(transform.get_scaling_factor())
-    , mirror(transform.get_mirror())
-    , full_matrix(transform.get_matrix())
-    , transform(transform)
-    , rotation_matrix(transform.get_rotation_matrix())
-    , scale_matrix(transform.get_scaling_factor_matrix())
-    , mirror_matrix(transform.get_mirror_matrix())
-{
-}
-
 Selection::VolumeCache::VolumeCache(const Geometry::Transformation& volume_transform, const Geometry::Transformation& instance_transform)
     : m_volume(volume_transform)
     , m_instance(instance_transform)
@@ -850,11 +837,31 @@ std::pair<BoundingBoxf3, Transform3d> Selection::get_bounding_box_in_reference_s
             }
         }
     }
+
     const Vec3d box_size = max - min;
-    const Vec3d half_box_size = 0.5 * box_size;
-    BoundingBoxf3 out_box(-half_box_size, half_box_size);
+    Vec3d half_box_size = 0.5 * box_size;
     Geometry::Transformation out_trafo(trafo);
-    const Vec3d center = 0.5 * (min + max);
+    Vec3d center = 0.5 * (min + max);
+
+    // Fix for non centered volume 
+    // by move with calculated center(to volume center) and extend half box size
+    // e.g. for right aligned embossed text
+    if (m_list.size() == 1 &&
+        type == ECoordinatesType::Local) {
+        const GLVolume& vol = *get_volume(*m_list.begin());
+        const Transform3d vol_world_trafo = vol.world_matrix();
+        Vec3d world_zero = vol_world_trafo * Vec3d::Zero();
+        for (size_t i = 0; i < 3; i++){
+            // move center to local volume zero
+            center[i] = world_zero.dot(axes[i]);
+            // extend half size to bigger distance from center
+            half_box_size[i] = std::max(
+                abs(center[i] - min[i]),
+                abs(center[i] - max[i]));
+        }
+    }
+    
+    const BoundingBoxf3 out_box(-half_box_size, half_box_size);
     out_trafo.set_offset(basis_trafo * center);
     return { out_box, out_trafo.get_matrix_no_scaling_factor() };
 }
@@ -933,8 +940,8 @@ void Selection::translate(const Vec3d& displacement, TransformationType transfor
             }
             else {
                 Vec3d relative_disp = displacement;
-                if (transformation_type.instance())
-                    relative_disp = volume_data.get_instance_scale_matrix().inverse() * relative_disp;
+                if (transformation_type.world() && transformation_type.instance())
+                    relative_disp = volume_data.get_instance_transform().get_scaling_factor_matrix().inverse() * relative_disp;
 
                 transform_volume_relative(v, volume_data, transformation_type, Geometry::translation_transform(relative_disp), m_cache.dragging_center);
             }

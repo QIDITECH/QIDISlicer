@@ -54,8 +54,8 @@ public:
         return ! (this->max.x() < other.min.x() || this->min.x() > other.max.x() ||
                   this->max.y() < other.min.y() || this->min.y() > other.max.y());
     }
-    bool operator==(const BoundingBoxBase<PointType, PointsType> &rhs) { return this->min == rhs.min && this->max == rhs.max; }
-    bool operator!=(const BoundingBoxBase<PointType, PointsType> &rhs) { return ! (*this == rhs); }
+    bool operator==(const BoundingBoxBase<PointType, PointsType> &rhs) const noexcept { return this->min == rhs.min && this->max == rhs.max; }
+    bool operator!=(const BoundingBoxBase<PointType, PointsType> &rhs) const noexcept { return ! (*this == rhs); }
 
 private:
     // to access construct()
@@ -192,6 +192,7 @@ public:
     
     BoundingBox() : BoundingBoxBase<Point, Points>() {}
     BoundingBox(const Point &pmin, const Point &pmax) : BoundingBoxBase<Point, Points>(pmin, pmax) {}
+    BoundingBox(const BoundingBoxBase<Vec2crd> &bb): BoundingBox(bb.min, bb.max) {}
     BoundingBox(const Points &points) : BoundingBoxBase<Point, Points>(points) {}
 
     BoundingBox inflated(coordf_t delta) const throw() { BoundingBox out(*this); out.offset(delta); return out; }
@@ -215,6 +216,7 @@ public:
     BoundingBoxf() : BoundingBoxBase<Vec2d>() {}
     BoundingBoxf(const Vec2d &pmin, const Vec2d &pmax) : BoundingBoxBase<Vec2d>(pmin, pmax) {}
     BoundingBoxf(const std::vector<Vec2d> &points) : BoundingBoxBase<Vec2d>(points) {}
+    BoundingBoxf(const BoundingBoxBase<Vec2d> &bb): BoundingBoxf{bb.min, bb.max} {}
 };
 
 class BoundingBoxf3 : public BoundingBox3Base<Vec3d> 
@@ -239,17 +241,23 @@ inline bool empty(const BoundingBox3Base<PointType> &bb)
 
 inline BoundingBox scaled(const BoundingBoxf &bb) { return {scaled(bb.min), scaled(bb.max)}; }
 
-template<class T = coord_t>
-BoundingBoxBase<Vec<2, T>> scaled(const BoundingBoxf &bb) { return {scaled<T>(bb.min), scaled<T>(bb.max)}; }
+template<class T = coord_t, class Tin>
+BoundingBoxBase<Vec<2, T>> scaled(const BoundingBoxBase<Vec<2, Tin>> &bb) { return {scaled<T>(bb.min), scaled<T>(bb.max)}; }
 
 template<class T = coord_t>
-BoundingBox3Base<Vec<3, T>> scaled(const BoundingBoxf3 &bb) { return {scaled<T>(bb.min), scaled<T>(bb.max)}; }
+BoundingBoxBase<Vec<2, T>> scaled(const BoundingBox &bb) { return {scaled<T>(bb.min), scaled<T>(bb.max)}; }
+
+template<class T = coord_t, class Tin>
+BoundingBox3Base<Vec<3, T>> scaled(const BoundingBox3Base<Vec<3, Tin>> &bb) { return {scaled<T>(bb.min), scaled<T>(bb.max)}; }
+
+template<class T = double, class Tin>
+BoundingBoxBase<Vec<2, T>> unscaled(const BoundingBoxBase<Vec<2, Tin>> &bb) { return {unscaled<T>(bb.min), unscaled<T>(bb.max)}; }
 
 template<class T = double>
 BoundingBoxBase<Vec<2, T>> unscaled(const BoundingBox &bb) { return {unscaled<T>(bb.min), unscaled<T>(bb.max)}; }
 
-template<class T = double>
-BoundingBox3Base<Vec<3, T>> unscaled(const BoundingBox3 &bb) { return {unscaled<T>(bb.min), unscaled<T>(bb.max)}; }
+template<class T = double, class Tin>
+BoundingBox3Base<Vec<3, T>> unscaled(const BoundingBox3Base<Vec<3, Tin>> &bb) { return {unscaled<T>(bb.min), unscaled<T>(bb.max)}; }
 
 template<class Tout, class Tin>
 auto cast(const BoundingBoxBase<Tin> &b)
@@ -297,6 +305,19 @@ inline double bbox_point_distance_squared(const BoundingBox &bbox, const Point &
                                    pt.y() > bbox.max.y() ? pt.y() - bbox.max.y() :
                                    coord_t(0));
 }
+
+template<class T>
+BoundingBoxBase<Vec<2, T>> to_2d(const BoundingBox3Base<Vec<3, T>> &bb)
+{
+    return {to_2d(bb.min), to_2d(bb.max)};
+}
+
+template<class Tout, class T>
+BoundingBoxBase<Vec<2, Tout>> to_2d(const BoundingBox3Base<Vec<3, T>> &bb)
+{
+    return {to_2d(bb.min), to_2d(bb.max)};
+}
+
 
 } // namespace Slic3r
 

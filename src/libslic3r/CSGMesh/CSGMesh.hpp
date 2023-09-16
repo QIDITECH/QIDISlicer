@@ -1,8 +1,10 @@
 #ifndef CSGMESH_HPP
 #define CSGMESH_HPP
 
+#include "libslic3r/Point.hpp"
+
 #include <libslic3r/AnyPtr.hpp>
-#include <admesh/stl.h>
+#include <libslic3r/TriangleMesh.hpp>
 
 namespace Slic3r { namespace csg {
 
@@ -80,6 +82,35 @@ struct CSGPart {
         , trafo{tr}
     {}
 };
+
+template<class Cont> bool is_all_positive(const Cont &csgmesh)
+{
+    bool is_all_pos =
+        std::all_of(csgmesh.begin(),
+                    csgmesh.end(),
+                    [](auto &part) {
+                        return csg::get_operation(part) == csg::CSGType::Union;
+                    });
+
+    return is_all_pos;
+}
+
+template<class Cont>
+indexed_triangle_set csgmesh_merge_positive_parts(const Cont &csgmesh)
+{
+    indexed_triangle_set m;
+    for (auto &csgpart : csgmesh) {
+        auto op = csg::get_operation(csgpart);
+        const indexed_triangle_set * pmesh = csg::get_mesh(csgpart);
+        if (pmesh && op == csg::CSGType::Union) {
+            indexed_triangle_set mcpy = *pmesh;
+            its_transform(mcpy, csg::get_transform(csgpart), true);
+            its_merge(m, mcpy);
+        }
+    }
+
+    return m;
+}
 
 }} // namespace Slic3r::csg
 

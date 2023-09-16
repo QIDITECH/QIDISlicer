@@ -279,6 +279,11 @@ void Preview::set_drop_target(wxDropTarget* target)
         SetDropTarget(target);
 }
 
+void Preview::load_gcode_shells()
+{
+    m_canvas->load_gcode_shells();
+}
+
 void Preview::load_print(bool keep_z_range)
 {
     PrinterTechnology tech = m_process->current_printer_technology();

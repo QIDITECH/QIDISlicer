@@ -49,6 +49,11 @@ public:
         bool edited  { false };
         bool clicked { false };
         bool deactivated_after_edit { false };
+        // flag to indicate possibility to take snapshot from the slider value
+        // It's used from Gizmos to take snapshots just from the very beginning of the editing
+        bool can_take_snapshot { false };
+        // When Undo/Redo snapshot is taken, then call this function
+        void invalidate_snapshot() { can_take_snapshot = false; }
     };
 
     ImGuiWrapper();
@@ -80,6 +85,7 @@ public:
     ImVec2 get_item_spacing() const;
     float  get_slider_float_height() const;
     const LastSliderStatus& get_last_slider_status() const { return m_last_slider_status; }
+    LastSliderStatus& get_last_slider_status() { return m_last_slider_status; }
 
     void set_next_window_pos(float x, float y, int flag, float pivot_x = 0.0f, float pivot_y = 0.0f);
     void set_next_window_bg_alpha(float alpha);

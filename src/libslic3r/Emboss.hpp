@@ -8,6 +8,7 @@
 #include <admesh/stl.h> // indexed_triangle_set
 #include "Polygon.hpp"
 #include "ExPolygon.hpp"
+#include "BoundingBox.hpp"
 #include "TextConfiguration.hpp"
 
 namespace Slic3r {
@@ -112,7 +113,7 @@ namespace Emboss
         std::shared_ptr<Emboss::Glyphs> cache;
 
         FontFileWithCache() : font_file(nullptr), cache(nullptr) {}
-        FontFileWithCache(std::unique_ptr<FontFile> font_file)
+        explicit FontFileWithCache(std::unique_ptr<FontFile> font_file)
             : font_file(std::move(font_file))
             , cache(std::make_shared<Emboss::Glyphs>())
         {}
@@ -151,7 +152,12 @@ namespace Emboss
     /// <param name="font_prop">User defined property of the font</param>
     /// <param name="was_canceled">Way to interupt processing</param>
     /// <returns>Inner polygon cw(outer ccw)</returns>
-    ExPolygons text2shapes(FontFileWithCache &font, const char *text, const FontProp &font_prop, std::function<bool()> was_canceled = nullptr);
+    ExPolygons              text2shapes (FontFileWithCache &font, const char *text,         const FontProp &font_prop, const std::function<bool()> &was_canceled = []() {return false;});
+    std::vector<ExPolygons> text2vshapes(FontFileWithCache &font, const std::wstring& text, const FontProp &font_prop, const std::function<bool()>& was_canceled = []() {return false;});
+
+    /// Sum of character '\n'
+    unsigned get_count_lines(const std::wstring &ws);
+    unsigned get_count_lines(const std::string &text);
 
     /// <summary>
     /// Fix duplicit points and self intersections in polygons.
@@ -221,6 +227,30 @@ namespace Emboss
     /// <param name="ff">Font data</param>
     /// <returns>Conversion to mm</returns>
     double get_shape_scale(const FontProp &fp, const FontFile &ff);
+
+    /// <summary>
+    /// getter of font info by collection defined in prop
+    /// </summary>
+    /// <param name="font">Contain infos about all fonts(collections) in file</param>
+    /// <param name="prop">Index of collection</param>
+    /// <returns>Ascent, descent, line gap</returns>
+    const FontFile::Info &get_font_info(const FontFile &font, const FontProp &prop);
+
+    /// <summary>
+    /// Read from font file and properties height of line with spacing
+    /// </summary>
+    /// <param name="font">Infos for collections</param>
+    /// <param name="prop">Collection index + Additional line gap</param>
+    /// <returns>Line height with spacing in ExPolygon size</returns>
+    int get_line_height(const FontFile &font, const FontProp &prop);
+
+    /// <summary>
+    /// Calculate Vertical align
+    /// </summary>
+    /// <param name="align">Top | Center | Bottom</param>
+    /// <param name="count_lines"></param>
+    /// <returns>Return align Y offset in mm</returns>
+    double get_align_y_offset_in_mm(FontProp::VerticalAlign align, unsigned count_lines, const FontFile &ff, const FontProp &fp);
 
     /// <summary>
     /// Project spatial point
@@ -337,6 +367,36 @@ namespace Emboss
         }
     };
 
+    class ProjectTransform : public IProjection
+    {
+        std::unique_ptr<IProjection> m_core;
+        Transform3d m_tr;
+        Transform3d m_tr_inv;
+        double z_scale;
+    public:
+        ProjectTransform(std::unique_ptr<IProjection> core, const Transform3d &tr) : m_core(std::move(core)), m_tr(tr)
+        {
+            m_tr_inv = m_tr.inverse();
+            z_scale  = (m_tr.linear() * Vec3d::UnitZ()).norm();
+        }
+
+        // Inherited via IProject
+        std::pair<Vec3d, Vec3d> create_front_back(const Point &p) const override
+        {
+            auto [front, back] = m_core->create_front_back(p);
+            return std::make_pair(m_tr * front, m_tr * back);
+        }
+        Vec3d project(const Vec3d &point) const override{
+            return m_core->project(point);
+        }
+        std::optional<Vec2d> unproject(const Vec3d &p, double *depth = nullptr) const override {
+            auto res = m_core->unproject(m_tr_inv * p, depth);
+            if (depth != nullptr)
+                *depth *= z_scale;
+            return res;
+        }
+    };
+
     class OrthoProject3d : public Emboss::IProject3d
     {
         // size and direction of emboss for ortho projection
@@ -360,7 +420,43 @@ namespace Emboss
         Vec3d project(const Vec3d &point) const override;
         std::optional<Vec2d> unproject(const Vec3d &p, double * depth = nullptr) const override;     
     };
-} // namespace Emboss
 
+    /// <summary>
+    /// Define polygon for draw letters
+    /// </summary>
+    struct TextLine
+    {
+        // slice of object
+        Polygon polygon;
+
+        // point laying on polygon closest to zero
+        PolygonPoint start;
+
+        // offset of text line in volume mm
+        float y;
+    };
+    using TextLines = std::vector<TextLine>;
+
+    /// <summary>
+    /// Sample slice polygon by bounding boxes centers
+    /// slice start point has shape_center_x coor
+    /// </summary>
+    /// <param name="slice">Polygon and start point[Slic3r scaled milimeters]</param>
+    /// <param name="bbs">Bounding boxes of letter on one line[in font scales]</param>
+    /// <param name="scale">Scale for bbs (after multiply bb is in milimeters)</param>
+    /// <returns>Sampled polygon by bounding boxes</returns>
+    PolygonPoints sample_slice(const TextLine &slice, const BoundingBoxes &bbs, double scale);
+
+    /// <summary>
+    /// Calculate angle for polygon point
+    /// </summary>
+    /// <param name="distance">Distance for found normal in point</param>
+    /// <param name="polygon_point">Select point on polygon</param>
+    /// <param name="polygon">Polygon know neighbor of point</param>
+    /// <returns>angle(atan2) of normal in polygon point</returns>
+    double calculate_angle(int32_t distance, PolygonPoint polygon_point, const Polygon &polygon);
+    std::vector<double> calculate_angles(int32_t distance, const PolygonPoints& polygon_points, const Polygon &polygon);
+
+} // namespace Emboss
 } // namespace Slic3r
 #endif // slic3r_Emboss_hpp_

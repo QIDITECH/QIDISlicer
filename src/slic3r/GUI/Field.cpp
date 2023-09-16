@@ -588,6 +588,8 @@ bool TextCtrl::value_was_changed()
     case coFloatOrPercent:
     case coFloatsOrPercents:
         return boost::any_cast<std::string>(m_value) != boost::any_cast<std::string>(val);
+    case coPoints:
+        return boost::any_cast<std::vector<Vec2d>>(m_value) != boost::any_cast<std::vector<Vec2d>>(val);
     default:
         return true;
     }

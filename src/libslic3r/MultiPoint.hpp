@@ -90,6 +90,12 @@ public:
     inline auto end()    const { return points.end();   }
     inline auto cbegin() const { return points.begin(); }
     inline auto cend()   const { return points.end();   }
+    inline auto rbegin()       { return points.rbegin(); }
+    inline auto rbegin() const { return points.rbegin(); }
+    inline auto rend()         { return points.rend();   }
+    inline auto rend()   const { return points.rend();   }
+    inline auto crbegin()const { return points.crbegin(); }
+    inline auto crend()  const { return points.crend(); }
 };
 
 class MultiPoint3

@@ -243,9 +243,21 @@ inline void translate(Slic3r::ExPolygon& sh, const Slic3r::Point& offs)
     sh.translate(offs);
 }
 
+template<>
+inline void translate(Slic3r::Polygon& sh, const Slic3r::Point& offs)
+{
+    sh.translate(offs);
+}
+
 #define DISABLE_BOOST_ROTATE
 template<>
 inline void rotate(Slic3r::ExPolygon& sh, const Radians& rads)
+{
+    sh.rotate(rads);
+}
+
+template<>
+inline void rotate(Slic3r::Polygon& sh, const Radians& rads)
 {
     sh.rotate(rads);
 }

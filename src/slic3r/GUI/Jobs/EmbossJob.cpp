@@ -1,6 +1,7 @@
 #include "EmbossJob.hpp"
 
 #include <stdexcept>
+#include <type_traits>
 
 #include <libslic3r/Model.hpp>
 #include <libslic3r/Format/OBJ.hpp> // load_obj for default mesh
@@ -28,6 +29,9 @@ namespace priv{
 // create sure that emboss object is bigger than source object [in mm]
 constexpr float safe_extension = 1.0f;
 
+// Offset of clossed side to model
+constexpr float SAFE_SURFACE_OFFSET = 0.015f; // [in mm]
+
 /// <summary>
 /// Assert check of inputs data
 /// </summary>
@@ -41,6 +45,7 @@ bool check(const CreateSurfaceVolumeData &input, bool is_main_thread = false);
 bool check(const UpdateSurfaceVolumeData &input, bool is_main_thread = false);
 
 template<typename Fnc> static ExPolygons create_shape(DataBase &input, Fnc was_canceled);
+template<typename Fnc> static std::vector<ExPolygons> create_shapes(DataBase &input, Fnc was_canceled);
 
 // <summary>
 /// Try to create mesh from text
@@ -136,9 +141,6 @@ void CreateVolumeJob::process(Ctl &ctl) {
     if (!priv::check(m_input)) throw std::runtime_error("Bad input data for EmbossCreateVolumeJob.");
     auto was_canceled = [&ctl]()->bool { return ctl.was_canceled(); };
     m_result = priv::create_mesh(m_input, was_canceled, ctl);
-    // center result
-    Vec3f c = m_result.bounding_box().center().cast<float>();
-    if (!c.isApprox(Vec3f::Zero())) m_result.translate(-c);
 }
 
 void CreateVolumeJob::finalize(bool canceled, std::exception_ptr &eptr) {
@@ -245,10 +247,6 @@ void UpdateJob::process(Ctl &ctl)
     if (was_canceled()) return;
     if (m_result.its.empty())
         throw priv::JobException("Created text volume is empty. Change text or font.");
-
-    // center triangle mesh
-    Vec3d shift = m_result.bounding_box().center();
-    m_result.translate(-shift.cast<float>());    
 }
 
 void UpdateJob::finalize(bool canceled, std::exception_ptr &eptr)
@@ -285,6 +283,8 @@ SurfaceVolumeData::ModelSources create_volume_sources(const ModelVolume *text_vo
     if (volumes.size() <= 1) return {};
     return create_sources(volumes, text_volume->id().id);
 }
+
+
 
 } // namespace Slic3r::GUI::Emboss
 
@@ -358,8 +358,15 @@ bool priv::check(const DataBase &input, bool check_fontfile, bool use_surface)
     res &= !input.text_configuration.text.empty();
     assert(!input.volume_name.empty());
     res &= !input.volume_name.empty();
-    assert(input.text_configuration.style.prop.use_surface == use_surface);
-    res &= input.text_configuration.style.prop.use_surface == use_surface;
+    const FontProp& prop = input.text_configuration.style.prop;
+    assert(prop.use_surface == use_surface);
+    res &= prop.use_surface == use_surface;
+    assert(prop.per_glyph == !input.text_lines.empty());
+    res &= prop.per_glyph == !input.text_lines.empty();
+    if (prop.per_glyph) {
+        assert(get_count_lines(input.text_configuration.text) == input.text_lines.size());
+        res &= get_count_lines(input.text_configuration.text) == input.text_lines.size();
+    }
     return res; 
 }
 bool priv::check(const DataCreateVolume &input, bool is_main_thread) {
@@ -417,28 +424,192 @@ ExPolygons priv::create_shape(DataBase &input, Fnc was_canceled) {
     const TextConfiguration &tc   = input.text_configuration;
     const char              *text = tc.text.c_str();
     const FontProp          &prop = tc.style.prop;
-
+    assert(!prop.per_glyph);
     assert(font.has_value());
     if (!font.has_value())
         return {};
 
-    return text2shapes(font, text, prop, was_canceled);
+    ExPolygons shapes = text2shapes(font, text, prop, was_canceled);
+    if (shapes.empty())
+        return {};
+
+    return shapes;
 }
+
+template<typename Fnc> 
+std::vector<ExPolygons> priv::create_shapes(DataBase &input, Fnc was_canceled) {
+    FontFileWithCache       &font = input.font_file;
+    const TextConfiguration &tc   = input.text_configuration;
+    const char              *text = tc.text.c_str();
+    const FontProp          &prop = tc.style.prop;
+    assert(prop.per_glyph);
+    assert(font.has_value());
+    if (!font.has_value())
+        return {};
+
+    std::wstring ws = boost::nowide::widen(text);
+    std::vector<ExPolygons> shapes = text2vshapes(font, ws, prop, was_canceled);
+    if (shapes.empty())
+        return {};
+
+    if (was_canceled())
+        return {};
+
+    return shapes;
+}
+
+//#define STORE_SAMPLING
+#ifdef STORE_SAMPLING
+#include "libslic3r/SVG.hpp"
+#endif // STORE_SAMPLING
+namespace {
+
+std::vector<BoundingBoxes> create_line_bounds(const std::vector<ExPolygons> &shapes, const std::wstring& text, size_t count_lines = 0)
+{
+    assert(text.size() == shapes.size());
+    if (count_lines == 0)
+        count_lines = get_count_lines(text);
+    assert(count_lines == get_count_lines(text));
+
+    std::vector<BoundingBoxes> result(count_lines);
+    size_t text_line_index = 0;
+    // s_i .. shape index
+    for (size_t s_i = 0; s_i < shapes.size(); ++s_i) {
+        const ExPolygons &shape = shapes[s_i];
+        BoundingBox       bb;
+        if (!shape.empty()) {
+            bb = get_extents(shape);
+        }
+        BoundingBoxes &line_bbs = result[text_line_index];
+        line_bbs.push_back(bb);
+        if (text[s_i] == '\n'){
+            // skip enters on beginig and tail
+            ++text_line_index;
+        }
+    }
+    return result;
+}
+
+template<typename Fnc> TriangleMesh create_mesh_per_glyph(DataBase &input, Fnc was_canceled)
+{
+    // method use square of coord stored into int64_t
+    static_assert(std::is_same<Point::coord_type, int32_t>());
+
+    std::vector<ExPolygons> shapes = priv::create_shapes(input, was_canceled);
+    if (shapes.empty())
+        return {};
+
+    // Precalculate bounding boxes of glyphs
+    // Separate lines of text to vector of Bounds
+    const TextConfiguration &tc = input.text_configuration;
+    std::wstring ws = boost::nowide::widen(tc.text.c_str());
+    assert(get_count_lines(ws) == input.text_lines.size());
+    size_t count_lines = input.text_lines.size();
+    std::vector<BoundingBoxes> bbs = create_line_bounds(shapes, ws, count_lines);
+
+    const FontProp &prop = tc.style.prop;
+    FontFileWithCache &font = input.font_file;
+    double shape_scale = get_shape_scale(prop, *font.font_file);
+    double projec_scale = shape_scale / SHAPE_SCALE;
+    double depth        = prop.emboss / projec_scale;
+    auto   scale_tr = Eigen::Scaling(projec_scale); 
+    
+    // half of font em size for direction of letter emboss
+    double  em_2_mm      = prop.size_in_mm / 2.;
+    int32_t em_2_polygon = static_cast<int32_t>(std::round(scale_(em_2_mm)));
+
+    size_t s_i_offset = 0; // shape index offset(for next lines)
+    indexed_triangle_set result;
+    for (size_t text_line_index = 0; text_line_index < input.text_lines.size(); ++text_line_index) {
+        const BoundingBoxes &line_bbs = bbs[text_line_index];
+        const TextLine      &line     = input.text_lines[text_line_index];
+        PolygonPoints        samples  = sample_slice(line, line_bbs, shape_scale);
+        std::vector<double>  angles   = calculate_angles(em_2_polygon, samples, line.polygon);
+
+        for (size_t i = 0; i < line_bbs.size(); ++i) {
+            const BoundingBox &letter_bb = line_bbs[i];
+            if (!letter_bb.defined)
+                continue;
+
+            Vec2d to_zero_vec = letter_bb.center().cast<double>() * shape_scale; // [in mm]
+            float surface_offset = input.is_outside ? -priv::SAFE_SURFACE_OFFSET : (-prop.emboss + priv::SAFE_SURFACE_OFFSET);
+            if (prop.distance.has_value())
+                surface_offset += *prop.distance;
+
+            Eigen::Translation<double, 3> to_zero(-to_zero_vec.x(), 0., static_cast<double>(surface_offset));
+
+            const double &angle = angles[i];
+            Eigen::AngleAxisd rotate(angle + M_PI_2, Vec3d::UnitY());
+
+            const PolygonPoint &sample = samples[i];
+            Vec2d offset_vec = unscale(sample.point); // [in mm]
+            Eigen::Translation<double, 3> offset_tr(offset_vec.x(), 0., -offset_vec.y());
+            Transform3d tr = offset_tr * rotate * to_zero * scale_tr;
+
+            const ExPolygons &letter_shape = shapes[s_i_offset + i];
+            assert(get_extents(letter_shape) == letter_bb);
+            auto projectZ = std::make_unique<ProjectZ>(depth);
+            ProjectTransform project(std::move(projectZ), tr);
+            indexed_triangle_set glyph_its = polygons2model(letter_shape, project);
+            its_merge(result, std::move(glyph_its));
+
+            if (((s_i_offset + i) % 15) && was_canceled())
+                return {};
+        }
+        s_i_offset += line_bbs.size();
+
+#ifdef STORE_SAMPLING
+        { // Debug store polygon
+            //std::string stl_filepath = "C:/data/temp/line" + std::to_string(text_line_index) + "_model.stl";
+            //bool suc = its_write_stl_ascii(stl_filepath.c_str(), "label", result);
+
+            BoundingBox bbox      = get_extents(line.polygon);
+            std::string file_path = "C:/data/temp/line" + std::to_string(text_line_index) + "_letter_position.svg";
+            SVG         svg(file_path, bbox);
+            svg.draw(line.polygon);
+            int32_t radius = bbox.size().x() / 300; 
+            for (size_t i = 0; i < samples.size(); i++) {
+                const PolygonPoint &pp = samples[i];
+                const Point& p = pp.point;
+                svg.draw(p, "green", radius);
+                std::string label = std::string(" ")+tc.text[i];
+                svg.draw_text(p, label.c_str(), "black");
+
+                double a = angles[i];
+                double length = 3.0 * radius;
+                Point  n(length * std::cos(a), length * std::sin(a));
+                svg.draw(Slic3r::Line(p - n, p + n), "Lime");
+            }
+        }
+#endif // STORE_SAMPLING
+    }
+    return TriangleMesh(std::move(result));
+}
+} // namespace
+
 
 template<typename Fnc>
 TriangleMesh priv::try_create_mesh(DataBase &input, Fnc was_canceled)
 {
+    if (!input.text_lines.empty()) {
+        TriangleMesh tm = create_mesh_per_glyph(input, was_canceled);
+        if (was_canceled()) return {};
+        if (!tm.empty()) return tm;
+    }
+
     ExPolygons shapes = priv::create_shape(input, was_canceled);
     if (shapes.empty()) return {};
-    if (was_canceled()) return {}; 
-    
+    if (was_canceled()) return {};
+
     const FontProp &prop = input.text_configuration.style.prop;
     const FontFile &ff = *input.font_file.font_file;
     // NOTE: SHAPE_SCALE is applied in ProjectZ
     double scale = get_shape_scale(prop, ff) / SHAPE_SCALE;
     double depth = prop.emboss / scale;    
-    auto  projectZ = std::make_unique<ProjectZ>(depth);
-    ProjectScale project(std::move(projectZ), scale);
+    auto projectZ = std::make_unique<ProjectZ>(depth);    
+    float offset = input.is_outside ? -SAFE_SURFACE_OFFSET : (SAFE_SURFACE_OFFSET - prop.emboss);
+    Transform3d tr = Eigen::Translation<double, 3>(0., 0.,static_cast<double>(offset)) * Eigen::Scaling(scale);
+    ProjectTransform project(std::move(projectZ), tr);
     if (was_canceled()) return {};
     return TriangleMesh(polygons2model(shapes, project));
 }
@@ -715,37 +886,24 @@ OrthoProject priv::create_projection_for_cut(
 OrthoProject3d priv::create_emboss_projection(
     bool is_outside, float emboss, Transform3d tr, SurfaceCut &cut)
 {
-    // Offset of clossed side to model
-    const float surface_offset = 0.015f; // [in mm]
     float 
-        front_move = (is_outside) ? emboss : surface_offset,
-        back_move  = -((is_outside) ? surface_offset : emboss);    
+        front_move = (is_outside) ? emboss : SAFE_SURFACE_OFFSET,
+        back_move  = -((is_outside) ? SAFE_SURFACE_OFFSET : emboss);    
     its_transform(cut, tr.pretranslate(Vec3d(0., 0., front_move)));    
     Vec3d from_front_to_back(0., 0., back_move - front_move);
     return OrthoProject3d(from_front_to_back);
 }
 
-// input can't be const - cache of font
-TriangleMesh priv::cut_surface(DataBase& input1, const SurfaceVolumeData& input2, std::function<bool()> was_canceled)
-{
-    ExPolygons shapes = create_shape(input1, was_canceled);
-    if (shapes.empty())
-        throw JobException(_u8L("Font doesn't have any shape for given text.").c_str());
+namespace {
 
-    if (was_canceled()) return {};
-
-    // Define alignment of text - left, right, center, top bottom, ....
-    BoundingBox bb                = get_extents(shapes);
-    Point       projection_center = bb.center();
-    for (ExPolygon &shape : shapes) shape.translate(-projection_center);
-    bb.translate(-projection_center);
-
-    const FontFile &ff = *input1.font_file.font_file;
-    const FontProp &fp = input1.text_configuration.style.prop;
+indexed_triangle_set cut_surface_to_its(const ExPolygons &shapes, const Transform3d& tr,const SurfaceVolumeData::ModelSources &sources, DataBase& input, std::function<bool()> was_canceled) {
+    assert(!sources.empty());
+    BoundingBox bb = get_extents(shapes);
+    const FontFile &ff = *input.font_file.font_file;    
+    const FontProp &fp = input.text_configuration.style.prop;
     double shape_scale = get_shape_scale(fp, ff);
 
-    const SurfaceVolumeData::ModelSources &sources = input2.sources;
-    const SurfaceVolumeData::ModelSource  *biggest = nullptr;
+    const SurfaceVolumeData::ModelSource *biggest = &sources.front();
 
     size_t biggest_count = 0;
     // convert index from (s)ources to (i)ndexed (t)riangle (s)ets
@@ -754,9 +912,9 @@ TriangleMesh priv::cut_surface(DataBase& input1, const SurfaceVolumeData& input2
     itss.reserve(sources.size());
     for (const SurfaceVolumeData::ModelSource &s : sources) {
         Transform3d mesh_tr_inv       = s.tr.inverse();
-        Transform3d cut_projection_tr = mesh_tr_inv * input2.text_tr;
+        Transform3d cut_projection_tr = mesh_tr_inv * tr;
         std::pair<float, float> z_range{0., 1.};
-        OrthoProject    cut_projection = create_projection_for_cut(cut_projection_tr, shape_scale, z_range);
+        OrthoProject    cut_projection = priv::create_projection_for_cut(cut_projection_tr, shape_scale, z_range);
         // copy only part of source model
         indexed_triangle_set its = its_cut_AoI(s.mesh->its, bb, cut_projection);
         if (its.indices.empty()) continue;
@@ -770,10 +928,10 @@ TriangleMesh priv::cut_surface(DataBase& input1, const SurfaceVolumeData& input2
         itss.emplace_back(std::move(its));
     }
     if (itss.empty())
-        throw JobException(_u8L("There is no volume in projection direction.").c_str());
+        return {};
 
     Transform3d tr_inv = biggest->tr.inverse();
-    Transform3d cut_projection_tr = tr_inv * input2.text_tr;
+    Transform3d cut_projection_tr = tr_inv * tr;
 
     size_t        itss_index = s_to_itss[biggest - &sources.front()];
     BoundingBoxf3 mesh_bb    = bounding_box(itss[itss_index]);
@@ -795,22 +953,27 @@ TriangleMesh priv::cut_surface(DataBase& input1, const SurfaceVolumeData& input2
     Transform3d   emboss_tr  = cut_projection_tr.inverse();
     BoundingBoxf3 mesh_bb_tr = mesh_bb.transformed(emboss_tr);
     std::pair<float, float> z_range{mesh_bb_tr.min.z(), mesh_bb_tr.max.z()};
-    OrthoProject cut_projection = create_projection_for_cut(cut_projection_tr, shape_scale, z_range);
-    float projection_ratio = (-z_range.first + safe_extension) / (z_range.second - z_range.first + 2 * safe_extension);
+    OrthoProject cut_projection = priv::create_projection_for_cut(cut_projection_tr, shape_scale, z_range);
+    float projection_ratio = (-z_range.first + priv::safe_extension) / 
+                              (z_range.second - z_range.first + 2 * priv::safe_extension);
 
-    bool is_text_reflected = Slic3r::has_reflection(input2.text_tr);
+    ExPolygons shapes_data; // is used only when text is reflected to reverse polygon points order
+    const ExPolygons *shapes_ptr = &shapes;
+    bool is_text_reflected = Slic3r::has_reflection(tr);
     if (is_text_reflected) {
         // revert order of points in expolygons
         // CW --> CCW
-        for (ExPolygon &shape : shapes) {
+        shapes_data = shapes; // copy
+        for (ExPolygon &shape : shapes_data) {
             shape.contour.reverse();
             for (Slic3r::Polygon &hole : shape.holes)
                 hole.reverse();
         }
+        shapes_ptr = &shapes_data;
     }
 
     // Use CGAL to cut surface from triangle mesh
-    SurfaceCut cut = cut_surface(shapes, itss, cut_projection, projection_ratio);
+    SurfaceCut cut = cut_surface(*shapes_ptr, itss, cut_projection, projection_ratio);
 
     if (is_text_reflected) {
         for (SurfaceCut::Contour &c : cut.contours)
@@ -819,15 +982,105 @@ TriangleMesh priv::cut_surface(DataBase& input1, const SurfaceVolumeData& input2
             std::swap(t[0], t[1]);
     }
 
-    if (cut.empty()) throw JobException(_u8L("There is no valid surface for text projection.").c_str());
+    if (cut.empty()) return {}; // There is no valid surface for text projection.
     if (was_canceled()) return {};
 
     // !! Projection needs to transform cut
-    OrthoProject3d projection = create_emboss_projection(input2.is_outside, fp.emboss, emboss_tr, cut);
-    indexed_triangle_set new_its = cut2model(cut, projection);
-    assert(!new_its.empty());
+    OrthoProject3d projection = priv::create_emboss_projection(input.is_outside, fp.emboss, emboss_tr, cut);
+    return cut2model(cut, projection);
+}
+
+TriangleMesh cut_per_glyph_surface(DataBase &input1, const SurfaceVolumeData &input2, std::function<bool()> was_canceled) 
+{
+    std::vector<ExPolygons> shapes = priv::create_shapes(input1, was_canceled);
     if (was_canceled()) return {};
-    return TriangleMesh(std::move(new_its));
+    if (shapes.empty())
+        throw priv::JobException(_u8L("Font doesn't have any shape for given text.").c_str());
+
+    // Precalculate bounding boxes of glyphs
+    // Separate lines of text to vector of Bounds
+    const TextConfiguration &tc = input1.text_configuration;
+    std::wstring ws = boost::nowide::widen(tc.text.c_str());
+    assert(get_count_lines(ws) == input1.text_lines.size());
+    size_t count_lines = input1.text_lines.size();
+    std::vector<BoundingBoxes> bbs = create_line_bounds(shapes, ws, count_lines);
+
+    const FontProp &prop = tc.style.prop;
+    FontFileWithCache &font = input1.font_file;
+    double shape_scale = get_shape_scale(prop, *font.font_file);
+    
+    // half of font em size for direction of letter emboss
+    double  em_2_mm      = prop.size_in_mm / 2.;
+    int32_t em_2_polygon = static_cast<int32_t>(std::round(scale_(em_2_mm)));
+
+    size_t s_i_offset = 0; // shape index offset(for next lines)
+    indexed_triangle_set result;
+    for (size_t text_line_index = 0; text_line_index < input1.text_lines.size(); ++text_line_index) {
+        const BoundingBoxes &line_bbs = bbs[text_line_index];
+        const TextLine      &line     = input1.text_lines[text_line_index];
+        PolygonPoints        samples  = sample_slice(line, line_bbs, shape_scale);
+        std::vector<double>  angles   = calculate_angles(em_2_polygon, samples, line.polygon);
+
+        for (size_t i = 0; i < line_bbs.size(); ++i) {
+            const BoundingBox &glyph_bb = line_bbs[i];
+            if (!glyph_bb.defined)
+                continue;
+
+            const double &angle = angles[i];
+            auto rotate = Eigen::AngleAxisd(angle + M_PI_2, Vec3d::UnitY());
+
+            const PolygonPoint &sample = samples[i];
+            Vec2d offset_vec = unscale(sample.point); // [in mm]
+            auto offset_tr = Eigen::Translation<double, 3>(offset_vec.x(), 0., -offset_vec.y());
+
+            ExPolygons &glyph_shape = shapes[s_i_offset + i];
+            assert(get_extents(glyph_shape) == glyph_bb);
+
+            Point offset(-glyph_bb.center().x(), 0);
+            for (ExPolygon& s: glyph_shape)
+                s.translate(offset);
+
+            Transform3d modify = offset_tr * rotate;
+            Transform3d tr = input2.text_tr * modify;
+            indexed_triangle_set glyph_its = cut_surface_to_its(glyph_shape, tr, input2.sources, input1, was_canceled);
+            // move letter in volume on the right position
+            its_transform(glyph_its, modify);
+
+            // Improve: union instead of merge
+            its_merge(result, std::move(glyph_its));
+
+            if (((s_i_offset + i) % 15) && was_canceled())
+                return {};
+        }
+        s_i_offset += line_bbs.size();
+    }
+
+    if (was_canceled()) return {};    
+    if (result.empty()) 
+        throw priv::JobException(_u8L("There is no valid surface for text projection.").c_str());
+    return TriangleMesh(std::move(result));
+}
+
+} // namespace
+
+// input can't be const - cache of font
+TriangleMesh priv::cut_surface(DataBase& input1, const SurfaceVolumeData& input2, std::function<bool()> was_canceled)
+{
+    const FontProp &fp = input1.text_configuration.style.prop;
+    if (fp.per_glyph)
+        return cut_per_glyph_surface(input1, input2, was_canceled);
+    
+    ExPolygons shapes = create_shape(input1, was_canceled);
+    if (was_canceled()) return {};
+    if (shapes.empty())
+        throw JobException(_u8L("Font doesn't have any shape for given text.").c_str());
+
+    indexed_triangle_set its = cut_surface_to_its(shapes, input2.text_tr, input2.sources, input1, was_canceled);
+    if (was_canceled()) return {};    
+    if (its.empty()) 
+        throw JobException(_u8L("There is no valid surface for text projection.").c_str());    
+
+    return TriangleMesh(std::move(its));
 }
 
 bool priv::process(std::exception_ptr &eptr) { 

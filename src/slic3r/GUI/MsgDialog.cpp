@@ -22,6 +22,7 @@
 #include "wxExtensions.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
 #include "GUI_App.hpp"
+//Y
 #include "libslic3r/AppConfig.cpp"
 
 namespace Slic3r {
@@ -33,6 +34,9 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
 	, content_sizer(new wxBoxSizer(wxVERTICAL))
 	, btn_sizer(new wxBoxSizer(wxHORIZONTAL))
 {
+#ifdef __APPLE__
+    this->SetBackgroundColour(wxGetApp().get_window_default_clr());
+#endif
 	boldfont.SetWeight(wxFONTWEIGHT_BOLD);
 
     this->SetFont(wxGetApp().normal_font());
@@ -140,22 +144,8 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
     wxFont      font = wxGetApp().normal_font();//wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
     wxFont      monospace = wxGetApp().code_font();
     wxColour    text_clr = wxGetApp().get_label_clr_default();
-    wxColour    bgr_clr = parent->GetBackgroundColour();
-
-#ifdef __APPLE__
-    // On macOS 10.13 and older the background color returned by wxWidgets
-    // is wrong, which leads to https://github.com/qidi3d/QIDISlicer/issues/7603
-    // and https://github.com/qidi3d/QIDISlicer/issues/3775. wxSYS_COLOUR_WINDOW
-    // may not match the window background exactly, but it seems to never end up
-    // as black on black.
-    
-    if (wxPlatformInfo::Get().GetOSMajorVersion() == 10
-     && wxPlatformInfo::Get().GetOSMinorVersion() < 14)
-        bgr_clr = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
-#endif
-
     auto        text_clr_str = encode_color(ColorRGB(text_clr.Red(), text_clr.Green(), text_clr.Blue()));
-    auto        bgr_clr_str = encode_color(ColorRGB(bgr_clr.Red(), bgr_clr.Green(), bgr_clr.Blue()));
+    auto        bgr_clr_str = wxGetApp().get_html_bg_color(parent);
     const int   font_size = font.GetPointSize();
     int         size[] = { font_size, font_size, font_size, font_size, font_size, font_size, font_size };
     html->SetFonts(font.GetFaceName(), monospace.GetFaceName(), size);
@@ -204,6 +194,7 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
     if (monospaced_font)
         // Code formatting will be preserved. This is useful for reporting errors from the placeholder parser.
         msg_escaped = std::string("<pre><code>") + msg_escaped + "</code></pre>";
+//Y
     bool is_that_msg = false;
     std::string that_msg;
     that_msg = msg_escaped.substr(0, 46);

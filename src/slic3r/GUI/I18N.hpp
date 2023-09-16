@@ -22,12 +22,6 @@
 #define L_CONTEXT(s, context) s
 #endif /* L */
 
-#ifndef _CHB
-//! macro used to localization, return wxScopedCharBuffer
-//! With wxConvUTF8 explicitly specify that the source string is already in UTF-8 encoding
-#define _CHB(s) wxGetTranslation(wxString(s, wxConvUTF8)).utf8_str()
-#endif /* _CHB */
-
 #ifndef slic3r_GUI_I18N_hpp_
 #define slic3r_GUI_I18N_hpp_
 

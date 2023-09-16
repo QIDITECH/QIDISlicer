@@ -1,4 +1,4 @@
-#define NOMINMAX
+
 #include "OpenVDBUtils.hpp"
 
 #ifdef _MSC_VER

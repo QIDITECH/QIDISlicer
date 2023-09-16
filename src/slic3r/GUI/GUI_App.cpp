@@ -499,87 +499,44 @@ static const FileWildcards file_wildcards_by_type[FT_SIZE] = {
     /* FT_ZIP */     { "Zip files"sv, { ".zip"sv } },
 };
 
-static wxString file_wildcards(const FileWildcards& data)
-{
-    std::string title;
-    std::string mask;
-
-    // Generate cumulative first item
-    for (const std::string_view& ext : data.file_extensions) {
-        if (title.empty()) {
-            title = "*";
-            title += ext;
-            mask = title;
-        }
-        else {
-            title += ", *";
-            title += ext;
-            mask += ";*";
-            mask += ext;
-        }
-        mask += ";*";
-        mask += boost::to_upper_copy(std::string(ext));
-    }
-
-    wxString ret = GUI::format_wxstr("%s (%s)|%s", data.title, title, mask);
-
-    // Adds an item for each of the extensions
-    if (data.file_extensions.size() > 1) {
-        for (const std::string_view& ext : data.file_extensions) {
-            title = "*";
-            title += ext;
-            ret += GUI::format_wxstr("|%s (%s)|%s", data.title, title, title);
-        }
-    }
-
-    return ret;
-}
-
-#if ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
-wxString file_wildcards(FileType file_type)
-{
-    const FileWildcards& data = file_wildcards_by_type[file_type];
-
-    return file_wildcards(data);
-}
-#else
 // This function produces a Win32 file dialog file template mask to be consumed by wxWidgets on all platforms.
 // The function accepts a custom extension parameter. If the parameter is provided, the custom extension
 // will be added as a fist to the list. This is important for a "file save" dialog on OSX, which strips
 // an extension from the provided initial file name and substitutes it with the default extension (the first one in the template).
-wxString file_wildcards(FileType file_type, const std::string &custom_extension)
+static wxString file_wildcards(const FileWildcards &wildcards, const std::string &custom_extension)
 {
-    const FileWildcards& data = file_wildcards_by_type[file_type];
     std::string title;
     std::string mask;
     std::string custom_ext_lower;
 
+    // Collects items for each of the extensions one by one.
+    wxString out_one_by_one;
+    auto add_single = [&out_one_by_one](const std::string_view title, const std::string_view ext) {
+        out_one_by_one += GUI::format_wxstr("|%s (*%s)|*%s", title, ext, ext);
+    };
+
     if (! custom_extension.empty()) {
-        // Generate an extension into the title mask and into the list of extensions.
+        // Generate a custom extension into the title mask and into the list of extensions.
+        // Add default version (upper, lower or mixed) first based on custom extension provided.
+        title = std::string("*") + custom_extension;
+        mask = title;
+        add_single(wildcards.title, custom_extension);
         custom_ext_lower = boost::to_lower_copy(custom_extension);
         const std::string custom_ext_upper = boost::to_upper_copy(custom_extension);
         if (custom_ext_lower == custom_extension) {
-            // Add a lower case version.
-            title = std::string("*") + custom_ext_lower;
-            mask = title;
-            // Add an upper case version.
-            mask  += ";*";
-            mask  += custom_ext_upper;
+            // Add one more variant - the upper case extension.
+            mask += ";*";
+            mask += custom_ext_upper;
+            add_single(wildcards.title, custom_ext_upper);
         } else if (custom_ext_upper == custom_extension) {
-            // Add an upper case version.
-            title = std::string("*") + custom_ext_upper;
-            mask = title;
-            // Add a lower case version.
+            // Add one more variant - the lower case extension.
             mask += ";*";
             mask += custom_ext_lower;
-        } else {
-            // Add the mixed case version only.
-            title = std::string("*") + custom_extension;
-            mask = title;
+            add_single(wildcards.title, custom_ext_lower);
         }
     }
 
-    for (const std::string_view &ext : data.file_extensions)
+    for (const std::string_view &ext : wildcards.file_extensions)
         // Only add an extension if it was not added first as the custom extension.
         if (ext != custom_ext_lower) {
             if (title.empty()) {
@@ -594,11 +551,16 @@ wxString file_wildcards(FileType file_type, const std::string &custom_extension)
             }
             mask += ";*";
             mask += boost::to_upper_copy(std::string(ext));
+            add_single(wildcards.title, ext);
         }
 
-    return GUI::format_wxstr("%s (%s)|%s", data.title, title, mask);
+    return GUI::format_wxstr("%s (%s)|%s", wildcards.title, title, mask) + out_one_by_one;
 }
-#endif // ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
+
+wxString file_wildcards(FileType file_type, const std::string &custom_extension)
+{
+    return file_wildcards(file_wildcards_by_type[file_type], custom_extension);
+}
 
 wxString sla_wildcards(const char *formatid)
 {
@@ -620,7 +582,7 @@ wxString sla_wildcards(const char *formatid)
             wc.file_extensions.emplace_back(ext);
         }
 
-        ret = file_wildcards(wc);
+        ret = file_wildcards(wc, {});
     }
 
     if (ret.empty())
@@ -1291,6 +1253,7 @@ bool GUI_App::on_init_inner()
             associate_3mf_files();
         if (app_config->get_bool("associate_stl"))
             associate_stl_files();
+//Y
         if (app_config->get_bool("associate_step"))
             associate_step_files();
 #endif // __WXMSW__
@@ -1740,6 +1703,23 @@ void GUI_App::set_label_clr_sys(const wxColour& clr)
     m_color_label_sys = clr;
     const std::string str = encode_color(ColorRGB(clr.Red(), clr.Green(), clr.Blue()));
     app_config->set("label_clr_sys", str);
+}
+
+const std::string GUI_App::get_html_bg_color(wxWindow* html_parent)
+{
+    wxColour    bgr_clr = html_parent->GetBackgroundColour();
+#ifdef __APPLE__
+    // On macOS 10.13 and older the background color returned by wxWidgets
+    // is wrong. wxSYS_COLOUR_WINDOW
+    // may not match the window background exactly, but it seems to never end up
+    // as black on black.
+
+    if (wxPlatformInfo::Get().GetOSMajorVersion() == 10
+        && wxPlatformInfo::Get().GetOSMinorVersion() < 14)
+        bgr_clr = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+#endif
+
+    return encode_color(ColorRGB(bgr_clr.Red(), bgr_clr.Green(), bgr_clr.Blue()));
 }
 
 const std::string& GUI_App::get_mode_btn_color(int mode_id)
@@ -2607,6 +2587,7 @@ void GUI_App::open_preferences(const std::string& highlight_option /*= std::stri
             associate_3mf_files();
         if (app_config->get_bool("associate_stl"))
             associate_stl_files();
+//Y
         if (app_config->get_bool("associate_step"))
             associate_step_files();
     }
@@ -2859,6 +2840,9 @@ void GUI_App::load_current_presets(bool check_printer_presets_ /*= true*/)
 				// Mark the plater to update print bed by tab->load_current_preset() from Plater::on_config_change().
 				this->plater()->force_print_bed_update();
 			}
+            else if (tab->type() == Preset::TYPE_FILAMENT)
+                // active extruder can be changed in a respect to the new loaded configurations, if some filament preset will be modified
+                static_cast<TabFilament*>(tab)->invalidate_active_extruder();
 			tab->load_current_preset();
 		}
 }

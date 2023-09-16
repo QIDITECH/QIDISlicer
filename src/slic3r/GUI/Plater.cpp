@@ -3,10 +3,11 @@
 
 #include <cstddef>
 #include <algorithm>
-#include <cmath>
 #include <numeric>
 #include <vector>
 #include <string>
+//Y
+#include <cmath>
 #include <sstream>
 #include <iomanip>
 #include <regex>
@@ -82,8 +83,10 @@
 #include "Camera.hpp"
 #include "Mouse3DController.hpp"
 #include "Tab.hpp"
-#include "Jobs/ArrangeJob.hpp"
-#include "Jobs/FillBedJob.hpp"
+//#include "Jobs/ArrangeJob.hpp"
+#include "Jobs/ArrangeJob2.hpp"
+
+//#include "Jobs/FillBedJob.hpp"
 #include "Jobs/RotoptimizeJob.hpp"
 #include "Jobs/SLAImportJob.hpp"
 #include "Jobs/SLAImportDialog.hpp"
@@ -1283,9 +1286,11 @@ void Sidebar::show_info_sizer()
 {
     Selection& selection = wxGetApp().plater()->canvas3D()->get_selection();
     ModelObjectPtrs objects = p->plater->model().objects;
-    int obj_idx = selection.get_object_idx();
+    const int obj_idx = selection.get_object_idx();
+    const int inst_idx = selection.get_instance_idx();
 
     if (m_mode < comExpert || objects.empty() || obj_idx < 0 || int(objects.size()) <= obj_idx ||
+        inst_idx < 0 || int(objects[obj_idx]->instances.size()) <= inst_idx ||
         objects[obj_idx]->volumes.empty() ||                                            // hack to avoid crash when deleting the last object on the bed
         (selection.is_single_full_object() && objects[obj_idx]->instances.size()> 1) ||
         !(selection.is_single_full_instance() || selection.is_single_volume())) {
@@ -1294,9 +1299,6 @@ void Sidebar::show_info_sizer()
     }
 
     const ModelObject* model_object = objects[obj_idx];
-
-    int inst_idx = selection.get_instance_idx();
-    assert(inst_idx >= 0);
 
     bool imperial_units = wxGetApp().app_config->get_bool("use_inches");
     double koef = imperial_units ? ObjectManipulation::mm_to_in : 1.0f;
@@ -2797,7 +2799,9 @@ std::vector<size_t> Plater::priv::load_model_objects(const ModelObjectPtrs& mode
 #endif /* AUTOPLACEMENT_ON_LOAD */
         }
 
-        for (size_t i = 0; i < object->instances.size(); ++i) {
+        for (size_t i = 0; i < object->instances.size() 
+             && !object->is_cut()       // don't apply scaled_down functionality to cut objects
+            ; ++i) {
             ModelInstance* instance = object->instances[i];
             const Vec3d size = object->instance_bounding_box(i).size();
             const Vec3d ratio = size.cwiseQuotient(bed_size);
@@ -3613,9 +3617,14 @@ bool Plater::priv::replace_volume_with_stl(int object_idx, int volume_idx, const
         new_volume->convert_from_imperial_units();
     else if (old_volume->source.is_converted_from_meters)
         new_volume->convert_from_meters();
-    new_volume->supported_facets.assign(old_volume->supported_facets);
-    new_volume->seam_facets.assign(old_volume->seam_facets);
-    new_volume->mmu_segmentation_facets.assign(old_volume->mmu_segmentation_facets);
+
+    if (old_volume->mesh().its == new_volume->mesh().its) {
+        // This function is called both from reload_from_disk and replace_with_stl.
+        // We need to make sure that the painted data point to existing triangles.
+        new_volume->supported_facets.assign(old_volume->supported_facets);
+        new_volume->seam_facets.assign(old_volume->seam_facets);
+        new_volume->mmu_segmentation_facets.assign(old_volume->mmu_segmentation_facets);
+    }
     std::swap(old_model_object->volumes[volume_idx], old_model_object->volumes.back());
     old_model_object->delete_volume(old_model_object->volumes.size() - 1);
     if (!sinking)
@@ -4037,6 +4046,8 @@ void Plater::priv::set_current_panel(wxPanel* panel)
             bool model_fits = view3D->get_canvas3d()->check_volumes_outside_state() != ModelInstancePVS_Partly_Outside;
             if (!model.objects.empty() && !export_in_progress && model_fits) {
                 preview->get_canvas3d()->init_gcode_viewer();
+                if (! this->background_process.finished())
+                    preview->load_gcode_shells();
                 q->reslice();
             }
             // keeps current gcode preview, if any
@@ -5504,6 +5515,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
 
     const double e_step = print_config->get_abs_value("layer_height") * pa_external_perimeter_extrusion_width * 0.4;
 
+<<<<<<< Updated upstream
     std::string num_str = double_to_str(StartPA + (count-1) * PAStep) ;
     for (int i = 1; i < count/2; i++) {
         num_str += "\n" + double_to_str(StartPA + (count - 1 - i * 2) * PAStep) ;
@@ -5511,6 +5523,31 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y()));
     //add_num_text("2.0");
     // add_num_text("1.0", Vec2d(100, 200));
+=======
+    //B34  Add Text
+    /*GLCanvas3D *     canvas = wxGetApp().plater()->canvas3D();
+    GLGizmosManager  &mng    = canvas->get_gizmos_manager();
+    GLGizmoBase *    gizmo  = mng.get_gizmo(GLGizmosManager::Emboss);
+    GLGizmoEmboss *  emboss = dynamic_cast<GLGizmoEmboss *>(gizmo);
+    assert(emboss != nullptr);
+    if (emboss == nullptr)
+        return;
+
+    ModelVolumeType volume_type = ModelVolumeType::MODEL_PART;
+    // no selected object means create new object
+    if (volume_type == ModelVolumeType::INVALID)
+        volume_type = ModelVolumeType::MODEL_PART;
+*/
+    //emboss->create_volume(volume_type, Vec2d(plate_center.x() - 10, plate_center.y() - count * 2.5), "0.0");
+    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
+    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "1.0");
+    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
+    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "2.0");
+    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
+    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "3.0");
+    //model().objects[0]->scale(2);
+
+>>>>>>> Stashed changes
     //B34 Generate line gcode
     std::stringstream gcode;
     gcode << move_to(Vec2d(start_x + 80, start_y), pa_travel_speed);
@@ -6691,8 +6728,50 @@ void Plater::fill_bed_with_instances()
 {
     auto &w = get_ui_job_worker();
     if (w.is_idle()) {
-        p->take_snapshot(_L("Fill bed"));
-        replace_job(w, std::make_unique<FillBedJob>());
+
+        FillBedJob2::Callbacks cbs;
+        cbs.on_processed = [this](arr2::ArrangeTaskBase &t) {
+            p->take_snapshot(_L("Fill bed"));
+        };
+
+        auto scene = arr2::Scene{
+            build_scene(*this, ArrangeSelectionMode::SelectionOnly)};
+
+        cbs.on_finished = [this](arr2::FillBedTaskResult &result) {
+            auto [prototype_mi, pos] = arr2::find_instance_by_id(model(), result.prototype_id);
+
+            if (!prototype_mi)
+                return;
+
+            ModelObject *model_object = prototype_mi->get_object();
+            assert(model_object);
+
+            model_object->ensure_on_bed();
+
+            size_t inst_cnt = model_object->instances.size();
+            if (inst_cnt == 0)
+                return;
+
+            int object_idx = pos.obj_idx;
+
+            if (object_idx < 0 || object_idx >= int(model().objects.size()))
+                return;
+
+            update(static_cast<unsigned int>(UpdateParams::FORCE_FULL_SCREEN_REFRESH));
+
+            if (!result.to_add.empty()) {
+                auto added_cnt = result.to_add.size();
+
+                // FIXME: somebody explain why this is needed for
+                // increase_object_instances
+                if (result.arranged_items.size() == 1)
+                    added_cnt++;
+
+                sidebar().obj_list()->increase_object_instances(object_idx, added_cnt);
+            }
+        };
+
+        replace_job(w, std::make_unique<FillBedJob2>(std::move(scene), cbs));
     }
 }
 
@@ -6749,20 +6828,7 @@ void Plater::toggle_layers_editing(bool enable)
         canvas3D()->force_main_toolbar_left_action(canvas3D()->get_main_toolbar_item_id("layersediting"));
 }
 
-void Plater::cut(size_t obj_idx, size_t instance_idx, const Transform3d& cut_matrix, ModelObjectCutAttributes attributes)
-{
-    wxCHECK_RET(obj_idx < p->model.objects.size(), "obj_idx out of bounds");
-    auto* object = p->model.objects[obj_idx];
-
-    wxCHECK_RET(instance_idx < object->instances.size(), "instance_idx out of bounds");
-
-    wxBusyCursor wait;
-
-    const auto new_objects = object->cut(instance_idx, cut_matrix, attributes);
-    cut(obj_idx, new_objects);
-}
-
-void Plater::cut(size_t obj_idx, const ModelObjectPtrs& new_objects)
+void Plater::apply_cut_object_to_model(size_t obj_idx, const ModelObjectPtrs& new_objects)
 {
     model().delete_object(obj_idx);
     sidebar().obj_list()->delete_object_from_list(obj_idx);
@@ -6783,8 +6849,8 @@ void Plater::cut(size_t obj_idx, const ModelObjectPtrs& new_objects)
         selection.add_object((unsigned int)(last_id - i), i == 0);
 
     UIThreadWorker w;
-    replace_job(w, std::make_unique<ArrangeJob>(ArrangeJob::SelectionOnly));
-    w.process_events();
+    arrange(w, true);
+    w.wait_for_idle();
 }
 
 void Plater::export_gcode(bool prefer_removable)
@@ -6832,19 +6898,12 @@ void Plater::export_gcode(bool prefer_removable)
 
     fs::path output_path;
     {
-#if !ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
         std::string ext = default_output_file.extension().string();
-#endif // !ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
         wxFileDialog dlg(this, (printer_technology() == ptFFF) ? _L("Save G-code file as:") : _L("Save SL1 / SL1S file as:"),
             start_dir,
             from_path(default_output_file.filename()),
-#if ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
-            printer_technology() == ptFFF ?  GUI::file_wildcards(FT_GCODE) :
-                                             GUI::sla_wildcards(p->sla_print.printer_config().sla_archive_format.value.c_str()),
-#else
             printer_technology() == ptFFF ? GUI::file_wildcards(FT_GCODE, ext) :
                                             GUI::sla_wildcards(p->sla_print.printer_config().sla_archive_format.value.c_str()),
-#endif // ENABLE_ALTERNATIVE_FILE_WILDCARDS_GENERATOR
             wxFD_SAVE | wxFD_OVERWRITE_PROMPT
         );
         if (dlg.ShowModal() == wxID_OK) {
@@ -6902,9 +6961,12 @@ void Plater::export_stl_obj(bool extended, bool selection_only)
         csg::model_to_csgmesh(mo, Transform3d::Identity(), std::back_inserter(csgmesh),
                               csg::mpartsPositive | csg::mpartsNegative | csg::mpartsDoSplits);
 
-        if (csg::check_csgmesh_booleans(range(csgmesh)) == csgmesh.end()) {
+        auto csgrange = range(csgmesh);
+        if (csg::is_all_positive(csgrange)) {
+            mesh = TriangleMesh{csg::csgmesh_merge_positive_parts(csgrange)};
+        } else if (csg::check_csgmesh_booleans(csgrange) == csgrange.end()) {
             try {
-                auto cgalm = csg::perform_csgmesh_booleans(range(csgmesh));
+                auto cgalm = csg::perform_csgmesh_booleans(csgrange);
                 mesh = MeshBoolean::cgal::cgal_to_triangle_mesh(*cgalm);
             } catch (...) {}
         }
@@ -7561,7 +7623,9 @@ void Plater::force_filament_cb_update()
 
     // Update preset comboboxes on sidebar and filaments tab
     p->sidebar->update_presets(Preset::TYPE_FILAMENT);
-    wxGetApp().get_tab(Preset::TYPE_FILAMENT)->select_preset(wxGetApp().preset_bundle->filaments.get_selected_preset_name());
+
+    TabFilament* tab = dynamic_cast<TabFilament*>(wxGetApp().get_tab(Preset::TYPE_FILAMENT));
+    tab->select_preset(wxGetApp().preset_bundle->extruders_filaments[tab->get_active_extruder()].get_selected_preset_name());
 }
 
 void Plater::force_print_bed_update()
@@ -7669,17 +7733,68 @@ GLCanvas3D* Plater::get_current_canvas3D()
     return p->get_current_canvas3D();
 }
 
+static std::string concat_strings(const std::set<std::string> &strings,
+                                  const std::string &delim = "\n")
+{
+    return std::accumulate(
+        strings.begin(), strings.end(), std::string(""),
+        [delim](const std::string &s, const std::string &name) {
+            return s + name + delim;
+        });
+}
+
 void Plater::arrange()
 {
     if (p->can_arrange()) {
         auto &w = get_ui_job_worker();
-        p->take_snapshot(_L("Arrange"));
-
-        auto mode = wxGetKeyState(WXK_SHIFT) ? ArrangeJob::SelectionOnly :
-                                               ArrangeJob::Full;
-
-        replace_job(w, std::make_unique<ArrangeJob>(mode));
+        arrange(w, wxGetKeyState(WXK_SHIFT));
     }
+}
+
+void Plater::arrange(Worker &w, bool selected)
+{
+    ArrangeSelectionMode mode = selected ?
+                                     ArrangeSelectionMode::SelectionOnly :
+                                     ArrangeSelectionMode::Full;
+
+    arr2::Scene arrscene{build_scene(*this, mode)};
+
+    ArrangeJob2::Callbacks cbs;
+
+    cbs.on_processed = [this](arr2::ArrangeTaskBase &t) {
+        p->take_snapshot(_L("Arrange"));
+    };
+
+    cbs.on_finished = [this](arr2::ArrangeTaskResult &t) {
+        std::set<std::string> names;
+
+        auto collect_unarranged = [this, &names](const arr2::TrafoOnlyArrangeItem &itm) {
+            if (!arr2::is_arranged(itm)) {
+                std::optional<ObjectID> id = arr2::retrieve_id(itm);
+                if (id) {
+                    auto [mi, pos] = arr2::find_instance_by_id(p->model, *id);
+                    if (mi && mi->get_object()) {
+                        names.insert(mi->get_object()->name);
+                    }
+                }
+            }
+        };
+
+        for (const arr2::TrafoOnlyArrangeItem &itm : t.items)
+            collect_unarranged(itm);
+
+        if (!names.empty()) {
+            get_notification_manager()->push_notification(
+                GUI::format(_L("Arrangement ignored the following objects which "
+                               "can't fit into a single bed:\n%s"),
+                            concat_strings(names, "\n")));
+        }
+
+        update(static_cast<unsigned int>(UpdateParams::FORCE_FULL_SCREEN_REFRESH));
+        wxGetApp().obj_manipul()->set_dirty();
+    };
+
+    replace_job(w, std::make_unique<ArrangeJob2>(std::move(arrscene), cbs));
 }
 
 void Plater::set_current_canvas_as_dirty()

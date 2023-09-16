@@ -67,6 +67,7 @@ static const std::map<const wchar_t, std::string> font_icons = {
     {ImGui::InfoMarkerSmall       , "notification_info"             },
     {ImGui::PlugMarker            , "plug"                          },
     {ImGui::DowelMarker           , "dowel"                         },
+    {ImGui::SnapMarker            , "snap"                          },
 };
 
 static const std::map<const wchar_t, std::string> font_icons_large = {
@@ -642,6 +643,8 @@ bool ImGuiWrapper::slider_float(const char* label, float* v, float v_min, float 
     m_last_slider_status.edited = ImGui::IsItemEdited();
     m_last_slider_status.clicked = ImGui::IsItemClicked();
     m_last_slider_status.deactivated_after_edit = ImGui::IsItemDeactivatedAfterEdit();
+    if (!m_last_slider_status.can_take_snapshot)
+        m_last_slider_status.can_take_snapshot = ImGui::IsItemClicked();
 
     if (!tooltip.empty() && ImGui::IsItemHovered())
         this->tooltip(into_u8(tooltip).c_str(), max_tooltip_width);

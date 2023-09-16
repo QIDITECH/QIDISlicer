@@ -169,6 +169,7 @@ private:
     bool m_is_enabled                   { true };
     bool m_is_enabled_size_and_scale    { true };
 
+    bool m_show_skew                    { false };
 
 public:
     ObjectManipulation(wxWindow* parent);

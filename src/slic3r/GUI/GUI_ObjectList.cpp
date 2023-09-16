@@ -2682,7 +2682,7 @@ void ObjectList::part_selection_changed()
     GLGizmosManager& gizmos_mgr = wxGetApp().plater()->canvas3D()->get_gizmos_manager();
 
     if (item && m_objects_model->GetItemType(item) == itInfo && m_objects_model->GetInfoItemType(item) == InfoItemType::CutConnectors) {
-        og_name = _L("Cut Connectors information");
+        og_name = _L("Connectors information");
 
         update_and_show_manipulations = true;
         enable_manipulation = false;

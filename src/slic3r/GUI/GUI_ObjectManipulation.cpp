@@ -15,10 +15,43 @@
 #include "MainFrame.hpp"
 #include "MsgDialog.hpp"
 
+#include <GL/glew.h> //  Fix for fatal  error C1189: #error:  gl.h included before glew.h (compiling source file C:\git\slicer2\src\slic3r\GUI\GUI_ObjectManipulation.cpp)
 #include <wx/glcanvas.h>
 
 #include <boost/algorithm/string.hpp>
 #include "slic3r/Utils/FixModelByWin10.hpp"
+
+// For special mirroring in manipulation gizmo
+#include "Gizmos/GLGizmosManager.hpp"
+#include "Gizmos/GLGizmoEmboss.hpp"
+namespace {
+using namespace Slic3r::GUI;
+bool is_emboss_mirror(size_t axis_idx)
+{    
+    Plater* plater = wxGetApp().plater();
+    if (!plater)
+        return false;
+
+    GLCanvas3D *canvas  = plater->canvas3D();
+    if (!canvas)
+        return false;
+
+    GLGizmosManager &manager = canvas->get_gizmos_manager();
+    // is embossing
+    if (manager.get_current_type() != GLGizmosManager::Emboss)
+        return false;
+
+    GLGizmoBase *gizmo = manager.get_current();
+    if (!gizmo)
+        return false;
+
+    GLGizmoEmboss *emboss = dynamic_cast<GLGizmoEmboss *>(gizmo);
+    if (!emboss)
+        return false;
+
+    return emboss->do_mirror(axis_idx);
+}
+} // namespace
 
 namespace Slic3r
 {
@@ -253,10 +286,12 @@ ObjectManipulation::ObjectManipulation(wxWindow* parent) :
 
         sizer->AddStretchSpacer(2);
         sizer->Add(btn, 0, wxALIGN_CENTER_VERTICAL);
-
+        
         btn->Bind(wxEVT_BUTTON, [this, axis_idx](wxCommandEvent&) {
+            if (::is_emboss_mirror(axis_idx))
+                return;
+
             GLCanvas3D* canvas = wxGetApp().plater()->canvas3D();
-            Selection& selection = canvas->get_selection();
             TransformationType transformation_type;
             if (is_local_coordinates())
                 transformation_type.set_local();
@@ -265,6 +300,7 @@ ObjectManipulation::ObjectManipulation(wxWindow* parent) :
 
             transformation_type.set_relative();
 
+            Selection& selection = canvas->get_selection();
             selection.setup_cache();
             selection.mirror((Axis)axis_idx, transformation_type);
 
@@ -320,7 +356,10 @@ ObjectManipulation::ObjectManipulation(wxWindow* parent) :
             const GLVolume* volume = selection.get_first_volume();
             const double min_z = get_volume_min_z(*volume);
             if (!is_world_coordinates()) {
-                const Vec3d diff = m_cache.position - volume->get_instance_transformation().get_matrix_no_offset().inverse() * (min_z * Vec3d::UnitZ());
+                Vec3d diff = volume->get_instance_transformation().get_matrix_no_offset().inverse() * (min_z * Vec3d::UnitZ());
+                if (is_local_coordinates())
+                    diff = volume->get_volume_transformation().get_matrix_no_offset().inverse() * diff;
+                diff = m_cache.position - diff;
 
                 Plater::TakeSnapshot snapshot(wxGetApp().plater(), _L("Drop to bed"));
                 change_position_value(0, diff.x());
@@ -503,6 +542,11 @@ void ObjectManipulation::Show(const bool show)
         }
         m_word_local_combo->Show(show_world_local_combo);
         m_empty_str->Show(!show_world_local_combo);
+
+        m_skew_label->Show(m_show_skew);
+        m_reset_skew_button->Show(m_show_skew);
+
+        m_parent->Layout();
     }
 }
 
@@ -795,15 +839,22 @@ void ObjectManipulation::update_reset_buttons_visibility()
         m_mirror_warning_bitmap->SetBitmap(show_mirror ? m_manifold_warning_bmp.bmp() : wxNullBitmap);
         m_mirror_warning_bitmap->SetMinSize(show_mirror ? m_manifold_warning_bmp.GetSize() : wxSize(0, 0));
         m_mirror_warning_bitmap->SetToolTip(show_mirror ? _L("Left handed") : "");
-        m_reset_skew_button->Show(show_skew);
-        m_skew_label->Show(show_skew);
 
-        // Because of CallAfter we need to layout sidebar after Show/hide of reset buttons one more time
-        Sidebar& panel = wxGetApp().sidebar();
-        if (!panel.IsFrozen()) {
-            panel.Freeze();
-            panel.Layout();
-            panel.Thaw();
+        if (m_show_skew == show_skew)
+            get_sizer()->Layout();
+        else {
+            // Call sidebar layout only if it's really needed,
+            // it means, when we show/hide additional line for skew information
+            m_show_skew = show_skew;
+            m_reset_skew_button->Show(m_show_skew);
+            m_skew_label->Show(m_show_skew);
+            // Because of CallAfter we need to layout sidebar after Show/hide of reset buttons one more time
+            Sidebar& panel = wxGetApp().sidebar();
+            if (!panel.IsFrozen()) {
+                panel.Freeze();
+                panel.Layout();
+                panel.Thaw();
+            }
         }
     });
 }
@@ -895,7 +946,7 @@ void ObjectManipulation::change_position_value(int axis, double value)
     selection.setup_cache();
     TransformationType trafo_type;
     trafo_type.set_relative();
-    switch (get_coordinates_type())
+    switch (m_coordinates_type)
     {
     case ECoordinatesType::Instance: { trafo_type.set_instance(); break; }
     case ECoordinatesType::Local:    { trafo_type.set_local(); break; }
@@ -905,7 +956,7 @@ void ObjectManipulation::change_position_value(int axis, double value)
     canvas->do_move(L("Set Position"));
 
     m_cache.position = position;
-	m_cache.position_rounded(axis) = DBL_MAX;
+    m_cache.position_rounded(axis) = DBL_MAX;
     this->UpdateAndShow(true);
 }
 

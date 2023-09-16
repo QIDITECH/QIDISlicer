@@ -86,7 +86,13 @@ inline IntPoint IntPoint2d(cInt x, cInt y)
 
 inline cInt Round(double val)
 {
-  return static_cast<cInt>((val < 0) ? (val - 0.5) : (val + 0.5));
+    double v = val < 0 ? val - 0.5 : val + 0.5;
+#if defined(CLIPPERLIB_INT32) && ! defined(NDEBUG)
+    static constexpr const double hi = 65536 * 16383;
+    if (v > hi || -v > hi)
+        throw clipperException("Coordinate outside allowed range");
+#endif
+    return static_cast<cInt>(v);
 }
 
 // Overriding the Eigen operators because we don't want to compare Z coordinate if IntPoint is 3 dimensional.

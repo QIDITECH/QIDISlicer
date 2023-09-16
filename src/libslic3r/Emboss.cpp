@@ -19,6 +19,10 @@
 #include "libslic3r/Line.hpp"
 #include "libslic3r/BoundingBox.hpp"
 
+// Experimentaly suggested ration of font ascent by multiple fonts
+// to get approx center of normal text line
+const double ASCENT_CENTER = 1/3.; // 0.5 is above small letter
+
 using namespace Slic3r;
 using namespace Emboss;
 using fontinfo_opt = std::optional<stbtt_fontinfo>;
@@ -1207,62 +1211,158 @@ std::optional<Glyph> Emboss::letter2glyph(const FontFile &font,
     return priv::get_glyph(*font_info_opt, letter, flatness);
 }
 
-ExPolygons Emboss::text2shapes(FontFileWithCache    &font_with_cache,
-                               const char           *text,
-                               const FontProp       &font_prop,
-                               std::function<bool()> was_canceled)
+const FontFile::Info &Emboss::get_font_info(const FontFile &font, const FontProp &prop)
+{
+    unsigned int font_index = prop.collection_number.value_or(0);
+    assert(priv::is_valid(font, font_index));
+    return font.infos[font_index];
+}
+
+int Emboss::get_line_height(const FontFile &font, const FontProp &prop) {
+    const FontFile::Info &info = get_font_info(font, prop);
+    int line_height = info.ascent - info.descent + info.linegap;
+    line_height += prop.line_gap.value_or(0);
+    return static_cast<int>(line_height / SHAPE_SCALE);
+}
+
+namespace {
+ExPolygons letter2shapes(
+    wchar_t letter, Point &cursor, FontFileWithCache &font_with_cache, const FontProp &font_prop, fontinfo_opt& font_info_cache)
 {
     assert(font_with_cache.has_value());
-    fontinfo_opt font_info_opt;    
-    Point    cursor(0, 0);
+    if (!font_with_cache.has_value())
+        return {};
+
+    Glyphs &cache = *font_with_cache.cache;
+    const FontFile &font  = *font_with_cache.font_file;
+
+    if (letter == '\n') {
+        cursor.x() = 0;
+        // 2d shape has opposit direction of y
+        cursor.y() -= get_line_height(font, font_prop);
+        return {};
+    }
+    if (letter == '\t') {
+        // '\t' = 4*space => same as imgui
+        const int count_spaces = 4;
+        const Glyph *space = priv::get_glyph(int(' '), font, font_prop, cache, font_info_cache);
+        if (space == nullptr)
+            return {};
+        cursor.x() += count_spaces * space->advance_width;
+        return {};
+    }
+    if (letter == '\r')
+        return {};
+
+    int unicode = static_cast<int>(letter);
+    auto it = cache.find(unicode);
+
+    // Create glyph from font file and cache it
+    const Glyph *glyph_ptr = (it != cache.end()) ? &it->second : priv::get_glyph(unicode, font, font_prop, cache, font_info_cache);
+    if (glyph_ptr == nullptr)
+        return {};
+
+    // move glyph to cursor position
+    ExPolygons expolygons = glyph_ptr->shape; // copy
+    for (ExPolygon &expolygon : expolygons)
+        expolygon.translate(cursor);
+
+    cursor.x() += glyph_ptr->advance_width;
+    return expolygons;
+}
+
+// Check cancel every X letters in text
+// Lower number - too much checks(slows down)
+// Higher number - slows down response on cancelation
+const int CANCEL_CHECK = 10;
+} // namespace
+
+ExPolygons Emboss::text2shapes(FontFileWithCache &font_with_cache, const char *text, const FontProp &font_prop, const std::function<bool()>& was_canceled)
+{
+    std::wstring text_w = boost::nowide::widen(text);
+    std::vector<ExPolygons> vshapes = text2vshapes(font_with_cache, text_w, font_prop, was_canceled);
+    // unify to one expolygon
     ExPolygons result;
-    const FontFile& font = *font_with_cache.font_file;
-    unsigned int font_index = font_prop.collection_number.has_value()?
-        *font_prop.collection_number : 0;
-    if (!priv::is_valid(font, font_index)) return {};
-    const FontFile::Info& info = font.infos[font_index];
-    Glyphs& cache = *font_with_cache.cache;
-    std::wstring ws = boost::nowide::widen(text);
-    for (wchar_t wc: ws){
-        if (wc == '\n') { 
-            int line_height = info.ascent - info.descent + info.linegap;
-            if (font_prop.line_gap.has_value())
-                line_height += *font_prop.line_gap;
-            line_height = static_cast<int>(line_height / SHAPE_SCALE);
-
-            cursor.x() = 0;
-            cursor.y() -= line_height;
+    for (ExPolygons &shapes : vshapes) {
+        if (shapes.empty())
             continue;
-        } 
-        if (wc == '\t') {
-            // '\t' = 4*space => same as imgui
-            const int count_spaces = 4;
-            const Glyph* space = priv::get_glyph(int(' '), font, font_prop, cache, font_info_opt);
-            if (space == nullptr) continue;
-            cursor.x() += count_spaces * space->advance_width;
-            continue;
-        }
-        if (wc == '\r') continue;
-
-        int unicode = static_cast<int>(wc);
-        // check cancelation only before unknown symbol - loading of symbol could be timeconsuming on slow computer and dificult fonts
-        auto it = cache.find(unicode);
-        if (it == cache.end() && was_canceled != nullptr && was_canceled()) return {};
-        const Glyph *glyph_ptr = (it != cache.end())? &it->second :
-            priv::get_glyph(unicode, font, font_prop, cache, font_info_opt);
-        if (glyph_ptr == nullptr) continue;
-        
-        // move glyph to cursor position
-        ExPolygons expolygons = glyph_ptr->shape; // copy
-        for (ExPolygon &expolygon : expolygons) 
-            expolygon.translate(cursor);
-
-        cursor.x() += glyph_ptr->advance_width;
-        expolygons_append(result, std::move(expolygons));
+        expolygons_append(result, std::move(shapes));
     }
     result = Slic3r::union_ex(result);
     heal_shape(result);
     return result;
+}
+
+namespace {
+/// <summary>
+/// Align shape against pivot
+/// </summary>
+/// <param name="shapes">Shapes to align
+/// Prerequisities: shapes are aligned left top</param>
+/// <param name="text">To detect end of lines - to be able horizontal center the line</param>
+/// <param name="prop">Containe Horizontal and vertical alignment</param>
+/// <param name="font">Needed for scale and font size</param>
+void align_shape(std::vector<ExPolygons> &shapes, const std::wstring &text, const FontProp &prop, const FontFile &font);
+}
+
+std::vector<ExPolygons> Emboss::text2vshapes(FontFileWithCache &font_with_cache, const std::wstring& text, const FontProp &font_prop, const std::function<bool()>& was_canceled){
+    assert(font_with_cache.has_value());
+    const FontFile &font = *font_with_cache.font_file;
+    unsigned int font_index = font_prop.collection_number.value_or(0);
+    if (!priv::is_valid(font, font_index))
+        return {};
+
+    unsigned counter = 0;
+    Point cursor(0, 0);
+
+    fontinfo_opt font_info_cache;  
+    std::vector<ExPolygons> result;
+    result.reserve(text.size());
+    for (wchar_t letter : text) {
+        if (++counter == CANCEL_CHECK) {
+            counter = 0;
+            if (was_canceled())
+                return {};
+        }
+        result.emplace_back(letter2shapes(letter, cursor, font_with_cache, font_prop, font_info_cache));
+    }
+
+    align_shape(result, text, font_prop, font);
+    return result;
+}
+
+#include <boost/range/adaptor/reversed.hpp>
+unsigned Emboss::get_count_lines(const std::wstring& ws)
+{
+    if (ws.empty())
+        return 0;
+
+    unsigned count = 1;
+    for (wchar_t wc : ws)
+        if (wc == '\n')
+            ++count;
+    return count;
+
+    // unsigned prev_count = 0;
+    // for (wchar_t wc : ws)
+    //     if (wc == '\n')
+    //         ++prev_count;
+    //     else
+    //         break;
+    //
+    // unsigned post_count = 0;
+    // for (wchar_t wc : boost::adaptors::reverse(ws))
+    //     if (wc == '\n')
+    //         ++post_count;
+    //     else
+    //         break;
+    //return count - prev_count - post_count;
+}
+
+unsigned Emboss::get_count_lines(const std::string &text)
+{
+    std::wstring ws = boost::nowide::widen(text.c_str());
+    return get_count_lines(ws);
 }
 
 void Emboss::apply_transformation(const FontProp &font_prop, Transform3d &transformation){
@@ -1361,8 +1461,7 @@ std::string Emboss::create_range_text(const std::string &text,
 
 double Emboss::get_shape_scale(const FontProp &fp, const FontFile &ff)
 {
-    size_t font_index  = fp.collection_number.value_or(0);
-    const FontFile::Info &info = ff.infos[font_index];
+    const FontFile::Info &info = get_font_info(ff, fp);
     double scale  = fp.size_in_mm / (double) info.unit_per_em;
     // Shape is scaled for store point coordinate as integer
     return scale * SHAPE_SCALE;
@@ -1655,6 +1754,266 @@ std::optional<Vec2d> Emboss::OrthoProject::unproject(const Vec3d &p, double *dep
     Vec3d pp = m_matrix_inv * p;
     if (depth != nullptr) *depth = pp.z();
     return Vec2d(pp.x(), pp.y());
+}
+
+// sample slice
+namespace {
+
+// using coor2 = int64_t;
+using Coord2 = double;
+using P2     = Eigen::Matrix<Coord2, 2, 1, Eigen::DontAlign>;
+
+bool point_in_distance(const Coord2 &distance_sq, PolygonPoint &polygon_point, const size_t &i, const Slic3r::Polygon &polygon, bool is_first, bool is_reverse = false)
+{
+    size_t s  = polygon.size();
+    size_t ii = (i + polygon_point.index) % s;
+
+    // second point of line
+    const Point &p = polygon[ii];
+    Point p_d = p - polygon_point.point;
+
+    P2 p_d2 = p_d.cast<Coord2>();
+    Coord2 p_distance_sq = p_d2.squaredNorm();
+    if (p_distance_sq < distance_sq)
+        return false;
+
+    // found line
+    if (is_first) {
+        // on same line
+        // center also lay on line
+        // new point is distance moved from point by direction
+        polygon_point.point += p_d * sqrt(distance_sq / p_distance_sq);
+        return true;
+    }
+
+    // line cross circle
+
+    // start point of line
+    size_t ii2          = (is_reverse) ? (ii + 1) % s : (ii + s - 1) % s;
+    polygon_point.index = (is_reverse) ? ii : ii2;
+    const Point &p2 = polygon[ii2];
+
+    Point line_dir  = p2 - p;
+    P2    line_dir2 = line_dir.cast<Coord2>();
+
+    Coord2 a = line_dir2.dot(line_dir2);
+    Coord2 b = 2 * p_d2.dot(line_dir2);
+    Coord2 c = p_d2.dot(p_d2) - distance_sq;
+
+    double discriminant = b * b - 4 * a * c;
+    if (discriminant < 0) {
+        assert(false);
+        // no intersection
+        polygon_point.point = p;
+        return true;
+    }
+
+    // ray didn't totally miss sphere,
+    // so there is a solution to
+    // the equation.
+    discriminant = sqrt(discriminant);
+
+    // either solution may be on or off the ray so need to test both
+    // t1 is always the smaller value, because BOTH discriminant and
+    // a are nonnegative.
+    double t1 = (-b - discriminant) / (2 * a);
+    double t2 = (-b + discriminant) / (2 * a);
+
+    double t = std::min(t1, t2);
+    if (t < 0. || t > 1.) {
+        // Bad intersection
+        assert(false);
+        polygon_point.point = p;
+        return true;
+    }
+
+    polygon_point.point = p + (t * line_dir2).cast<Point::coord_type>();
+    return true;
+}
+
+void point_in_distance(int32_t distance, PolygonPoint &p, const Slic3r::Polygon &polygon)
+{
+    Coord2 distance_sq = static_cast<Coord2>(distance) * distance;
+    bool is_first = true;
+    for (size_t i = 1; i < polygon.size(); ++i) {
+        if (point_in_distance(distance_sq, p, i, polygon, is_first))
+            return;
+        is_first = false;
+    }
+    // There is not point on polygon with this distance
+}
+
+void point_in_reverse_distance(int32_t distance, PolygonPoint &p, const Slic3r::Polygon &polygon)
+{
+    Coord2 distance_sq = static_cast<Coord2>(distance) * distance;
+    bool is_first = true;
+    bool is_reverse = true;
+    for (size_t i = polygon.size(); i > 0; --i) {
+        if (point_in_distance(distance_sq, p, i, polygon, is_first, is_reverse))
+            return;
+        is_first = false;
+    }
+    // There is not point on polygon with this distance
+}
+} // namespace
+
+// calculate rotation, need copy of polygon point
+double Emboss::calculate_angle(int32_t distance, PolygonPoint polygon_point, const Polygon &polygon)
+{
+    PolygonPoint polygon_point2 = polygon_point; // copy
+    point_in_distance(distance, polygon_point, polygon);
+    point_in_reverse_distance(distance, polygon_point2, polygon);
+
+    Point surface_dir = polygon_point2.point - polygon_point.point;
+    Point norm(-surface_dir.y(), surface_dir.x());
+    Vec2d norm_d = norm.cast<double>();
+    //norm_d.normalize();
+    return std::atan2(norm_d.y(), norm_d.x());
+}
+
+std::vector<double> Emboss::calculate_angles(int32_t distance, const PolygonPoints& polygon_points, const Polygon &polygon)
+{
+    std::vector<double> result;
+    result.reserve(polygon_points.size());
+    for(const PolygonPoint& pp: polygon_points)
+        result.emplace_back(calculate_angle(distance, pp, polygon));
+    return result;
+}
+
+PolygonPoints Emboss::sample_slice(const TextLine &slice, const BoundingBoxes &bbs, double scale)
+{
+    // find BB in center of line
+    size_t first_right_index = 0;
+    for (const BoundingBox &bb : bbs)
+        if (!bb.defined) // white char do not have bb
+            continue;
+        else if (bb.min.x() < 0)
+            ++first_right_index;
+        else 
+            break;
+
+    PolygonPoints samples(bbs.size());
+    int32_t shapes_x_cursor = 0;
+
+    PolygonPoint cursor = slice.start; //copy
+
+    auto create_sample = [&] //polygon_cursor, &polygon_line_index, &line_bbs, &shapes_x_cursor, &shape_scale, &em_2_polygon, &line, &offsets]
+    (const BoundingBox &bb, bool is_reverse) {
+        if (!bb.defined)
+            return cursor;
+        Point   letter_center  = bb.center();
+        int32_t shape_distance = shapes_x_cursor - letter_center.x();
+        shapes_x_cursor        = letter_center.x();
+        double  distance_mm    = shape_distance * scale;
+        int32_t distance_polygon = static_cast<int32_t>(std::round(scale_(distance_mm)));
+        if (is_reverse)
+            point_in_distance(distance_polygon, cursor, slice.polygon);
+        else
+            point_in_reverse_distance(distance_polygon, cursor, slice.polygon);
+        return cursor;
+    };
+
+    // calc transformation for letters on the Right side from center
+    bool is_reverse = true;
+    for (size_t index = first_right_index; index < bbs.size(); ++index)
+        samples[index] = create_sample(bbs[index], is_reverse);
+
+    // calc transformation for letters on the Left side from center
+    if (first_right_index < bbs.size()) {
+        shapes_x_cursor = bbs[first_right_index].center().x();
+        cursor          = samples[first_right_index];
+    }else{
+        // only left side exists
+        shapes_x_cursor = 0;
+        cursor = slice.start; // copy    
+    }
+    is_reverse = false;
+    for (size_t index_plus_one = first_right_index; index_plus_one > 0; --index_plus_one) {
+        size_t index = index_plus_one - 1;
+        samples[index] = create_sample(bbs[index], is_reverse);
+    }
+    return samples;
+}
+
+namespace {
+float get_align_y_offset(FontProp::VerticalAlign align, unsigned count_lines, const FontFile &ff, const FontProp &fp)
+{
+    assert(count_lines != 0);
+    int line_height = get_line_height(ff, fp);
+    int ascent = get_font_info(ff, fp).ascent / SHAPE_SCALE;
+    float line_center = static_cast<float>(std::round(ascent * ASCENT_CENTER));
+
+    // direction of Y in 2d is from top to bottom
+    // zero is on base line of first line
+    switch (align) {
+    case FontProp::VerticalAlign::bottom: return line_height * (count_lines - 1);
+    case FontProp::VerticalAlign::top: return -ascent;
+    case FontProp::VerticalAlign::center: 
+    default: 
+        return -line_center + line_height * (count_lines - 1) / 2.;
+    }
+}
+
+int32_t get_align_x_offset(FontProp::HorizontalAlign align, const BoundingBox &shape_bb, const BoundingBox &line_bb)
+{
+    switch (align) {
+    case FontProp::HorizontalAlign::right: return -shape_bb.max.x() + (shape_bb.size().x() - line_bb.size().x());
+    case FontProp::HorizontalAlign::center: return -shape_bb.center().x() + (shape_bb.size().x() - line_bb.size().x()) / 2;
+    case FontProp::HorizontalAlign::left: // no change
+    default: break;
+    }
+    return 0;
+}
+
+void align_shape(std::vector<ExPolygons> &shapes, const std::wstring &text, const FontProp &prop, const FontFile &font)
+{
+    // Shapes have to match letters in text
+    assert(shapes.size() == text.length());
+
+    unsigned count_lines = get_count_lines(text);
+    int y_offset = get_align_y_offset(prop.align.second, count_lines, font, prop);
+
+    // Speed up for left aligned text
+    //if (prop.align.first == FontProp::HorizontalAlign::left){
+    //    // already horizontaly aligned
+    //    for (ExPolygons shape : shapes)
+    //        for (ExPolygon &s : shape)
+    //            s.translate(Point(0, y_offset));
+    //    return;
+    //}
+
+    BoundingBox shape_bb;
+    for (const ExPolygons& shape: shapes)
+        shape_bb.merge(get_extents(shape));
+
+    auto get_line_bb = [&](size_t j) {
+        BoundingBox line_bb;
+        for (; j < text.length() && text[j] != '\n'; ++j)
+            line_bb.merge(get_extents(shapes[j]));
+        return line_bb;
+    };
+
+    // Align x line by line
+    Point offset(
+        get_align_x_offset(prop.align.first, shape_bb, get_line_bb(0)), 
+        y_offset);
+    for (size_t i = 0; i < shapes.size(); ++i) {
+        wchar_t letter = text[i];
+        if (letter == '\n'){
+            offset.x() = get_align_x_offset(prop.align.first, shape_bb, get_line_bb(i + 1));
+            continue;
+        }
+        ExPolygons &shape = shapes[i];
+        for (ExPolygon &s : shape)
+            s.translate(offset);
+    }
+}
+} // namespace
+
+double Emboss::get_align_y_offset_in_mm(FontProp::VerticalAlign align, unsigned count_lines, const FontFile &ff, const FontProp &fp){
+    float offset_in_font_point = get_align_y_offset(align, count_lines, ff, fp);
+    double scale = get_shape_scale(fp, ff);
+    return scale * offset_in_font_point;
 }
 
 #ifdef REMOVE_SPIKES
