@@ -43,7 +43,6 @@
 #include <GL/glew.h>
 #include <chrono> // measure enumeration of fonts
 
-
 // uncomment for easier debug
 //#define ALLOW_DEBUG_MODE
 #ifdef ALLOW_DEBUG_MODE
@@ -216,8 +215,6 @@ static void find_closest_volume(const Selection       &selection,
 /// <param name="coor">Screen coordinat, where to create new object laying on bed</param>
 static void start_create_object_job(DataBase &emboss_data, const Vec2d &coor);
 
-
-
 // Loaded icons enum
 // Have to match order of files in function GLGizmoEmboss::init_icons()
 enum class IconType : unsigned {
@@ -264,7 +261,14 @@ static bool apply_camera_dir(const Camera &camera, GLCanvas3D &canvas, bool keep
 
 } // namespace priv
 
-<<<<<<< Updated upstream
+namespace {
+// for existing volume which is selected(could init different(to volume text) lines count when edit text)
+void init_text_lines(TextLinesModel &text_lines, const Selection& selection, /* const*/ StyleManager &style_manager, unsigned count_lines=0);
+// before text volume is created
+void init_new_text_line(TextLinesModel &text_lines, const Transform3d& new_text_tr, const ModelObject& mo, /* const*/ StyleManager &style_manager);
+}
+
+
 //B34
 void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos, std::string str)
 {
@@ -278,7 +282,9 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mous
     Size s = m_parent.get_canvas_size();
 
     Vec2d                  screen_center(s.get_width() / 2., s.get_height() / 2.);
-    DataBase               emboss_data    = priv::create_emboss_data_base(str, m_style_manager, m_job_cancel);
+    DataBase emboss_data = priv::create_emboss_data_base(str, m_style_manager, m_text_lines, m_parent.get_selection(), volume_type,
+                                                         m_job_cancel);
+
     const ModelObjectPtrs &objects        = selection.get_model()->objects;
     bool                   is_simple_mode = wxGetApp().get_mode() == comSimple;
     // No selected object so create new object
@@ -329,20 +335,6 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mous
 }
 
 
-
-
-
-void GLGizmoEmboss::change_height(double height) { 
-    set_height(); 
-=======
-namespace {
-// for existing volume which is selected(could init different(to volume text) lines count when edit text)
-void init_text_lines(TextLinesModel &text_lines, const Selection& selection, /* const*/ StyleManager &style_manager, unsigned count_lines=0);
-// before text volume is created
-void init_new_text_line(TextLinesModel &text_lines, const Transform3d& new_text_tr, const ModelObject& mo, /* const*/ StyleManager &style_manager);
->>>>>>> Stashed changes
-}
-
 void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d& mouse_pos)
 {
     if (!init_create(volume_type))
@@ -375,9 +367,6 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type)
     int object_idx = selection.get_object_idx();
 
     Size s = m_parent.get_canvas_size();
-
-
-
     Vec2d screen_center(s.get_width() / 2., s.get_height() / 2.);
     DataBase emboss_data = priv::create_emboss_data_base(m_text, m_style_manager, m_text_lines, m_parent.get_selection(), volume_type, m_job_cancel);
     const ModelObjectPtrs &objects = selection.get_model()->objects;
@@ -3068,7 +3057,6 @@ bool GLGizmoEmboss::set_height() {
     return true;
 }
 
-
 void GLGizmoEmboss::draw_height(bool use_inch)
 {
     float &value = m_style_manager.get_font_prop().size_in_mm;
@@ -3077,7 +3065,6 @@ void GLGizmoEmboss::draw_height(bool use_inch)
     const char *size_format = use_inch ? "%.2f in" : "%.1f mm";
     const std::string revert_text_size = _u8L("Revert text size.");
     const std::string& name = m_gui_cfg->translations.height;
-
     if (rev_input_mm(name, value, stored, revert_text_size, 0.1f, 1.f, size_format, use_inch, m_scale_height))
         if (set_height())
             process();
@@ -3947,8 +3934,7 @@ bool priv::start_create_volume_on_surface_job(DataBase       &emboss_data,
         return false;
 
     // Create result volume transformation
-    Transform3d     surface_trmat = create_transformation_onto_surface(hit->position, hit->normal,
-                                                                   priv::up_limit);
+    Transform3d surface_trmat = create_transformation_onto_surface(hit->position, hit->normal, priv::up_limit);
     const FontProp &font_prop = emboss_data.text_configuration.style.prop;
     apply_transformation(font_prop, surface_trmat);
     Transform3d instance = gl_volume->get_instance_transformation().get_matrix();

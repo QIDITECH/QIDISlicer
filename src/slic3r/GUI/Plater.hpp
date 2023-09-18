@@ -206,7 +206,6 @@ public:
         FORCE_BACKGROUND_PROCESSING_UPDATE = 2,
         POSTPONE_VALIDATION_ERROR_MESSAGE = 4,
     };
-
     void update(unsigned int flags = 0);
 
     // Get the worker handling the UI jobs (arrange, fill bed, etc...)

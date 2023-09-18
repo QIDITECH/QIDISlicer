@@ -3,13 +3,10 @@
 
 #include <cstddef>
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 #include <string>
-//Y
-#include <cmath>
-#include <sstream>
-#include <iomanip>
 #include <regex>
 #include <future>
 #include <boost/algorithm/string.hpp>
@@ -2294,7 +2291,6 @@ Plater::priv::~priv()
 
 void Plater::priv::update(unsigned int flags)
 {
-
     // the following line, when enabled, causes flickering on NVIDIA graphics cards
 //    wxWindowUpdateLocker freeze_guard(q);
     if (get_config_bool("autocenter"))
@@ -5515,7 +5511,6 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
 
     const double e_step = print_config->get_abs_value("layer_height") * pa_external_perimeter_extrusion_width * 0.4;
 
-<<<<<<< Updated upstream
     std::string num_str = double_to_str(StartPA + (count-1) * PAStep) ;
     for (int i = 1; i < count/2; i++) {
         num_str += "\n" + double_to_str(StartPA + (count - 1 - i * 2) * PAStep) ;
@@ -5523,31 +5518,6 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y()));
     //add_num_text("2.0");
     // add_num_text("1.0", Vec2d(100, 200));
-=======
-    //B34  Add Text
-    /*GLCanvas3D *     canvas = wxGetApp().plater()->canvas3D();
-    GLGizmosManager  &mng    = canvas->get_gizmos_manager();
-    GLGizmoBase *    gizmo  = mng.get_gizmo(GLGizmosManager::Emboss);
-    GLGizmoEmboss *  emboss = dynamic_cast<GLGizmoEmboss *>(gizmo);
-    assert(emboss != nullptr);
-    if (emboss == nullptr)
-        return;
-
-    ModelVolumeType volume_type = ModelVolumeType::MODEL_PART;
-    // no selected object means create new object
-    if (volume_type == ModelVolumeType::INVALID)
-        volume_type = ModelVolumeType::MODEL_PART;
-*/
-    //emboss->create_volume(volume_type, Vec2d(plate_center.x() - 10, plate_center.y() - count * 2.5), "0.0");
-    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
-    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "1.0");
-    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
-    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "2.0");
-    //dynamic_cast<GLGizmoEmboss *>(mng.get_gizmo(GLGizmosManager::Emboss))
-    //    ->create_volume(volume_type, Vec2d(plate_center.x() - 20, plate_center.y() - count * 2.5), "3.0");
-    //model().objects[0]->scale(2);
-
->>>>>>> Stashed changes
     //B34 Generate line gcode
     std::stringstream gcode;
     gcode << move_to(Vec2d(start_x + 80, start_y), pa_travel_speed);
