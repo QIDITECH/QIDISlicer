@@ -5413,6 +5413,7 @@ void Plater::calib_flowrate_coarse()
     std::vector<fs::path> model_path;
     model_path.emplace_back(Slic3r::resources_dir() + "/calib/FlowRate/flowrate_coarse.3mf");
     load_files(model_path, true, false, false);
+    p->set_project_filename("Flowrate Coarse");
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
@@ -5444,6 +5445,7 @@ void Plater::calib_flowrate_fine(const double target_extrusion_multiplier)
     std::vector<fs::path> model_path;
     model_path.emplace_back(Slic3r::resources_dir() + "/calib/FlowRate/flowrate_fine.3mf");
     load_files(model_path, true, false, false);
+    p->set_project_filename("Flowrate Fine");
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
@@ -5458,6 +5460,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     std::vector<fs::path> model_path;
     model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_line.stl");
     load_files(model_path, true, false, false);
+    p->set_project_filename("PA Line");
 
     // Check step count
     double      interval     = 4.62;
@@ -5527,9 +5530,9 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     for (int i = 0; i <= count; i++) {
         gcode << set_pressure_advance(StartPA + i * PAStep);
         gcode << move_to(Vec2d(start_x, start_y + i * interval), pa_travel_speed, retract_length, retract_speed);
-        gcode << move_to(Vec2d(start_x + line_short, start_y + i * interval), speed_fast, line_short * e_per_mm);
-        gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + i * interval), speed_slow, line_long * e_per_mm);
-        gcode << move_to(Vec2d(start_x + line_short + line_long + line_short, start_y + i * interval), speed_fast, line_short * e_per_mm);
+        gcode << move_to(Vec2d(start_x + line_short, start_y + i * interval), speed_slow, line_short * e_per_mm);
+        gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + i * interval), speed_fast, line_long * e_per_mm);
+        gcode << move_to(Vec2d(start_x + line_short + line_long + line_short, start_y + i * interval), speed_slow, line_short * e_per_mm);
     }
 
     gcode << set_pressure_advance(0);
@@ -5537,6 +5540,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     gcode << move_to(Vec2d(start_x + line_short, start_y + count * interval + 3), speed_fast, 2 * e_per_mm);
     gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * interval + 1), pa_travel_speed, retract_length, retract_speed);
     gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * interval + 3), speed_fast, 2 * e_per_mm);
+    gcode << "\n";
 
     // Set and load end gcode
     auto pa_end_gcode = printer_config->opt_string("end_gcode");
@@ -5562,6 +5566,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     std::vector<fs::path> model_path;
     model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_pattern.stl");
     load_files(model_path, true, false, false);
+    p->set_project_filename("PA Pattern");
 
     // Check step count
     const Vec2d plate_center = build_volume().bed_center();
@@ -5705,6 +5710,7 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     std::vector<fs::path> model_path;
     model_path.emplace_back(Slic3r::resources_dir() + "/calib/PressureAdvance/pa_tower.stl");
     load_files(model_path, true, false, false);
+    p->set_project_filename("PA Tower");
 
     DynamicPrintConfig  new_config;
     DynamicPrintConfig *printer_config   = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
