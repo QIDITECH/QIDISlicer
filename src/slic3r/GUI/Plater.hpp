@@ -17,6 +17,11 @@
 #include "Jobs/Worker.hpp"
 #include "Search.hpp"
 
+
+#include "libslic3r/GCode.hpp"
+#include "libslic3r/GCodeWriter.hpp"
+#include "libslic3r/PrintConfig.hpp"
+
 class wxButton;
 class ScalableButton;
 class wxScrolledWindow;
@@ -172,10 +177,11 @@ public:
     void calib_pa_tower(const double StartPA, double EndPA, double PAStep);
     void calib_flowrate_coarse();
     void calib_flowrate_fine(const double target_extrusion_multiplier);
-    std::string move_to(const Vec2d &point, double speed);
+    std::string move_to(const Vec2d &point, double speed, double retract_length, double retract_speed);
     std::string move_to(const Vec2d &point, double speed, double e);
     std::string move_to(double height);
     std::string set_pressure_advance(double pa);
+    std::string set_pa_acceleration(double acceleration);
     void        add_num_text(std::string num, Vec2d posotion);
 
     void new_project();
