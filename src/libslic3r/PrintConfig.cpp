@@ -1365,6 +1365,19 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloatOrPercent(30, false));
 
+    //B36
+    // def = this->add("first_layer_travel_speed", coFloatOrPercent);
+    // def->label = L("First layer travel speed");
+    // def->tooltip = L("If expressed as absolute value in mm/s, this speed will be applied to all the print moves "
+    //                "of the first layer, regardless of their type. If expressed as a percentage "
+    //                "(for example: 40%) it will scale the default speeds.");
+    // def->sidetext = L("mm/s or %");
+    // def->min = 0;
+    // def->max_literal = 20;
+    // def->mode = comAdvanced;
+    // def->set_default_value(new ConfigOptionFloatOrPercent(200, false));
+
+
     def = this->add("first_layer_speed_over_raft", coFloatOrPercent);
     def->label = L("Speed of object first layer over raft interface");
     def->tooltip = L("If expressed as absolute value in mm/s, this speed will be applied to all the print moves "
@@ -3457,6 +3470,9 @@ void PrintConfigDef::init_fff_params()
         // floats
         "retract_length", "retract_lift", "retract_lift_above", "retract_lift_below", "retract_speed",
         "deretract_speed", "retract_restart_extra", "retract_before_travel", "retract_length_toolchange", "retract_restart_extra_toolchange",
+        //B34
+        "filament_diameter",
+        "extrusion_multiplier",
         // bools
         "retract_layer_change", "wipe",
         // percents
@@ -3486,6 +3502,9 @@ void PrintConfigDef::init_extruder_option_keys()
         "retract_length", "retract_lift", "retract_lift_above", "retract_lift_below", "retract_speed", "deretract_speed",
         "retract_before_wipe", "retract_restart_extra", "retract_before_travel", "wipe",
         "retract_layer_change", "retract_length_toolchange", "retract_restart_extra_toolchange", "extruder_colour",
+        //B34
+        "filament_diameter",
+        "extrusion_multiplier",
         "default_filament_profile"
     };
 
@@ -3495,6 +3514,9 @@ void PrintConfigDef::init_extruder_option_keys()
         "retract_before_wipe",
         "retract_layer_change",
         "retract_length",
+        //B34
+        "filament_diameter",
+        "extrusion_multiplier",
         "retract_length_toolchange",
         "retract_lift",
         "retract_lift_above",
