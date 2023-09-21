@@ -601,27 +601,27 @@ std::string GCodeWriter::set_fan(unsigned int speed) const
 
 
 //B38
-//void GCodeWriter::add_object_start_labels(std::string &gcode)
-//{
-//    if (!m_gcode_label_objects_start.empty()) {
-//        gcode += m_gcode_label_objects_start;
-//        m_gcode_label_objects_start = "";
-//    }
-//}
-//
-//void GCodeWriter::add_object_end_labels(std::string &gcode)
-//{
-//    if (!m_gcode_label_objects_end.empty()) {
-//        gcode += m_gcode_label_objects_end;
-//        m_gcode_label_objects_end = "";
-//    }
-//}
-//
-//void GCodeWriter::add_object_change_labels(std::string &gcode)
-//{
-//    add_object_end_labels(gcode);
-//    add_object_start_labels(gcode);
-//}
+void GCodeWriter::add_object_start_labels(std::string &gcode)
+{
+    if (!m_gcode_label_objects_start.empty()) {
+        gcode += m_gcode_label_objects_start;
+        m_gcode_label_objects_start = "";
+    }
+}
+
+void GCodeWriter::add_object_end_labels(std::string &gcode)
+{
+    if (!m_gcode_label_objects_end.empty()) {
+        gcode += m_gcode_label_objects_end;
+        m_gcode_label_objects_end = "";
+    }
+}
+
+void GCodeWriter::add_object_change_labels(std::string &gcode)
+{
+    add_object_end_labels(gcode);
+    add_object_start_labels(gcode);
+}
 
 
 void GCodeFormatter::emit_axis(const char axis, const double v, size_t digits) {

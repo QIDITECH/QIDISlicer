@@ -102,13 +102,13 @@ public:
     void set_is_first_layer(bool bval) { m_is_first_layer = bval; }
 
     //B38
-    //void set_object_start_str(std::string start_string) { m_gcode_label_objects_start = start_string; }
-    //bool empty_object_start_str() { return m_gcode_label_objects_start.empty(); }
-    //void set_object_end_str(std::string end_string) { m_gcode_label_objects_end = end_string; }
-    //bool empty_object_end_str() { return m_gcode_label_objects_end.empty(); }
-    //void add_object_start_labels(std::string &gcode);
-    //void add_object_end_labels(std::string &gcode);
-    //void add_object_change_labels(std::string &gcode);
+    void set_object_start_str(std::string start_string) { m_gcode_label_objects_start = start_string; }
+    bool is_object_start_str_empty() { return m_gcode_label_objects_start.empty(); }
+    void set_object_end_str(std::string end_string) { m_gcode_label_objects_end = end_string; }
+    bool is_object_end_str_empty() { return m_gcode_label_objects_end.empty(); }
+    void add_object_start_labels(std::string &gcode);
+    void add_object_end_labels(std::string &gcode);
+    void add_object_change_labels(std::string &gcode);
 
 
 private:
@@ -135,9 +135,9 @@ private:
     //B36
     bool m_is_first_layer = true;
 
-    ////B38
-    //std::string m_gcode_label_objects_start;
-    //std::string m_gcode_label_objects_end;
+    //B38
+    std::string m_gcode_label_objects_start;
+    std::string m_gcode_label_objects_end;
 
     enum class Acceleration {
         Travel,

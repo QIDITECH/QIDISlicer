@@ -1487,6 +1487,13 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     // Write end commands to file.
     file.write(this->retract());
 
+    //B38
+    {
+        std::string gcode;
+        m_writer.add_object_change_labels(gcode);
+        file.write(gcode);
+    }
+
 
     file.write(m_writer.set_fan(0));
 
@@ -2458,7 +2465,8 @@ void GCode::process_layer_single_object(
                         ++ object_id;
                 gcode += std::string("; printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) + " copy " + std::to_string(print_instance.instance_id) + "\n";
                 //B38
-                gcode += std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n";
+                //gcode += std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n";
+                m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n");
             }
         }
     };
@@ -2636,7 +2644,12 @@ void GCode::process_layer_single_object(
         gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
                  " copy " + std::to_string(print_instance.instance_id) + "\n";
         //B38
-        gcode += std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n";
+        //gcode += std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n";
+        if (!m_writer.is_object_start_str_empty()) {
+            m_writer.set_object_start_str("");
+        } else {
+            m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n");
+        }
     }
         
 }
@@ -2718,6 +2731,10 @@ std::string GCode::change_layer(coordf_t print_z)
     if (EXTRUDER_CONFIG(retract_layer_change) && m_writer.will_move_z(z)) {
         gcode += this->retract();
     }
+
+    //B38
+    m_writer.add_object_change_labels(gcode);
+
 
     {
         std::ostringstream comment;
@@ -3011,6 +3028,8 @@ std::string GCode::_extrude(const ExtrusionPath &path, const std::string_view de
         gcode += this->travel_to(path.first_point(), path.role(), comment);
     }
 
+    //B38
+    m_writer.add_object_change_labels(gcode);
 
     // compensate retraction
     gcode += this->unretract();
@@ -3310,6 +3329,9 @@ std::string GCode::travel_to(const Point &point, ExtrusionRole role, std::string
     } else
         // Reset the wipe path when traveling, so one would not wipe along an old path.
         m_wipe.reset_path();
+
+    //B38
+    m_writer.add_object_change_labels(gcode);
 
 
     // use G1 because we rely on paths being straight (G0 may make round paths)
