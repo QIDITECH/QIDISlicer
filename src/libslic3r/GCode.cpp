@@ -2463,10 +2463,13 @@ void GCode::process_layer_single_object(
                         break;
                     else
                         ++ object_id;
-                gcode += std::string("; printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) + " copy " + std::to_string(print_instance.instance_id) + "\n";
                 //B38
-                //gcode += std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n";
-                m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n");
+                if (this->config().gcode_flavor == gcfKlipper) {
+                    m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n");
+                } else {
+                    gcode += std::string("; printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
+                             " copy " + std::to_string(print_instance.instance_id) + "\n";
+                }
             }
         }
     };
@@ -2641,14 +2644,16 @@ void GCode::process_layer_single_object(
         }
 
     if (!first && this->config().gcode_label_objects) {
-        gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
-                 " copy " + std::to_string(print_instance.instance_id) + "\n";
         //B38
-        //gcode += std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n";
-        if (!m_writer.is_object_start_str_empty()) {
-            m_writer.set_object_start_str("");
+        if (this->config().gcode_flavor == gcfKlipper) {
+            if (!m_writer.is_object_start_str_empty()) {
+                m_writer.set_object_start_str("");
+            } else {
+                m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n");
+            }
         } else {
-            m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n");
+            gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
+                     " copy " + std::to_string(print_instance.instance_id) + "\n";
         }
     }
         
