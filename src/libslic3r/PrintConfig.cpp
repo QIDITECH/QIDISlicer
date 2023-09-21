@@ -1366,16 +1366,24 @@ void PrintConfigDef::init_fff_params()
     def->set_default_value(new ConfigOptionFloatOrPercent(30, false));
 
     //B36
-    // def = this->add("first_layer_travel_speed", coFloatOrPercent);
-    // def->label = L("First layer travel speed");
-    // def->tooltip = L("If expressed as absolute value in mm/s, this speed will be applied to all the print moves "
-    //                "of the first layer, regardless of their type. If expressed as a percentage "
-    //                "(for example: 40%) it will scale the default speeds.");
-    // def->sidetext = L("mm/s or %");
-    // def->min = 0;
-    // def->max_literal = 20;
-    // def->mode = comAdvanced;
-    // def->set_default_value(new ConfigOptionFloatOrPercent(200, false));
+    def           = this->add("first_layer_travel_speed", coFloat);
+    def->label    = L("First layer travel");
+    def->tooltip  = L("Speed for travel moves (jumps between distant extrusion points).");
+    def->sidetext = L("mm/s");
+    def->aliases  = {"travel_feed_rate"};
+    def->min      = 1;
+    def->mode     = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(130));
+
+    //B37
+    def           = this->add("first_layer_external_perimeter_speed", coFloat);
+    def->label    = L("First layer external perimeters");
+    def->tooltip  = L("Speed for travel moves (jumps between distant extrusion points).");
+    def->sidetext = L("mm/s");
+    def->aliases  = {"travel_feed_rate"};
+    def->min      = 1;
+    def->mode     = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(130));
 
 
     def = this->add("first_layer_speed_over_raft", coFloatOrPercent);

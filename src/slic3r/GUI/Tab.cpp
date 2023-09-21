@@ -1574,6 +1574,10 @@ void TabPrint::build()
         optgroup = page->new_optgroup(L("Modifiers"));
         optgroup->append_single_option_line("first_layer_speed");
         optgroup->append_single_option_line("first_layer_speed_over_raft");
+        //B36
+        optgroup->append_single_option_line("first_layer_travel_speed");
+        //B37
+        optgroup->append_single_option_line("first_layer_external_perimeter_speed");
 
         optgroup = page->new_optgroup(L("Acceleration control (advanced)"));
         optgroup->append_single_option_line("external_perimeter_acceleration");

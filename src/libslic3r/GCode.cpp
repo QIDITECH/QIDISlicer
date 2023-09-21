@@ -276,7 +276,6 @@ namespace Slic3r {
                 deretraction_str = gcodegen.unretract();
         }
 
-        
 
 
         // Insert the toolchange and deretraction gcode into the generated gcode.
@@ -1487,6 +1486,8 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
 
     // Write end commands to file.
     file.write(this->retract());
+
+
     file.write(m_writer.set_fan(0));
 
     // adds tag for processor
@@ -2215,6 +2216,9 @@ LayerResult GCode::process_layer(
     bool                 first_layer   = layer.id() == 0;
     unsigned int         first_extruder_id = layer_tools.extruders.front();
 
+    //B36
+    m_writer.set_is_first_layer(first_layer);
+
     // Initialize config with the 1st object to be printed at this layer.
     m_config.apply(layer.object()->config(), true);
 
@@ -2453,6 +2457,8 @@ void GCode::process_layer_single_object(
                     else
                         ++ object_id;
                 gcode += std::string("; printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) + " copy " + std::to_string(print_instance.instance_id) + "\n";
+                //B38
+                gcode += std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n";
             }
         }
     };
@@ -2625,8 +2631,14 @@ void GCode::process_layer_single_object(
                 }
             }
         }
-    if (! first && this->config().gcode_label_objects)
-        gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) + " copy " + std::to_string(print_instance.instance_id) + "\n";
+
+    if (!first && this->config().gcode_label_objects) {
+        gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
+                 " copy " + std::to_string(print_instance.instance_id) + "\n";
+        //B38
+        gcode += std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n";
+    }
+        
 }
 
 void GCode::apply_print_config(const PrintConfig &print_config)
@@ -2703,8 +2715,9 @@ std::string GCode::change_layer(coordf_t print_z)
         // Increment a progress bar indicator.
         gcode += m_writer.update_progress(++ m_layer_index, m_layer_count);
     coordf_t z = print_z + m_config.z_offset.value;  // in unscaled coordinates
-    if (EXTRUDER_CONFIG(retract_layer_change) && m_writer.will_move_z(z))
+    if (EXTRUDER_CONFIG(retract_layer_change) && m_writer.will_move_z(z)) {
         gcode += this->retract();
+    }
 
     {
         std::ostringstream comment;
@@ -2998,6 +3011,7 @@ std::string GCode::_extrude(const ExtrusionPath &path, const std::string_view de
         gcode += this->travel_to(path.first_point(), path.role(), comment);
     }
 
+
     // compensate retraction
     gcode += this->unretract();
 
@@ -3057,8 +3071,9 @@ std::string GCode::_extrude(const ExtrusionPath &path, const std::string_view de
     }
     if (m_volumetric_speed != 0. && speed == 0)
         speed = m_volumetric_speed / path.mm3_per_mm;
+    //B37
     if (this->on_first_layer())
-        speed = m_config.get_abs_value("first_layer_speed", speed);
+        speed = path.role() == ExtrusionRole::ExternalPerimeter ? m_config.get_abs_value("first_layer_external_perimeter_speed") : m_config.get_abs_value("first_layer_speed", speed);
     else if (this->object_layer_over_raft())
         speed = m_config.get_abs_value("first_layer_speed_over_raft", speed);
     if (m_config.max_volumetric_speed.value > 0) {
@@ -3295,6 +3310,7 @@ std::string GCode::travel_to(const Point &point, ExtrusionRole role, std::string
     } else
         // Reset the wipe path when traveling, so one would not wipe along an old path.
         m_wipe.reset_path();
+
 
     // use G1 because we rely on paths being straight (G0 may make round paths)
     if (travel.size() >= 2) {

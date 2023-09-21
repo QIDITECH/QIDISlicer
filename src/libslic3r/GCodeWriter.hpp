@@ -24,6 +24,8 @@ public:
         //B24
         m_last_volume_temperature(0), m_last_volume_temperature_reached(true), 
         m_lifted(0)
+        //B36
+        , m_is_first_layer(true)
         {}
     Extruder*            extruder()             { return m_extruder; }
     const Extruder*      extruder()     const   { return m_extruder; }
@@ -96,6 +98,19 @@ public:
     // Keeping the state is left to the CoolingBuffer, which runs asynchronously on another thread.
     std::string set_fan(unsigned int speed) const;
 
+    //B36
+    void set_is_first_layer(bool bval) { m_is_first_layer = bval; }
+
+    //B38
+    //void set_object_start_str(std::string start_string) { m_gcode_label_objects_start = start_string; }
+    //bool empty_object_start_str() { return m_gcode_label_objects_start.empty(); }
+    //void set_object_end_str(std::string end_string) { m_gcode_label_objects_end = end_string; }
+    //bool empty_object_end_str() { return m_gcode_label_objects_end.empty(); }
+    //void add_object_start_labels(std::string &gcode);
+    //void add_object_end_labels(std::string &gcode);
+    //void add_object_change_labels(std::string &gcode);
+
+
 private:
 	// Extruders are sorted by their ID, so that binary search is possible.
     std::vector<Extruder> m_extruders;
@@ -116,6 +131,13 @@ private:
     bool            m_last_volume_temperature_reached;
     double          m_lifted;
     Vec3d           m_pos = Vec3d::Zero();
+
+    //B36
+    bool m_is_first_layer = true;
+
+    ////B38
+    //std::string m_gcode_label_objects_start;
+    //std::string m_gcode_label_objects_end;
 
     enum class Acceleration {
         Travel,
