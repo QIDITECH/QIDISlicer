@@ -570,8 +570,8 @@ std::string GCodeWriter::set_fan(const GCodeFlavor gcode_flavor, bool gcode_comm
         case gcfSailfish:
             gcode << "M127";    break;
         default:
-            //B15 //B25
-            gcode << "M107\nM106 P2 S0\nM106 P3 S0";    break;
+            //B15 //B25 //B39
+            gcode << "M107\nM106 P2 S0";    break;
         }
         if (gcode_comments)
             gcode << " ; disable fan";

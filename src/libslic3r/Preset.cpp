@@ -487,7 +487,7 @@ static std::vector<std::string> s_Preset_print_options {
     //B36
     ,"first_layer_travel_speed"
     //B37
-    ,"first_layer_external_perimeter_speed"
+    ,"first_layer_infill_speed"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

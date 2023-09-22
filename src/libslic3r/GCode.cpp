@@ -1496,7 +1496,8 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
 
 
     file.write(m_writer.set_fan(0));
-
+    //B39
+    file.write("M106 P3 S0\n");
     // adds tag for processor
     file.write_format(";%s%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Role).c_str(), gcode_extrusion_role_to_string(GCodeExtrusionRole::Custom).c_str());
 
@@ -3097,7 +3098,11 @@ std::string GCode::_extrude(const ExtrusionPath &path, const std::string_view de
         speed = m_volumetric_speed / path.mm3_per_mm;
     //B37
     if (this->on_first_layer())
-        speed = path.role() == ExtrusionRole::ExternalPerimeter ? m_config.get_abs_value("first_layer_external_perimeter_speed") : m_config.get_abs_value("first_layer_speed", speed);
+        speed = path.role() == ExtrusionRole::InternalInfill ?
+            m_config.get_abs_value("first_layer_infill_speed") : 
+            path.role() == ExtrusionRole::SolidInfill ?
+            m_config.get_abs_value("first_layer_infill_speed") :
+            m_config.get_abs_value("first_layer_speed", speed);
     else if (this->object_layer_over_raft())
         speed = m_config.get_abs_value("first_layer_speed_over_raft", speed);
     if (m_config.max_volumetric_speed.value > 0) {

@@ -735,7 +735,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     //B36
     ((ConfigOptionFloat, first_layer_travel_speed))
     //B37
-    ((ConfigOptionFloat, first_layer_external_perimeter_speed))
+    ((ConfigOptionFloat, first_layer_infill_speed))
 
     ((ConfigOptionFloat,               travel_speed_z))
     ((ConfigOptionBool,                use_firmware_retraction))

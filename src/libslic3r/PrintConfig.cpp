@@ -1384,17 +1384,17 @@ void PrintConfigDef::init_fff_params()
     def->aliases  = {"travel_feed_rate"};
     def->min      = 1;
     def->mode     = comAdvanced;
-    def->set_default_value(new ConfigOptionFloat(130));
+    def->set_default_value(new ConfigOptionFloat(50));
 
     //B37
-    def           = this->add("first_layer_external_perimeter_speed", coFloat);
-    def->label    = L("First layer external perimeters");
-    def->tooltip  = L("Speed for external perimeters of the first layer (jumps between distant extrusion points).");
+    def           = this->add("first_layer_infill_speed", coFloat);
+    def->label    = L("First layer infill");
+    def->tooltip  = L("Speed for infill of the first layer (jumps between distant extrusion points).");
     def->sidetext = L("mm/s");
-    def->aliases  = {"external_perimeter_speed"};
+    def->aliases  = {"infill_speed"};
     def->min      = 1;
     def->mode     = comAdvanced;
-    def->set_default_value(new ConfigOptionFloat(130));
+    def->set_default_value(new ConfigOptionFloat(50));
 
 
     def = this->add("first_layer_speed_over_raft", coFloatOrPercent);
