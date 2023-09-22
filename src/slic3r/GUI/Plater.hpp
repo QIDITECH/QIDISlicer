@@ -177,6 +177,7 @@ public:
     void calib_pa_tower(const double StartPA, double EndPA, double PAStep);
     void calib_flowrate_coarse();
     void calib_flowrate_fine(const double target_extrusion_multiplier);
+    std::string move_to(const Vec2d &point, double speed, double retract_length, double retract_speed, double height, double retract_lift);
     std::string move_to(const Vec2d &point, double speed, double retract_length, double retract_speed);
     std::string move_to(const Vec2d &point, double speed, double e);
     std::string move_to(double height);

@@ -5494,7 +5494,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     const double line_long  = 40;
     double       pa_layer_height                       = print_config->get_abs_value("layer_height");
     double       nozzle_diameter                       = double(printer_config->opt_float("nozzle_diameter", 0));
-    double pa_line_width                               = print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height) == 0 ?
+    double       pa_line_width                         = print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height) == 0 ?
                                                             print_config->get_abs_value("extrusion_width", pa_layer_height) == 0 ?
                                                             nozzle_diameter * 1.125 :
                                                             print_config->get_abs_value("extrusion_width", pa_layer_height) :
@@ -5611,6 +5611,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     const double speed_fast                            = print_config->get_abs_value("external_perimeter_speed") * 60;
     const double speed_first_layer                     = print_config->get_abs_value("first_layer_speed", speed_perimeter) * 60;
 
+    double retract_lift   = double(printer_config->opt_float("retract_lift", 0));
     double retract_length = double(printer_config->opt_float("retract_length", 0));
     double retract_speed  = double(printer_config->opt_float("retract_speed", 0)) * 60;
 
@@ -5655,7 +5656,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     for (int n = 1; n <= count + 1; n++) {
         gcode << set_pressure_advance(StartPA + (n - 1) * PAStep);
         for (int i = 0; i < 3; i++) {
-            gcode << move_to(Vec2d(start_x + 3 * line_spacing, start_y - (step_spacing * n) - i * line_spacing), pa_travel_speed, retract_length, retract_speed);
+            gcode << move_to(Vec2d(start_x + 3 * line_spacing, start_y - (step_spacing * n) - i * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height, retract_lift);
             gcode << move_to(Vec2d(start_x + m_wall_side_length / 2,
                                    start_y - (step_spacing * n) - m_wall_side_length / 2 + 3 * line_spacing - i * line_spacing),
                              speed_first_layer, (m_wall_side_length - 6 * line_spacing) / 1.4142 * e_per_mm);
@@ -5668,7 +5669,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
         for (int n = 1; n <= count + 1; n++) {
             gcode << set_pressure_advance(StartPA + (n - 1) * PAStep);
             for (int i = 0; i < 3; i++) {
-                gcode << move_to(Vec2d(start_x , start_y - (step_spacing * n) - (i - 3) * line_spacing), pa_travel_speed, retract_length, retract_speed);
+                gcode << move_to(Vec2d(start_x , start_y - (step_spacing * n) - (i - 3) * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height * m, retract_lift);
                 gcode << move_to(Vec2d(start_x + m_wall_side_length / 2,
                                        start_y - (step_spacing * n) - m_wall_side_length / 2 + 3 * line_spacing - i * line_spacing),
                                  speed_fast, (m_wall_side_length) / 1.4142 * e_per_mm);
@@ -5727,6 +5728,17 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
 }
 //B34
+std::string Plater::move_to(const Vec2d &point, double speed, double retract_length, double retract_speed, double height, double retract_lift)
+{
+    std::stringstream gcode;
+    gcode << "\nG1 E" << -1 * retract_length << " F" << retract_speed;
+    gcode << "\nG0 Z" << height + retract_lift << " F600";
+    gcode << "\nG0 X" << point(0) << " Y" << point(1) << " F" <<speed;
+    gcode << "\nG0 Z" << height << " F600";
+    gcode << "\nG1 E" << retract_length << " F" << retract_speed;
+    return gcode.str();
+}
+
 std::string Plater::move_to(const Vec2d &point, double speed, double retract_length, double retract_speed)
 {
     std::stringstream gcode;
