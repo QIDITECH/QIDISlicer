@@ -516,7 +516,9 @@ static std::vector<std::string> s_Preset_filament_options {
     //B26
     "advance_pressure",
     //B26
-    "smooth_time"
+    "smooth_time",
+    //B39
+    "disable_rapid_cooling_fan_first_layers"
 };
 
 static std::vector<std::string> s_Preset_machine_limits_options {

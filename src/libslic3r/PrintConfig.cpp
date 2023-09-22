@@ -778,6 +778,17 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInts { 3 });
 
+    //B39
+    def = this->add("disable_rapid_cooling_fan_first_layers", coInts);
+    def->label = L("Disable rapid cooling fan for the first");
+    def->tooltip = L("You can set this to a positive value to disable rapid cooling fan at all "
+                   "during the first layers, so that it does not make adhesion worse.");
+    def->sidetext = L("layers");
+    def->min = 0;
+    def->max = 1000;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionInts { 3 });
+
     def = this->add("dont_support_bridges", coBool);
     def->label = L("Don't support bridges");
     def->category = L("Support material");
@@ -1368,7 +1379,7 @@ void PrintConfigDef::init_fff_params()
     //B36
     def           = this->add("first_layer_travel_speed", coFloat);
     def->label    = L("First layer travel");
-    def->tooltip  = L("Speed for travel moves (jumps between distant extrusion points).");
+    def->tooltip  = L("Speed for travel moves of the first layer (jumps between distant extrusion points).");
     def->sidetext = L("mm/s");
     def->aliases  = {"travel_feed_rate"};
     def->min      = 1;
@@ -1378,9 +1389,9 @@ void PrintConfigDef::init_fff_params()
     //B37
     def           = this->add("first_layer_external_perimeter_speed", coFloat);
     def->label    = L("First layer external perimeters");
-    def->tooltip  = L("Speed for travel moves (jumps between distant extrusion points).");
+    def->tooltip  = L("Speed for external perimeters of the first layer (jumps between distant extrusion points).");
     def->sidetext = L("mm/s");
-    def->aliases  = {"travel_feed_rate"};
+    def->aliases  = {"external_perimeter_speed"};
     def->min      = 1;
     def->mode     = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(130));

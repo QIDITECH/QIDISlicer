@@ -78,6 +78,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "default_acceleration",
         "deretract_speed",
         "disable_fan_first_layers",
+        //B39
+        "disable_rapid_cooling_fan_first_layers",
         "duplicate_distance",
         "end_gcode",
         "end_filament_gcode",

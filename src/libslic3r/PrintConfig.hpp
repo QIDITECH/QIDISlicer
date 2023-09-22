@@ -788,6 +788,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               enable_auxiliary_fan))     
     ((ConfigOptionFloat,              default_acceleration))
     ((ConfigOptionInts,               disable_fan_first_layers))
+    //B39
+    ((ConfigOptionInts,               disable_rapid_cooling_fan_first_layers))
     ((ConfigOptionEnum<DraftShield>,  draft_shield))
     ((ConfigOptionFloat,              duplicate_distance))
     ((ConfigOptionFloat,              external_perimeter_acceleration))

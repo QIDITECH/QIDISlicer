@@ -2104,6 +2104,8 @@ void TabFilament::build()
         //B25
         optgroup->append_single_option_line("enable_volume_fan", category_path + "fan-settings");
         optgroup->append_single_option_line("disable_fan_first_layers", category_path + "fan-settings");
+        //B39
+        optgroup->append_single_option_line("disable_rapid_cooling_fan_first_layers", category_path + "fan-settings");
         optgroup->append_single_option_line("full_fan_speed_layer", category_path + "fan-settings");
 
         optgroup = page->new_optgroup(L("Dynamic fan speeds"), 25);
