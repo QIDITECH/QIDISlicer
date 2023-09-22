@@ -320,7 +320,10 @@ std::string GCodeWriter::travel_to_xy(const Vec2d &point, const std::string &com
     
     GCodeG1Formatter w;
     w.emit_xy(point);
-    w.emit_f(this->config.travel_speed.value * 60.0);
+    //B36
+    auto speed = m_is_first_layer ? this->config.get_abs_value("first_layer_travel_speed") :
+                                    this->config.travel_speed.value;
+    w.emit_f(speed * 60.0);
     w.emit_comment(this->config.gcode_comments, comment);
     return w.string();
 }
@@ -595,6 +598,31 @@ std::string GCodeWriter::set_fan(unsigned int speed) const
 {
     return GCodeWriter::set_fan(this->config.gcode_flavor, this->config.gcode_comments, speed);
 }
+
+
+//B38
+void GCodeWriter::add_object_start_labels(std::string &gcode)
+{
+    if (!m_gcode_label_objects_start.empty()) {
+        gcode += m_gcode_label_objects_start;
+        m_gcode_label_objects_start = "";
+    }
+}
+
+void GCodeWriter::add_object_end_labels(std::string &gcode)
+{
+    if (!m_gcode_label_objects_end.empty()) {
+        gcode += m_gcode_label_objects_end;
+        m_gcode_label_objects_end = "";
+    }
+}
+
+void GCodeWriter::add_object_change_labels(std::string &gcode)
+{
+    add_object_end_labels(gcode);
+    add_object_start_labels(gcode);
+}
+
 
 void GCodeFormatter::emit_axis(const char axis, const double v, size_t digits) {
     assert(digits <= 9);

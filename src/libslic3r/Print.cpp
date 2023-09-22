@@ -222,6 +222,10 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "travel_speed"
             || opt_key == "travel_speed_z"
             || opt_key == "first_layer_speed"
+            //B36
+            || opt_key == "first_layer_travel_speed"
+            //B37
+            || opt_key == "first_layer_external_perimeter_speed"
             || opt_key == "z_offset") {
             steps.emplace_back(psWipeTower);
             steps.emplace_back(psSkirtBrim);
