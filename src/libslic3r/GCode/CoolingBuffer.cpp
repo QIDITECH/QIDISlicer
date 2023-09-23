@@ -39,6 +39,9 @@ void CoolingBuffer::reset(const Vec3d &position)
     m_current_pos[2] = float(position.z());
     m_current_pos[4] = float(m_config.travel_speed.value);
     m_fan_speed = -1;
+//Y12
+    m_fan_speed = -1;
+    m_fan_speed = -1;
 }
 
 struct CoolingLine
@@ -807,15 +810,23 @@ std::string CoolingBuffer::apply_layer_cooldown(
         }
         //B15 //B39
         if (int(layer_id) == disable_rapid_cooling_fan_first_layers) {
-            std::ostringstream fan_gcode;
-            fan_gcode << "M106 P2 S" << 255.0 * enable_auxiliary_fan / 100.0 << "\n";
-            new_gcode += fan_gcode.str();
+            int auxiliary_fan_speed_new = 255 * enable_auxiliary_fan / 100;
+            if (auxiliary_fan_speed_new != m_auxiliary_fan_speed) {
+                std::ostringstream fan_gcode;
+                m_auxiliary_fan_speed = auxiliary_fan_speed_new;
+                fan_gcode << "M106 P2 S" << auxiliary_fan_speed_new << "\n";
+                new_gcode += fan_gcode.str();
+            }
         }
         //B25
         if (int(layer_id) == disable_fan_first_layers) {
-            std::ostringstream fan_gcode;
-            fan_gcode << "M106 P3 S" << 255.0 * enable_volume_fan / 100.0 << "\n";
-            new_gcode += fan_gcode.str();
+            int volume_fan_speed_new = 255 * enable_volume_fan / 100;
+            if (volume_fan_speed_new != m_volume_fan_speed) {
+                std::ostringstream fan_gcode;
+                m_volume_fan_speed = volume_fan_speed_new;
+                fan_gcode << "M106 P3 S" << volume_fan_speed_new << "\n";
+                new_gcode += fan_gcode.str();
+            }
         }
 
         if (fan_speed_new != m_fan_speed) {
