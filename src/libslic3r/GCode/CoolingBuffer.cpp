@@ -758,11 +758,6 @@ std::string CoolingBuffer::apply_layer_cooldown(
         int enable_volume_fan = EXTRUDER_CONFIG(enable_volume_fan);
         int fan_speed_new = EXTRUDER_CONFIG(fan_always_on) ? min_fan_speed : 0;
 
-        //B26
-        bool enable_advance_pressure = EXTRUDER_CONFIG(enable_advance_pressure);
-        float advance_pressure = float(EXTRUDER_CONFIG(advance_pressure));
-        float smooth_time = float(EXTRUDER_CONFIG(smooth_time));
-
         std::pair<int, int> custom_fan_speed_limits{fan_speed_new, 100 };
         int disable_fan_first_layers = EXTRUDER_CONFIG(disable_fan_first_layers);
 
@@ -811,7 +806,7 @@ std::string CoolingBuffer::apply_layer_cooldown(
             custom_fan_speed_limits.second = 0;
         }
         //B15 //B39
-        if (int(layer_id) == disable_rapid_cooling_fan_first_layers  && enable_auxiliary_fan!=0) {
+        if (int(layer_id) == disable_rapid_cooling_fan_first_layers) {
             std::ostringstream fan_gcode;
             fan_gcode << "M106 P2 S" << 255.0 * enable_auxiliary_fan / 100.0 << "\n";
             new_gcode += fan_gcode.str();
@@ -821,12 +816,6 @@ std::string CoolingBuffer::apply_layer_cooldown(
             std::ostringstream fan_gcode;
             fan_gcode << "M106 P3 S" << 255.0 * enable_volume_fan / 100.0 << "\n";
             new_gcode += fan_gcode.str();
-        }
-        //B26
-        if (enable_advance_pressure &&  fan_speed_new != m_fan_speed) {
-            std::ostringstream pressure_advance_gcode;
-            pressure_advance_gcode << "M900 K" << advance_pressure << " T" << smooth_time << "\n";
-            new_gcode += pressure_advance_gcode.str();
         }
 
         if (fan_speed_new != m_fan_speed) {

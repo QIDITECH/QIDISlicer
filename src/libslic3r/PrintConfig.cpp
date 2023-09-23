@@ -1381,7 +1381,6 @@ void PrintConfigDef::init_fff_params()
     def->label    = L("First layer travel");
     def->tooltip  = L("Speed for travel moves of the first layer (jumps between distant extrusion points).");
     def->sidetext = L("mm/s");
-    def->aliases  = {"travel_feed_rate"};
     def->min      = 1;
     def->mode     = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(50));
@@ -1391,7 +1390,6 @@ void PrintConfigDef::init_fff_params()
     def->label    = L("First layer infill");
     def->tooltip  = L("Speed for infill of the first layer (jumps between distant extrusion points).");
     def->sidetext = L("mm/s");
-    def->aliases  = {"infill_speed"};
     def->min      = 1;
     def->mode     = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(50));

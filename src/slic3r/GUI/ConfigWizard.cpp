@@ -1480,7 +1480,7 @@ PageDownloader::PageDownloader(ConfigWizard* parent)
 
         const wxString link = format_wxstr("<a href = \"%1%\">%1%</a>", "qidi3d.com");
 
-        const wxString main_text = format_wxstr(_L("You can get more information about the printer from the %1% "
+        const wxString main_text = format_wxstr(_L("You can get more information about the printer and %2% from the %1%."
         ), link, SLIC3R_APP_NAME);
 
         const wxFont& font = this->GetFont();
