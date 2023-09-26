@@ -48,7 +48,7 @@ PresetBundle::PresetBundle() :
     // The following keys are handled by the UI, they do not have a counterpart in any StaticPrintConfig derived classes,
     // therefore they need to be handled differently. As they have no counterpart in StaticPrintConfig, they are not being
     // initialized based on PrintConfigDef(), but to empty values (zeros, empty vectors, empty strings).
-    //
+    
     // "compatible_printers", "compatible_printers_condition", "inherits",
     // "print_settings_id", "filament_settings_id", "printer_settings_id", "printer_settings_id"
     // "printer_vendor", "printer_model", "printer_variant", "default_print_profile", "default_filament_profile"
@@ -1679,8 +1679,15 @@ void PresetBundle::update_multi_material_filament_presets()
     auto   *nozzle_diameter = static_cast<const ConfigOptionFloats*>(printers.get_edited_preset().config.option("nozzle_diameter"));
     size_t  num_extruders   = nozzle_diameter->values.size();
     // Verify validity of the current filament presets.
-    for (size_t i = 0; i < std::min(this->extruders_filaments.size(), num_extruders); ++i)
-        this->extruders_filaments[i].select_filament(this->filaments.find_preset(this->extruders_filaments[i].get_selected_preset_name(), true)->name);
+    //B40
+    for (size_t i = 0; i < std::min(this->extruders_filaments.size(), num_extruders); ++i) {
+        this->extruders_filaments[i].select_filament(this->filaments
+                                                         .find_preset(this->filaments.get_selected_idx() == size_t(-1) ?
+                                                                          this->filaments.first_visible().name :
+                                                                          this->extruders_filaments[i].get_selected_preset_name(),
+                                                                      true)
+                                                         ->name);
+    }
 
     if (this->extruders_filaments.size() > num_extruders)
         this->extruders_filaments.resize(num_extruders);

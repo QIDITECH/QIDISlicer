@@ -1215,15 +1215,27 @@ Preset* PresetCollection::find_preset(const std::string &name, bool first_visibl
 }
 
 // Return index of the first visible preset. Certainly at least the '- default -' preset shall be visible.
+//B40
 size_t PresetCollection::first_visible_idx() const
 {
-    size_t idx = m_default_suppressed ? m_num_default_presets : 0;
-    for (; idx < m_presets.size(); ++ idx)
-        if (m_presets[idx].is_visible)
-            break;
-    if (idx == m_presets.size())
-        idx = 0;
-    return idx;
+    size_t first_visible = -1;
+    size_t idx           = m_default_suppressed ? m_num_default_presets : 0;
+    for (; idx < m_presets.size(); ++idx)
+        if (m_presets[idx].is_visible) {
+            if (first_visible == -1)
+                first_visible = idx;
+            if (m_type != Preset::TYPE_FILAMENT)
+                break;
+            else {
+                if (m_presets[idx].name.find("PLA") != std::string::npos) {
+                    first_visible = idx;
+                    break;
+                }
+            }
+        }
+    if (first_visible == -1)
+        first_visible = 0;
+    return first_visible;
 }
 
 void PresetCollection::set_default_suppressed(bool default_suppressed)
