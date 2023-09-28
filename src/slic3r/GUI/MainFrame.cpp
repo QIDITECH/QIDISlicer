@@ -1601,7 +1601,7 @@ void MainFrame::init_menubar_as_editor()
         //calibrationMenu->AppendSubMenu(flowrateMenu, _L("Flow rate"));
         append_submenu(calibrationMenu, flowrateMenu, wxID_ANY, _L("Flow rate"), "");
 
-        append_menu_item(calibrationMenu, wxID_ANY, _L("Pressure advance"), _L("Pressure advance"),
+        append_menu_item(calibrationMenu, wxID_ANY, _L("Pressure Advance"), _L("Pressure Advance"),
             [this](wxCommandEvent &) {
                 m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
                 m_pa_calib_dlg->ShowModal();

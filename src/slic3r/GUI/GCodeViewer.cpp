@@ -709,7 +709,8 @@ void GCodeViewer::init()
             break;
         }
         }
-
+//Y13
+        set_toolpath_move_type_visible(EMoveType::Seam, true);
         set_toolpath_move_type_visible(EMoveType::Extrude, true);
     }
 
