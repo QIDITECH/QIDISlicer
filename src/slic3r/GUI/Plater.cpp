@@ -5463,10 +5463,10 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     p->set_project_filename("PA Line");
 
     // Check step count
-    double      interval     = 4.62;
+    double      step_spacing = 4.62;
     const Vec2d plate_center = build_volume().bed_center();
-    double      count        = floor((EndPA - StartPA) / PAStep);
-    double      max_count    = floor(plate_center.y() / interval *2) - 2;
+    int         count        = int((EndPA - StartPA) / PAStep);
+    int         max_count    = int(plate_center.y() / step_spacing * 2) - 4;
     if (count > max_count) {
         count = max_count;
     }
@@ -5476,22 +5476,15 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     DynamicPrintConfig *printer_config  = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     DynamicPrintConfig  new_config;
 
-    // Position aided model
-    sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
-    sidebar().obj_manipul()->set_uniform_scaling(false);
-    sidebar().obj_manipul()->on_change("size", 1, count * interval);
-    double pa_first_layer_height = print_config->get_abs_value("first_layer_height");
-    sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
-    sidebar().obj_manipul()->set_uniform_scaling(true);
-
     //B34 Get parameter
     double       start_x = plate_center.x() - 40;
-    double       start_y = plate_center.y() - count * interval / 2;
-    const double speed_fast = print_config->get_abs_value("external_perimeter_speed") * 60;
-    const double speed_slow = speed_fast * 0.8;
-    const double external_perimeter_acceleration       = print_config->get_abs_value("external_perimeter_acceleration");
+    double       start_y = plate_center.y() - count * step_spacing / 2;
+    const double speed_fast = 7200;
+    const double speed_slow = 1200;
     const double line_short = 20;
     const double line_long  = 40;
+    const double external_perimeter_acceleration       = print_config->get_abs_value("external_perimeter_acceleration");
+    double       pa_first_layer_height                 = print_config->get_abs_value("first_layer_height");
     double       pa_layer_height                       = print_config->get_abs_value("layer_height");
     double       nozzle_diameter                       = double(printer_config->opt_float("nozzle_diameter", 0));
     double       pa_line_width                         = print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height) == 0 ?
@@ -5499,7 +5492,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
                                                             nozzle_diameter * 1.125 :
                                                             print_config->get_abs_value("extrusion_width", pa_layer_height) :
                                                             print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height);
-    double       pa_travel_speed = print_config->get_abs_value("travel_speed") * 60;
+    double       pa_travel_speed = print_config->get_abs_value("first_layer_travel_speed") * 60;
     double       retract_length                        = double(printer_config->opt_float("retract_length", 0));
     double       retract_speed                         = double(printer_config->opt_float("retract_speed", 0)) * 60;
 
@@ -5510,32 +5503,42 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
 
     const double e_per_mm = line_flow.mm3_per_mm() / filament_area * print_flow_ratio;
 
-    std::string num_str = double_to_str(StartPA + (count-1) * PAStep) ;
-    for (int i = 1; i < count/2; i++) {
-        num_str += "\n" + double_to_str(StartPA + (count - 1 - i * 2) * PAStep) ;
-    }
-    add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y()));
+    // Position aided model
+    sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
+    sidebar().obj_manipul()->set_uniform_scaling(false);
+    sidebar().obj_manipul()->on_change("size", 1, count * step_spacing + pa_line_width);
+    sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
+    sidebar().obj_manipul()->set_uniform_scaling(true);
 
+    std::string num_str = double_to_str(StartPA + PAStep);
+    for (int i = 1; i < count/2; i++) {
+        num_str = double_to_str(StartPA + (2 * i + 1) * PAStep) + "\n" + num_str;
+    }
+    if (count % 2 == 0)
+        add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y()));
+    else
+        add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y() - step_spacing / 2));
 
     std::stringstream gcode;
+    gcode << "\n;WIDTH:" << pa_line_width;
     gcode << set_pa_acceleration(external_perimeter_acceleration);
     gcode << move_to(Vec2d(start_x + 80, start_y), pa_travel_speed, retract_length, retract_speed);
     gcode << move_to(pa_layer_height);
-    gcode << move_to(Vec2d(start_x + 80, start_y + count * interval), speed_fast, count * interval * e_per_mm);
+    gcode << move_to(Vec2d(start_x + 80, start_y + count * step_spacing), 3000, count * step_spacing * e_per_mm);
 
     for (int i = 0; i <= count; i++) {
         gcode << set_pressure_advance(StartPA + i * PAStep);
-        gcode << move_to(Vec2d(start_x, start_y + i * interval), pa_travel_speed, retract_length, retract_speed);
-        gcode << move_to(Vec2d(start_x + line_short, start_y + i * interval), speed_slow, line_short * e_per_mm);
-        gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + i * interval), speed_fast, line_long * e_per_mm);
-        gcode << move_to(Vec2d(start_x + line_short + line_long + line_short, start_y + i * interval), speed_slow, line_short * e_per_mm);
+        gcode << move_to(Vec2d(start_x, start_y + i * step_spacing), pa_travel_speed, retract_length, retract_speed);
+        gcode << move_to(Vec2d(start_x + line_short, start_y + i * step_spacing), speed_slow, line_short * e_per_mm);
+        gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + i * step_spacing), speed_fast, line_long * e_per_mm);
+        gcode << move_to(Vec2d(start_x + line_short + line_long + line_short, start_y + i * step_spacing), speed_slow, line_short * e_per_mm);
     }
 
     gcode << set_pressure_advance(0);
-    gcode << move_to(Vec2d(start_x + line_short, start_y + count * interval + 1), pa_travel_speed, retract_length, retract_speed);
-    gcode << move_to(Vec2d(start_x + line_short, start_y + count * interval + 3), speed_fast, 2 * e_per_mm);
-    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * interval + 1), pa_travel_speed, retract_length, retract_speed);
-    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * interval + 3), speed_fast, 2 * e_per_mm);
+    gcode << move_to(Vec2d(start_x + line_short, start_y + count * step_spacing + 1), pa_travel_speed, retract_length, retract_speed);
+    gcode << move_to(Vec2d(start_x + line_short, start_y + count * step_spacing + 3), speed_fast, 2 * e_per_mm);
+    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * step_spacing + 1), pa_travel_speed, retract_length, retract_speed);
+    gcode << move_to(Vec2d(start_x + line_short + line_long, start_y + count * step_spacing + 3), speed_fast, 2 * e_per_mm);
     gcode << "\n";
 
     // Set and load end gcode
@@ -5566,7 +5569,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
 
     // Check step count
     const Vec2d plate_center = build_volume().bed_center();
-    double      count        = floor((EndPA - StartPA) / PAStep);
+    int   count              = int((EndPA - StartPA) / PAStep);
 
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
 
@@ -5574,7 +5577,6 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     DynamicPrintConfig  new_config;
     DynamicPrintConfig *printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     DynamicPrintConfig *print_config = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
-
 
     double pa_travel_speed                       = print_config->get_abs_value("travel_speed") * 60;
 
@@ -5585,28 +5587,25 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
                                 nozzle_diameter * 1.125 :
                                 print_config->get_abs_value("extrusion_width", pa_layer_height) :
                                 print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height);
-
     double       filament_diameter = double(printer_config->opt_float("filament_diameter", 0));
     const Flow   line_flow         = Flow(pa_line_width, pa_layer_height, nozzle_diameter);
     const double filament_area     = M_PI * std::pow(filament_diameter / 2, 2);
     const double print_flow_ratio  = double(printer_config->opt_float("extrusion_multiplier", 0));
-
-
     const double e_per_mm = line_flow.mm3_per_mm() / filament_area * print_flow_ratio;
-
     const double external_perimeter_acceleration = print_config->get_abs_value("external_perimeter_acceleration");
 
-
-    const double step_spacing                          = 4.62;
+    const double step_spacing = 4.62;
     double       line_spacing = pa_line_width - pa_layer_height * (1 - M_PI / 4);
-    const double m_wall_side_length{64.0};
-
-    double max_count = floor((plate_center.y() * 2 - 2 * line_spacing - m_wall_side_length / 2) / step_spacing) - 3;
+    double       line_spacing_xy = line_spacing * 1.4142;
+    const double pa_wall_length = 42 - line_spacing;
+    int max_count = int((plate_center.y() * 2 - pa_wall_length / 2) / step_spacing) - 4;
     if (count > max_count) {
         count = max_count;
     }
-    double       start_x                               = plate_center.x() - 40;
-    double       start_y                               = plate_center.y() + (count + 1) * step_spacing / 2 + m_wall_side_length / 4 + line_spacing;
+    const double pa_wall_width = (count + 1) * step_spacing + pa_wall_length / 2 + 3 * line_spacing;
+
+    double       start_x                               = plate_center.x() - pa_wall_length / 2;
+    double       start_y                               = plate_center.y() + pa_wall_width / 2;
     const double speed_perimeter                       = print_config->get_abs_value("perimeter_speed");
     const double speed_fast                            = print_config->get_abs_value("external_perimeter_speed") * 60;
     const double speed_first_layer                     = print_config->get_abs_value("first_layer_speed", speed_perimeter) * 60;
@@ -5616,24 +5615,28 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     double retract_speed  = double(printer_config->opt_float("retract_speed", 0)) * 60;
 
     // Position aided model
-    sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
+    sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 31);
     sidebar().obj_manipul()->set_uniform_scaling(false);
-    sidebar().obj_manipul()->on_change("size", 1, (count + 1) * step_spacing + m_wall_side_length / 2 + 2 * line_spacing);
+    sidebar().obj_manipul()->on_change("size", 1, pa_wall_width + line_spacing);
     double pa_first_layer_height = print_config->get_abs_value("first_layer_height");
     sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
     sidebar().obj_manipul()->set_uniform_scaling(true);
 
     //B34 Add Num
-    std::string num_str = double_to_str(StartPA + 1 * PAStep);
-    for (int i = 1; i < count / 2; i++) {
+    std::string num_str = double_to_str(StartPA + PAStep);
+    for (int i = 1; i < (count + 1) / 2; i++) {
         num_str += "\n" + double_to_str(StartPA + (1 + i * 2) * PAStep);
     }
 
-    add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y() + m_wall_side_length / 4));
+    if (count % 2 == 0)
+        add_num_text(num_str, Vec2d(plate_center.x() - 31, plate_center.y() + pa_wall_length / 4));
+    else
+        add_num_text(num_str, Vec2d(plate_center.x() - 31, plate_center.y() + pa_wall_length / 4 - step_spacing / 2));
 
     //B34 Generate Gcode
     std::stringstream gcode;
 
+    gcode << "\n;WIDTH:" << pa_line_width;
     gcode << set_pa_acceleration(external_perimeter_acceleration);
 
     gcode << move_to(Vec2d(start_x + 2 * line_spacing, start_y - 2 * line_spacing), pa_travel_speed, retract_length, retract_speed);
@@ -5641,27 +5644,24 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
 
     // Draw Box
     for (int i = 0; i < 3; i++) {
-        gcode << move_to(Vec2d(start_x + m_wall_side_length - (2 - i) * line_spacing, start_y - (2 - i) * line_spacing), speed_first_layer,
-                         (m_wall_side_length - 2 * (2 - i) * line_spacing) * e_per_mm);
-        gcode << move_to(Vec2d(start_x + m_wall_side_length - (2 - i) * line_spacing,
-                               start_y - (count + 1) * step_spacing - m_wall_side_length / 2 - i * line_spacing),
-                         speed_first_layer, ((count + 1) * step_spacing + m_wall_side_length / 2 - 2 * (1 - i) * line_spacing) * e_per_mm);
-        gcode << move_to(Vec2d(start_x + (2 - i) * line_spacing,
-                               start_y - (count + 1) * step_spacing - m_wall_side_length / 2 - i * line_spacing),
-                         speed_first_layer, (m_wall_side_length - 2 * (2 - i) * line_spacing) * e_per_mm);
-        gcode << move_to(Vec2d(start_x + (2 - i) * line_spacing, start_y - (1 - i) * line_spacing), speed_first_layer,
-                         ((count + 1) * step_spacing + m_wall_side_length / 2 - 2 * (1 - i) * line_spacing) * e_per_mm);
+        gcode << move_to(Vec2d(start_x + pa_wall_length - (2 - i) * line_spacing, start_y - (2 - i) * line_spacing),
+                         speed_first_layer, (pa_wall_length - 2 * (2 - i) * line_spacing) * e_per_mm);
+        gcode << move_to(Vec2d(start_x + pa_wall_length - (2 - i) * line_spacing, start_y - pa_wall_width + (2 - i) * line_spacing),
+                         speed_first_layer, ((count + 1) * step_spacing + pa_wall_length / 2 - 2 * (1 - i) * line_spacing) * e_per_mm);
+        gcode << move_to(Vec2d(start_x + (2 - i) * line_spacing, start_y - pa_wall_width + (2 - i) * line_spacing),
+                         speed_first_layer, (pa_wall_length - 2 * (2 - i) * line_spacing) * e_per_mm);
+        gcode << move_to(Vec2d(start_x + (2 - i) * line_spacing, start_y - (1 - i) * line_spacing),
+                         speed_first_layer, ((count + 1) * step_spacing + pa_wall_length / 2 - 2 * (1 - i) * line_spacing) * e_per_mm);
     }
     // Draw Line
     for (int n = 1; n <= count + 1; n++) {
         gcode << set_pressure_advance(StartPA + (n - 1) * PAStep);
         for (int i = 0; i < 3; i++) {
-            gcode << move_to(Vec2d(start_x + 3 * line_spacing, start_y - (step_spacing * n) - i * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height, retract_lift);
-            gcode << move_to(Vec2d(start_x + m_wall_side_length / 2,
-                                   start_y - (step_spacing * n) - m_wall_side_length / 2 + 3 * line_spacing - i * line_spacing),
-                             speed_first_layer, (m_wall_side_length - 6 * line_spacing) / 1.4142 * e_per_mm);
-            gcode << move_to(Vec2d(start_x + m_wall_side_length - 3 * line_spacing, start_y - (step_spacing * n) - i * line_spacing),
-                             speed_first_layer, (m_wall_side_length - 6 * line_spacing) / 1.4142 * e_per_mm);
+            gcode << move_to(Vec2d(start_x + 3 * line_spacing, start_y - n * step_spacing - i * line_spacing_xy), pa_travel_speed, retract_length, retract_speed, pa_layer_height, retract_lift);
+            gcode << move_to(Vec2d(start_x + pa_wall_length / 2, start_y - n * step_spacing - i * line_spacing_xy - pa_wall_length / 2 + 3 * line_spacing),
+                             speed_first_layer, (pa_wall_length - 6 * line_spacing) / 1.4142 * e_per_mm);
+            gcode << move_to(Vec2d(start_x + pa_wall_length - 3 * line_spacing, start_y - n * step_spacing - i * line_spacing_xy),
+                             speed_first_layer, (pa_wall_length - 6 * line_spacing) / 1.4142 * e_per_mm);
         }
     }
     for (int m = 2; m <= 4; m++) {
@@ -5669,15 +5669,15 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
         for (int n = 1; n <= count + 1; n++) {
             gcode << set_pressure_advance(StartPA + (n - 1) * PAStep);
             for (int i = 0; i < 3; i++) {
-                gcode << move_to(Vec2d(start_x , start_y - (step_spacing * n) - (i - 3) * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height * m, retract_lift);
-                gcode << move_to(Vec2d(start_x + m_wall_side_length / 2,
-                                       start_y - (step_spacing * n) - m_wall_side_length / 2 + 3 * line_spacing - i * line_spacing),
-                                 speed_fast, (m_wall_side_length) / 1.4142 * e_per_mm);
-                gcode << move_to(Vec2d(start_x + m_wall_side_length, start_y - (step_spacing * n) - (i - 3) * line_spacing), speed_fast,
-                                 (m_wall_side_length) / 1.4142 * e_per_mm);
+                gcode << move_to(Vec2d(start_x , start_y - n * step_spacing - i * line_spacing_xy + 3 * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height * m, retract_lift);
+                gcode << move_to(Vec2d(start_x + pa_wall_length / 2, start_y - n * step_spacing - pa_wall_length / 2 + 3 * line_spacing - i * line_spacing_xy),
+                                 speed_fast, pa_wall_length / 1.4142 * e_per_mm);
+                gcode << move_to(Vec2d(start_x + pa_wall_length, start_y - n * step_spacing - i * line_spacing_xy + 3 * line_spacing),
+                                 speed_fast, pa_wall_length / 1.4142 * e_per_mm);
             }
         }
     }
+    gcode << "\n";
 
     auto pa_end_gcode = printer_config->opt_string("end_gcode");
     gcode << pa_end_gcode;
@@ -5694,6 +5694,7 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     new_project();
     wxGetApp().mainframe->select_tab(size_t(0));
 
+    //Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_printer = wxGetApp().get_tab(Preset::TYPE_PRINTER);
 
     std::vector<fs::path> model_path;
@@ -5715,14 +5716,16 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
 
     // Scale model height
     sidebar().obj_manipul()->set_uniform_scaling(false);
-    sidebar().obj_manipul()->on_change("size", 2, (count + 1) *5);
+    sidebar().obj_manipul()->on_change("size", 2, (count + 1) * 5);
     sidebar().obj_manipul()->set_uniform_scaling(true);
-    
-    // Change End Gcode
-    pa_end_gcode = "M900 k{int(layer_z / 5) * " + double_to_str(PAStep) + "}\n" + pa_end_gcode;
-    new_config.set_key_value("before_layer_gcode", new ConfigOptionString(pa_end_gcode));
-    tab_printer->load_config(new_config);
 
+    // Change End Gcode
+    //new_config.set_key_value("seam_position", new ConfigOptionEnum(spRear));
+    //new_config.set_key_value("perimeter_generator", new ConfigOptionEnum(PerimeterGeneratorType::Classic));
+    pa_end_gcode = "M900 K{int(layer_z / 5) * " + double_to_str(PAStep) + "}\n" + pa_end_gcode;
+    new_config.set_key_value("before_layer_gcode", new ConfigOptionString(pa_end_gcode));
+    //tab_print->load_config(new_config);
+    tab_printer->load_config(new_config);
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
