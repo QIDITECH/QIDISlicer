@@ -1328,29 +1328,36 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
 
     // adds tag for processor
     file.write_format(";%s%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Role).c_str(), gcode_extrusion_role_to_string(GCodeExtrusionRole::Custom).c_str());
+
+
+
+    file.write(set_object_range(print));
+
     //B14
-    std::string first_layer_print_min_x = this->placeholder_parser_process("start_gcode", "{first_layer_print_min[0]}", initial_extruder_id);
-    std::string first_layer_print_min_y = this->placeholder_parser_process("start_gcode", "{first_layer_print_min[1]}", initial_extruder_id);
-    std::string first_layer_print_max_x = this->placeholder_parser_process("start_gcode", "{first_layer_print_max[0]}", initial_extruder_id);
-    std::string first_layer_print_max_y = this->placeholder_parser_process("start_gcode", "{first_layer_print_max[1]}", initial_extruder_id);
-    std::string center_x = std ::to_string(
-        (atof(first_layer_print_min_x.c_str()) +
-         atof(first_layer_print_max_x.c_str())) /
-        2);
-    std::string center_y = std ::to_string(
-        (atof(first_layer_print_min_y.c_str()) +
-            atof(first_layer_print_max_y.c_str())) /
-        2);
-    std::string min_x = std ::to_string(atof(first_layer_print_min_x.c_str()) -10);
-    std::string min_y = std ::to_string(atof(first_layer_print_min_y.c_str()) - 10);
-    std::string max_x = std ::to_string(atof(first_layer_print_max_x.c_str()) + 10);
-    std::string max_y = std ::to_string(atof(first_layer_print_max_y.c_str()) + 10);
-    std::string range_gcode =
-        "EXCLUDE_OBJECT_DEFINE NAME=stl_id_0_copy_0 CENTER=" + center_x +
-        "," + center_y + " POLYGON=[[" + min_x + "," + min_y + "],[" + min_x +
-        "," + max_y + "],[" + max_x + "," + max_y + "],[" + max_x + "," +
-        min_y + "],[" + min_x + "," + min_y + "]]";
-    file.writeln(range_gcode);
+    //std::string first_layer_print_min_x = this->placeholder_parser_process("start_gcode", "{first_layer_print_min[0]}", initial_extruder_id);
+    //std::string first_layer_print_min_y = this->placeholder_parser_process("start_gcode", "{first_layer_print_min[1]}", initial_extruder_id);
+    //std::string first_layer_print_max_x = this->placeholder_parser_process("start_gcode", "{first_layer_print_max[0]}", initial_extruder_id);
+    //std::string first_layer_print_max_y = this->placeholder_parser_process("start_gcode", "{first_layer_print_max[1]}", initial_extruder_id);
+    //BOOST_LOG_TRIVIAL(error) << "bed_x:" << first_layer_print_min_x;
+    //BOOST_LOG_TRIVIAL(error) << "bed_x:" << first_layer_print_max_x;
+    //std::string center_x = std ::to_string(
+    //    (atof(first_layer_print_min_x.c_str()) +
+    //     atof(first_layer_print_max_x.c_str())) /
+    //    2);
+    //std::string center_y = std ::to_string(
+    //    (atof(first_layer_print_min_y.c_str()) +
+    //        atof(first_layer_print_max_y.c_str())) /
+    //    2);
+    //std::string min_x = std ::to_string(atof(first_layer_print_min_x.c_str()) -10);
+    //std::string min_y = std ::to_string(atof(first_layer_print_min_y.c_str()) - 10);
+    //std::string max_x = std ::to_string(atof(first_layer_print_max_x.c_str()) + 10);
+    //std::string max_y = std ::to_string(atof(first_layer_print_max_y.c_str()) + 10);
+    //std::string range_gcode =
+    //    "EXCLUDE_OBJECT_DEFINE NAME=stl_id_0_copy_0 CENTER=" + center_x +
+    //    "," + center_y + " POLYGON=[[" + min_x + "," + min_y + "],[" + min_x +
+    //    "," + max_y + "],[" + max_x + "," + max_y + "],[" + max_x + "," +
+    //    min_y + "],[" + min_x + "," + min_y + "]]";
+    //file.writeln(range_gcode);
     //B17
     // adds tags for time estimators
     if (print.config().remaining_times.value)
@@ -3527,6 +3534,41 @@ std::string GCode::set_extruder(unsigned int extruder_id, double print_z)
         gcode += m_ooze_prevention.post_toolchange(*this);
 
     return gcode;
+}
+
+//B41
+std::string GCode::set_object_range(Print &print)
+{
+    std::ostringstream gcode;
+
+    std::vector<std::pair<coordf_t, ObjectsLayerToPrint>> layers_to_print = collect_layers_to_print(print);
+    const std::pair<coordf_t, ObjectsLayerToPrint> &      layer           = layers_to_print[0];
+
+    std::vector<const PrintInstance *> print_object_instances_ordering;
+    print_object_instances_ordering                 = chain_print_object_instances(print);
+    std::vector<InstanceToPrint> instances_to_print = sort_print_object_instances(layer.second, &print_object_instances_ordering,
+                                                                                  size_t(-1));
+    for (const InstanceToPrint& instance : instances_to_print) {
+        const PrintObject &print_object = instance.print_object;
+        auto               bbox         = print_object.bounding_box();
+        auto               instances    = print_object.instances();
+        for (PrintInstance &inst : instances) {
+            auto shift = inst.shift;
+            float min_x = round(bbox.min(0) + shift(0)) / 1000000.0 - 10;
+            float max_x = ((print_object.model_object()->name) == "pa_line.stl" or (print_object.model_object()->name) == "pa_pattern.stl") ?
+                              round(bbox.max(0) + shift(0)) / 1000000.0 + 90 :
+                              round(bbox.max(0) + shift(0)) / 1000000.0 + 10;
+            float min_y = round(bbox.min(1) + shift(1)) / 1000000.0 - 10;
+            float max_y = round(bbox.max(1) + shift(1)) / 1000000.0 + 10;
+
+            gcode << (std::string("EXCLUDE_OBJECT_DEFINE NAME =") + print_object.model_object()->name)
+                  << " CENTER=" << round(shift(0)) / 1000000.0 << "," << round(shift(1)) / 1000000.0 << " POLYGON=[[" << min_x << ","
+                  << min_y << "],[" << min_x << "," << max_y << "],[" << max_x << "," << max_y << "],[" << max_x << "," << min_y << "],["
+                  << min_x << "," << min_y << "]]"
+                  << "\n";
+        }
+    }
+    return gcode.str();
 }
 
 // convert a model-space scaled point into G-code coordinates

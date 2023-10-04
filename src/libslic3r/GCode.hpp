@@ -330,6 +330,9 @@ private:
     std::string     unretract() { return m_writer.unlift() + m_writer.unretract(); }
     std::string     set_extruder(unsigned int extruder_id, double print_z);
 
+    //B41
+    std::string set_object_range(Print &print);
+
     // Cache for custom seam enforcers/blockers for each layer.
     SeamPlacer                          m_seam_placer;
 
