@@ -1,6 +1,6 @@
 #include "qidiparts.hpp"
 
-const TestData qidi_PART_POLYGONS =
+const TestData QIDI_PART_POLYGONS =
 {
     {
         {-5000000, 8954050},
