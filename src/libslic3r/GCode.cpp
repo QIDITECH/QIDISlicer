@@ -3561,7 +3561,7 @@ std::string GCode::set_object_range(Print &print)
             float min_y = round(bbox.min(1) + shift(1)) / 1000000.0 - 10;
             float max_y = round(bbox.max(1) + shift(1)) / 1000000.0 + 10;
 
-            gcode << (std::string("EXCLUDE_OBJECT_DEFINE NAME =") + print_object.model_object()->name)
+            gcode << (std::string("EXCLUDE_OBJECT_DEFINE NAME=") + print_object.model_object()->name)
                   << " CENTER=" << round(shift(0)) / 1000000.0 << "," << round(shift(1)) / 1000000.0 << " POLYGON=[[" << min_x << ","
                   << min_y << "],[" << min_x << "," << max_y << "],[" << max_x << "," << max_y << "],[" << max_x << "," << min_y << "],["
                   << min_x << "," << min_y << "]]"
