@@ -2473,7 +2473,9 @@ void GCode::process_layer_single_object(
                         ++ object_id;
                 //B38
                 if (this->config().gcode_flavor == gcfKlipper) {
-                    m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + print_object.model_object()->name + "\n");
+                    std::string object_name = print_object.model_object()->name;
+                    std::replace(object_name.begin(), object_name.end(), ' ', '_');
+                    m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + object_name + "\n");
                 } else {
                     gcode += std::string("; printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
                              " copy " + std::to_string(print_instance.instance_id) + "\n";
@@ -2657,7 +2659,9 @@ void GCode::process_layer_single_object(
             if (!m_writer.is_object_start_str_empty()) {
                 m_writer.set_object_start_str("");
             } else {
-                m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + print_object.model_object()->name + "\n");
+                std::string object_name = print_object.model_object()->name;
+                std::replace(object_name.begin(), object_name.end(), ' ', '_');
+                m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + object_name + "\n");
             }
         } else {
             gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
@@ -3540,6 +3544,8 @@ std::string GCode::set_extruder(unsigned int extruder_id, double print_z)
 std::string GCode::set_object_range(Print &print)
 {
     std::ostringstream gcode;
+    std::string        object_name;
+
 
     std::vector<std::pair<coordf_t, ObjectsLayerToPrint>> layers_to_print = collect_layers_to_print(print);
     const std::pair<coordf_t, ObjectsLayerToPrint> &      layer           = layers_to_print[0];
@@ -3552,16 +3558,18 @@ std::string GCode::set_object_range(Print &print)
         const PrintObject &print_object = instance.print_object;
         auto               bbox         = print_object.bounding_box();
         auto               instances    = print_object.instances();
+        object_name                     = print_object.model_object()->name;
+        std::replace(object_name.begin(), object_name.end(), ' ', '_');
         for (PrintInstance &inst : instances) {
             auto shift = inst.shift;
             float min_x = round(bbox.min(0) + shift(0)) / 1000000.0 - 10;
-            float max_x = ((print_object.model_object()->name) == "pa_line.stl" or (print_object.model_object()->name) == "pa_pattern.stl") ?
+            float max_x = (object_name == "pa_line.stl" or object_name == "pa_pattern.stl") ?
                               round(bbox.max(0) + shift(0)) / 1000000.0 + 90 :
                               round(bbox.max(0) + shift(0)) / 1000000.0 + 10;
             float min_y = round(bbox.min(1) + shift(1)) / 1000000.0 - 10;
             float max_y = round(bbox.max(1) + shift(1)) / 1000000.0 + 10;
 
-            gcode << (std::string("EXCLUDE_OBJECT_DEFINE NAME=") + print_object.model_object()->name)
+            gcode << (std::string("EXCLUDE_OBJECT_DEFINE NAME=") + object_name)
                   << " CENTER=" << round(shift(0)) / 1000000.0 << "," << round(shift(1)) / 1000000.0 << " POLYGON=[[" << min_x << ","
                   << min_y << "],[" << min_x << "," << max_y << "],[" << max_x << "," << max_y << "],[" << max_x << "," << min_y << "],["
                   << min_x << "," << min_y << "]]"
