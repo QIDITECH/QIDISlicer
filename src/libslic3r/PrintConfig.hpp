@@ -802,9 +802,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionStrings,            filament_colour))
     ((ConfigOptionStrings,            filament_notes))
     ((ConfigOptionFloat,              first_layer_acceleration))
-    //B24
     ((ConfigOptionInts,               first_layer_bed_temperature))
-    ((ConfigOptionInts,               first_layer_volume_temperature))
     ((ConfigOptionFloatOrPercent,     first_layer_extrusion_width))
     ((ConfigOptionFloatOrPercent,     first_layer_height))
     ((ConfigOptionFloatOrPercent,     first_layer_speed))

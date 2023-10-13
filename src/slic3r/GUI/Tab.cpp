@@ -2073,10 +2073,7 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("bed_temperature"));
         optgroup->append_line(line);
         //B24
-        line = { L("Chamber"), "" };
-        line.append_option(optgroup->get_option("first_layer_volume_temperature"));
-        line.append_option(optgroup->get_option("volume_temperature"));
-        optgroup->append_line(line);
+        optgroup->append_single_option_line("volume_temperature");
 
     page = add_options_page(L("Cooling"), "cooling");
         std::string category_path = "cooling_127569#";
