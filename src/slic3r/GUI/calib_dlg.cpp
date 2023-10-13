@@ -160,7 +160,7 @@ void PA_Calibration_Dlg::on_start(wxCommandEvent& event) {
     read_double = m_tcStartPA->GetValue().ToDouble(&start_pa);
     read_double = read_double && m_tcEndPA->GetValue().ToDouble(&end_pa);
     read_double = read_double && m_tcPAStep->GetValue().ToDouble(&pa_step);
-    if (!read_double || start_pa < 0 || pa_step < EPSILON || end_pa < start_pa + pa_step) {
+    if (!read_double || start_pa < 0 || pa_step < 0.001 || end_pa < start_pa + pa_step) {
         MessageDialog msg_dlg(nullptr, _L("Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"), wxEmptyString, wxICON_WARNING | wxOK);
         msg_dlg.ShowModal();
         return;

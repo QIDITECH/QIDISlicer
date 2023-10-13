@@ -58,6 +58,7 @@ var LangText={
 		"l38": "After printing is completed, select the flattest set of lines, enter its corresponding values into the software and save it.",
 		"l39": "PA Tower",
 		"l40": "The pressure advance value will be changed every 5mm the PA tower rises. Please measure the height of the best area of the model, and then calculate the corresponding pressure advance value based on the set step value, then input it into the software and save it.",
+		"l41": "4.PA calibration does not work with PETG.",
 	},
 	"zh_CN": {
 		"t1": "用户指南",
@@ -118,6 +119,7 @@ var LangText={
 		"l38": "打印完成后，选择最平整的一组线，请将其对应的值输入到软件中并保存。",
 		"l39": "PA 塔",
 		"l40": "PA 塔每升高5mm会更改一次压力提前值，请测量出模型最佳区域的高度，再根据设定的步进值计算出其对应的压力提前值，然后输入到软件中并保存。",
+		"l41": "4.PA校准不适用于PETG。",
 	},
 	"ja": {
 		"t1": "ユーザーガイド",
@@ -178,6 +180,7 @@ var LangText={
 		"l38": "印刷が完了したら、最も平坦な線のセットを選択し、対応する値をソフトウェアに入力して保存します。",
 		"l39": "PAタワー",
 		"l40": "PAタワーが上昇する5mmごとに圧力アドバンス値が変更されますので、モデルの最適領域の高さを測定し、設定されたステップ値に基づいて対応する圧力アドバンス値を計算し、それをソフトウェアに入力して、それを保存。",
+		"l41": "4.PA キャリブレーションは PETG では機能しません。",
 	},
 	"fr": {
 		"t1": "Guide de l'utilisateur",
@@ -238,6 +241,7 @@ var LangText={
 		"l38": "Une fois l'impression terminée, sélectionnez l'ensemble de lignes le plus plat, entrez ses valeurs correspondantes dans le logiciel et enregistrez-le.",
 		"l39": "La tour PA",
 		"l40": "La valeur d'avance de pression sera modifiée tous les 5 mm d'élévation de la tour PA. Veuillez mesurer la hauteur de la meilleure zone du modèle, puis calculer la valeur d'avance de pression correspondante en fonction de la valeur de pas définie, puis la saisir dans le logiciel et l'enregistrer.",
+		"l41": "4.L'étalonnage PA ne fonctionne pas avec le PETG.",
 	},
 	"de": {
 		"t1": "Benutzerhandbuch",
@@ -298,6 +302,7 @@ var LangText={
 		"l38": "Wählen Sie nach Abschluss des Druckvorgangs den flachsten Liniensatz aus, geben Sie die entsprechenden Werte in die Software ein und speichern Sie sie.",
 		"l39": "PA-Turm",
 		"l40": "Der Druckvorschubwert wird alle 5 mm geändert, wenn der PA-Turm ansteigt. Bitte messen Sie die Höhe des besten Bereichs des Modells und berechnen Sie dann den entsprechenden Druckvorschubwert basierend auf dem eingestellten Schrittwert, geben Sie ihn dann in die Software ein und speichern Sie ihn.",
+		"l41": "4.Die PA-Kalibrierung funktioniert nicht mit PETG.",
 	},
 	"be": {
 		"t1": "Кіраўніцтва карыстальніка",
@@ -358,6 +363,7 @@ var LangText={
 		"l38": "После завершения печати выберите самый плоский набор линий, введите соответствующие значения в программу и сохраните.",
 		"l39": "ПА Тауэр",
 		"l40": "Значение опережения давления будет меняться каждые 5 мм подъема башни PA. Измерьте высоту лучшей области модели, а затем рассчитайте соответствующее значение опережения давления на основе установленного значения шага, затем введите его в программное обеспечение и сохраните.",
+		"l41": "4.Калибровка PA не работает с PETG.",
 	},
 };
 

@@ -1593,7 +1593,8 @@ void MainFrame::init_menubar_as_editor()
 
         append_menu_item(flowrateMenu, wxID_ANY, _L("Fine"), _L("Flow Rate Fine"),
             [this](wxCommandEvent &) {
-                m_frf_calib_dlg = new FRF_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+                if (!m_frf_calib_dlg)
+                    m_frf_calib_dlg = new FRF_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
                 m_frf_calib_dlg->ShowModal();
             },
             "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
@@ -1603,7 +1604,8 @@ void MainFrame::init_menubar_as_editor()
 
         append_menu_item(calibrationMenu, wxID_ANY, _L("Pressure Advance"), _L("Pressure Advance"),
             [this](wxCommandEvent &) {
-                m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+                if (!m_pa_calib_dlg)
+                    m_pa_calib_dlg = new PA_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
                 m_pa_calib_dlg->ShowModal();
             },
             "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
