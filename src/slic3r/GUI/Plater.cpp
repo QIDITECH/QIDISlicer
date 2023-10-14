@@ -911,8 +911,8 @@ Sidebar::Sidebar(Plater *parent)
     // Buttons underneath the scrolled area
 
     // rescalable bitmap buttons "Send to printer" and "Remove device" 
-
-    auto init_scalable_btn = [this](ScalableButton** btn, const std::string& icon_name, wxString tooltip = wxEmptyString)
+//Y14
+    auto init_scalable_btn = [this](ScalableButton** btn, const std::string& icon_name, wxString label, wxString tooltip = wxEmptyString)
     {
 #ifdef __APPLE__
         int bmp_px_cnt = 16;
@@ -920,7 +920,8 @@ Sidebar::Sidebar(Plater *parent)
         int bmp_px_cnt = 32;
 #endif //__APPLE__
         ScalableBitmap bmp = ScalableBitmap(this, icon_name, bmp_px_cnt);
-        *btn = new ScalableButton(this, wxID_ANY, bmp, "", wxBU_EXACTFIT);
+        *btn = new ScalableButton(this, wxID_ANY, bmp, label, wxBU_EXACTFIT);
+        (*btn)->SetFont(wxGetApp().bold_font());
 
 #ifdef _WIN32
         (*btn)->Bind(wxEVT_ENTER_WINDOW, [tooltip, btn, this](wxMouseEvent& event) {
@@ -937,11 +938,11 @@ Sidebar::Sidebar(Plater *parent)
         (*btn)->Hide();
     };
 
-    init_scalable_btn(&p->btn_send_gcode   , "export_gcode", _L("Send to printer") + " " +GUI::shortkey_ctrl_prefix() + "Shift+G");
+    init_scalable_btn(&p->btn_send_gcode, "export_gcode", _L("Send to printer"), _L("Send to printer") + " " + GUI::shortkey_ctrl_prefix() + "Shift+G");
 //    init_scalable_btn(&p->btn_eject_device, "eject_sd"       , _L("Remove device ") + GUI::shortkey_ctrl_prefix() + "T");
-	init_scalable_btn(&p->btn_export_gcode_removable, "export_to_sd", _L("Export to SD card / Flash drive") + " " + GUI::shortkey_ctrl_prefix() + "U");
-
-    // regular buttons "Slice now" and "Export G-code" 
+    init_scalable_btn(&p->btn_export_gcode_removable, "export_to_sd", _L("Export"), _L("Export to SD card / Flash drive") + " " + GUI::shortkey_ctrl_prefix() + "U");
+//Y14
+    // regular buttons "Slice now" and "Export G-code"
 
 //    const int scaled_height = p->btn_eject_device->GetBitmapHeight() + 4;
 #ifdef _WIN32
