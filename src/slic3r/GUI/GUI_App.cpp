@@ -1104,7 +1104,7 @@ bool GUI_App::on_init_inner()
         RichMessageDialog dlg(nullptr,
             _L("You are running a 32 bit build of QIDISlicer on 64-bit Windows."
                 "\n32 bit build of QIDISlicer will likely not be able to utilize all the RAM available in the system."
-                "\nPlease download and install a 64 bit build of QIDISlicer from https://www.qidi3d.cz/qidislicer/."
+                "\nPlease download and install a 64 bit build of QIDISlicer from https://qidi3d.com/pages/software-firmware/."
                 "\nDo you wish to continue?"),
             "QIDISlicer", wxICON_QUESTION | wxYES_NO);
         if (dlg.ShowModal() != wxID_YES)

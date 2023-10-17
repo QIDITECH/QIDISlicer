@@ -1378,7 +1378,7 @@ msgstr "Колер фону"
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:52
 msgid "Backspace"
-msgstr "<b>Backspace</b>"
+msgstr "Backspace"
 
 #: ../src/common/fmapbase.cpp:160
 msgid "Baltic (ISO-8859-13)"
@@ -2741,7 +2741,7 @@ msgstr "Канец"
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:55
 msgid "Enter"
-msgstr "<b>Enter</b>"
+msgstr "Enter"
 
 #: ../src/richtext/richtextstyledlg.cpp:934
 msgid "Enter a box style name"
@@ -2827,7 +2827,7 @@ msgstr "Памылка: "
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:69
 msgid "Esc"
-msgstr "<b>Esc</b>"
+msgstr "Esc"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:70
@@ -4004,7 +4004,7 @@ msgstr "Ініцыялізацыя не атрымалася ў post init, пе�
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:54
 msgid "Ins"
-msgstr "<b>Ins</b>"
+msgstr "Ins"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/richtext/richtextsymboldlg.cpp:472 ../src/common/accelcmn.cpp:53
@@ -4699,7 +4699,7 @@ msgstr "&Згарнуць"
 #. TRANSLATORS: System cursor name
 #: ../src/propgrid/advprops.cpp:1763
 msgid "Middle Button"
-msgstr "<b>Сярэдняя кнопка</b>"
+msgstr "Сярэдняя кнопка"
 
 #: ../src/richtext/richtextsizepage.cpp:409
 msgid "Min height:"
@@ -4933,117 +4933,117 @@ msgstr "Заўвага, 8 1/2 x 11 цалі"
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:105
 msgid "Num *"
-msgstr "<b>Num *</b>"
+msgstr "Num *"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:106
 msgid "Num +"
-msgstr "<b>Num +</b>"
+msgstr "Num +"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:107
 msgid "Num ,"
-msgstr "<b>Num ,</b>"
+msgstr "Num ,"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:108
 msgid "Num -"
-msgstr "<b>Num -</b>"
+msgstr "Num -"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:109
 msgid "Num ."
-msgstr "<b>Num .</b>"
+msgstr "Num ."
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:110
 msgid "Num /"
-msgstr "<b>Num /</b>"
+msgstr "Num /"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:104
 msgid "Num ="
-msgstr "<b>Num =</b>"
+msgstr "Num ="
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:101
 msgid "Num Begin"
-msgstr "<b>Num Begin</b>"
+msgstr "Num Begin"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:103
 msgid "Num Delete"
-msgstr "<b>Num Delete</b>"
+msgstr "Num Delete"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:95
 msgid "Num Down"
-msgstr "<b>Num Down</b>"
+msgstr "Num Down"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:100
 msgid "Num End"
-msgstr "<b>Num End</b>"
+msgstr "Num End"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:90
 msgid "Num Enter"
-msgstr "<b>Num Enter</b>"
+msgstr "Num Enter"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:91
 msgid "Num Home"
-msgstr "<b>Num Home</b>"
+msgstr "Num Home"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:102
 msgid "Num Insert"
-msgstr "<b>Num Insert</b>"
+msgstr "Num Insert"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:86
 msgid "Num Lock"
-msgstr "<b>Num Lock</b>"
+msgstr "Num Lock"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:97
 msgid "Num Page Down"
-msgstr "<b>Num Page Down</b>"
+msgstr "Num Page Down"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:96
 msgid "Num Page Up"
-msgstr "<b>Num Page Up</b>"
+msgstr "Num Page Up"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:94
 msgid "Num Right"
-msgstr "<b>Num Right</b>"
+msgstr "Num Right"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:88
 msgid "Num Space"
-msgstr "<b>Num Space</b>"
+msgstr "Num Space"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:89
 msgid "Num Tab"
-msgstr "<b>Num Tab</b>"
+msgstr "Num Tab"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:93
 msgid "Num Up"
-msgstr "<b>Num Up</b>"
+msgstr "Num Up"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:92
 msgid "Num left"
-msgstr "<b>Num left</b>"
+msgstr "Num left"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:86
 msgid "Num_lock"
-msgstr "<b>Num_lock</b>"
+msgstr "Num_lock"
 
 #: ../src/richtext/richtextliststylepage.cpp:487
 #: ../src/richtext/richtextbulletspage.cpp:279
@@ -5317,12 +5317,12 @@ msgstr "Налады старонкі"
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:58
 msgid "PageDown"
-msgstr "<b>PageDown</b>"
+msgstr "PageDown"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:57
 msgid "PageUp"
-msgstr "<b>PageUp</b>"
+msgstr "PageUp"
 
 #: ../src/generic/prntdlgg.cpp:216
 msgid "Pages"
@@ -5372,12 +5372,12 @@ msgstr "Дазволы"
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:60
 msgid "PgDn"
-msgstr "<b>PgDn</b>"
+msgstr "PgDn"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:59
 msgid "PgUp"
-msgstr "<b>PgUp</b>"
+msgstr "PgUp"
 
 #: ../src/richtext/richtextbuffer.cpp:12868
 msgid "Picture Properties"
@@ -7448,17 +7448,17 @@ msgstr "Кірыліца Windows/DOS OEM (CP 866)"
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:111
 msgid "Windows_Left"
-msgstr "<b>Windows_Left</b>"
+msgstr "Windows_Left"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:113
 msgid "Windows_Menu"
-msgstr "<b>Windows_Menu</b>"
+msgstr "Windows_Menu"
 
 #. TRANSLATORS: Name of keyboard key
 #: ../src/common/accelcmn.cpp:112
 msgid "Windows_Right"
-msgstr "<b>Windows_Right</b>"
+msgstr "Windows_Right"
 
 #: ../src/common/ffile.cpp:150
 #, c-format
@@ -7520,7 +7520,7 @@ msgstr "Вы не можаце дадаць новы каталог у гэту�
 
 #: ../src/propgrid/propgrid.cpp:3299
 msgid "You have entered invalid value. Press ESC to cancel editing."
-msgstr "Вы ўвялі недапушчальнае значэнне. Націсніце <b>Esc</b>, каб адмяніць змены."
+msgstr "Вы ўвялі недапушчальнае значэнне. Націсніце Esc, каб адмяніць змены."
 
 #: ../src/common/stockitem.cpp:209
 msgid "Zoom &In"
