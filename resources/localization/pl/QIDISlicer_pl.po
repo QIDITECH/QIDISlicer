@@ -16897,11 +16897,11 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:2449
 msgid ""
 "This separate setting will affect the speed of perimeters having radius <= "
-"6.5mm (usually holes). If expressed as percentage (for example: 80%) it will "
+"4mm (usually holes). If expressed as percentage (for example: 80%) it will "
 "be calculated on the perimeters speed setting above. Set to zero for auto."
 msgstr ""
 "To ustawienie reguluje prędkość obrysów posiadających promień mniejszy lub "
-"równy 6.5 mm (zazwyczaj chodzi o otwory). Jeśli ustawisz wartość procentową "
+"równy 4 mm (zazwyczaj chodzi o otwory). Jeśli ustawisz wartość procentową "
 "(np. 80%) to zostanie obliczona z prędkości obrysów ustawionej powyżej. "
 "Ustaw zero, aby użyć ustawień automatycznych."
 

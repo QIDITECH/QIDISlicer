@@ -16944,13 +16944,13 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:2449
 msgid ""
 "This separate setting will affect the speed of perimeters having radius <= "
-"6.5mm (usually holes). If expressed as percentage (for example: 80%) it will "
+"4mm (usually holes). If expressed as percentage (for example: 80%) it will "
 "be calculated on the perimeters speed setting above. Set to zero for auto."
 msgstr ""
 "Esta configuración por separado afectará la velocidad de los perímetros con "
-"un radio <= 6,5 mm (generalmente agujeros). Si se expresa como porcentaje "
-"(por ejemplo: 80%), se calculará en la configuración de velocidad de "
-"perímetros anterior. Establecer a cero para auto."
+"un radio <= 4 mm (generalmente agujeros). Si se expresa como porcentaje (por "
+"ejemplo: 80%), se calculará en la configuración de velocidad de perímetros "
+"anterior. Establecer a cero para auto."
 
 #: src/libslic3r/PrintConfig.cpp:1619
 msgid ""

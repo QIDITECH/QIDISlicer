@@ -64,49 +64,42 @@ msgstr "0 (溶解性)"
 msgid "%1$d backward edge"
 msgid_plural "%1$d backward edges"
 msgstr[0] "%1$d の後方エッジ"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2879
 #, c-format, boost-format
 msgid "%1$d connector is out of cut contour"
 msgid_plural "%1$d connectors are out of cut contour"
 msgstr[0] "%1$dコネクタがカット輪郭から外れている"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2882
 #, c-format, boost-format
 msgid "%1$d connector is out of object"
 msgid_plural "%1$d connectors are out of object"
 msgstr[0] "%1$d コネクタがオブジェクトから外れています"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:465
 #, c-format, boost-format
 msgid "%1$d degenerate facet"
 msgid_plural "%1$d degenerate facets"
 msgstr[0] "%1$d個の変性ファセット"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:467
 #, c-format, boost-format
 msgid "%1$d edge fixed"
 msgid_plural "%1$d edges fixed"
 msgstr[0] "%1$d エッジが修正されました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:469
 #, c-format, boost-format
 msgid "%1$d facet removed"
 msgid_plural "%1$d facets removed"
 msgstr[0] "%1$dファセットが削除されました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:471
 #, c-format, boost-format
 msgid "%1$d facet reversed"
 msgid_plural "%1$d facets reversed"
 msgstr[0] "%1$d面リバース"
-msgstr[1] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1657
 #, c-format, boost-format
@@ -114,49 +107,42 @@ msgid "%1$d object was loaded as a part of cut object."
 msgid_plural "%1$d objects were loaded as parts of cut object"
 msgstr[0] ""
 "%1$dのオブジェクトがカットオブジェクトの一部としてロードされました。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1653
 #, c-format, boost-format
 msgid "%1$d object was loaded with custom seam."
 msgid_plural "%1$d objects were loaded with custom seam."
 msgstr[0] "%1$d オブジェクトがカスタム シームでロードされました。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1652
 #, c-format, boost-format
 msgid "%1$d object was loaded with custom supports."
 msgid_plural "%1$d objects were loaded with custom supports."
 msgstr[0] "%1$d オブジェクトがカスタム・サポートでロードされました。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1654
 #, c-format, boost-format
 msgid "%1$d object was loaded with multimaterial painting."
 msgid_plural "%1$d objects were loaded with multimaterial painting."
 msgstr[0] "%1$d オブジェクトがマルチマテリアルペイントでロードされました。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1656
 #, c-format, boost-format
 msgid "%1$d object was loaded with partial sinking."
 msgid_plural "%1$d objects were loaded with partial sinking."
 msgstr[0] "%1$d オブジェクトが部分的に沈み込んでロードされました。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/NotificationManager.cpp:1655
 #, c-format, boost-format
 msgid "%1$d object was loaded with variable layer height."
 msgid_plural "%1$d objects were loaded with variable layer height."
 msgstr[0] "%1$d オブジェクトが可変レイヤー高でロードされました。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:476 src/slic3r/GUI/GUI_ObjectList.cpp:479
 #, c-format, boost-format
 msgid "%1$d open edge"
 msgid_plural "%1$d open edges"
 msgstr[0] "%1$d オープンエッジ"
-msgstr[1] ""
 
 #: src/libslic3r/PrintConfig.cpp:1552 src/libslic3r/PrintConfig.cpp:1575
 msgid "1000 (unlimited)"
@@ -179,7 +165,6 @@ msgstr "%1%, %2%"
 msgid "%1% (%2$d shell)"
 msgid_plural "%1% (%2$d shells)"
 msgstr[0] "%1% (%2$d シェル)"
-msgstr[1] ""
 
 #: src/libslic3r/Print.cpp:696
 #, boost-format
@@ -1041,7 +1026,6 @@ msgid_plural ""
 "New vendors were installed and one of theirs printers will be activated"
 msgstr[0] ""
 "新しいベンダーがインストールされ、そのプリンターの1つがアクティブ化されます"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_App.cpp:1032
 #, boost-format
@@ -1485,7 +1469,6 @@ msgstr "自動アップデート"
 msgid "Auto-repaired %1$d error"
 msgid_plural "Auto-repaired %1$d errors"
 msgstr[0] "自動修復された%1$dエラー"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Tab.cpp:1610
 msgid "Autospeed (advanced)"
@@ -5667,7 +5650,6 @@ msgid_plural ""
 msgstr[0] ""
 "次のプリンタプリセットが複製されます。%1%上記のプリンタ\"%2%\"のプリセットは1"
 "回だけ使用されます。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/ConfigWizard.cpp:2823
 #, boost-format
@@ -5691,7 +5673,6 @@ msgstr ""
 msgid "Folowing model repair failed"
 msgid_plural "Folowing models repair failed"
 msgstr[0] "次のモデルの修復に失敗しました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:1015
 msgid "Font"
@@ -9464,7 +9445,6 @@ msgid_plural ""
 msgstr[0] ""
 "選択したプリセットはこれらのプリンターからも削除されることに注意してくださ"
 "い。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Tab.cpp:4159
 msgid "Note, that the selected preset will be renamed in this printer too."
@@ -9472,7 +9452,6 @@ msgid_plural ""
 "Note, that the selected preset will be renamed in these printers too."
 msgstr[0] ""
 "なお、これらのプリンターでは、選択したプリセットの名前も変更されます。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Tab.cpp:4261
 msgid ""
@@ -9482,7 +9461,6 @@ msgid_plural ""
 msgstr[0] ""
 "選択したプリセットを削除すると、これらのプリンターは削除されることに注意して"
 "ください。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/SavePresetDialog.cpp:217
 msgid "Note: This preset will be replaced after saving"
@@ -9638,7 +9616,6 @@ msgstr "ツールチェンジ回数"
 msgid "object"
 msgid_plural "objects"
 msgstr[0] "オブジェクト"
-msgstr[1] "オブジェクト"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:251
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2706
@@ -9700,7 +9677,6 @@ msgid_plural ""
 msgstr[0] ""
 "ファイル%sのオブジェクトサイズはゼロのようです。\n"
 "これらのオブジェクトはモデルから削除されました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/KBShortcutsDialog.cpp:211
 msgid "Objects List"
@@ -11715,7 +11691,6 @@ msgstr "再実行"
 msgid "Redo %1$d Action"
 msgid_plural "Redo %1$d Actions"
 msgstr[0] "%1$d 操作の繰り返し"
-msgstr[1] "%1$d 操作の繰り返し"
 
 #: src/slic3r/GUI/GLCanvas3D.cpp:4711
 msgid "Redo History"
@@ -15164,7 +15139,6 @@ msgstr[0] ""
 "ファイル%sの一部のオブジェクトの寸法は、インチで定義されているようです。\n"
 "QIDISlicerの内部単位はミリメートルです。 これらのオブジェクトの寸法を再計算し"
 "ますか？"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Plater.cpp:2634
 #, c-format, boost-format
@@ -15180,7 +15154,6 @@ msgstr[0] ""
 "ファイル%sの一部のオブジェクトの寸法は、メートルで定義されているようです。\n"
 "QIDISlicerの内部単位はミリメートルです。 これらのオブジェクトの寸法を再計算し"
 "ますか？"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Downloader.cpp:185
 msgid "The download has failed"
@@ -15306,19 +15279,16 @@ msgstr[0] ""
 "次の行%sには、予約済みのキーワードが含まれています。\n"
 "Gコードの視覚化で問題が発生する可能性があるため、削除してください。\n"
 "プリント時間の見積もり。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/GUI_ObjectList.cpp:4749
 msgid "The following model was repaired successfully"
 msgid_plural "The following models were repaired successfully"
 msgstr[0] "次のモデルは正常に修復されました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/UnsavedChangesDialog.cpp:1246
 msgid "The following preset was modified"
 msgid_plural "The following presets were modified"
 msgstr[0] "以下のプリセットが変更されました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/KBShortcutsDialog.cpp:264
 msgid ""
@@ -15552,7 +15522,6 @@ msgid_plural ""
 "delete."
 msgstr[0] ""
 "以下の物理プリンタは、プリセットのみに基づいているため、削除します。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Tab.cpp:4246
 msgid ""
@@ -15560,7 +15529,6 @@ msgid ""
 msgid_plural ""
 "The physical printers below are based on the preset, you are going to delete."
 msgstr[0] "以下の物理プリンタはプリセットに基づいているため、削除します。"
-msgstr[1] ""
 
 #: src/slic3r/GUI/Tab.cpp:4154
 msgid ""
@@ -15569,7 +15537,6 @@ msgid_plural ""
 "The physical printers below are based on the preset, you are going to rename."
 msgstr[0] ""
 "以下の物理プリンターは、プリセットに基づき、名前を変更するものです。"
-msgstr[1] ""
 
 #: src/libslic3r/PrintConfig.cpp:662
 msgid ""
@@ -15605,13 +15572,11 @@ msgid_plural ""
 msgstr[0] ""
 "以下のプリセットは、QIDISlicerのアクティブなインスタンスに一時的にインストー"
 "ルされました"
-msgstr[1] ""
 
 #: src/slic3r/GUI/UnsavedChangesDialog.cpp:1335
 msgid "The preset modifications are successfully saved"
 msgid_plural "The presets modifications are successfully saved"
 msgstr[0] "プリセットの変更は正常に保存されます"
-msgstr[1] ""
 
 #: src/libslic3r/PrintConfig.cpp:2618
 msgid "The printer multiplexes filaments into a single hot end."
@@ -16584,12 +16549,12 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:2449
 msgid ""
 "This separate setting will affect the speed of perimeters having radius <= "
-"6.5mm (usually holes). If expressed as percentage (for example: 80%) it will "
+"4mm (usually holes). If expressed as percentage (for example: 80%) it will "
 "be calculated on the perimeters speed setting above. Set to zero for auto."
 msgstr ""
-"この個別の設定は、半径<= 6.5mm（通常は穴）の境界線プリントの速度に影響しま"
-"す。 パーセンテージ（例：80％）で入力された場合、上記の境界線速度設定で計算さ"
-"れます。 自動の場合はゼロに設定します。"
+"この個別の設定は、半径<= 4mm（通常は穴）の境界線プリントの速度に影響します。 "
+"パーセンテージ（例：80％）で入力された場合、上記の境界線速度設定で計算されま"
+"す。 自動の場合はゼロに設定します。"
 
 #: src/libslic3r/PrintConfig.cpp:1619
 msgid ""
@@ -17156,7 +17121,6 @@ msgstr "元に戻す"
 msgid "Undo %1$d Action"
 msgid_plural "Undo %1$d Actions"
 msgstr[0] "%1$d 操作のやり直し"
-msgstr[1] "%1$d 操作のやり直し"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:3287
 msgid "Undo boldness"
@@ -18235,7 +18199,6 @@ msgstr ""
 msgid "You are using template filament preset."
 msgid_plural "You are using template filament presets."
 msgstr[0] "テンプレート フィラメント プリセットを使用しています。"
-msgstr[1] "テンプレート フィラメント プリセットを使用しています。"
 
 #: src/slic3r/GUI/Plater.cpp:5270
 msgid ""
@@ -18618,7 +18581,6 @@ msgstr "%i / %i"
 msgid "%ld byte"
 msgid_plural "%ld bytes"
 msgstr[0] "%ld バイト"
-msgstr[1] ""
 
 #: ../src/html/helpwnd.cpp:1033
 #, fuzzy, c-format
@@ -22926,7 +22888,6 @@ msgstr "次のページ"
 msgid "Last repeated message (\"%s\", %u time) wasn't output"
 msgid_plural "Last repeated message (\"%s\", %u times) wasn't output"
 msgstr[0] ""
-msgstr[1] ""
 
 #: ../src/common/paper.cpp:103
 msgid "Ledger, 17 x 11 in"
@@ -25180,7 +25141,6 @@ msgstr "アウトラインレベルを指定できます。"
 msgid "The previous message repeated %u time."
 msgid_plural "The previous message repeated %u times."
 msgstr[0] "直前のメッセージは %lu 回繰り返されました。"
-msgstr[1] ""
 
 #: ../src/common/log.cpp:270
 #, fuzzy

@@ -16942,13 +16942,13 @@ msgstr ""
 #: src/libslic3r/PrintConfig.cpp:2449
 msgid ""
 "This separate setting will affect the speed of perimeters having radius <= "
-"6.5mm (usually holes). If expressed as percentage (for example: 80%) it will "
+"4mm (usually holes). If expressed as percentage (for example: 80%) it will "
 "be calculated on the perimeters speed setting above. Set to zero for auto."
 msgstr ""
 "Questa impostazione separata influenzerà la velocità dei perimetri con "
-"raggio <=6.5mm (solitamente i buchi). Se espresso in percentuale (per "
-"esempio: 80%) sarà calcolato sulla velocità dei perimetri qui sopra. Imposta "
-"a zero per automatico."
+"raggio <=4mm (solitamente i buchi). Se espresso in percentuale (per esempio: "
+"80%) sarà calcolato sulla velocità dei perimetri qui sopra. Imposta a zero "
+"per automatico."
 
 #: src/libslic3r/PrintConfig.cpp:1619
 msgid ""
