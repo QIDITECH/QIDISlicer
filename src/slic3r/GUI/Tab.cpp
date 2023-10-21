@@ -2260,6 +2260,8 @@ void TabFilament::toggle_options()
 {
     if (!m_active_page)
         return;
+//Y16
+    DynamicPrintConfig *printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
 
     if (m_active_page->title() == "Cooling")
     {
@@ -2275,6 +2277,12 @@ void TabFilament::toggle_options()
         bool dynamic_fan_speeds = m_config->opt_bool("enable_dynamic_fan_speeds", 0);
         for (int i = 0; i < 4; i++) {
         toggle_option("overhang_fan_speed_"+std::to_string(i),dynamic_fan_speeds);
+//Y16
+        bool auxiliary_fan = printer_config->opt_bool("auxiliary_fan");
+        toggle_option("enable_auxiliary_fan", auxiliary_fan);
+
+        bool chamber_fan = printer_config->opt_bool("chamber_fan");
+        toggle_option("enable_volume_fan", chamber_fan);
         }
     }
 
@@ -2300,6 +2308,9 @@ void TabFilament::toggle_options()
         bool pa = m_config->opt_bool("enable_advance_pressure", 0);
         toggle_option("advance_pressure", pa);
         toggle_option("smooth_time", pa);
+//Y16
+        bool chamber_temp = printer_config->opt_bool("chamber_temperature");
+        toggle_option("volume_temperature", chamber_temp);
     }
 }
 
@@ -2643,6 +2654,11 @@ void TabPrinter::build_fff()
         optgroup->append_single_option_line("use_firmware_retraction");
         optgroup->append_single_option_line("use_volumetric_e");
         optgroup->append_single_option_line("variable_layer_height");
+//Y16
+        optgroup = page->new_optgroup(L("Accessory"));
+        optgroup->append_single_option_line("auxiliary_fan");
+        optgroup->append_single_option_line("chamber_fan");
+        optgroup->append_single_option_line("chamber_temperature");
 
     const int gcode_field_height = 15; // 150
     const int notes_field_height = 25; // 250

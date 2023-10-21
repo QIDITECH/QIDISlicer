@@ -770,6 +770,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloatOrPercent,     avoid_crossing_perimeters_max_detour))
     ((ConfigOptionPoints,             bed_shape))
     ((ConfigOptionInts,               bed_temperature))
+    //Y16
+    ((ConfigOptionBool,               chamber_temperature))
     //B24
     ((ConfigOptionInts,               volume_temperature))
     ((ConfigOptionFloat,              bridge_acceleration))
@@ -782,10 +784,13 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionBool,               complete_objects))
     ((ConfigOptionFloats,             colorprint_heights))
     ((ConfigOptionBools,              cooling))
+    //Y16
+    ((ConfigOptionBool,               auxiliary_fan))
+    ((ConfigOptionBool,               chamber_fan))
     //B25
-    ((ConfigOptionInts,               enable_volume_fan)) 
+    ((ConfigOptionInts,               enable_volume_fan))
     //B15
-    ((ConfigOptionInts,               enable_auxiliary_fan))     
+    ((ConfigOptionInts,               enable_auxiliary_fan))
     ((ConfigOptionFloat,              default_acceleration))
     ((ConfigOptionInts,               disable_fan_first_layers))
     //B39

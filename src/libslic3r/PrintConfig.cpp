@@ -439,6 +439,14 @@ void PrintConfigDef::init_fff_params()
     def->min = 0;
     def->max = 300;
     def->set_default_value(new ConfigOptionInts { 0 });
+
+//Y16
+    def = this->add("chamber_temperature", coBool);
+    def->label = L("Chamber Temperature");
+    def->tooltip = L("Enable chamber temperature control.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
+
     //B24
     def = this->add("volume_temperature", coInts);
     def->label = L("Chamber");
@@ -1990,6 +1998,19 @@ void PrintConfigDef::init_fff_params()
     def->max = 100;
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInts { 35 });
+
+//Y16
+    def = this->add("auxiliary_fan", coBool);
+    def->label = L("Auxiliary Fan");
+    def->tooltip = L("Enable rapid cooling fan control.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("chamber_fan", coBool);
+    def->label = L("Chamber Fan");
+    def->tooltip = L("Enable chamber fan control.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
 
     //B15
     def = this->add("enable_auxiliary_fan", coInts);
