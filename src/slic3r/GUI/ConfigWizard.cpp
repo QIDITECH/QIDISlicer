@@ -338,9 +338,10 @@ PrinterPicker::PrinterPicker(wxWindow *parent, const VendorProfile &vendor, wxSt
                 : from_u8(model.name);
 
             if (i == 1) {
-                auto *alt_label = new wxStaticText(variants_panel, wxID_ANY, _L("Alternate nozzles:"));
-                alt_label->SetFont(font_alt_nozzle);
-                variants_sizer->Add(alt_label, 0, wxBOTTOM, 3);
+//Y15
+                //auto *alt_label = new wxStaticText(variants_panel, wxID_ANY, _L("Alternate nozzles:"));
+                //alt_label->SetFont(font_alt_nozzle);
+                //variants_sizer->Add(alt_label, 0, wxBOTTOM, 3);
                 is_variants = true;
             }
 
@@ -680,7 +681,9 @@ void PagePrinters::set_run_reason(ConfigWizard::RunReason run_reason)
         && (run_reason == ConfigWizard::RR_DATA_EMPTY || run_reason == ConfigWizard::RR_DATA_LEGACY)
         && printer_pickers.size() > 0 
         && printer_pickers[0]->vendor_id == PresetBundle::QIDI_BUNDLE) {
-        printer_pickers[0]->select_one(0, true);
+//Y15
+        //printer_pickers[0]->select_one(0, true);
+        printer_pickers[0]->select_all(true, false);
     }
 }
 
