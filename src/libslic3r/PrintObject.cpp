@@ -1526,12 +1526,15 @@ void PrintObject::discover_vertical_shells()
                         // Open to remove (filter out) regions narrower than a bit less than an infill extrusion line width.
                         // Such narrow regions are difficult to fill in with a gap fill algorithm (or Arachne), however they are most likely
                         // not needed for print stability / quality.
-                        const float narrow_ensure_vertical_wall_thickness_region_radius = 0.5f * 0.65f * min_perimeter_infill_spacing;
+                        //W11
+                        const float narrow_ensure_vertical_wall_thickness_region_radius = 0.75f * 0.75f * min_perimeter_infill_spacing;//0.7f*0.75f may error in complex model/ original parameter 0.5f * 0.65f 
                         // Then close gaps narrower than 1.2 * line width, such gaps are difficult to fill in with sparse infill,
                         // thus they will be merged into the solid infill.
-                        const float narrow_sparse_infill_region_radius                  = 0.5f * 1.2f * min_perimeter_infill_spacing;
+                        //W11
+                        const float narrow_sparse_infill_region_radius                  = 0.7f * 1.25f * min_perimeter_infill_spacing;//0.7f*1.25f may error in complex model /original parameter 0.5f * 1.2f 
                         // Finally expand the infill a bit to remove tiny gaps between solid infill and the other regions.
-                        const float tiny_overlap_radius                                 = 0.2f        * min_perimeter_infill_spacing;
+                        //W11
+                        const float tiny_overlap_radius                                 = 0.15f        * min_perimeter_infill_spacing;// original parameter 0.2f       
                         regularized_shell = shrink_ex(offset2_ex(union_ex(shell),
                             // Open to remove (filter out) regions narrower than an infill extrusion line width.
                             -narrow_ensure_vertical_wall_thickness_region_radius,
@@ -1561,8 +1564,10 @@ void PrintObject::discover_vertical_shells()
                         regularized_shell.erase(std::remove_if(regularized_shell.begin(), regularized_shell.end(),
                                                                [&internal_volume, &min_perimeter_infill_spacing,
                                                                 &object_volume](const ExPolygon &p) {
-                                                                   return (p.area() < min_perimeter_infill_spacing * scaled(1.5) ||
-                                                                           (p.area() < min_perimeter_infill_spacing * scaled(8.0) &&
+                                                                    //W11
+                                                                   return (p.area() < min_perimeter_infill_spacing * scaled(2.0) ||//original parameter scaled(1.5)
+                                                                       //W11
+                                                                          (p.area() < min_perimeter_infill_spacing * scaled(10.0) &&//original parameter scaled(8.0) 
                                                                             diff(to_polygons(p), object_volume).empty())) &&
                                                                           diff(internal_volume,
                                                                                expand(to_polygons(p), min_perimeter_infill_spacing))
