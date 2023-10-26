@@ -305,7 +305,11 @@ void GCodeViewer::SequentialView::Marker::set_world_position(const Vec3f& positi
       Geometry::translation_transform(m_model.get_bounding_box().size().z() * Vec3d::UnitZ()) * Geometry::rotation_transform({ M_PI, 0.0, 0.0 })).cast<float>();
 }
 
-void GCodeViewer::SequentialView::Marker::render()
+////B43
+void GCodeViewer::SequentialView::Marker::update_curr_move(GCodeProcessorResult::MoveVertex move) { m_curr_move = move; }
+
+//B43
+void GCodeViewer::SequentialView::Marker::render(EViewType &view_type)
 {
     if (!m_visible)
         return;
@@ -347,7 +351,35 @@ void GCodeViewer::SequentialView::Marker::render()
     ImGui::SameLine();
     char buf[1024];
     const Vec3f position = m_world_position + m_world_offset;
+    //B43
     sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f", position.x(), position.y(), position.z());
+    switch (view_type) {
+    case EViewType::Height: {
+        sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f, Height: %.2f mm", position.x(), position.y(), position.z(), m_curr_move.height);
+        break;
+    }
+    case EViewType::Width: {
+        sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f, Width: %.2f mm", position.x(), position.y(), position.z(), m_curr_move.width);
+        break;
+    }
+    case EViewType::Feedrate: {
+        sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f, Speed: %.0f mm/s", position.x(), position.y(), position.z(), m_curr_move.feedrate);
+        break;
+    }
+    case EViewType::VolumetricRate: {
+        sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f, Flow: %.2f mm³/s", position.x(), position.y(), position.z(), m_curr_move.volumetric_rate());
+        break;
+    }
+    case EViewType::FanSpeed: {
+        sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f, Fan Speed: %.0f %%", position.x(), position.y(), position.z(), m_curr_move.fan_speed);
+        break;
+    }
+    case EViewType::Temperature: {
+        sprintf(buf, "X: %.3f, Y: %.3f, Z: %.3f, Temperature: %.0f °C", position.x(), position.y(), position.z(), m_curr_move.temperature);
+        break;
+    }
+    }
+
     imgui.text(std::string(buf));
 
     // force extra frame to automatically update window size
@@ -553,10 +585,10 @@ void GCodeViewer::SequentialView::GCodeWindow::stop_mapping_file()
     if (m_file.is_open())
         m_file.close();
 }
-
-void GCodeViewer::SequentialView::render(float legend_height)
+//B43
+void GCodeViewer::SequentialView::render(float legend_height, EViewType &view_type)
 {
-    marker.render();
+    marker.render(view_type);
     float bottom = wxGetApp().plater()->get_current_canvas3D()->get_canvas_size().get_height();
     if (wxGetApp().is_editor())
         bottom -= wxGetApp().plater()->get_view_toolbar().get_height();
@@ -732,6 +764,9 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
 
     // release gpu memory, if used
     reset(); 
+
+    //B43
+    m_gcode_result = &gcode_result;
 
     m_sequential_view.gcode_window.load_gcode(gcode_result.filename, gcode_result.lines_ends);
 
@@ -940,7 +975,8 @@ void GCodeViewer::render()
         if (m_sequential_view.current.last != m_sequential_view.endpoints.last) {
             m_sequential_view.marker.set_world_position(m_sequential_view.current_position);
             m_sequential_view.marker.set_world_offset(m_sequential_view.current_offset);
-            m_sequential_view.render(legend_height);
+            //B43
+            m_sequential_view.render(legend_height, m_view_type);
         }
     }
 #if ENABLE_GCODE_VIEWER_STATISTICS
@@ -997,6 +1033,25 @@ void GCodeViewer::update_sequential_view_current(unsigned int first, unsigned in
 
     if (new_first != first || new_last != last)
         wxGetApp().plater()->update_preview_moves_slider();
+
+    update_marker_curr_move();
+}
+
+//B43
+void GCodeViewer::update_marker_curr_move()
+{
+    if ((int) m_last_result_id != -1) {
+        auto it = std::find_if(m_gcode_result->moves.begin(), m_gcode_result->moves.end(), [this](auto move) {
+            if (m_sequential_view.current.last < m_sequential_view.gcode_ids.size() && m_sequential_view.current.last >= 0) {
+                return move.gcode_id == static_cast<uint64_t>(m_sequential_view.gcode_ids[m_sequential_view.current.last]);
+            }
+            return false;
+        });
+        if (it != m_gcode_result->moves.end())
+            m_sequential_view.marker.update_curr_move(*it);
+    }
+
+
 }
 
 bool GCodeViewer::is_toolpath_move_type_visible(EMoveType type) const

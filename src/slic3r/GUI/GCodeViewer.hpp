@@ -645,6 +645,8 @@ class GCodeViewer
 #endif // ENABLE_GCODE_VIEWER_STATISTICS
 
 public:
+    //B43
+    enum class EViewType : unsigned char;
     struct SequentialView
     {
         class Marker
@@ -658,6 +660,8 @@ public:
             Vec3f m_world_offset;
             float m_z_offset{ 0.5f };
             bool m_visible{ true };
+            //B43
+            GCodeProcessorResult::MoveVertex m_curr_move;
 
         public:
             void init();
@@ -669,8 +673,9 @@ public:
 
             bool is_visible() const { return m_visible; }
             void set_visible(bool visible) { m_visible = visible; }
-
-            void render();
+            //B43
+            void render(EViewType &view_type);
+            void update_curr_move(GCodeProcessorResult::MoveVertex move);
         };
 
         class GCodeWindow
@@ -725,8 +730,8 @@ public:
         Marker marker;
         GCodeWindow gcode_window;
         std::vector<unsigned int> gcode_ids;
-
-        void render(float legend_height);
+        //B43
+        void render(float legend_height, EViewType &view_type);
     };
 
     enum class EViewType : unsigned char
@@ -757,6 +762,10 @@ private:
     BoundingBoxf3 m_shells_bounding_box;
     // bounding box of toolpaths + marker tools + shells
     BoundingBoxf3 m_max_bounding_box;
+
+    //B43
+    const GCodeProcessorResult *m_gcode_result;
+
     float m_max_print_height{ 0.0f };
     std::vector<ColorRGBA> m_tool_colors;
     Layers m_layers;
@@ -828,6 +837,10 @@ public:
 
     const SequentialView& get_sequential_view() const { return m_sequential_view; }
     void update_sequential_view_current(unsigned int first, unsigned int last);
+
+    //B43
+    void update_marker_curr_move();
+
 
     bool is_contained_in_bed() const { return m_contained_in_bed; }
 
