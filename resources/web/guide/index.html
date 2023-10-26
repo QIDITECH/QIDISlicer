@@ -57,6 +57,10 @@
 						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
 						<div class="trans" tid="t14"></div>
 					</li>
+					<li menu="ExcludeObjects" class="MenuBtn" onClick="GotoMenu('ExcludeObjects')">
+						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
+						<div class="trans" tid="t18"></div>
+					</li>
 					<li menu="ModelDownload" class="MenuBtn" onClick="GotoMenu('ModelDownload')">
 						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
 						<div class="trans" tid="t13"></div>
@@ -154,6 +158,10 @@
 				<div class="AutozoomImage"><img src="img/AdaptiveMeshingThumbnail.png"/></div>
 				<div class="ThumbnailTitle trans" tid="t14"></div>
 			</div>
+			<div class="Thumbnail" onClick="GotoMenu('ExcludeObjects')">
+				<div class="AutozoomImage"><img src="img/ExcludeObjects.gif"/></div>
+				<div class="ThumbnailTitle trans" tid="t18"></div>
+			</div>
 			<div class="Thumbnail" onClick="GotoMenu('ModelDownload')">
 				<div class="AutozoomImage"><img src="img/DownloadModel.png"/></div>
 				<div class="ThumbnailTitle trans" tid="t13"></div>
@@ -215,6 +223,13 @@
 			<div class="CenterImage"><img src="img/DisableAM.png"/></div>
 			<div class="IntroduceTextBold trans" tid="l0"></div>
 			<div class="IntroduceText">https://github.com/kyleisah/Klipper-Adaptive-Meshing-Purging#key-features</div>
+		</div>
+
+		<div class="IntroduceBoard" board="ExcludeObjects">
+			<div class="IntroduceTitle trans" tid="t18"></div>
+			<div class="IntroduceText trans" tid="l42"></div>
+			<div class="IntroduceText trans" tid="l43"></div>
+			<div class="AutozoomImage"><img src="img/ExcludeObjects.gif"/></div>
 		</div>
 
 		<div class="IntroduceBoard" board="ModelDownload">
@@ -314,36 +329,20 @@
 					</thead>
 					<tbody>
 						<tr v-for="(item, index) in 1" :key="index">
-							<td>ToughPETG</td>
-							<td>≤20％</td>
-							<td>/</td>
-							<td>+++</td>
-							<td>++</td>
-							<td>+++</td>
-							<td>78℃</td>
-							<td>73℃</td>
-							<td>40.3±0.6</td>
-							<td>1780±80</td>
-							<td>4.0±0.2</td>
-							<td>62.8±0.4</td>
-							<td>1919±54</td>
-							<td>13.9±2.3</td>
-						</tr>
-						<tr v-for="(item, index) in 1" :key="index">
-							<td>UltraABS-GF25</td>
+							<td>ABS Odorless</td>
 							<td>≤30％</td>
 							<td>/</td>
-							<td>+++</td>
+							<td>++</td>
 							<td>+</td>
 							<td>+++</td>
-							<td>97℃</td>
-							<td>93℃</td>
-							<td>48.48 ± 0.61</td>
-							<td>3752.13 ± 68.39</td>
-							<td>2.10 ± 0.10</td>
-							<td>78.80 ± 1.26</td>
-							<td>3531.71 ± 75.79</td>
-							<td>8.91 ± 0.63</td>
+							<td>92℃</td>
+							<td>86℃</td>
+							<td>41.65 ± 0.27</td>
+							<td>2351.00 ± 92.00</td>
+							<td>7.95 ± 4.53</td>
+							<td>67.81 ± 0.54</td>
+							<td>2400.00 ± 79.69</td>
+							<td>20.03 ± 1.32</td>
 						</tr>
 						<tr v-for="(item, index) in 1" :key="index">
 							<td>ABS Rapido</td>
@@ -362,6 +361,38 @@
 							<td>20 ± 2</td>
 						</tr>
 						<tr v-for="(item, index) in 1" :key="index">
+							<td>ABS-GF25</td>
+							<td>≤30％</td>
+							<td>/</td>
+							<td>+++</td>
+							<td>+</td>
+							<td>+++</td>
+							<td>97℃</td>
+							<td>93℃</td>
+							<td>48.48 ± 0.61</td>
+							<td>3752.13 ± 68.39</td>
+							<td>2.10 ± 0.10</td>
+							<td>78.80 ± 1.26</td>
+							<td>3531.71 ± 75.79</td>
+							<td>8.91 ± 0.63</td>
+						</tr>
+						<tr v-for="(item, index) in 1" :key="index">
+							<td>ASA</td>
+							<td>≤30％</td>
+							<td>/</td>
+							<td>+++</td>
+							<td>+</td>
+							<td>+++</td>
+							<td>94℃</td>
+							<td>86℃</td>
+							<td>38.50 ± 1.60</td>
+							<td>2317.00 ± 246.00</td>
+							<td>5.20 ± 1.40</td>
+							<td>64.49 ± 1.30</td>
+							<td>2399.00 ± 147.00</td>
+							<td>12.90 ± 0.90</td>
+						</tr>
+						<tr v-for="(item, index) in 1" :key="index">
 							<td>PA12-CF</td>
 							<td>≤15％</td>
 							<td>80-100℃</td>
@@ -378,7 +409,7 @@
 							<td>6.11 ± 1.45</td>
 						</tr>
 						<tr v-for="(item, index) in 1" :key="index">
-							<td>PATH-CF</td>
+							<td>PAHT-CF</td>
 							<td>≤15％</td>
 							<td>80-100℃</td>
 							<td>++</td>
@@ -408,6 +439,22 @@
 							<td>122.69 ± 5.19</td>
 							<td>5313.21 ± 197.89</td>
 							<td>5.57 ± 0.58</td>
+						</tr>
+						<tr v-for="(item, index) in 1" :key="index">
+							<td>PETG-Tough</td>
+							<td>≤20％</td>
+							<td>/</td>
+							<td>+++</td>
+							<td>++</td>
+							<td>+++</td>
+							<td>78℃</td>
+							<td>73℃</td>
+							<td>40.3±0.6</td>
+							<td>1780±80</td>
+							<td>4.0±0.2</td>
+							<td>62.8±0.4</td>
+							<td>1919±54</td>
+							<td>13.9±2.3</td>
 						</tr>
 						<tr v-for="(item, index) in 1" :key="index">
 							<td>PLA Rapido</td>

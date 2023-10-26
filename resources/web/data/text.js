@@ -17,6 +17,7 @@ var LangText={
 		"t15": "Flow Rate Calibration",
 		"t16": "Calibration",
 		"t17": "Pressure Advance",
+		"t18": "Exclude Objects",
 
 		"l0": "Learn more:",
 		"l1": "You can download the 3D model from the following link.",
@@ -59,6 +60,8 @@ var LangText={
 		"l39": "PA Tower",
 		"l40": "The pressure advance value will be changed every 5mm the PA tower rises. Please measure the height of the best area of the model, and then calculate the corresponding pressure advance value based on the set step value, then input it into the software and save it.",
 		"l41": "4.PA calibration does not work with PETG.",
+		"l42": "When multiple models are printed at the same time, you can stop printing a model in the middle of printing.",
+		"l43": "Note: Models with the same file name are treated as the same object.",
 	},
 	"zh_CN": {
 		"t1": "用户指南",
@@ -78,6 +81,7 @@ var LangText={
 		"t15": "流量校准",
 		"t16": "校准",
 		"t17": "压力提前",
+		"t18": "排除对象",
 
 		"l0": "了解更多：",
 		"l1": "您可以从以下链接下载3D模型。",
@@ -120,6 +124,8 @@ var LangText={
 		"l39": "PA 塔",
 		"l40": "PA 塔每升高5mm会更改一次压力提前值，请测量出模型最佳区域的高度，再根据设定的步进值计算出其对应的压力提前值，然后输入到软件中并保存。",
 		"l41": "4.PA校准不适用于PETG。",
+		"l42": "当多个模型同时打印时，你可以在打印中途停止某个模型的打印。",
+		"l43": "注：相同文件名的模型会被视为同一对象。",
 	},
 	"ja": {
 		"t1": "ユーザーガイド",
@@ -139,6 +145,7 @@ var LangText={
 		"t15": "流量校正",
 		"t16": "較正",
 		"t17": "圧力前進",
+		"t18": "対象をはずします",
 
 		"l0": "もっと詳しく知る:",
 		"l1": "3Dモデルは以下のWebサイトからダウンロードできます。",
@@ -181,6 +188,8 @@ var LangText={
 		"l39": "PAタワー",
 		"l40": "PAタワーが上昇する5mmごとに圧力アドバンス値が変更されますので、モデルの最適領域の高さを測定し、設定されたステップ値に基づいて対応する圧力アドバンス値を計算し、それをソフトウェアに入力して、それを保存。",
 		"l41": "4.PA キャリブレーションは PETG では機能しません。",
+		"l42": "複数のモデルが同時に印刷されている場合は、あるモデルの印刷を途中でやめることができます。",
+		"l43": "注:同じファイル名のモデルは、同じ対象として扱われます。",
 	},
 	"fr": {
 		"t1": "Guide de l'utilisateur",
@@ -200,6 +209,7 @@ var LangText={
 		"t15": "Étalonnage du débit",
 		"t16": "Étalonnage",
 		"t17": "Avance de pression",
+		"t18": "Exclure des objets",
 
 		"l0": "Apprendre encore plus:",
 		"l1": "Vous pouvez télécharger des modèles 3D à partir des sites Web suivants.",
@@ -242,6 +252,8 @@ var LangText={
 		"l39": "La tour PA",
 		"l40": "La valeur d'avance de pression sera modifiée tous les 5 mm d'élévation de la tour PA. Veuillez mesurer la hauteur de la meilleure zone du modèle, puis calculer la valeur d'avance de pression correspondante en fonction de la valeur de pas définie, puis la saisir dans le logiciel et l'enregistrer.",
 		"l41": "4.L'étalonnage PA ne fonctionne pas avec le PETG.",
+		"l42": "Lorsque plusieurs modèles sont imprimés en même temps, vous pouvez arrêter l’impression d’un modèle au milieu de l’impression.",
+		"l43": "Note: les modèles avec le même nom de fichier sont traités comme le même objet.",
 	},
 	"de": {
 		"t1": "Benutzerhandbuch",
@@ -261,6 +273,7 @@ var LangText={
 		"t15": "Kalibrierung der Durchflussrate",
 		"t16": "Kalibrierung",
 		"t17": "Druckvorschub",
+		"t18": "Subjekt wird eliminiert",
 
 		"l0": "Erfahren Sie mehr:",
 		"l1": "Sie können 3D-Modelle von den folgenden Websites herunterladen.",
@@ -303,6 +316,8 @@ var LangText={
 		"l39": "PA-Turm",
 		"l40": "Der Druckvorschubwert wird alle 5 mm geändert, wenn der PA-Turm ansteigt. Bitte messen Sie die Höhe des besten Bereichs des Modells und berechnen Sie dann den entsprechenden Druckvorschubwert basierend auf dem eingestellten Schrittwert, geben Sie ihn dann in die Software ein und speichern Sie ihn.",
 		"l41": "4.Die PA-Kalibrierung funktioniert nicht mit PETG.",
+		"l42": "Wenn sie mehrere modelle gleichzeitig drucken, können sie den druckvorgang beenden.",
+		"l43": "Anmerkung: ein modell mit dem gleichen namen wird als gleiches objekt betrachtet.",
 	},
 	"be": {
 		"t1": "Кіраўніцтва карыстальніка",
@@ -322,6 +337,7 @@ var LangText={
 		"t15": "Каліброўка хуткасці патоку",
 		"t16": "Каліброўка",
 		"t17": "Увеличение давления",
+		"t18": "Исключить объекты из списка",
 
 		"l0": "даведацца больш:",
 		"l1": "Вы можаце загрузіць 3D-мадэлі з наступных сайтаў.",
@@ -364,6 +380,8 @@ var LangText={
 		"l39": "ПА Тауэр",
 		"l40": "Значение опережения давления будет меняться каждые 5 мм подъема башни PA. Измерьте высоту лучшей области модели, а затем рассчитайте соответствующее значение опережения давления на основе установленного значения шага, затем введите его в программное обеспечение и сохраните.",
 		"l41": "4.Калибровка PA не работает с PETG.",
+		"l42": "Когда одновременно печатаются несколько моделей, можно прекратить печатание модели в процессе печати.",
+		"l43": "Примечание: модели с одним и тем же именем файла рассматриваются как Один и тот же объект.",
 	},
 };
 
