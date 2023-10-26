@@ -2113,7 +2113,8 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 PresetBundle &         preset_bundle = *wxGetApp().preset_bundle;
                 const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
                 wxString               host          = pp.config.opt_string("print_host");
-                if (host.empty())
+                if (host.empty()) {
+                    tem_host = "";
                     host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
                 else {
                     if (!host.Lower().starts_with("http"))
@@ -2127,6 +2128,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 }
 
             } else {
+                tem_host     = "";
                 wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
                 m_printer_view->load_url(url);
             }
