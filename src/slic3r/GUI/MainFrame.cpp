@@ -2115,7 +2115,8 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 wxString               host          = pp.config.opt_string("print_host");
                 if (host.empty()) {
                     tem_host = "";
-                    host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                    host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                }
                 else {
                     if (!host.Lower().starts_with("http"))
                         host = wxString::Format("http://%s", host);
