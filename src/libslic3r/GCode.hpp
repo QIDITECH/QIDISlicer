@@ -332,6 +332,12 @@ private:
 
     //B41
     std::string set_object_range(Print &print);
+    struct LabelData
+    {
+        std::string name;
+        int         unique_id;
+    };
+    std::unordered_map<const PrintInstance *, LabelData> m_label_data;
 
     // Cache for custom seam enforcers/blockers for each layer.
     SeamPlacer                          m_seam_placer;

@@ -1327,34 +1327,11 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     file.write_format(";%s%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Role).c_str(), gcode_extrusion_role_to_string(GCodeExtrusionRole::Custom).c_str());
 
 
-
-    file.write(set_object_range(print));
-
-    //B14
-    //std::string first_layer_print_min_x = this->placeholder_parser_process("start_gcode", "{first_layer_print_min[0]}", initial_extruder_id);
-    //std::string first_layer_print_min_y = this->placeholder_parser_process("start_gcode", "{first_layer_print_min[1]}", initial_extruder_id);
-    //std::string first_layer_print_max_x = this->placeholder_parser_process("start_gcode", "{first_layer_print_max[0]}", initial_extruder_id);
-    //std::string first_layer_print_max_y = this->placeholder_parser_process("start_gcode", "{first_layer_print_max[1]}", initial_extruder_id);
-    //BOOST_LOG_TRIVIAL(error) << "bed_x:" << first_layer_print_min_x;
-    //BOOST_LOG_TRIVIAL(error) << "bed_x:" << first_layer_print_max_x;
-    //std::string center_x = std ::to_string(
-    //    (atof(first_layer_print_min_x.c_str()) +
-    //     atof(first_layer_print_max_x.c_str())) /
-    //    2);
-    //std::string center_y = std ::to_string(
-    //    (atof(first_layer_print_min_y.c_str()) +
-    //        atof(first_layer_print_max_y.c_str())) /
-    //    2);
-    //std::string min_x = std ::to_string(atof(first_layer_print_min_x.c_str()) -10);
-    //std::string min_y = std ::to_string(atof(first_layer_print_min_y.c_str()) - 10);
-    //std::string max_x = std ::to_string(atof(first_layer_print_max_x.c_str()) + 10);
-    //std::string max_y = std ::to_string(atof(first_layer_print_max_y.c_str()) + 10);
-    //std::string range_gcode =
-    //    "EXCLUDE_OBJECT_DEFINE NAME=stl_id_0_copy_0 CENTER=" + center_x +
-    //    "," + center_y + " POLYGON=[[" + min_x + "," + min_y + "],[" + min_x +
-    //    "," + max_y + "],[" + max_x + "," + max_y + "],[" + max_x + "," +
-    //    min_y + "],[" + min_x + "," + min_y + "]]";
-    //file.writeln(range_gcode);
+    //B41
+    if (this->config().gcode_flavor == gcfKlipper)
+        file.write(set_object_range(print));
+    else
+        set_object_range(print);
     //B17
     // adds tags for time estimators
     if (print.config().remaining_times.value)
@@ -2448,14 +2425,18 @@ void GCode::process_layer_single_object(
                         break;
                     else
                         ++ object_id;
-                //B38
+                //B38 //B41
                 if (this->config().gcode_flavor == gcfKlipper) {
-                    std::string object_name = print_object.model_object()->name;
-                    std::replace(object_name.begin(), object_name.end(), ' ', '_');
-                    m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + object_name + "\n");
-                } else {
-                    gcode += std::string("; printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
-                             " copy " + std::to_string(print_instance.instance_id) + "\n";
+                    const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+                    m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + label.name + "\n");
+                } else if (this->config().gcode_flavor == gcfMarlinFirmware || this->config().gcode_flavor == gcfMarlinLegacy ||
+                           this->config().gcode_flavor == gcfRepRapFirmware) {
+                    const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+                    gcode += std::string("M486 S") + std::to_string(label.unique_id) + "\n";
+                } 
+                else {
+                    const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+                    gcode += std::string("; printing object ") + label.name + "\n";
                 }
             }
         }
@@ -2631,22 +2612,26 @@ void GCode::process_layer_single_object(
         }
 
     if (!first && this->config().gcode_label_objects) {
-        //B38
+        //B38 //B41
         if (this->config().gcode_flavor == gcfKlipper) {
             if (!m_writer.is_object_start_str_empty()) {
                 m_writer.set_object_start_str("");
             } else {
-                std::string object_name = print_object.model_object()->name;
-                std::replace(object_name.begin(), object_name.end(), ' ', '_');
-                m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + object_name + "\n");
+                const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+                m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + label.name + "\n");
             }
-        } else {
-            gcode += std::string("; stop printing object ") + print_object.model_object()->name + " id:" + std::to_string(object_id) +
-                     " copy " + std::to_string(print_instance.instance_id) + "\n";
+        } else if (this->config().gcode_flavor == gcfMarlinFirmware || this->config().gcode_flavor == gcfMarlinLegacy ||
+                   this->config().gcode_flavor == gcfRepRapFirmware) {
+            gcode += std::string("M486 S-1\n");
+        } 
+        else {
+            const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+            gcode += std::string("; stop printing object ") + label.name + "\n";
         }
     }
         
 }
+
 
 void GCode::apply_print_config(const PrintConfig &print_config)
 {
@@ -3517,43 +3502,77 @@ std::string GCode::set_extruder(unsigned int extruder_id, double print_z)
     return gcode;
 }
 
-//B41
 std::string GCode::set_object_range(Print &print)
 {
-    std::ostringstream gcode;
+    std::string gcode;
     std::string        object_name;
 
+    std::map<const ModelObject *, std::vector<const PrintInstance *>> model_object_to_print_instances;
+    for (const PrintObject *po : print.objects())
+        for (const PrintInstance &pi : po->instances())
+            model_object_to_print_instances[pi.model_instance->get_object()].emplace_back(&pi);
+    int unique_id = 0;
+    std::unordered_map<const PrintInstance *, LabelData> tem_m_label_data;
+    for (const auto &[model_object, print_instances] : model_object_to_print_instances) {
+        const ModelObjectPtrs &model_objects = model_object->get_model()->objects;
+        int                    object_id = int(std::find(model_objects.begin(), model_objects.end(), model_object) - model_objects.begin());
+        for (const PrintInstance *const pi : print_instances) {
+            bool object_has_more_instances = print_instances.size() > 1u;
+            int  instance_id = int(std::find(model_object->instances.begin(), model_object->instances.end(), pi->model_instance) -
+                                  model_object->instances.begin());
 
-    std::vector<std::pair<coordf_t, ObjectsLayerToPrint>> layers_to_print = collect_layers_to_print(print);
-    const std::pair<coordf_t, ObjectsLayerToPrint> &      layer           = layers_to_print[0];
+            // Now compose the name of the object and define whether indexing is 0 or 1-based.
+            std::string name = model_object->name;
+            ++object_id;
+            ++instance_id;
 
-    std::vector<const PrintInstance *> print_object_instances_ordering;
-    print_object_instances_ordering                 = chain_print_object_instances(print);
-    std::vector<InstanceToPrint> instances_to_print = sort_print_object_instances(layer.second, &print_object_instances_ordering,
-                                                                                  size_t(-1));
-    for (const InstanceToPrint& instance : instances_to_print) {
-        const PrintObject &print_object = instance.print_object;
-        auto               bbox         = print_object.bounding_box();
-        auto               instances    = print_object.instances();
-        object_name                     = print_object.model_object()->name;
-        std::replace(object_name.begin(), object_name.end(), ' ', '_');
-        for (PrintInstance &inst : instances) {
-            auto shift = inst.shift;
-            float min_x = round(bbox.min(0) + shift(0)) / 1000000.0 - 10;
-            float max_x = (object_name == "pa_line.stl" or object_name == "pa_pattern.stl") ?
-                              round(bbox.max(0) + shift(0)) / 1000000.0 + 90 :
-                              round(bbox.max(0) + shift(0)) / 1000000.0 + 10;
-            float min_y = round(bbox.min(1) + shift(1)) / 1000000.0 - 10;
-            float max_y = round(bbox.max(1) + shift(1)) / 1000000.0 + 10;
+            if (object_has_more_instances)
+                name += " (Instance " + std::to_string(instance_id) + ")";
+            const std::string banned = "-. \r\n\v\t\f";
+            std::replace_if(
+                name.begin(), name.end(), [&banned](char c) { return banned.find(c) != std::string::npos; }, '_');
+            auto shift = pi->shift;
 
-            gcode << (std::string("EXCLUDE_OBJECT_DEFINE NAME=") + object_name)
-                  << " CENTER=" << round(shift(0)) / 1000000.0 << "," << round(shift(1)) / 1000000.0 << " POLYGON=[[" << min_x << ","
-                  << min_y << "],[" << min_x << "," << max_y << "],[" << max_x << "," << max_y << "],[" << max_x << "," << min_y << "],["
-                  << min_x << "," << min_y << "]]"
-                  << "\n";
+            ExPolygons           outline;
+            const ModelObject *  mo = pi->model_instance->get_object();
+            const ModelInstance *mi = pi->model_instance;
+            for (const ModelVolume *v : mo->volumes) {
+                Polygons vol_outline;
+                vol_outline = project_mesh(v->mesh().its, mi->get_matrix() * v->get_matrix(), [] {});
+                switch (v->type()) {
+                case ModelVolumeType::MODEL_PART: outline = union_ex(outline, vol_outline); break;
+                case ModelVolumeType::NEGATIVE_VOLUME: outline = diff_ex(outline, vol_outline); break;
+                default:;
+                }
+            }
+
+            // The projection may contain multiple polygons, which is not supported by Klipper.
+            // When that happens, calculate and use a 2d convex hull instead.
+            Polygon contour;
+            if (outline.size() == 1u)
+                contour = outline.front().contour;
+            else
+                contour = pi->model_instance->get_object()->convex_hull_2d(pi->model_instance->get_matrix());
+            assert(!contour.empty());
+            contour.douglas_peucker(50000.f);
+            Point center = contour.centroid();
+            char  buffer[64];
+            std::replace(name.begin(), name.end(), ' ', '_');
+            gcode += (std::string("EXCLUDE_OBJECT_DEFINE NAME=") + name);
+            std::snprintf(buffer, sizeof(buffer) - 1, " CENTER=%.3f,%.3f", unscale<float>(center[0]), unscale<float>(center[1]));
+            gcode += buffer + std::string(" POLYGON=[");
+            for (const Point &point : contour) {
+                std::snprintf(buffer, sizeof(buffer) - 1, "[%.3f,%.3f],", unscale<float>(point[0]), unscale<float>(point[1]));
+                gcode += buffer;
+            }
+            gcode.pop_back();
+            gcode += "]\n";
+            tem_m_label_data.emplace(pi, LabelData{name, unique_id});
+            ++unique_id;
         }
     }
-    return gcode.str();
+    m_label_data = tem_m_label_data;
+    return gcode;
 }
 
 // convert a model-space scaled point into G-code coordinates
