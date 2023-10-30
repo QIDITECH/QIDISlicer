@@ -1527,14 +1527,14 @@ void PrintObject::discover_vertical_shells()
                         // Such narrow regions are difficult to fill in with a gap fill algorithm (or Arachne), however they are most likely
                         // not needed for print stability / quality.
                         //W11
-                        const float narrow_ensure_vertical_wall_thickness_region_radius = 0.75f * 0.75f * min_perimeter_infill_spacing;//0.7f*0.75f may error in complex model/ original parameter 0.5f * 0.65f 
+                        const float narrow_ensure_vertical_wall_thickness_region_radius = 0.65f * 0.7f * min_perimeter_infill_spacing;//0.7f*0.75f may error in complex model/ original parameter 0.5f * 0.65f 
                         // Then close gaps narrower than 1.2 * line width, such gaps are difficult to fill in with sparse infill,
                         // thus they will be merged into the solid infill.
                         //W11
                         const float narrow_sparse_infill_region_radius                  = 0.7f * 1.25f * min_perimeter_infill_spacing;//0.7f*1.25f may error in complex model /original parameter 0.5f * 1.2f 
                         // Finally expand the infill a bit to remove tiny gaps between solid infill and the other regions.
                         //W11
-                        const float tiny_overlap_radius                                 = 0.15f        * min_perimeter_infill_spacing;// original parameter 0.2f       
+                        const float tiny_overlap_radius                                 = 0.19f        * min_perimeter_infill_spacing;// original parameter 0.2f       
                         regularized_shell = shrink_ex(offset2_ex(union_ex(shell),
                             // Open to remove (filter out) regions narrower than an infill extrusion line width.
                             -narrow_ensure_vertical_wall_thickness_region_radius,
