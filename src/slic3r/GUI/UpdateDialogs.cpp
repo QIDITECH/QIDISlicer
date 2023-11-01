@@ -24,6 +24,10 @@
 #include "wxExtensions.hpp"
 #include "format.hpp"
 
+//B44
+#include "Widgets/WebView.hpp"
+
+
 namespace Slic3r {
 namespace GUI {
 
@@ -97,12 +101,14 @@ bool MsgUpdateSlic3r::disable_version_check() const
 AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, const Semver& ver_online, bool from_user)
 	: MsgDialog(nullptr, _(L("App Update available")), wxString::Format(_(L("New version of %s is available.\nDo you wish to download it?")), SLIC3R_APP_NAME))
 {
-	auto* versions = new wxFlexGridSizer(1, 0, VERT_SPACING);
-	versions->Add(new wxStaticText(this, wxID_ANY, _(L("Current version:"))));
-	versions->Add(new wxStaticText(this, wxID_ANY, ver_current.to_string()));
-	versions->Add(new wxStaticText(this, wxID_ANY, _(L("New version:"))));
-	versions->Add(new wxStaticText(this, wxID_ANY, ver_online.to_string()));
-	content_sizer->Add(versions);
+	//B44
+	m_vebview_release_note = CreateTipView(this);
+    m_vebview_release_note->SetBackgroundColour(wxColour(0x00, 0x00, 0x00));
+    m_vebview_release_note->SetSize(wxSize(FromDIP(800), FromDIP(430)));
+    m_vebview_release_note->SetMinSize(wxSize(FromDIP(800), FromDIP(430)));
+    m_vebview_release_note->LoadURL(from_u8("https://github.com/QIDITECH/QIDISlicer/releases/tag/V" + ver_online.to_string()));
+
+    content_sizer->Add(m_vebview_release_note, 1, wxEXPAND);
 	content_sizer->AddSpacer(VERT_SPACING);
 
 	if(!from_user) {
@@ -110,9 +116,8 @@ AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, co
 		content_sizer->Add(cbox);
 	}
 	content_sizer->AddSpacer(VERT_SPACING);
-	
-	AUAD_size = content_sizer->GetSize();
-	
+    AUAD_size = wxSize(850, 500);
+    content_sizer->SetMinSize(AppUpdateAvailableDialog::AUAD_size);
 
 	add_button(wxID_CANCEL);
 
@@ -124,6 +129,15 @@ AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, co
 }
 
 AppUpdateAvailableDialog::~AppUpdateAvailableDialog() {}
+
+
+//B44
+wxWebView *AppUpdateAvailableDialog::CreateTipView(wxWindow *parent)
+{
+    wxWebView *tipView = WebView::CreateWebView(parent, "");
+    return tipView;
+}
+
 
 
 bool AppUpdateAvailableDialog::disable_version_check() const

@@ -11,6 +11,10 @@
 #include "libslic3r/Semver.hpp"
 #include "MsgDialog.hpp"
 
+//B44
+#include <wx/webview.h>
+
+
 class wxBoxSizer;
 class wxCheckBox;
 
@@ -48,6 +52,11 @@ public:
 	AppUpdateAvailableDialog& operator=(AppUpdateAvailableDialog&&) = delete;
 	AppUpdateAvailableDialog& operator=(const AppUpdateAvailableDialog&) = delete;
 	virtual ~AppUpdateAvailableDialog();
+
+
+	// B44
+    wxWebView *CreateTipView(wxWindow *parent);
+    wxWebView *m_vebview_release_note{nullptr};
 
 	// Tells whether the user checked the "don't bother me again" checkbox
 	bool disable_version_check() const;
