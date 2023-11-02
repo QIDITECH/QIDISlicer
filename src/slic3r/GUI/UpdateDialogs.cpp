@@ -199,7 +199,8 @@ AppUpdateDownloadDialog::AppUpdateDownloadDialog( const Semver& ver_online, boos
 		}
 	}));
 
-	content_sizer->SetMinSize(AppUpdateAvailableDialog::AUAD_size);
+	//B44
+    content_sizer->SetMinSize(wxSize(400, 200));
 
 	add_button(wxID_CANCEL);
 

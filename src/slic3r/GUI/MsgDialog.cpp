@@ -57,8 +57,9 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
 
     //B44
 	logo = new wxStaticBitmap(this, wxID_ANY, bitmap.IsOk() ? bitmap : wxNullBitmap);
-    if (style == 4) {
+    if (title == "App Update available") {
         topsizer->Add(rightsizer, 1, wxLEFT | wxTOP | wxRIGHT | wxEXPAND, BORDER);
+
     } else { 
         topsizer->Add(logo, 0, wxALL, BORDER);
         topsizer->Add(rightsizer, 1, wxTOP | wxBOTTOM | wxRIGHT | wxEXPAND, BORDER);
@@ -66,9 +67,11 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
     main_sizer->Add(topsizer, 1, wxEXPAND);
     main_sizer->Add(new StaticLine(this), 0, wxEXPAND | wxLEFT | wxRIGHT, HORIZ_SPACING);
     main_sizer->Add(btn_sizer, 0, wxALL | wxEXPAND, VERT_SPACING);
-
-    apply_style(style);
-
+    if (style & wxOK)
+        add_button(wxID_OK, true);
+    if (title != "App Update available") {
+        apply_style(style);
+    }
 	SetSizerAndFit(main_sizer);
 }
 
@@ -100,9 +103,9 @@ wxButton* MsgDialog::get_button(wxWindowID btn_id){
     return static_cast<wxButton*>(FindWindowById(btn_id, this));
 }
 
+//B44
 void MsgDialog::apply_style(long style)
 {
-    if (style & wxOK)       add_button(wxID_OK, true);
     if (style & wxYES)      add_button(wxID_YES,   !(style & wxNO_DEFAULT));
     if (style & wxNO)       add_button(wxID_NO,     (style & wxNO_DEFAULT));
     if (style & wxCANCEL)   add_button(wxID_CANCEL, (style & wxCANCEL_DEFAULT));
@@ -110,10 +113,7 @@ void MsgDialog::apply_style(long style)
     std::string icon_name = style & wxICON_WARNING        ? "exclamation" :
                             style & wxICON_INFORMATION    ? "info"        :
                             style & wxICON_QUESTION       ? "question"    : "QIDISlicer";
-    //B44
-    if (style != 4) {
-        logo->SetBitmap(*get_bmp_bundle(icon_name, 64));
-    }
+    logo->SetBitmap(*get_bmp_bundle(icon_name, 64));
 }
 
 void MsgDialog::finalize()
