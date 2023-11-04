@@ -3501,7 +3501,7 @@ std::string GCode::set_extruder(unsigned int extruder_id, double print_z)
 
     return gcode;
 }
-
+//B41
 std::string GCode::set_object_range(Print &print)
 {
     std::string gcode;
@@ -3558,6 +3558,9 @@ std::string GCode::set_object_range(Print &print)
             Point center = contour.centroid();
             char  buffer[64];
             std::replace(name.begin(), name.end(), ' ', '_');
+            std::replace(name.begin(), name.end(), '#', '_');
+            std::replace(name.begin(), name.end(), '*', '_');
+            std::replace(name.begin(), name.end(), ':', '_');
             gcode += (std::string("EXCLUDE_OBJECT_DEFINE NAME=") + name);
             std::snprintf(buffer, sizeof(buffer) - 1, " CENTER=%.3f,%.3f", unscale<float>(center[0]), unscale<float>(center[1]));
             gcode += buffer + std::string(" POLYGON=[");
