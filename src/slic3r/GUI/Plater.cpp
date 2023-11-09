@@ -5521,7 +5521,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
         add_num_text(num_str, Vec2d(plate_center.x() - 50, plate_center.y() - step_spacing / 2));
 
     std::stringstream gcode;
-    gcode << "\n;WIDTH:" << pa_line_width;
+    // gcode << "\n;WIDTH:" << pa_line_width;
     gcode << set_pa_acceleration(external_perimeter_acceleration);
     gcode << move_to(Vec2d(start_x + 80, start_y), pa_travel_speed, retract_length, retract_speed);
     gcode << move_to(pa_layer_height);
@@ -5637,7 +5637,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     //B34 Generate Gcode
     std::stringstream gcode;
 
-    gcode << "\n;WIDTH:" << pa_line_width;
+    // gcode << "\n;WIDTH:" << pa_line_width;
     gcode << set_pa_acceleration(external_perimeter_acceleration);
 
     gcode << move_to(Vec2d(start_x + 2 * line_spacing, start_y - 2 * line_spacing), pa_travel_speed, retract_length, retract_speed);
