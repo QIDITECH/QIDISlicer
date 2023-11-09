@@ -292,9 +292,18 @@ ThickPolylines make_fill_polylines(
         // svg.draw(to_lines(gaps_for_additional_filling), "green", scale_(0.2));
         // svg.draw(vertical_lines, "black", scale_(0.1));
         // svg.Close();
-
+        //w11
+        const coord_t threshold = scaled_spacing * 4.5;
         for (ExPolygon &ex_poly : gaps_for_additional_filling) {
+            //w11
+            if (ex_poly.contour.length() < threshold) {
+                continue;
+            }
             BoundingBox            ex_bb       = ex_poly.contour.bounding_box();
+            //w11
+            if (ex_bb.size().x() < threshold || ex_bb.size().y() < threshold) {
+                continue;
+            }
             coord_t                loops_count = (std::max(ex_bb.size().x(), ex_bb.size().y()) + scaled_spacing - 1) / scaled_spacing;
             Polygons               polygons    = to_polygons(ex_poly);
             Arachne::WallToolPaths wall_tool_paths(polygons, scaled_spacing, scaled_spacing, loops_count, 0, params.layer_height,
