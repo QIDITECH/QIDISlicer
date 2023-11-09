@@ -5,7 +5,6 @@
 #include <wx/dcgraph.h>
 #include "MainFrame.hpp"
 #include <string>
-#include <sstream>
 #include <iomanip>
 namespace Slic3r { 
 namespace GUI {
@@ -31,9 +30,7 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     // extru
     auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
     auto read_extrusion_multiplier = filament_config->opt_float("extrusion_multiplier", 0);
-    std::stringstream ss;
-    ss << read_extrusion_multiplier;
-    m_tc_extrusion_multiplier = new wxTextCtrl(this, wxID_ANY, ss.str(), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tc_extrusion_multiplier = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(read_extrusion_multiplier), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
     m_tc_extrusion_multiplier->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
     settings_sizer->Add(m_tc_extrusion_multiplier, 0, wxRIGHT | wxALIGN_RIGHT, 0);
 
@@ -104,7 +101,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     auto start_pa_text = new wxStaticText(this, wxID_ANY, _L("Start PA: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     start_PA_sizer->Add(start_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
-    m_tcStartPA = new wxTextCtrl(this, wxID_ANY, "0", wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tcStartPA = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.0), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
     m_tcStartPA->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
     start_PA_sizer->Add(m_tcStartPA, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     settings_sizer->Add(start_PA_sizer);
@@ -114,7 +111,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     auto end_pa_text = new wxStaticText(this, wxID_ANY, _L("End PA: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     end_PA_sizer->Add(end_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
-    m_tcEndPA = new wxTextCtrl(this, wxID_ANY, "0.04", wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tcEndPA = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.04), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
     m_tcStartPA->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
     end_PA_sizer->Add(m_tcEndPA, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     settings_sizer->Add(end_PA_sizer);
@@ -124,7 +121,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     auto PA_step_text = new wxStaticText(this, wxID_ANY, _L("PA step: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     PA_step_sizer->Add(PA_step_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
-    m_tcPAStep = new wxTextCtrl(this, wxID_ANY, "0.002", wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
+    m_tcPAStep = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.002), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
     m_tcStartPA->SetValidator(wxTextValidator(wxFILTER_NUMERIC));
     PA_step_sizer->Add(m_tcPAStep, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
     settings_sizer->Add(PA_step_sizer);

@@ -320,10 +320,13 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mous
     m_raycast_manager.actualize(*obj, &cond, &meshes);
     std::optional<RaycastManager::Hit> hit    = ray_from_camera(m_raycast_manager, coor, camera, &cond);
 
-    Transform3d surface_trmat = create_transformation_onto_surface(Vec3d(mouse_pos.x(), mouse_pos.y(), 0.2),
+    DynamicPrintConfig *print_config    = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
+    double pa_first_layer_height = print_config->get_abs_value("first_layer_height");
+    double pa_layer_height       = print_config->get_abs_value("layer_height");
+    Transform3d surface_trmat = create_transformation_onto_surface(Vec3d(mouse_pos.x(), mouse_pos.y(), pa_first_layer_height),
                                                                    hit->normal,
                                                                     priv::up_limit);
-    emboss_data.text_configuration.style.prop.emboss     = 0.2;
+    emboss_data.text_configuration.style.prop.emboss     = pa_layer_height;
     emboss_data.text_configuration.style.prop.size_in_mm = 7;
 
     const FontProp &font_prop     = emboss_data.text_configuration.style.prop;

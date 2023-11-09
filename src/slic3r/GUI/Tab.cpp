@@ -2283,6 +2283,12 @@ void TabFilament::toggle_options()
 
         bool chamber_fan = printer_config->opt_bool("chamber_fan");
         toggle_option("enable_volume_fan", chamber_fan);
+
+        int auxiliary_fan_speed = m_config->opt_int("enable_auxiliary_fan", 0);
+        if (auxiliary_fan_speed == 0)
+            toggle_option("disable_rapid_cooling_fan_first_layers", false);
+        else
+            toggle_option("disable_rapid_cooling_fan_first_layers", true);
         }
     }
 
