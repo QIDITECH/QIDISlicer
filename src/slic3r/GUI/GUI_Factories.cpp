@@ -1026,8 +1026,24 @@ MenuFactory::MenuFactory()
 
 void MenuFactory::create_default_menu()
 {
-    wxMenu* sub_menu = append_submenu_add_generic(&m_default_menu, ModelVolumeType::INVALID);
-    append_submenu(&m_default_menu, sub_menu, wxID_ANY, _L("Add Shape"), "", "add_part",
+//Y17
+    wxMenu* menu = &m_default_menu;
+    append_menu_item(menu, wxID_ANY, _L("Select All"), _L("Selects all objects"),
+        [](wxCommandEvent&) { plater()->select_all(); }, "", nullptr,
+        [](){return (plater() != nullptr) && !plater()->model().objects.empty(); }, m_parent);
+
+    append_menu_item(menu, wxID_ANY, _L("Delete All"), _L("Deletes all objects"),
+        [](wxCommandEvent&) { plater()->reset(); }, "", nullptr,
+        []() {return (plater() != nullptr) && !plater()->model().objects.empty(); }, m_parent);
+
+    append_menu_item(menu, wxID_ANY, _L("Arrange"), _L("Arrange all objects"),
+        [](wxCommandEvent&) { plater()->arrange(); }, "", nullptr,
+        []() {return plater()->can_arrange(); }, m_parent);
+
+    m_default_menu.SetFirstSeparator();
+
+    wxMenu* sub_menu = append_submenu_add_generic(menu, ModelVolumeType::INVALID);
+    append_submenu(menu, sub_menu, wxID_ANY, _L("Add Shape"), "", "add_part",
         []() {return true; }, m_parent);
 }
 
@@ -1296,9 +1312,14 @@ void MenuFactory::update_objects_menu()
 
 void MenuFactory::update_default_menu()
 {
-    const auto menu_item_id = m_default_menu.FindItem(_("Add Shape"));
-    if (menu_item_id != wxNOT_FOUND)
-        m_default_menu.Destroy(menu_item_id);
+//Y17
+    for (auto& name : { _L("Select All"), _L("Delete All"), _L("Arrange"), _L("Add Shape") }) {
+        const auto menu_item_id = m_default_menu.FindItem(name);
+        if (menu_item_id != wxNOT_FOUND)
+            m_default_menu.Destroy(menu_item_id);
+    }
+    m_default_menu.DestroySeparators();
+
     create_default_menu();
 }
 
