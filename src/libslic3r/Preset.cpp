@@ -488,6 +488,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"first_layer_travel_speed"
     //B37
     ,"first_layer_infill_speed"
+    //w11
+    ,"detect_narrow_internal_solid_infill"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

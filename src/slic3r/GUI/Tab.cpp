@@ -1487,6 +1487,8 @@ void TabPrint::build()
         optgroup->append_single_option_line("bridge_angle");
         optgroup->append_single_option_line("only_retract_when_crossing_perimeters");
         optgroup->append_single_option_line("infill_first");
+        //w11
+        optgroup->append_single_option_line("detect_narrow_internal_solid_infill");
 
     page = add_options_page(L("Skirt and brim"), "skirt+brim");
         category_path = "skirt-and-brim_133969#";
@@ -2283,12 +2285,6 @@ void TabFilament::toggle_options()
 
         bool chamber_fan = printer_config->opt_bool("chamber_fan");
         toggle_option("enable_volume_fan", chamber_fan);
-
-        int auxiliary_fan_speed = m_config->opt_int("enable_auxiliary_fan", 0);
-        if (auxiliary_fan_speed == 0)
-            toggle_option("disable_rapid_cooling_fan_first_layers", false);
-        else
-            toggle_option("disable_rapid_cooling_fan_first_layers", true);
         }
     }
 

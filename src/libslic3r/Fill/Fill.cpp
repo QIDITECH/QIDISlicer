@@ -17,7 +17,8 @@
 #include "FillConcentric.hpp"
 #include "FillEnsuring.hpp"
 #include "Polygon.hpp"
-
+//w11
+#define NARROW_INFILL_AREA_THRESHOLD 3
 namespace Slic3r {
 
 //static constexpr const float NarrowInfillAreaThresholdMM = 3.f;
@@ -112,7 +113,15 @@ struct SurfaceFill {
 	ExPolygons       	expolygons;
 	SurfaceFillParams	params;
 };
+//w11
+static bool is_narrow_infill_area(const ExPolygon &expolygon)
+{
+    ExPolygons offsets = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD));
+    if (offsets.empty())
+        return true;
 
+    return false;
+}
 static inline bool fill_type_monotonic(InfillPattern pattern)
 {
 	return pattern == ipMonotonic || pattern == ipMonotonicLines;
@@ -313,7 +322,43 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
                 fill.params.pattern = ipEnsuring;
             }
     }
+	//w11
+    if (layer.object()->config().detect_narrow_internal_solid_infill) {
+        size_t surface_fills_size = surface_fills.size();
+        for (size_t i = 0; i < surface_fills_size; i++) {
+            if (surface_fills[i].surface.surface_type != stInternalSolid)
+                continue;
 
+            size_t              expolygons_size = surface_fills[i].expolygons.size();
+            std::vector<size_t> narrow_expolygons_index;
+            narrow_expolygons_index.reserve(expolygons_size);
+            for (size_t j = 0; j < expolygons_size; j++)
+                if (is_narrow_infill_area(surface_fills[i].expolygons[j]))
+                    narrow_expolygons_index.push_back(j);
+
+            if (narrow_expolygons_index.size() == 0) {
+                continue;
+            } else if (narrow_expolygons_index.size() == expolygons_size) {
+                // w11
+                surface_fills[i].params.pattern = ipConcentric;
+            } else {
+                params         = surface_fills[i].params;
+                params.pattern = ipConcentric;
+                surface_fills.emplace_back(params);
+                surface_fills.back().region_id            = surface_fills[i].region_id;
+                surface_fills.back().surface.surface_type = stInternalSolid;
+                surface_fills.back().surface.thickness    = surface_fills[i].surface.thickness;
+                // surface_fills.back().region_id_group       = surface_fills[i].region_id_group;
+                // surface_fills.back().no_overlap_expolygons = surface_fills[i].no_overlap_expolygons;
+                for (size_t j = 0; j < narrow_expolygons_index.size(); j++) {
+                    surface_fills.back().expolygons.emplace_back(std::move(surface_fills[i].expolygons[narrow_expolygons_index[j]]));
+                }
+                for (int j = narrow_expolygons_index.size() - 1; j >= 0; j--) {
+                    surface_fills[i].expolygons.erase(surface_fills[i].expolygons.begin() + narrow_expolygons_index[j]);
+                }
+            }
+        }
+    }
     return surface_fills;
 }
 

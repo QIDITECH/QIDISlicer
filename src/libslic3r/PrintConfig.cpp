@@ -3519,6 +3519,16 @@ void PrintConfigDef::init_fff_params()
         default: assert(false);
         }
     }
+    //w11
+    def           = this->add("detect_narrow_internal_solid_infill", coBool);
+    def->label    = L("Detect narrow internal solid infill");
+    def->category = L("Infill");
+    def->tooltip  = L("This option will auto detect narrow internal solid infill area."
+                     " If enabled, concentric pattern will be used for the area to speed printing up."
+                     " Otherwise, rectilinear pattern is used defaultly.");
+    def->mode     = comExpert;
+    def->set_default_value(new ConfigOptionBool(true));
+
 }
 
 void PrintConfigDef::init_extruder_option_keys()
