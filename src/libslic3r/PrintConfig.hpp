@@ -571,8 +571,6 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                thick_bridges))
     ((ConfigOptionFloat,               xy_size_compensation))
     ((ConfigOptionBool,                wipe_into_objects))
-    //w11
-    ((ConfigOptionBool,                detect_narrow_internal_solid_infill))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(
