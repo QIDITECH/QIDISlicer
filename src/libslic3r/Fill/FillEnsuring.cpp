@@ -14,7 +14,8 @@
 #include "Polyline.hpp"
 #include "SVG.hpp"
 #include "libslic3r.h"
-
+//w11
+#include "../PrintConfig.hpp"
 #include <algorithm>
 #include <boost/log/trivial.hpp>
 #include <functional>
@@ -293,15 +294,16 @@ ThickPolylines make_fill_polylines(
         // svg.draw(vertical_lines, "black", scale_(0.1));
         // svg.Close();
         //w11
+        PrintObjectConfig config;
         const coord_t threshold = scaled_spacing * 4.5;
         for (ExPolygon &ex_poly : gaps_for_additional_filling) {
             //w11
-            if (ex_poly.contour.length() < threshold) {
+            if (ex_poly.contour.length() < threshold && config.detect_narrow_internal_solid_infill) {
                 continue;
             }
             BoundingBox            ex_bb       = ex_poly.contour.bounding_box();
             //w11
-            if (ex_bb.size().x() < threshold || ex_bb.size().y() < threshold) {
+            if ((ex_bb.size().x() < threshold || ex_bb.size().y() < threshold) && config.detect_narrow_internal_solid_infill) {
                 continue;
             }
             coord_t                loops_count = (std::max(ex_bb.size().x(), ex_bb.size().y()) + scaled_spacing - 1) / scaled_spacing;
