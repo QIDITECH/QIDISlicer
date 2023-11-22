@@ -3386,7 +3386,8 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInt(0));
 
-    def = this->add("xy_size_compensation", coFloat);
+    //w11
+    def        = this->add("xy_size_compensation", coFloat);
     def->label = L("XY Size Compensation");
     def->category = L("Advanced");
     def->tooltip = L("The object will be grown/shrunk in the XY plane by the configured value "
@@ -3394,6 +3395,26 @@ void PrintConfigDef::init_fff_params()
                    "for fine-tuning hole sizes.");
     def->sidetext = L("mm");
     def->mode = comExpert;
+    def->set_default_value(new ConfigOptionFloat(0));
+    //w11
+    def           = this->add("xy_hole_compensation", coFloat);
+    def->label    = L("X-Y hole compensation");
+    def->category = L("Advanced");
+    def->tooltip  = L("Holes of object will be grown or shrunk in XY plane by the configured value. "
+                     "Positive value makes holes bigger. Negative value makes holes smaller. "
+                     "This function is used to adjust size slightly when the object has assembling issue");
+    def->sidetext = L("mm");
+    def->mode     = comExpert;
+    def->set_default_value(new ConfigOptionFloat(0));
+
+    def           = this->add("xy_contour_compensation", coFloat);
+    def->label    = L("X-Y contour compensation");
+    def->category = L("Advanced");
+    def->tooltip  = L("Contour of object will be grown or shrunk in XY plane by the configured value. "
+                     "Positive value makes contour bigger. Negative value makes contour smaller. "
+                     "This function is used to adjust size slightly when the object has assembling issue");
+    def->sidetext = L("mm");
+    def->mode     = comExpert;
     def->set_default_value(new ConfigOptionFloat(0));
 
     def = this->add("z_offset", coFloat);

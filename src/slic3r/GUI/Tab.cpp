@@ -1655,7 +1655,11 @@ void TabPrint::build()
         optgroup->append_single_option_line("slicing_mode");
         optgroup->append_single_option_line("resolution");
         optgroup->append_single_option_line("gcode_resolution");
-        optgroup->append_single_option_line("xy_size_compensation");
+        //w11
+        //optgroup->append_single_option_line("xy_size_compensation");
+        optgroup->append_single_option_line("xy_hole_compensation");
+        optgroup->append_single_option_line("xy_contour_compensation");
+        //optgroup->append_single_option_line("xy_size_compensation");
         optgroup->append_single_option_line("elefant_foot_compensation", "elephant-foot-compensation_114487");
 
         optgroup = page->new_optgroup(L("Arachne perimeter generator"));
