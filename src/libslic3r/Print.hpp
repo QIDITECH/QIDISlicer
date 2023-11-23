@@ -379,7 +379,7 @@ private:
 
     void slice_volumes();
     // Has any support (not counting the raft).
-    //w11
+    //w12
     ExPolygons _shrink_contour_holes(double contour_delta, double hole_delta, const ExPolygons &polys) const;
     void detect_surfaces_type();
     void process_external_surfaces();

@@ -679,7 +679,7 @@ bool PrintObject::invalidate_state_by_config_options(
 		} else if (
                opt_key == "elefant_foot_compensation"
             || opt_key == "support_material_contact_distance" 
-            //w11
+            //w12
             || opt_key == "xy_size_compensation"
             || opt_key == "xy_hole_compensation"
             || opt_key == "xy_contour_compensation") {

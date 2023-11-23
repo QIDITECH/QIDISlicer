@@ -848,7 +848,7 @@ static PrintObjectRegions* generate_print_object_regions(
     const PrintRegionConfig                     &default_region_config,
     const Transform3d                           &trafo,
     size_t                                       num_extruders,
-    //w11
+    //w12
     const float                                  xy_contour_compensation,
     const std::vector<unsigned int>             &painting_extruders)
 {
@@ -880,7 +880,7 @@ static PrintObjectRegions* generate_print_object_regions(
             layer_ranges_regions.push_back({ range.layer_height_range, range.config });
     }
 
-    //w11
+    //w12
     const bool is_mm_painted = num_extruders > 1 && std::any_of(model_volumes.cbegin(), model_volumes.cend(), [](const ModelVolume *mv) { return mv->is_mm_painted(); });
     update_volume_bboxes(layer_ranges_regions, out->cached_volume_ids, model_volumes, out->trafo_bboxes, is_mm_painted ? 0.f : std::max(0.f, xy_contour_compensation));
 
@@ -1405,7 +1405,7 @@ Print::ApplyStatus Print::apply(const Model &model, DynamicPrintConfig new_full_
                 m_default_region_config,
                 model_object_status.print_instances.front().trafo,
                 num_extruders,
-                //w11
+                //w12
                 print_object.is_mm_painted() ? 0.f : float(print_object.config().xy_contour_compensation.value),
                 painting_extruders);
         }

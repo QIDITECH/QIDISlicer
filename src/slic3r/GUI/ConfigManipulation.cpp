@@ -181,7 +181,7 @@ void ConfigManipulation::update_print_fff_config(DynamicPrintConfig* config, con
         m_support_material_overhangs_queried = false;
     }
 
-    //w11
+    //w12
     if (abs(config->option<ConfigOptionFloat>("xy_hole_compensation")->value) > 2) {
         const wxString     msg_text = _(L("This setting is only used for model size tunning with small value in some cases.\n"
                                       "For example, when model size has small error and hard to be assembled.\n"

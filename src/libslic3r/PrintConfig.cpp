@@ -3386,7 +3386,6 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInt(0));
 
-    //w11
     def        = this->add("xy_size_compensation", coFloat);
     def->label = L("XY Size Compensation");
     def->category = L("Advanced");
@@ -3396,7 +3395,7 @@ void PrintConfigDef::init_fff_params()
     def->sidetext = L("mm");
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionFloat(0));
-    //w11
+    //w12
     def           = this->add("xy_hole_compensation", coFloat);
     def->label    = L("X-Y hole compensation");
     def->category = L("Advanced");

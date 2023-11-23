@@ -570,7 +570,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     // The rest
     ((ConfigOptionBool,                thick_bridges))
     ((ConfigOptionFloat,               xy_size_compensation))
-    //w11
+    //w12
     ((ConfigOptionFloat, xy_hole_compensation))
     ((ConfigOptionFloat, xy_contour_compensation))
     ((ConfigOptionBool,                wipe_into_objects))
