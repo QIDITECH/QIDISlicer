@@ -2132,104 +2132,98 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
         size_t new_selection = tab == (size_t)(-1) ? m_last_selected_tab : (m_layout == ESettingsLayout::Dlg && tab != 0) ? tab - 1 : tab;
         //B4
         if (m_tabpanel->GetSelection() == 4) {
+            // B45
+            PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+            const PhysicalPrinterCollection &ph_printers = preset_bundle.physical_printers;
+            struct PhysicalPrinterPresetData
+            {
+                wxString    lower_name; // just for sorting
+                std::string name;       // preset_name
+                std::string fullname;   // full name
+                bool        selected;   // is selected
+            };
+            std::vector<PhysicalPrinterPresetData> preset_data;
+            for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
+                for (const std::string &preset_name : it->get_preset_names()) {
+                    preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), preset_name,
+                                           it->get_full_name(preset_name), ph_printers.is_selected(it, preset_name)});
+                }
+            }
+            m_collection = &preset_bundle.printers;
+            std::vector<const PhysicalPrinterPresetData *> missingPresets;
+            std::vector<MachineListButton *>               m_buttons = (m_printer_view->GetButton());
+
+            for (auto it = m_buttons.begin(); it != m_buttons.end();) {
+                bool foundPreset = false;
+                for (const PhysicalPrinterPresetData &data : preset_data) {
+                    if ((*it)->getLabel() == data.fullname) {
+                        foundPreset = true;
+                        break;
+                    }
+                }
+                if (!foundPreset) {
+                    (*it)->StopStatusThread();
+
+                    delete *it;
+
+                    it = m_buttons.erase(it);
+                    m_printer_view->SetButtons(m_buttons);
+                    m_printer_view->UpdateLayout();
+                } else {
+                    ++it;
+                }
+            }
+
+            for (const PhysicalPrinterPresetData &data : preset_data) {
+                bool foundButton = false;
+                for (MachineListButton *button : m_buttons) {
+                    if (button->getLabel() == data.fullname) {
+                        foundButton = true;
+                        break;
+                    }
+                }
+                if (!foundButton) {
+                    missingPresets.push_back(&data);
+                }
+            }
+            for (const PhysicalPrinterPresetData *data : missingPresets) {
+                Preset *preset = m_collection->find_preset(data->name);
+                if (!preset || !preset->is_visible)
+                    continue;
+                wxStringTokenizer tokenizer((data->fullname), " ");
+                auto *printer = preset_bundle.physical_printers.find_printer(std::string(tokenizer.GetNextToken().mb_str()));
+                wxString host = (printer->config.opt_string("print_host"));
+
+                std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+                bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+
+                DynamicPrintConfig *cfg_t = &(printer->config);
+                if (isValidIPAddress) {
+                    m_printer_view->AddButton(
+                        data->fullname, "Name: " + data->fullname + "\nIp: " + host,
+                        [host, this](wxMouseEvent &event) {
+                            wxString formattedHost = wxString::Format("http://%s", host);
+                            if (!host.Lower().starts_with("http"))
+                                wxString formattedHost = wxString::Format("http://%s", host);
+                            if (!formattedHost.Lower().ends_with("10088"))
+                                formattedHost = wxString::Format("%s:10088", formattedHost);
+                            this->m_printer_view->load_url(formattedHost);
+                        },
+                        (data->selected), cfg_t);
+                }
+            }
+            m_printer_view->ResumeButton();
+
+
+
+
             if (const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config(); cfg) {
-                std::string            select_name   = wxGetApp().preset_bundle->physical_printers.get_selected_full_printer_name();
-                PresetBundle &         preset_bundle = *wxGetApp().preset_bundle;
                 const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
                 wxString               host          = pp.config.opt_string("print_host");
                 //B45
-                const PhysicalPrinterCollection &ph_printers = preset_bundle.physical_printers;
-                struct PhysicalPrinterPresetData
-                {
-                    wxString    lower_name; // just for sorting
-                    std::string name;       // preset_name
-                    std::string fullname;   // full name
-                    bool        selected;   // is selected
-                };
-                std::vector<PhysicalPrinterPresetData> preset_data;
-                for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
-                    for (const std::string &preset_name : it->get_preset_names()) {
-                        preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), preset_name,
-                                               it->get_full_name(preset_name), ph_printers.is_selected(it, preset_name)});
-                    }
-                }
-                m_collection = &preset_bundle.printers;
-                std::vector<const PhysicalPrinterPresetData *> missingPresets;
-                std::vector<MachineListButton *>                        m_buttons = (m_printer_view->GetButton());
-
-                 for (auto it = m_buttons.begin(); it != m_buttons.end();) {
-                    bool foundPreset = false;
-                    for (const PhysicalPrinterPresetData &data : preset_data) {
-                        if ((*it)->getLabel() == data.fullname) {
-                            foundPreset = true;
-                            break;
-                        }
-                    }
-                    if (!foundPreset) {
-                        (*it)->StopStatusThread();
-
-                        delete *it;
-
-                        it = m_buttons.erase(it);
-                        m_printer_view->SetButtons(m_buttons);
-                        m_printer_view->UpdateLayout();
-                    } else {
-                        ++it;
-                    }
-                }
-
-
-
-
-
-                for (const PhysicalPrinterPresetData &data : preset_data) {
-                    bool foundButton = false;
-                    for (MachineListButton *button : m_buttons) {
-                        if (button->getLabel() == data.fullname) {
-                            foundButton = true;
-                            break;
-                        }
-                    }
-                    if (!foundButton) {
-                        missingPresets.push_back(&data);
-                    }
-                }
-                for (const PhysicalPrinterPresetData *data : missingPresets) {
-                    Preset *preset = m_collection->find_preset(data->name);
-                    if (!preset || !preset->is_visible)
-                        continue;
-                    //auto                printer = preset_bundle.physical_printers.printer(count);
-
-                    wxStringTokenizer tokenizer((data->fullname), " ");
-
-
-                    auto *printer = preset_bundle.physical_printers.find_printer(std::string(tokenizer.GetNextToken().mb_str()));
-
-
-                    //wxString            host    = printer.config.opt_string("print_host");
-                    wxString            host  = (printer->config.opt_string("print_host"));
-
-                    std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                    bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-
-                    DynamicPrintConfig *cfg_t = &(printer->config);
-                    if (isValidIPAddress) {
-                        m_printer_view->AddButton(
-                            data->fullname, "Name: " + data->fullname + "\nIp: " + host,
-                            [host, this](wxMouseEvent &event) {
-                                wxString formattedHost = wxString::Format("http://%s", host);
-                                if (!host.Lower().starts_with("http"))
-                                    wxString formattedHost = wxString::Format("http://%s", host);
-                                if (!formattedHost.Lower().ends_with("10088"))
-                                    formattedHost = wxString::Format("%s:10088", formattedHost);
-                                this->m_printer_view->load_url(formattedHost);
-                            },
-                            (data->selected), cfg_t);
-                    }
-                }
-                m_printer_view->ResumeButton();
-
-                if (host.empty()) {
+                std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+                bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+                if (host.empty() || !isValidIPAddress) {
                     tem_host = "";
                     host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
                 }
