@@ -25,6 +25,11 @@ public:
     const char* get_name() const override;
 
     virtual bool test(wxString &curl_msg) const override;
+
+    //B45
+    virtual std::string get_status(wxString &curl_msg) const override;
+    virtual float       get_progress(wxString &curl_msg) const override;
+
     wxString get_test_ok_msg () const override;
     wxString get_test_failed_msg (wxString &msg) const override;
     bool upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const override;

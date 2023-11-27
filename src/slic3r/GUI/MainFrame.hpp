@@ -196,6 +196,9 @@ public:
     // When tab == -1, will be selected last selected tab
     void        select_tab(Tab* tab);
     void        select_tab(size_t tab = size_t(-1));
+    //B45
+    void OnTabPanelSelectionChanged(wxCommandEvent &event);
+
     void        select_view(const std::string& direction);
     // Propagate changed configuration from the Tab to the Plater and save changes to the AppConfig
     void        on_config_changed(DynamicPrintConfig* cfg) const ;
@@ -220,6 +223,10 @@ public:
     PrinterWebView *      m_printer_view{nullptr};
     //B28
     GuideWebView *        m_guide_view{nullptr};
+    //B45
+    PresetCollection *m_collection{nullptr};
+
+
     wxBookCtrlBase *      m_tabpanel{nullptr};
     SettingsDialog        m_settings_dialog;
     DiffPresetDialog      diff_dialog;

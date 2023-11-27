@@ -30,9 +30,165 @@
 #include <boost/log/trivial.hpp>
 #endif
 
+//B45
+#include "PrintHostDialogs.hpp"
+#include <wx/tokenzr.h>
 
 namespace Slic3r {
 namespace GUI {
+
+class MachineListButton : public wxButton
+{
+public:
+    MachineListButton(wxWindow *         parent,
+             wxWindowID         id,
+             const wxString &   label,
+             const wxPoint &    pos       = wxDefaultPosition,
+             const wxSize &     size      = wxDefaultSize,
+             long               style     = wxBORDER_DOUBLE,
+             const wxValidator &validator = wxDefaultValidator,
+             const wxString &   name      = wxButtonNameStr,
+             bool isSelected = false)
+        : wxButton(parent, id, label, pos, size, style, validator, name)
+    {
+        full_label = label;
+        m_isSelected = isSelected;
+        if (isSelected)
+            SetBackgroundColour(wxColour(100, 100, 105)); 
+        else
+            SetBackgroundColour(wxColour(67, 67, 71)); 
+        //Bind(wxEVT_BUTTON, &MachineListButton::OnMouseLeftUp, this);
+    }
+    wxString getLabel() { return full_label; }
+    wxString getIPLabel() { return m_ip_text; }
+
+
+    void SetBitMap(const wxBitmap &bitmap)
+    {
+        m_bitmap = bitmap;
+        Refresh();
+    }
+
+
+    void SetNameText(const wxString &text)
+    {
+        m_name_text = text;
+        Refresh();
+    }
+    void SetIPText(const wxString &text)
+    {
+        m_ip_text = text;
+        Refresh();
+    }
+    void SetStateText(const wxString &text)
+    {
+        m_state_text = text;
+        Refresh();
+    }
+
+    void SetProgressText(const wxString &text)
+    {
+        m_progress_text = text;
+        Refresh();
+    }
+    void SetSelect(bool isselectd)
+    {
+        m_isSelected = isselectd;
+        if (m_isSelected)
+            SetBackgroundColour(wxColour(100, 100, 105));
+        else
+            SetBackgroundColour(wxColour(67, 67, 71)); 
+        Refresh();
+    }
+
+    void SetSimpleMode(bool issimplemode)
+    {
+        m_isSimpleMode = issimplemode;
+        //if (m_isSelected)
+        //    SetBackgroundColour(wxColour(100, 100, 105));
+        //else
+        //    SetBackgroundColour(wxColour(67, 67, 71));
+        Refresh();
+    }
+
+    void SetClickHandler(const std::function<void(wxMouseEvent &)> &handler) { m_handlerl = handler; }
+    void PauseStatusThread() { m_pauseThread = true; }
+    void ResumeStatusThread() { m_pauseThread = false; }
+    void StopStatusThread()
+    {
+        m_stopThread = true;
+        if (m_statusThread.joinable()) {
+            m_statusThread.join();
+        }
+    }
+    void OnPaint(wxPaintEvent &event);
+    void OnMouseEnter(wxMouseEvent &event);
+    void OnMouseLeave(wxMouseEvent &event);
+    void OnMouseLeftDown(wxMouseEvent &event);
+    void OnMouseLeftUp(wxMouseEvent &event);
+    void OnClickHandler(wxCommandEvent &event);
+    void SetStatusThread(std::thread thread) { m_statusThread = std::move(thread); }
+    std::thread CreatThread(const wxString &buttonText, DynamicPrintConfig *cfg_t)
+    {
+
+        std::thread thread([this, buttonText, cfg_t]() {
+             std::unique_ptr<PrintHost> printhost(PrintHost::get_print_host(cfg_t));
+             if (!printhost) {
+                 BOOST_LOG_TRIVIAL(error) << ("Could not get a valid Printer Host reference");
+                 return;
+             }
+             wxString msg;
+             std::string state = "standby";
+             float         progress = 0;
+            while (true) {
+                if (!m_pauseThread) {
+                    state = printhost->get_status(msg);
+                    if (state == "offline") {
+                        //BOOST_LOG_TRIVIAL(error) << boost::format("%1%Got state: %2%") % buttonText % state;
+                        m_pauseThread = true;
+                    }
+                    BOOST_LOG_TRIVIAL(info) << boost::format("%1%Got state: %2%") % buttonText % state;
+                    SetStateText(state);
+                    if (state == "printing") {
+                        progress = (printhost->get_progress(msg)) * 100;
+                        int progressInt = static_cast<int>(progress);
+                        SetStateText(state);
+                        SetProgressText(wxString::Format(wxT("(%d%%)"), progressInt));
+                        BOOST_LOG_TRIVIAL(info) << boost::format("%1%Got progress: %2%") % buttonText % progress;
+                    } 
+                    ;
+                 } else
+                std::this_thread::sleep_for(std::chrono::seconds(3));
+                if (m_stopThread)
+                    break;
+            }
+        });
+        return thread;
+    }
+
+private:
+
+    std::atomic<bool> m_stopThread{false};
+    std::atomic<bool> m_pauseThread{false};
+
+    bool m_isSimpleMode;
+    bool m_isSelected;
+
+    std::thread m_statusThread;
+
+    wxBitmap m_bitmap;    
+    bool     m_isHovered; 
+    wxString full_label;
+    wxString m_name_text; 
+    wxString m_ip_text; 
+    wxString m_state_text; 
+    wxString m_progress_text; 
+    std::function<void(wxMouseEvent &)> m_handlerl;
+    wxDECLARE_EVENT_TABLE();
+    //wxDECLARE_EVENT_TABLE();
+};
+
+
 
 
 class PrinterWebView : public wxPanel {
@@ -44,7 +200,41 @@ public:
     void UpdateState();
     void OnClose(wxCloseEvent& evt);
 
+    //B45
+    void OnLeftButtonClick(wxCommandEvent &event);
+    void OnRightButtonClick(wxCommandEvent &event);
+
+    void RunScript(const wxString &javascript);
+    //void OnScriptMessageReceived(wxWebViewEvent &event);
+    void OnScriptMessage(wxWebViewEvent &evt);
+
+    void UpdateLayout();
+    void OnScroll(wxScrollWinEvent &event);
+
+    //B45
+    void SendRecentList(int images);
+    void SetButtons(std::vector<MachineListButton *> buttons);
+    void AddButton(const wxString &                             buttonText,
+                   const wxString &                             moreInfo,
+                   const std::function<void(wxMouseEvent &)> &handler,
+                   bool                                         isOnline,
+                   DynamicPrintConfig *                         cfg_t);
+    void                        DeleteButton();
+    void                        PauseButton();
+    void                        ResumeButton();
+    std::vector<MachineListButton *>     GetButton() { return m_buttons; };
+
 private:
+    //B45
+    wxBoxSizer *leftsizer;
+    wxBoxSizer *topsizer;
+    bool        m_isSimpleMode = false;
+
+    wxButton *arrow_button;
+
+    wxScrolledWindow *          leftScrolledWindow;
+
+    std::vector<MachineListButton *> m_buttons;
 
     wxWebView* m_browser;
     long m_zoomFactor;
