@@ -749,6 +749,10 @@ void MainFrame::init_tabpanel()
 #else
     m_tabpanel->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, [this](wxBookCtrlEvent& e) {
 #endif
+        //B45
+        #if defined(__WIN32__) || defined(__WXMAC__)
+                m_printer_view->PauseButton();
+        #endif 
         if (int old_selection = e.GetOldSelection();
             old_selection != wxNOT_FOUND && old_selection < static_cast<int>(m_tabpanel->GetPageCount())) {
             Tab* old_tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(old_selection));
@@ -893,9 +897,9 @@ void MainFrame::create_preset_tabs()
 #endif
     m_tabpanel->AddPage(m_guide_view, _L("Guide"));
     //B45
-    m_tabpanel->Bind(wxCUSTOMEVT_NOTEBOOK_SEL_CHANGED, &MainFrame::OnTabPanelSelectionChanged, this);
-
-
+    // #if defined(__WIN32__)
+    //     m_tabpanel->Bind(wxCUSTOMEVT_NOTEBOOK_SEL_CHANGED, &MainFrame::OnTabPanelSelectionChanged, this);
+    // #endif
 }
 
 void MainFrame::add_created_tab(Tab* panel,  const std::string& bmp_name /*= ""*/)
@@ -2108,12 +2112,12 @@ void MainFrame::select_tab(Tab* tab)
 }
 
 //B45
-void MainFrame::OnTabPanelSelectionChanged(wxCommandEvent &event)
-{
+// void MainFrame::OnTabPanelSelectionChanged(wxCommandEvent &event)
+// {
 
-    m_printer_view->PauseButton();
-    event.Skip();
-}
+//     m_printer_view->PauseButton();
+//     event.Skip();
+// }
 
 
 
@@ -2196,11 +2200,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
                 std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
                 bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-
+                wxStringTokenizer tokenizer2((data->name), " 0.", wxTOKEN_RET_EMPTY);
+                wxString            machine_type = tokenizer2.GetNextToken();
+                machine_type += " "+ tokenizer2.GetNextToken();
                 DynamicPrintConfig *cfg_t = &(printer->config);
                 if (isValidIPAddress) {
                     m_printer_view->AddButton(
-                        data->fullname, "Name: " + data->fullname + "\nIp: " + host,
+                        printer->name, host, machine_type, (data->fullname),
                         [host, this](wxMouseEvent &event) {
                             wxString formattedHost = wxString::Format("http://%s", host);
                             if (!host.Lower().starts_with("http"))
@@ -2212,9 +2218,10 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                         (data->selected), cfg_t);
                 }
             }
-            m_printer_view->ResumeButton();
 
-
+            #if defined(__WIN32__) || defined(__WXMAC__)
+                m_printer_view->ResumeButton();
+            #endif 
 
 
             if (const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config(); cfg) {

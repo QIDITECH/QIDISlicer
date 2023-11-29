@@ -23,6 +23,7 @@ wxBEGIN_EVENT_TABLE(MachineListButton, wxButton) EVT_PAINT(MachineListButton::On
     EVT_LEAVE_WINDOW(MachineListButton::OnMouseLeave) EVT_LEFT_DOWN(MachineListButton::OnMouseLeftDown) EVT_LEFT_UP(MachineListButton::OnMouseLeftUp)
         wxEND_EVENT_TABLE()
 
+
 void MachineListButton::OnPaint(wxPaintEvent &event)
 {
     wxPaintDC dc(this);
@@ -32,6 +33,11 @@ void MachineListButton::OnPaint(wxPaintEvent &event)
         dc.SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
         dc.SetTextForeground(wxColour(230, 230, 230));
         dc.DrawText(m_name_text, 10 , 10);
+        //wxSize textSize = dc.GetTextExtent(m_name_text);
+        //int x = (dc.GetSize().GetWidth() - textSize.GetWidth()) / 2;   
+        //int y = (dc.GetSize().GetHeight() - textSize.GetHeight()) / 2;
+
+        //dc.DrawText(m_name_text, x, y);
     } else {
         dc.DrawBitmap(m_bitmap, 10, (GetSize().GetHeight() - m_bitmap.GetHeight()) / 2, true);
 
@@ -95,7 +101,11 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
         : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize)
  {
 
-    int         leftsizerWidth = 300;
+    #if defined(__WIN32__) || defined(__WXMAC__)
+         int leftsizerWidth = 300;
+    #else
+         int leftsizerWidth = 210;
+    #endif
     topsizer  = new wxBoxSizer(wxHORIZONTAL); 
     leftScrolledWindow = new wxScrolledWindow(this, wxID_ANY);
     leftScrolledWindow->SetBackgroundColour(wxColour(45, 45, 48));
@@ -103,31 +113,38 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     wxFont font(wxFontInfo().Bold());
 
     wxBoxSizer *titlesizer = new wxBoxSizer(wxHORIZONTAL); 
-    wxStaticText *text       = new wxStaticText(leftScrolledWindow, wxID_ANY, "MACHINE LIST", wxDefaultPosition, wxDefaultSize);
-    text->SetForegroundColour(wxColour(255, 255, 255));
-    text->SetFont(wxFont(wxFontInfo(18).Bold()));
-    titlesizer->Add(text, wxSizerFlags().Align(wxALIGN_LEFT).Border(wxALL, 5));
+    text_static            = new wxStaticText(leftScrolledWindow, wxID_ANY, "MACHINE LIST", wxDefaultPosition, wxDefaultSize);
+    text_static->SetForegroundColour(wxColour(255, 255, 255));
+    text_static->SetFont(wxFont(wxFontInfo(18).Bold()));
+    #if defined __linux__
+        text_static->SetMinSize(wxSize(200, 40));
+        text_static->SetFont(wxFont(wxFontInfo(12).Bold()));
+    #endif
+
+    titlesizer->Add(text_static, wxSizerFlags().Align(wxALIGN_LEFT).Border(wxALL, 5));
     titlesizer->AddStretchSpacer();
     //wxBU_EXACTFIT wxBORDER_NONE
-    wxButton *refresh_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-    refresh_button->SetBackgroundColour(leftScrolledWindow->GetBackgroundColour());
-    refresh_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
+    #if defined(__WIN32__) || defined(__WXMAC__)
+        wxButton *refresh_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        refresh_button->SetBackgroundColour(leftScrolledWindow->GetBackgroundColour());
+        refresh_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
 
-    refresh_button->SetMinSize(wxSize(40, -1));
-    refresh_button->SetBitmap(*get_bmp_bundle("refresh-line", 20));
-    //leftsizer->Add(button2, wxSizerFlags().Align(wxALIGN_RIGHT).Border(wxALL, 2));
-    titlesizer->Add(refresh_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
-    refresh_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnRightButtonClick, this);
+        refresh_button->SetMinSize(wxSize(40, -1));
+        refresh_button->SetBitmap(*get_bmp_bundle("refresh-line", 20));
+        //leftsizer->Add(button2, wxSizerFlags().Align(wxALIGN_RIGHT).Border(wxALL, 2));
+        titlesizer->Add(refresh_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
+        refresh_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnRightButtonClick, this);
 
-    arrow_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-    arrow_button->SetFont(font);
-    arrow_button->SetBackgroundColour(leftScrolledWindow->GetBackgroundColour());
-    arrow_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
-    arrow_button->SetMinSize(wxSize(40, -1));
-    arrow_button->SetBitmap(*get_bmp_bundle("arrow-left-s-line", 20));
-    // leftsizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_TOP).Border(wxALL, 2));
-    titlesizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
-    arrow_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnLeftButtonClick, this);
+        arrow_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        arrow_button->SetFont(font);
+        arrow_button->SetBackgroundColour(leftScrolledWindow->GetBackgroundColour());
+        arrow_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
+        arrow_button->SetMinSize(wxSize(40, -1));
+        arrow_button->SetBitmap(*get_bmp_bundle("arrow-left-s-line", 20));
+        // leftsizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_TOP).Border(wxALL, 2));
+        titlesizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
+        arrow_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnLeftButtonClick, this);
+    #endif
 
     titlesizer->Layout();
 
@@ -173,38 +190,38 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
 
 
 
-void PrinterWebView::AddButton(const wxString &                             buttonText,
-                                const wxString &                             moreInfo,
+void PrinterWebView::AddButton(const wxString &                             device_name,
+                                const wxString &                            ip,
+                                const wxString &                            machine_type,
+                                const wxString &                            fullname,
                                 const std::function<void(wxMouseEvent &)> &handler,
                                 bool                                         isSelected,
                                 DynamicPrintConfig *                         cfg_t)
  {
+    wxString Machine_Name = Machine_Name.Format("%s%s", machine_type, "_thumbnail");
 
-    wxStringTokenizer tokenizer(moreInfo, " ");
-
-
-    tokenizer.GetNextToken();
-    wxString Name = tokenizer.GetNextToken();
-    tokenizer.GetNextToken();
-    wxString Machine_Type = tokenizer.GetNextToken();
-    wxString Machine_Count = tokenizer.GetNextToken();
-    tokenizer.GetNextToken();
-    tokenizer.GetNextToken();
-    wxString Machine_IP = tokenizer.GetNextToken();
-    wxString Machine_Name = Machine_Name.Format("%s %s%s", Machine_Type, Machine_Count, "_thumbnail");
-
-    MachineListButton *customButton = new MachineListButton(leftScrolledWindow, wxID_ANY, buttonText, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE,
+    MachineListButton *customButton = new MachineListButton(leftScrolledWindow, wxID_ANY, device_name,
+                                                            fullname,
+                                                            wxDefaultPosition,
+                                                            wxDefaultSize, wxBU_LEFT,
                                           wxDefaultValidator, wxButtonNameStr, isSelected);
-    customButton->SetMinSize(wxSize(80, -1));
-    customButton->SetBitmap(*get_bmp_bundle(std::string(Machine_Name.mb_str()), 80));
+    //customButton->SetMinSize(wxSize(80, -1));
+    #if defined(__WIN32__) || defined(__WXMAC__)
+        customButton->SetBitmap(*get_bmp_bundle(std::string(Machine_Name.mb_str()), 80));
+    #endif
     customButton->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
-    customButton->SetNameText(Name);
-    customButton->SetIPText(Machine_IP);
+    customButton->SetForegroundColour(wxColour(255, 255, 255));
+    customButton->SetNameText(device_name);
+    customButton->SetIPText(ip);
     customButton->SetStateText("standby");
     customButton->SetProgressText("(0%)");
-    customButton->SetMinSize(wxSize(200, -1));
+    //customButton->SetMinSize(wxSize(200, -1));
     customButton->SetClickHandler(handler);
-    customButton->SetStatusThread(std::move(customButton->CreatThread(buttonText, cfg_t)));
+    #if defined(__WIN32__) || defined(__WXMAC__)
+        customButton->SetStatusThread(std::move(customButton->CreatThread(device_name,ip, cfg_t)));
+    #else
+        customButton->SetSize(wxSize(200, -1));
+    #endif
     customButton->SetSimpleMode(false);
 
     leftsizer->Add(customButton, wxSizerFlags().Border(wxALL, 1).Expand());
@@ -272,20 +289,26 @@ void PrinterWebView::OnLeftButtonClick(wxCommandEvent &event)
     m_isSimpleMode = !m_isSimpleMode;
 
     if (!m_isSimpleMode) {
+        leftsizer->SetMinSize(wxSize(300, -1));
         leftScrolledWindow->SetMinSize(wxSize(300, -1));
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-left-s-line", 20));
+        text_static->SetFont(wxFont(wxFontInfo(18).Bold()));
         for (MachineListButton *button : m_buttons) {
             button->SetBitmap(*get_bmp_bundle(std::string("X-MAX 3_thumbnail"), 80));
             button->SetSimpleMode(m_isSimpleMode);
+            button->SetSize(wxSize(300, -1));
+
         }
     }
         else {
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-right-s-line", 20));
-
-        leftScrolledWindow->SetMinSize(wxSize(260, -1));
+        leftsizer->SetMinSize(wxSize(210, -1));
+        leftScrolledWindow->SetMinSize(wxSize(210, -1));
+        text_static->SetFont(wxFont(wxFontInfo(12).Bold()));
         for (MachineListButton *button : m_buttons) {
             button->SetBitmap(*get_bmp_bundle(std::string("X-MAX 3_thumbnail"), 30));
             button->SetSimpleMode(m_isSimpleMode);
+            button->SetSize(wxSize(200, -1));
         }
     }
 
@@ -295,6 +318,7 @@ void PrinterWebView::OnLeftButtonClick(wxCommandEvent &event)
     leftScrolledWindow->Layout();
 
     topsizer->Layout();
+    //UpdateLayout();
 }
 
 void PrinterWebView::OnRightButtonClick(wxCommandEvent &event)
@@ -306,18 +330,18 @@ void PrinterWebView::OnRightButtonClick(wxCommandEvent &event)
 
 
 
-void PrinterWebView::SendRecentList(int images)
-{
-    boost::property_tree::wptree req;
-    boost::property_tree::wptree data;
-    //wxGetApp().mainframe->get_recent_projects(data, images);
-    req.put(L"sequence_id", "");
-    req.put(L"command", L"studio_set_mallurl");
-    //req.put_child(L"response", data);
-    std::wostringstream oss;
-    pt::write_json(oss, req, false);
-    RunScript(wxString::Format("window.postMessage(%s)", oss.str()));
-}
+//void PrinterWebView::SendRecentList(int images)
+//{
+//    boost::property_tree::wptree req;
+//    boost::property_tree::wptree data;
+//    //wxGetApp().mainframe->get_recent_projects(data, images);
+//    req.put(L"sequence_id", "");
+//    req.put(L"command", L"studio_set_mallurl");
+//    //req.put_child(L"response", data);
+//    std::wostringstream oss;
+//    pt::write_json(oss, req, false);
+//    RunScript(wxString::Format("window.postMessage(%s)", oss.str()));
+//}
 
 
 
@@ -328,7 +352,7 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent &evt)
     //std::string response = wxGetApp().handle_web_request(evt.GetString().ToUTF8().data());
     //if (response.empty())
     //    return;
-    SendRecentList(1);
+    //SendRecentList(1);
     ///* remove \n in response string */
     //response.erase(std::remove(response.begin(), response.end(), '\n'), response.end());
     //if (!response.empty()) {
