@@ -64,6 +64,10 @@ public:
             SetBackgroundColour(wxColour(67, 67, 71)); 
         //Bind(wxEVT_BUTTON, &MachineListButton::OnMouseLeftUp, this);
     }
+
+    void SetLabel(const wxString &fullname) { full_label = fullname; }
+
+
     wxString getLabel() { return full_label; }
     wxString getIPLabel() { return m_ip_text; }
 
@@ -80,6 +84,13 @@ public:
         m_name_text = text;
         Refresh();
     }
+
+    wxString GetNameText()
+    {
+        return m_name_text;
+    }
+
+
     void SetIPText(const wxString &text)
     {
         m_ip_text = text;
@@ -105,7 +116,7 @@ public:
             SetBackgroundColour(wxColour(67, 67, 71)); 
         Refresh();
     }
-
+    bool GetSelected() { return m_isSelected;}
     void SetSimpleMode(bool issimplemode)
     {
         m_isSimpleMode = issimplemode;
@@ -210,13 +221,19 @@ public:
     //B45
     void OnLeftButtonClick(wxCommandEvent &event);
     void OnRightButtonClick(wxCommandEvent &event);
+    void OnAddButtonClick(wxCommandEvent &event);
+    void OnDeleteButtonClick(wxCommandEvent &event);
+    void OnEditButtonClick(wxCommandEvent &event);
 
     void RunScript(const wxString &javascript);
     //void OnScriptMessageReceived(wxWebViewEvent &event);
     void OnScriptMessage(wxWebViewEvent &evt);
-
     void UpdateLayout();
     void OnScroll(wxScrollWinEvent &event);
+
+    void SetUpdateHandler(const std::function<void(wxCommandEvent &)> &handler) { m_handlerl = handler; }
+    void SetDeleteHandler(const std::function<void(wxCommandEvent &)> &handler) { m_delete_handlerl = handler; }
+
 
     //B45
     //void SendRecentList(int images);
@@ -231,18 +248,28 @@ public:
     void                        DeleteButton();
     void                        PauseButton();
     void                        ResumeButton();
+    void                        UnSelectedButton();
+
     std::vector<MachineListButton *>     GetButton() { return m_buttons; };
 
 private:
     //B45
+    wxBoxSizer *leftallsizer;
+
     wxBoxSizer *leftsizer;
     wxBoxSizer *topsizer;
     bool        m_isSimpleMode = false;
-
     wxButton *arrow_button;
     wxStaticText *    text_static;
 
+
+    std::function<void(wxCommandEvent &)> m_handlerl;
+    std::function<void(wxCommandEvent &)> m_delete_handlerl;
+
+
     wxScrolledWindow *          leftScrolledWindow;
+    wxPanel *         leftPanel;
+
 
     std::vector<MachineListButton *> m_buttons;
 
@@ -251,6 +278,8 @@ private:
 
     // DECLARE_EVENT_TABLE()
 };
+
+
 
 } // GUI
 } // Slic3r

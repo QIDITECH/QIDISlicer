@@ -57,6 +57,7 @@
 
 //B45
 #include <regex>
+#include <wx/regex.h>
 
 
 namespace Slic3r {
@@ -897,6 +898,30 @@ void MainFrame::create_preset_tabs()
 #endif
     m_tabpanel->AddPage(m_guide_view, _L("Guide"));
     //B45
+    m_printer_view->SetUpdateHandler([this](wxCommandEvent &event) {
+        wxGetApp().get_tab(Preset::TYPE_PRINTER)->update_preset_choice();
+        wxGetApp().get_tab(Preset::TYPE_PRINTER)->update_btns_enabling();
+        wxGetApp().plater()->sidebar().update_presets(Preset::TYPE_PRINTER);
+    });
+
+    m_printer_view->SetDeleteHandler([this](wxCommandEvent &event) {
+        PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+
+        const std::string &printer_name = preset_bundle.physical_printers.get_selected_full_printer_name();
+        if (printer_name.empty())
+            return false;
+
+        wxString msg;
+        //if (!note_string.IsEmpty())
+        //    msg += note_string + "\n";
+        msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), printer_name);
+
+        if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
+            return false;
+
+        preset_bundle.physical_printers.delete_selected_printer();
+    });
+
     // #if defined(__WIN32__)
     //     m_tabpanel->Bind(wxCUSTOMEVT_NOTEBOOK_SEL_CHANGED, &MainFrame::OnTabPanelSelectionChanged, this);
     // #endif
@@ -2142,8 +2167,8 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
             struct PhysicalPrinterPresetData
             {
                 wxString    lower_name; // just for sorting
-                std::string name;       // preset_name
-                std::string fullname;   // full name
+                wxString    name;       // preset_name
+                wxString    fullname;   // full name
                 bool        selected;   // is selected
             };
             std::vector<PhysicalPrinterPresetData> preset_data;
@@ -2191,11 +2216,12 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 }
             }
             for (const PhysicalPrinterPresetData *data : missingPresets) {
-                Preset *preset = m_collection->find_preset(data->name);
+
+                Preset *preset = m_collection->find_preset((data->name).ToStdString());
                 if (!preset || !preset->is_visible)
                     continue;
-                wxStringTokenizer tokenizer((data->fullname), " ");
-                auto *printer = preset_bundle.physical_printers.find_printer(std::string(tokenizer.GetNextToken().mb_str()));
+                wxStringTokenizer tokenizer((data->fullname), "*");
+                auto *   printer = preset_bundle.physical_printers.find_printer(std::string(tokenizer.GetNextToken().Trim().mb_str()));
                 wxString host = (printer->config.opt_string("print_host"));
 
                 std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
@@ -2204,9 +2230,15 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 wxString            machine_type = tokenizer2.GetNextToken();
                 machine_type += " "+ tokenizer2.GetNextToken();
                 DynamicPrintConfig *cfg_t = &(printer->config);
+
+                wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
+                wxString          printer_name = tokenizer3.GetNextToken();
+
+
+
                 if (isValidIPAddress) {
                     m_printer_view->AddButton(
-                        printer->name, host, machine_type, (data->fullname),
+                        printer_name, host, machine_type, (data->fullname),
                         [host, this](wxMouseEvent &event) {
                             wxString formattedHost = wxString::Format("http://%s", host);
                             if (!host.Lower().starts_with("http"))

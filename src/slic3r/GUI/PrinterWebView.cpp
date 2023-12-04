@@ -12,11 +12,14 @@
 
 #include <slic3r/GUI/Widgets/WebView.hpp>
 
+#include "PhysicalPrinterDialog.hpp"
+//B45
+#include <wx/regex.h>
+
 namespace pt = boost::property_tree;
 
 namespace Slic3r {
 namespace GUI {
-
 
 
 wxBEGIN_EVENT_TABLE(MachineListButton, wxButton) EVT_PAINT(MachineListButton::OnPaint) EVT_ENTER_WINDOW(MachineListButton::OnMouseEnter)
@@ -123,16 +126,46 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
 
     titlesizer->Add(text_static, wxSizerFlags().Align(wxALIGN_LEFT).Border(wxALL, 5));
     titlesizer->AddStretchSpacer();
+    wxBoxSizer *buttonsizer = new wxBoxSizer(wxHORIZONTAL); 
+
     //wxBU_EXACTFIT wxBORDER_NONE
     #if defined(__WIN32__) || defined(__WXMAC__)
+        wxButton *add_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        add_button->SetBackgroundColour(wxColour(100, 100, 105));
+        //add_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
+
+        add_button->SetMinSize(wxSize(40, -1));
+        add_button->SetBitmap(*get_bmp_bundle("add_machine_list", 20));
+        buttonsizer->Add(add_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
+        add_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnAddButtonClick, this);
+
+
+        wxButton *delete_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        delete_button->SetBackgroundColour(wxColour(100, 100, 105));
+        //delete_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
+
+        delete_button->SetMinSize(wxSize(40, -1));
+        delete_button->SetBitmap(*get_bmp_bundle("delete_machine_list", 20));
+        buttonsizer->Add(delete_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
+        delete_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnDeleteButtonClick, this);
+
+        wxButton *edit_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        edit_button->SetBackgroundColour(wxColour(100, 100, 105));
+        //edit_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
+
+        edit_button->SetMinSize(wxSize(40, -1));
+        edit_button->SetBitmap(*get_bmp_bundle("edit_machine_list", 20));
+        buttonsizer->Add(edit_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
+        edit_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnEditButtonClick, this);
+
+
         wxButton *refresh_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-        refresh_button->SetBackgroundColour(leftScrolledWindow->GetBackgroundColour());
-        refresh_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
+        refresh_button->SetBackgroundColour(wxColour(100, 100, 105));
+        //refresh_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
 
         refresh_button->SetMinSize(wxSize(40, -1));
         refresh_button->SetBitmap(*get_bmp_bundle("refresh-line", 20));
-        //leftsizer->Add(button2, wxSizerFlags().Align(wxALIGN_RIGHT).Border(wxALL, 2));
-        titlesizer->Add(refresh_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
+        buttonsizer->Add(refresh_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
         refresh_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnRightButtonClick, this);
 
         arrow_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
@@ -141,21 +174,22 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
         arrow_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
         arrow_button->SetMinSize(wxSize(40, -1));
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-left-s-line", 20));
-        // leftsizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_TOP).Border(wxALL, 2));
         titlesizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
         arrow_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnLeftButtonClick, this);
     #endif
 
     titlesizer->Layout();
+    buttonsizer->Layout();
 
     leftsizer->Add(titlesizer, wxSizerFlags().Expand().Align(wxALIGN_TOP).Border(wxALL, 0));
+    leftsizer->Add(buttonsizer, wxSizerFlags().Expand().Align(wxALIGN_TOP).Border(wxALL, 0));
 
     leftsizer->Layout();
-
     leftScrolledWindow->SetSizer(leftsizer);
     leftScrolledWindow->SetScrollRate(10, 10);
     leftScrolledWindow->SetMinSize(wxSize(leftsizerWidth, -1));
     leftScrolledWindow->FitInside();
+
     m_browser = WebView::CreateWebView(this, "");
     if (m_browser == nullptr) {
         wxLogError("Could not init m_browser");
@@ -163,6 +197,7 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     }
 
     SetSizer(topsizer);
+
     topsizer->Add(leftScrolledWindow, wxSizerFlags(0).Expand());
     topsizer->Add(m_browser, wxSizerFlags(1).Expand().Border(wxALL, 0));
 
@@ -257,6 +292,22 @@ void PrinterWebView::AddButton(const wxString &                             devi
  }
 
 
+  // B45
+ void PrinterWebView::UnSelectedButton()
+ {
+     // BOOST_LOG_TRIVIAL(error) << " Resume";
+
+     if (m_buttons.empty()) {
+         BOOST_LOG_TRIVIAL(info) << " empty";
+     } else {
+         for (MachineListButton *button : m_buttons) {
+             button->SetSelect(false);
+         }
+     }
+ }
+
+
+
  //B45
  void PrinterWebView::DeleteButton()
 {
@@ -328,6 +379,147 @@ void PrinterWebView::OnRightButtonClick(wxCommandEvent &event)
     }
 }
 
+void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
+{ 
+    PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString);
+    if (dlg.ShowModal() == wxID_OK) {
+        if (m_handlerl) {
+            m_handlerl(event);
+        }
+        PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+        auto          printer       = preset_bundle.physical_printers.get_selected_printer();
+        std::string   printer_name  = printer.name;
+        wxString      host          = printer.config.opt_string("print_host");
+
+        wxString formattedHost = wxString::Format("http://%s", host);
+        if (!host.Lower().starts_with("http"))
+            wxString formattedHost = wxString::Format("http://%s", host);
+        if (!formattedHost.Lower().ends_with("10088"))
+            formattedHost = wxString::Format("%s:10088", formattedHost);
+
+        std::string   fullname      = preset_bundle.physical_printers.get_selected_full_printer_name();
+
+        std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+        bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+        wxString            machine_type     = "X-MAX 3";
+        DynamicPrintConfig *cfg_t = &(printer.config);
+        std::regex  regex1("\\*\\s(.*)(?=\\snozzle)");
+
+        std::smatch match;
+
+        if (std::regex_search(fullname, match, regex1)) {
+            std::string regexmatch = match.str(0);
+            std::regex regex2("(X-\\w+\\s\\d)");
+            if (std::regex_search(regexmatch, match, regex2))
+                machine_type = match.str(0);
+        }
+
+        UnSelectedButton();
+        if (isValidIPAddress)
+            AddButton(
+                printer_name, host, machine_type, fullname,
+                [formattedHost, this](wxMouseEvent &event) {
+                    wxString host = formattedHost;
+                    load_url(host);
+                },
+                true, cfg_t);
+        load_url(formattedHost);
+        UpdateLayout();
+        Refresh();
+    }
+}
+
+void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) { 
+
+    PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+    for (MachineListButton *button : m_buttons) {
+        if ((button->GetSelected())) {
+
+            wxString msg;
+            //if (!note_string.IsEmpty())
+            //    msg += note_string + "\n";
+            msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), (button->getLabel()));
+
+            if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
+                return ;
+
+            button->StopStatusThread();
+
+            preset_bundle.physical_printers.delete_printer(std::string((button->GetNameText()).ToStdString()));
+
+            auto it = std::find(m_buttons.begin(), m_buttons.end(), button);
+            delete button;
+
+            if (it != m_buttons.end()) {
+                m_buttons.erase(it);
+            }
+
+            leftsizer->Detach(button);
+            for (MachineListButton *button : m_buttons) {
+                button->SetSelect(true);
+                wxString formattedHost = wxString::Format("http://%s:10088", button->getIPLabel());
+
+                load_url(formattedHost);
+                preset_bundle.physical_printers.select_printer((button->getLabel()).ToStdString());
+                break;
+            }
+            UpdateLayout();
+            Refresh();
+            break;
+        }
+    }
+    if (m_handlerl) {
+        m_handlerl(event);
+    }
+}
+
+void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) { 
+    for (MachineListButton *button : m_buttons) {
+        if ((button->GetSelected())) {
+            PhysicalPrinterDialog dlg(this->GetParent(), (wxString::FromUTF8((button->getLabel()).ToStdString())));
+            //BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << (button->getLabel());
+
+            //BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << wxString::FromUTF8((button->getLabel()).ToStdString());
+
+            if (dlg.ShowModal() == wxID_OK) {
+                if (m_handlerl) {
+                    m_handlerl(event);
+                }
+                PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+                auto          printer       = preset_bundle.physical_printers.get_selected_printer();
+                std::string   printer_name  = printer.name;
+                wxString      host          = printer.config.opt_string("print_host");
+                std::string   fullname      = preset_bundle.physical_printers.get_selected_full_printer_name();
+
+                std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+                bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+                wxString            machine_type     = "X-MAX 3";
+                DynamicPrintConfig *cfg_t            = &(printer.config);
+                std::regex          regex1("\\*\\s(.*)(?=\\snozzle)");
+
+                std::smatch match;
+
+                if (std::regex_search(fullname, match, regex1)) {
+                    std::string regexmatch = match.str(0);
+                    std::regex  regex2("(X-\\w+\\s\\d)");
+                    if (std::regex_search(regexmatch, match, regex2))
+                        machine_type = match.str(0);
+                }
+
+                button->SetNameText((wxString::FromUTF8(printer_name)));
+                button->SetIPText(host);
+                button->SetLabel(fullname);
+                wxString Machine_Name = Machine_Name.Format("%s%s", machine_type, "_thumbnail");
+
+                button->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
+                UpdateLayout();
+                Refresh();
+            }
+            break;
+        }
+    }
+}
+
 
 
 //void PrinterWebView::SendRecentList(int images)
@@ -368,6 +560,10 @@ void PrinterWebView::OnScriptMessage(wxWebViewEvent &evt)
 void PrinterWebView::UpdateLayout()
 {
     //leftScrolledWindow->SetVirtualSize(leftsizer->GetMinSize());
+    leftsizer->Layout();
+
+    leftScrolledWindow->Layout();
+
     leftScrolledWindow->FitInside();
     topsizer->Layout();
     if (!m_buttons.empty()) {
@@ -392,19 +588,26 @@ void PrinterWebView::load_url(wxString& url)
 //    this->Raise();
     if (m_browser == nullptr)
         return;
+    m_browser->LoadURL(url);
 
+    url.Remove(0, 7);
+    url.Remove(url.length() - 6);
     for (MachineListButton *button : m_buttons) {
 
-        size_t pos = url.Find((button->getIPLabel()));
-        if (pos != wxString::npos) {
+        if (url == (button->getIPLabel()))
             button->SetSelect(true);
-        } else {
+        else
             button->SetSelect(false);
-        }
     }
 
 
-    m_browser->LoadURL(url);
+    //const char *data = "Hello from C++!";
+    //std::string switch_dark_mode_script = "SwitchDarkMode(";
+    //switch_dark_mode_script += wxGetApp().app_config->get("dark_color_mode") == "1" ? "true" : "false";
+    //switch_dark_mode_script += ");";
+    //RunScript("var valueFromCpp = '" + std::string(data) + "';");
+    //m_browser->RunScript(switch_dark_mode_script);
+
     //m_browser->SetFocus();
     UpdateState();
 }
