@@ -444,8 +444,10 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
                 return ;
 
             button->StopStatusThread();
+            preset_bundle.physical_printers.select_printer((button->getLabel()).ToStdString());
 
-            preset_bundle.physical_printers.delete_printer(std::string((button->GetNameText()).ToStdString()));
+
+            preset_bundle.physical_printers.delete_selected_printer();
 
             auto it = std::find(m_buttons.begin(), m_buttons.end(), button);
             delete button;
@@ -455,14 +457,20 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
             }
 
             leftsizer->Detach(button);
-            for (MachineListButton *button : m_buttons) {
-                button->SetSelect(true);
-                wxString formattedHost = wxString::Format("http://%s:10088", button->getIPLabel());
+            if (!m_buttons.empty())
+                for (MachineListButton *button : m_buttons) {
+                    button->SetSelect(true);
+                    wxString formattedHost = wxString::Format("http://%s:10088", button->getIPLabel());
 
-                load_url(formattedHost);
-                preset_bundle.physical_printers.select_printer((button->getLabel()).ToStdString());
-                break;
+                    load_url(formattedHost);
+                    preset_bundle.physical_printers.select_printer((button->getLabel()).ToStdString());
+                    break;
+                }
+            else {
+                wxString host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                load_url(host);
             }
+
             UpdateLayout();
             Refresh();
             break;

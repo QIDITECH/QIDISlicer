@@ -2170,12 +2170,18 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 wxString    name;       // preset_name
                 wxString    fullname;   // full name
                 bool        selected;   // is selected
+                std::string  model_id;
             };
             std::vector<PhysicalPrinterPresetData> preset_data;
             for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
                 for (const std::string &preset_name : it->get_preset_names()) {
-                    preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), preset_name,
-                                           it->get_full_name(preset_name), ph_printers.is_selected(it, preset_name)});
+
+                    Preset *preset = wxGetApp().preset_bundle->printers.find_preset(preset_name);
+                    std::string model_id = preset->config.opt_string("printer_model");
+
+
+                    preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
+                                           wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name), model_id});
                 }
             }
             m_collection = &preset_bundle.printers;
@@ -2221,14 +2227,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 if (!preset || !preset->is_visible)
                     continue;
                 wxStringTokenizer tokenizer((data->fullname), "*");
-                auto *   printer = preset_bundle.physical_printers.find_printer(std::string(tokenizer.GetNextToken().Trim().mb_str()));
+
+                std::string tem_name = (into_u8(tokenizer.GetNextToken().Trim().mb_str()));
+                auto *   printer = preset_bundle.physical_printers.find_printer(tem_name);
                 wxString host = (printer->config.opt_string("print_host"));
 
                 std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
                 bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-                wxStringTokenizer tokenizer2((data->name), " 0.", wxTOKEN_RET_EMPTY);
-                wxString            machine_type = tokenizer2.GetNextToken();
-                machine_type += " "+ tokenizer2.GetNextToken();
                 DynamicPrintConfig *cfg_t = &(printer->config);
 
                 wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
@@ -2238,7 +2243,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
                 if (isValidIPAddress) {
                     m_printer_view->AddButton(
-                        printer_name, host, machine_type, (data->fullname),
+                        printer_name, host, (data->model_id), (data->fullname),
                         [host, this](wxMouseEvent &event) {
                             wxString formattedHost = wxString::Format("http://%s", host);
                             if (!host.Lower().starts_with("http"))
