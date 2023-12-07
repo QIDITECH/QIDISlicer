@@ -904,23 +904,23 @@ void MainFrame::create_preset_tabs()
         wxGetApp().plater()->sidebar().update_presets(Preset::TYPE_PRINTER);
     });
 
-    m_printer_view->SetDeleteHandler([this](wxCommandEvent &event) {
-        PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+    //m_printer_view->SetDeleteHandler([this](wxCommandEvent &event) {
+    //    PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
 
-        const std::string &printer_name = preset_bundle.physical_printers.get_selected_full_printer_name();
-        if (printer_name.empty())
-            return false;
+    //    const std::string &printer_name = preset_bundle.physical_printers.get_selected_full_printer_name();
+    //    if (printer_name.empty())
+    //        return false;
 
-        wxString msg;
-        //if (!note_string.IsEmpty())
-        //    msg += note_string + "\n";
-        msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), printer_name);
+    //    wxString msg;
+    //    //if (!note_string.IsEmpty())
+    //    //    msg += note_string + "\n";
+    //    msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), printer_name);
 
-        if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
-            return false;
+    //    if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
+    //        return false;
 
-        preset_bundle.physical_printers.delete_selected_printer();
-    });
+    //    preset_bundle.physical_printers.delete_selected_printer();
+    //});
 
     // #if defined(__WIN32__)
     //     m_tabpanel->Bind(wxCUSTOMEVT_NOTEBOOK_SEL_CHANGED, &MainFrame::OnTabPanelSelectionChanged, this);

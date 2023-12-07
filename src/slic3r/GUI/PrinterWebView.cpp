@@ -15,6 +15,7 @@
 #include "PhysicalPrinterDialog.hpp"
 //B45
 #include <wx/regex.h>
+#include <boost/regex.hpp>
 
 namespace pt = boost::property_tree;
 
@@ -398,26 +399,24 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
             formattedHost = wxString::Format("%s:10088", formattedHost);
 
         std::string   fullname      = preset_bundle.physical_printers.get_selected_full_printer_name();
-
-        std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-        bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-        wxString            machine_type     = "X-MAX 3";
-        DynamicPrintConfig *cfg_t = &(printer.config);
-        std::regex  regex1("\\*\\s(.*)(?=\\snozzle)");
-
-        std::smatch match;
-
-        if (std::regex_search(fullname, match, regex1)) {
-            std::string regexmatch = match.str(0);
-            std::regex regex2("(X-\\w+\\s\\d)");
-            if (std::regex_search(regexmatch, match, regex2))
-                machine_type = match.str(0);
+        std::string preset_name = printer.get_preset_name(fullname);
+        Preset *    preset      = wxGetApp().preset_bundle->printers.find_preset(preset_name);
+        std::string model_id    = "X-MAX 3";
+        if (preset != nullptr) {
+            model_id = preset->config.opt_string("printer_model");
         }
+
+
+
+
+        boost::regex        ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+        bool                isValidIPAddress = boost::regex_match(host.ToStdString(), ipRegex);
+        DynamicPrintConfig *cfg_t = &(printer.config);
 
         UnSelectedButton();
         if (isValidIPAddress)
             AddButton(
-                printer_name, host, machine_type, fullname,
+                printer_name, host, model_id, fullname,
                 [formattedHost, this](wxMouseEvent &event) {
                     wxString host = formattedHost;
                     load_url(host);
@@ -438,7 +437,12 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
             wxString msg;
             //if (!note_string.IsEmpty())
             //    msg += note_string + "\n";
-            msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), (button->getLabel()));
+            
+            #if defined(__WIN32__) || defined(__WXMAC__)
+                msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), (button->getLabel()));
+            #else
+                msg += _L("Are you sure you want to delete ") + (button->getLabel()) + _L("printer?");
+            #endif
 
             if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
                 return ;
@@ -498,26 +502,20 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) {
                 std::string   printer_name  = printer.name;
                 wxString      host          = printer.config.opt_string("print_host");
                 std::string   fullname      = preset_bundle.physical_printers.get_selected_full_printer_name();
-
-                std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-                wxString            machine_type     = "X-MAX 3";
-                DynamicPrintConfig *cfg_t            = &(printer.config);
-                std::regex          regex1("\\*\\s(.*)(?=\\snozzle)");
-
-                std::smatch match;
-
-                if (std::regex_search(fullname, match, regex1)) {
-                    std::string regexmatch = match.str(0);
-                    std::regex  regex2("(X-\\w+\\s\\d)");
-                    if (std::regex_search(regexmatch, match, regex2))
-                        machine_type = match.str(0);
+                std::string   preset_name   = printer.get_preset_name(fullname);
+                Preset *      preset        = wxGetApp().preset_bundle->printers.find_preset(preset_name);
+                std::string   model_id      = "X-MAX 3";
+                if (preset != nullptr) {
+                    model_id = preset->config.opt_string("printer_model");
                 }
+                DynamicPrintConfig *cfg_t            = &(printer.config);
+
+
 
                 button->SetNameText((wxString::FromUTF8(printer_name)));
                 button->SetIPText(host);
                 button->SetLabel(fullname);
-                wxString Machine_Name = Machine_Name.Format("%s%s", machine_type, "_thumbnail");
+                wxString Machine_Name = Machine_Name.Format("%s%s", model_id, "_thumbnail");
 
                 button->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
                 UpdateLayout();
