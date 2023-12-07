@@ -2177,11 +2177,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 for (const std::string &preset_name : it->get_preset_names()) {
 
                     Preset *preset = wxGetApp().preset_bundle->printers.find_preset(preset_name);
-                    std::string model_id = preset->config.opt_string("printer_model");
+                    if (preset != nullptr) {
+                        std::string model_id = preset->config.opt_string("printer_model");
 
-
-                    preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
-                                           wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name), model_id});
+                        preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
+                                               wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
+                                               model_id});
+                    }
                 }
             }
             m_collection = &preset_bundle.printers;
@@ -2230,29 +2232,29 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
                 std::string tem_name = (into_u8(tokenizer.GetNextToken().Trim().mb_str()));
                 auto *   printer = preset_bundle.physical_printers.find_printer(tem_name);
-                wxString host = (printer->config.opt_string("print_host"));
+                if (printer != nullptr) {
+                    wxString host = (printer->config.opt_string("print_host"));
 
-                std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-                DynamicPrintConfig *cfg_t = &(printer->config);
+                    std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+                    bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+                    DynamicPrintConfig *cfg_t            = &(printer->config);
 
-                wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
-                wxString          printer_name = tokenizer3.GetNextToken();
+                    wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
+                    wxString          printer_name = tokenizer3.GetNextToken();
 
-
-
-                if (isValidIPAddress) {
-                    m_printer_view->AddButton(
-                        printer_name, host, (data->model_id), (data->fullname),
-                        [host, this](wxMouseEvent &event) {
-                            wxString formattedHost = wxString::Format("http://%s", host);
-                            if (!host.Lower().starts_with("http"))
+                    if (isValidIPAddress) {
+                        m_printer_view->AddButton(
+                            printer_name, host, (data->model_id), (data->fullname),
+                            [host, this](wxMouseEvent &event) {
                                 wxString formattedHost = wxString::Format("http://%s", host);
-                            if (!formattedHost.Lower().ends_with("10088"))
-                                formattedHost = wxString::Format("%s:10088", formattedHost);
-                            this->m_printer_view->load_url(formattedHost);
-                        },
-                        (data->selected), cfg_t);
+                                if (!host.Lower().starts_with("http"))
+                                    wxString formattedHost = wxString::Format("http://%s", host);
+                                if (!formattedHost.Lower().ends_with("10088"))
+                                    formattedHost = wxString::Format("%s:10088", formattedHost);
+                                this->m_printer_view->load_url(formattedHost);
+                            },
+                            (data->selected), cfg_t);
+                    }
                 }
             }
 
