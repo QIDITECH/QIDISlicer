@@ -413,6 +413,8 @@ void PrinterWebView::OnRightButtonClick(wxCommandEvent &event)
     for (MachineListButton *button : m_buttons) {
         button->ResumeStatusThread();
     }
+    //w13
+    Refresh();
 }
 
 void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
@@ -480,9 +482,12 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
             #else
                 msg += _L("Are you sure you want to delete ") + (button->getLabel()) + _L("printer?");
             #endif
-
-            if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() != wxID_YES)
-                return ;
+                //w13
+                if (MessageDialog(this, msg, _L("Delete Physical Printer"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION).ShowModal() !=
+                    wxID_YES) {
+                    Refresh();
+                    return;
+                }
 
             button->StopStatusThread();
             preset_bundle.physical_printers.select_printer((button->getLabel()).ToStdString());
@@ -513,13 +518,14 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
             }
 
             UpdateLayout();
-            Refresh();
+            //Refresh();
             break;
         }
     }
     if (m_handlerl) {
         m_handlerl(event);
     }
+    Refresh();
 }
 
 void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) { 
@@ -556,11 +562,13 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) {
 
                 button->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
                 UpdateLayout();
-                Refresh();
+                //w13
+                //Refresh();
             }
             break;
         }
     }
+    Refresh();
 }
 
 
