@@ -28,11 +28,30 @@ wxBEGIN_EVENT_TABLE(MachineListButton, wxButton) EVT_PAINT(MachineListButton::On
         wxEND_EVENT_TABLE()
 
 
+//w13
+MachineListButton *hoverBtn = nullptr;
+enum ButtonState { NORMAL, HOVER, PRESSED };
+ButtonState state;
 void MachineListButton::OnPaint(wxPaintEvent &event)
 {
+    
     wxPaintDC dc(this);
     //m_bitmap = get_bmp_bundle("X-MAX 3_thumbnail", 80)->GetBitmapFor(this);
+    //w13
+    wxRect rect = GetClientRect();
+    if (this == hoverBtn) {
+        dc.SetPen(wxPen(wxColour(110, 110, 110)));
 
+        dc.SetBrush(wxBrush(wxColour(100, 100, 105)));
+
+        dc.DrawRoundedRectangle(rect, 5);
+    } else {
+        dc.SetPen(wxPen(wxColour(110, 110, 110)));
+
+        dc.SetBrush(wxBrush(wxColour(67, 67, 71)));
+
+        dc.DrawRoundedRectangle(rect, 5);
+    }
     if (m_isSimpleMode) {
         dc.SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
         dc.SetTextForeground(wxColour(230, 230, 230));
@@ -71,27 +90,39 @@ void MachineListButton::OnPaint(wxPaintEvent &event)
 
 void MachineListButton::OnMouseEnter(wxMouseEvent &event)
 {
-    SetBackgroundColour(wxColour(100, 100, 105));
+    //w13
+    hoverBtn = this;
+    state = HOVER;
+    //SetBackgroundColour(wxColour(100, 100, 105));
     Refresh();
 }
 
 void MachineListButton::OnMouseLeave(wxMouseEvent &event)
 {
+    //w13
+    hoverBtn = nullptr;
+    state    = NORMAL;
     if (m_isSelected)
         SetBackgroundColour(wxColour(100, 100, 105));
     else
-        SetBackgroundColour(wxColour(67, 67, 71)); 
+        SetBackgroundColour(wxColour(100, 100, 105)); 
     Refresh();
 }
 
 void MachineListButton::OnMouseLeftDown(wxMouseEvent &event)
 {
-    SetBackgroundColour(wxColour(120, 120, 125));
+    //w13
+    hoverBtn    = this;
+    state    = PRESSED;
+    SetBackgroundColour(wxColour(30, 30, 32));
     Refresh();
 }
 
 void MachineListButton::OnMouseLeftUp(wxMouseEvent &event)
 {
+    //w13
+    hoverBtn = nullptr;
+        state = NORMAL;
     SetBackgroundColour(wxColour(100, 100, 105));
     if (m_handlerl) {
         m_handlerl(event);
@@ -112,7 +143,7 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     #endif
     topsizer  = new wxBoxSizer(wxHORIZONTAL); 
     leftScrolledWindow = new wxScrolledWindow(this, wxID_ANY);
-    leftScrolledWindow->SetBackgroundColour(wxColour(45, 45, 48));
+    leftScrolledWindow->SetBackgroundColour(wxColour(30, 30, 32));
     leftsizer = new wxBoxSizer(wxVERTICAL);
     wxFont font(wxFontInfo().Bold());
 
@@ -130,42 +161,46 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     wxBoxSizer *buttonsizer = new wxBoxSizer(wxHORIZONTAL); 
 
     //wxBU_EXACTFIT wxBORDER_NONE
+    //w13
     #if defined(__WIN32__) || defined(__WXMAC__)
-        wxButton *add_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-        add_button->SetBackgroundColour(wxColour(100, 100, 105));
+        MyRoundButton *add_button = new MyRoundButton(leftScrolledWindow, wxID_ANY, "", "add_machine_list", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        add_button->SetBackgroundColour(wxColour(30, 30, 32));
         //add_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
 
         add_button->SetMinSize(wxSize(40, -1));
-        add_button->SetBitmap(*get_bmp_bundle("add_machine_list", 20));
+        //add_button->SetBitmap(*get_bmp_bundle("add_machine_list", 20));
         buttonsizer->Add(add_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
         add_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnAddButtonClick, this);
 
 
-        wxButton *delete_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-        delete_button->SetBackgroundColour(wxColour(100, 100, 105));
+        MyRoundButton *delete_button = new MyRoundButton(leftScrolledWindow, wxID_ANY, "", "delete_machine_list", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        //wxButton *delete_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        delete_button->SetBackgroundColour(wxColour(30, 30, 32));
         //delete_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
 
         delete_button->SetMinSize(wxSize(40, -1));
-        delete_button->SetBitmap(*get_bmp_bundle("delete_machine_list", 20));
+        //delete_button->SetBitmap(*get_bmp_bundle("delete_machine_list", 20));
         buttonsizer->Add(delete_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
         delete_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnDeleteButtonClick, this);
 
-        wxButton *edit_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-        edit_button->SetBackgroundColour(wxColour(100, 100, 105));
+        MyRoundButton *edit_button = new MyRoundButton(leftScrolledWindow, wxID_ANY, "", "edit_machine_list", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        //wxButton *edit_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        edit_button->SetBackgroundColour(wxColour(30, 30, 32));
         //edit_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
 
         edit_button->SetMinSize(wxSize(40, -1));
-        edit_button->SetBitmap(*get_bmp_bundle("edit_machine_list", 20));
+        //edit_button->SetBitmap(*get_bmp_bundle("edit_machine_list", 20));
         buttonsizer->Add(edit_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
         edit_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnEditButtonClick, this);
 
 
-        wxButton *refresh_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-        refresh_button->SetBackgroundColour(wxColour(100, 100, 105));
+        MyRoundButton *refresh_button = new MyRoundButton(leftScrolledWindow, wxID_ANY, "", "refresh-line", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        //wxButton *refresh_button = new wxButton(leftScrolledWindow, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+        refresh_button->SetBackgroundColour(wxColour(30, 30, 32));
         //refresh_button->SetForegroundColour(leftScrolledWindow->GetBackgroundColour());
 
         refresh_button->SetMinSize(wxSize(40, -1));
-        refresh_button->SetBitmap(*get_bmp_bundle("refresh-line", 20));
+        //refresh_button->SetBitmap(*get_bmp_bundle("refresh-line", 20));
         buttonsizer->Add(refresh_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
         refresh_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnRightButtonClick, this);
 
@@ -424,8 +459,10 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
                 true, cfg_t);
         load_url(formattedHost);
         UpdateLayout();
-        Refresh();
+        //w13
+        //Refresh();
     }
+    Refresh();
 }
 
 void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) { 
@@ -639,7 +676,20 @@ void PrinterWebView::RunScript(const wxString &javascript)
 
     WebView::RunScript(m_browser, javascript);
 }
-
-
+//w13
+void MyRoundButton::OnPaint(wxPaintEvent &evt)
+{
+    wxPaintDC dc(this);
+    wxRect rect = GetClientRect();
+    dc.SetPen(wxPen(wxColour(110, 110, 110)));
+    dc.SetBrush(wxBrush(wxColour(85, 85, 90)));
+    dc.DrawRoundedRectangle(rect, 5);
+    wxBitmap m_bitmap_state = get_bmp_bundle(m_name.ToStdString(), 20)->GetBitmapFor(this);
+    int imgWidth = m_bitmap_state.GetWidth();
+    int imgHeight = m_bitmap_state.GetHeight();
+    int x = (rect.GetWidth() - imgWidth) / 2;
+    int y = (rect.GetHeight() - imgHeight) / 2;
+    dc.DrawBitmap(m_bitmap_state, x, y);
+}
 } // GUI
 } // Slic3r

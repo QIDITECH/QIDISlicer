@@ -278,7 +278,34 @@ private:
 
     // DECLARE_EVENT_TABLE()
 };
+//w13
+class MyRoundButton : public wxButton
+{
+public:
+    wxString m_name;
 
+    MyRoundButton(wxWindow *      parent,
+                  wxWindowID      id    = wxID_ANY,
+                  const wxString &label = "",
+                  const wxString &name  = "",
+                  const wxPoint & pos   = wxDefaultPosition,
+                  const wxSize &  size  = wxDefaultSize,
+                  long            style = 0)
+        : wxButton(parent, id, label, pos, size, style), m_name(name)
+    {
+        //SetBackgroundColour(wxColour(100, 100, 105));
+        //SetMinSize(wxSize(40, -1));
+
+        Bind(wxEVT_PAINT, &MyRoundButton::OnPaint, this);
+    }
+
+    void OnPaint(wxPaintEvent &evt);
+
+private:
+    void DrawRoundedRect(wxDC &dc, wxRect rect, int radius){
+        dc.DrawRoundedRectangle(rect, radius); 
+    }
+};
 
 
 } // GUI
