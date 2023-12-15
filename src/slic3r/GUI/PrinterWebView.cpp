@@ -56,11 +56,6 @@ void MachineListButton::OnPaint(wxPaintEvent &event)
         dc.SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
         dc.SetTextForeground(wxColour(230, 230, 230));
         dc.DrawText(m_name_text, 10 , 10);
-        //wxSize textSize = dc.GetTextExtent(m_name_text);
-        //int x = (dc.GetSize().GetWidth() - textSize.GetWidth()) / 2;   
-        //int y = (dc.GetSize().GetHeight() - textSize.GetHeight()) / 2;
-
-        //dc.DrawText(m_name_text, x, y);
     } else {
         dc.DrawBitmap(m_bitmap, 10, (GetSize().GetHeight() - m_bitmap.GetHeight()) / 2, true);
 
@@ -327,6 +322,19 @@ void PrinterWebView::AddButton(const wxString &                             devi
      }
  }
 
+  //B45
+ void PrinterWebView::StopAllThread()
+ {
+     // BOOST_LOG_TRIVIAL(error) << " Stop";
+
+     if (m_buttons.empty()) {
+         BOOST_LOG_TRIVIAL(info) << " empty";
+     } else {
+         for (MachineListButton *button : m_buttons) {
+             button->StopStatusThread();
+         }
+     }
+ }
 
   // B45
  void PrinterWebView::UnSelectedButton()

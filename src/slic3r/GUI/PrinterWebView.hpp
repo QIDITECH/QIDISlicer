@@ -135,6 +135,9 @@ public:
         m_stopThread = true;
         if (m_statusThread.joinable()) {
             m_statusThread.join();
+        } else {
+            m_statusThread.detach();
+            std::terminate();
         }
     }
     void OnPaint(wxPaintEvent &event);
@@ -176,7 +179,7 @@ public:
                     }
 
                  } else
-                std::this_thread::sleep_for(std::chrono::seconds(3));
+                std::this_thread::sleep_for(std::chrono::seconds(1));
                 if (m_stopThread)
                     break;
             }
@@ -248,6 +251,7 @@ public:
     void                        DeleteButton();
     void                        PauseButton();
     void                        ResumeButton();
+    void                        StopAllThread();
     void                        UnSelectedButton();
 
     std::vector<MachineListButton *>     GetButton() { return m_buttons; };
