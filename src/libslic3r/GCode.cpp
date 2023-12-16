@@ -1146,15 +1146,14 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
 
     // Unit tests or command line slicing may not define "thumbnails" or "thumbnails_format".
     // If "thumbnails_format" is not defined, export to PNG.
-    //B3
-    // if (const auto [thumbnails, thumbnails_format] = std::make_pair(
-    //         print.full_print_config().option<ConfigOptionPoints>("thumbnails"),
-    //         print.full_print_config().option<ConfigOptionEnum<GCodeThumbnailsFormat>>("thumbnails_format"));
-    //     thumbnails)
-    //     GCodeThumbnails::export_thumbnails_to_file(
-    //         thumbnail_cb, thumbnails->values, thumbnails_format ? thumbnails_format->value : GCodeThumbnailsFormat::PNG,
-    //         [&file](const char* sz) { file.write(sz); },
-    //         [&print]() { print.throw_if_canceled(); });
+    if (const auto [thumbnails, thumbnails_format] = std::make_pair(
+            print.full_print_config().option<ConfigOptionPoints>("thumbnails"),
+            print.full_print_config().option<ConfigOptionEnum<GCodeThumbnailsFormat>>("thumbnails_format"));
+        thumbnails)
+        GCodeThumbnails::export_thumbnails_to_file(
+            thumbnail_cb, thumbnails->values, thumbnails_format ? thumbnails_format->value : GCodeThumbnailsFormat::PNG,
+            [&file](const char* sz) { file.write(sz); },
+            [&print]() { print.throw_if_canceled(); });
 
     // Write notes (content of the Print Settings tab -> Notes)
     {
@@ -1528,15 +1527,6 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     if (print.m_print_statistics.total_toolchanges > 0)
     	file.write_format("; total toolchanges = %i\n", print.m_print_statistics.total_toolchanges);
     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
-    //B3
-    if (const auto [thumbnails, thumbnails_format] = std::make_pair(
-        print.full_print_config().option<ConfigOptionPoints>("thumbnails"),
-        print.full_print_config().option<ConfigOptionEnum<GCodeThumbnailsFormat>>("thumbnails_format"));
-    thumbnails)
-    GCodeThumbnails::export_thumbnails_to_file(
-        thumbnail_cb, thumbnails->values, thumbnails_format ? thumbnails_format->value : GCodeThumbnailsFormat::PNG,
-        [&file](const char* sz) { file.write(sz); },
-        [&print]() { print.throw_if_canceled(); });
     // Append full config, delimited by two 'phony' configuration keys qidislicer_config = begin and qidislicer_config = end.
     // The delimiters are structured as configuration key / value pairs to be parsable by older versions of QIDISlicer G-code viewer.
     {
