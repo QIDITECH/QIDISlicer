@@ -5723,7 +5723,7 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     // Change End Gcode
     //new_config.set_key_value("seam_position", new ConfigOptionEnum(spRear));
     //new_config.set_key_value("perimeter_generator", new ConfigOptionEnum(PerimeterGeneratorType::Classic));
-    pa_end_gcode = "M900 K{int(layer_z / 5) * " + double_to_str(PAStep) + "}\n" + pa_end_gcode;
+    pa_end_gcode = "M900 K{int(layer_z / 5) * " + double_to_str(PAStep) + " + " + double_to_str(StartPA) + "}\n" + pa_end_gcode;
     new_config.set_key_value("before_layer_gcode", new ConfigOptionString(pa_end_gcode));
     //tab_print->load_config(new_config);
     tab_printer->load_config(new_config);
