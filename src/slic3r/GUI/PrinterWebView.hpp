@@ -58,10 +58,11 @@ public:
     {
         full_label   = fullname;
         m_isSelected = isSelected;
+        //w13
         if (isSelected)
-            SetBackgroundColour(wxColour(100, 100, 105)); 
+            SetBackgroundColour(wxColour(30, 30, 32)); 
         else
-            SetBackgroundColour(wxColour(67, 67, 71)); 
+            SetBackgroundColour(wxColour(30, 30, 32)); 
         //Bind(wxEVT_BUTTON, &MachineListButton::OnMouseLeftUp, this);
     }
 
@@ -110,10 +111,11 @@ public:
     void SetSelect(bool isselectd)
     {
         m_isSelected = isselectd;
-        if (m_isSelected)
+        //w13
+        /* if (m_isSelected)
             SetBackgroundColour(wxColour(100, 100, 105));
         else
-            SetBackgroundColour(wxColour(67, 67, 71)); 
+            SetBackgroundColour(wxColour(67, 67, 71)); */
         Refresh();
     }
     bool GetSelected() { return m_isSelected;}
@@ -188,7 +190,9 @@ public:
     }
 
 private:
-
+    //w13
+    bool mousePressed = false;
+    bool mouseOnButton;
     std::atomic<bool> m_stopThread{false};
     std::atomic<bool> m_pauseThread{false};
 
@@ -297,12 +301,15 @@ public:
                   long            style = 0)
         : wxButton(parent, id, label, pos, size, style), m_name(name)
     {
+        //w13
         //SetBackgroundColour(wxColour(100, 100, 105));
         //SetMinSize(wxSize(40, -1));
 
         Bind(wxEVT_PAINT, &MyRoundButton::OnPaint, this);
+        Bind(wxEVT_SET_FOCUS, &MyRoundButton::OnFocusEvent, this);
+        Bind(wxEVT_KILL_FOCUS, &MyRoundButton::OnFocusEvent, this);
     }
-
+    void OnFocusEvent(wxFocusEvent &evt);
     void OnPaint(wxPaintEvent &evt);
 
 private:

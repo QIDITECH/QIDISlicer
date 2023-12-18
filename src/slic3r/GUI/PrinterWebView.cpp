@@ -28,10 +28,6 @@ wxBEGIN_EVENT_TABLE(MachineListButton, wxButton) EVT_PAINT(MachineListButton::On
         wxEND_EVENT_TABLE()
 
 
-//w13
-MachineListButton *hoverBtn = nullptr;
-enum ButtonState { NORMAL, HOVER, PRESSED };
-ButtonState state;
 void MachineListButton::OnPaint(wxPaintEvent &event)
 {
     
@@ -39,16 +35,31 @@ void MachineListButton::OnPaint(wxPaintEvent &event)
     //m_bitmap = get_bmp_bundle("X-MAX 3_thumbnail", 80)->GetBitmapFor(this);
     //w13
     wxRect rect = GetClientRect();
-    if (this == hoverBtn) {
-        dc.SetPen(wxPen(wxColour(110, 110, 110)));
+    dc.SetPen(wxPen(wxColour(30, 30, 32)));
+    if (mouseOnButton) {
+        //dc.SetPen(wxPen(wxColour(110, 110, 110)));
 
         dc.SetBrush(wxBrush(wxColour(100, 100, 105)));
 
         dc.DrawRoundedRectangle(rect, 5);
     } else {
-        dc.SetPen(wxPen(wxColour(110, 110, 110)));
+        //dc.SetPen(wxPen(wxColour(110, 110, 110)));
 
         dc.SetBrush(wxBrush(wxColour(67, 67, 71)));
+
+        dc.DrawRoundedRectangle(rect, 5);
+    }
+    if (m_isSelected) {
+        //dc.SetPen(wxPen(wxColour(110, 110, 110)));
+
+        dc.SetBrush(wxBrush(wxColour(100, 100, 105)));
+
+        dc.DrawRoundedRectangle(rect, 5);
+    }
+    if (mousePressed) {
+        dc.SetPen(wxPen(wxColour(110, 110, 110)));
+
+        dc.SetBrush(wxBrush(wxColour(109, 109, 113)));
 
         dc.DrawRoundedRectangle(rect, 5);
     }
@@ -86,29 +97,28 @@ void MachineListButton::OnPaint(wxPaintEvent &event)
 void MachineListButton::OnMouseEnter(wxMouseEvent &event)
 {
     //w13
-    hoverBtn = this;
-    state = HOVER;
+    mouseOnButton = true;
     //SetBackgroundColour(wxColour(100, 100, 105));
     Refresh();
+    Update();
 }
 
 void MachineListButton::OnMouseLeave(wxMouseEvent &event)
 {
     //w13
-    hoverBtn = nullptr;
-    state    = NORMAL;
-    if (m_isSelected)
+    mouseOnButton = false;
+    /* if (m_isSelected)
         SetBackgroundColour(wxColour(100, 100, 105));
     else
-        SetBackgroundColour(wxColour(100, 100, 105)); 
+        SetBackgroundColour(wxColour(100, 100, 105)); */
     Refresh();
+    Update();
 }
 
 void MachineListButton::OnMouseLeftDown(wxMouseEvent &event)
 {
     //w13
-    hoverBtn    = this;
-    state    = PRESSED;
+    mousePressed = true;
     SetBackgroundColour(wxColour(30, 30, 32));
     Refresh();
 }
@@ -116,9 +126,8 @@ void MachineListButton::OnMouseLeftDown(wxMouseEvent &event)
 void MachineListButton::OnMouseLeftUp(wxMouseEvent &event)
 {
     //w13
-    hoverBtn = nullptr;
-        state = NORMAL;
-    SetBackgroundColour(wxColour(100, 100, 105));
+    mousePressed = false;
+    //SetBackgroundColour(wxColour(100, 100, 105));
     if (m_handlerl) {
         m_handlerl(event);
     }
@@ -706,6 +715,11 @@ void MyRoundButton::OnPaint(wxPaintEvent &evt)
     int x = (rect.GetWidth() - imgWidth) / 2;
     int y = (rect.GetHeight() - imgHeight) / 2;
     dc.DrawBitmap(m_bitmap_state, x, y);
+}
+void MyRoundButton::OnFocusEvent(wxFocusEvent &evt)
+{
+    Refresh();
+    evt.Skip();
 }
 } // GUI
 } // Slic3r
