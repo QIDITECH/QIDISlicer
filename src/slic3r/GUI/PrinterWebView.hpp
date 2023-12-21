@@ -70,7 +70,7 @@ public:
 
 
     wxString getLabel() { return full_label; }
-    wxString getIPLabel() { return m_ip_text; }
+    wxString getHostLabel() { return m_host_text; }
 
 
     void SetBitMap(const wxBitmap &bitmap)
@@ -92,9 +92,9 @@ public:
     }
 
 
-    void SetIPText(const wxString &text)
+    void SetHostText(const wxString &text)
     {
-        m_ip_text = text;
+        m_host_text = text;
         Refresh();
     }
     void SetStateText(const wxString &text)
@@ -149,10 +149,10 @@ public:
     void OnMouseLeftUp(wxMouseEvent &event);
     void OnClickHandler(wxCommandEvent &event);
     void SetStatusThread(std::thread thread) { m_statusThread = std::move(thread); }
-    std::thread CreatThread(const wxString &buttonText, const wxString &ip, DynamicPrintConfig *cfg_t)
+    std::thread CreatThread(const wxString &buttonText, const wxString &host, DynamicPrintConfig *cfg_t)
     {
 
-        std::thread thread([this, buttonText,ip, cfg_t]() {
+        std::thread thread([this, buttonText, host, cfg_t]() {
              std::unique_ptr<PrintHost> printhost(PrintHost::get_print_host(cfg_t));
              if (!printhost) {
                  BOOST_LOG_TRIVIAL(error) << ("Could not get a valid Printer Host reference");
@@ -205,7 +205,7 @@ private:
     bool     m_isHovered; 
     wxString full_label;
     wxString m_name_text; 
-    wxString m_ip_text; 
+    wxString m_host_text; 
     wxString m_state_text; 
     wxString m_progress_text; 
     std::function<void(wxMouseEvent &)> m_handlerl;
@@ -246,7 +246,7 @@ public:
     //void SendRecentList(int images);
     void SetButtons(std::vector<MachineListButton *> buttons);
     void  AddButton(const wxString &                           device_name,
-                    const wxString &                           ip,
+                    const wxString &                           host,
                     const wxString &                           machine_type,
                     const wxString &                           fullname,
                     const std::function<void(wxMouseEvent &)> &handler,

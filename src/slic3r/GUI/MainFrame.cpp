@@ -2236,26 +2236,22 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 if (printer != nullptr) {
                     wxString host = (printer->config.opt_string("print_host"));
 
-                    std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                    bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-                    DynamicPrintConfig *cfg_t            = &(printer->config);
+                    DynamicPrintConfig *cfg_t = &(printer->config);
 
                     wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
                     wxString          printer_name = tokenizer3.GetNextToken();
 
-                    if (isValidIPAddress) {
-                        m_printer_view->AddButton(
-                            printer_name, host, (data->model_id), (data->fullname),
-                            [host, this](wxMouseEvent &event) {
-                                wxString formattedHost = host;
-                                if (!formattedHost.Lower().starts_with("http"))
-                                    formattedHost = wxString::Format("http://%s", formattedHost);
-                                if (!formattedHost.Lower().ends_with("10088"))
-                                    formattedHost = wxString::Format("%s:10088", formattedHost);
-                                this->m_printer_view->load_url(formattedHost);
-                            },
-                            (data->selected), cfg_t);
-                    }
+                    m_printer_view->AddButton(
+                        printer_name, host, (data->model_id), (data->fullname),
+                        [host, this](wxMouseEvent &event) {
+                            wxString formattedHost = host;
+                            if (!formattedHost.Lower().starts_with("http"))
+                                formattedHost = wxString::Format("http://%s", formattedHost);
+                            if (!formattedHost.Lower().ends_with("10088"))
+                                formattedHost = wxString::Format("%s:10088", formattedHost);
+                            this->m_printer_view->load_url(formattedHost);
+                        },
+                        (data->selected), cfg_t);
                 }
             }
 
@@ -2268,9 +2264,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
                 wxString               host          = pp.config.opt_string("print_host");
                 //B45
-                std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-                if (host.empty() || !isValidIPAddress) {
+                if (host.empty()) {
                     tem_host = "";
                     host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
                 }

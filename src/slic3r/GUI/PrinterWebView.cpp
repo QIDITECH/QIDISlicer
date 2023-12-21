@@ -76,7 +76,7 @@ void MachineListButton::OnPaint(wxPaintEvent &event)
         dc.SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
         dc.SetTextForeground(wxColour(174, 174, 174));
 
-        dc.DrawText("IP:" + m_ip_text, 10 + m_bitmap.GetWidth() + 10, 40);
+        dc.DrawText("Host: " + m_host_text, 10 + m_bitmap.GetWidth() + 10, 40);
 
         wxBitmap m_bitmap_state = get_bmp_bundle("printer_state", 20)->GetBitmapFor(this);
         dc.DrawBitmap(m_bitmap_state, 10 + m_bitmap.GetWidth() + 10, 55, true);
@@ -266,7 +266,7 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
 
 
 void PrinterWebView::AddButton(const wxString &                             device_name,
-                                const wxString &                            ip,
+                                const wxString &                            host,
                                 const wxString &                            machine_type,
                                 const wxString &                            fullname,
                                 const std::function<void(wxMouseEvent &)> &handler,
@@ -287,13 +287,13 @@ void PrinterWebView::AddButton(const wxString &                             devi
     customButton->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
     customButton->SetForegroundColour(wxColour(255, 255, 255));
     customButton->SetNameText(device_name);
-    customButton->SetIPText(ip);
+    customButton->SetHostText(host);
     customButton->SetStateText("standby");
     customButton->SetProgressText("(0%)");
     //customButton->SetMinSize(wxSize(200, -1));
     customButton->SetClickHandler(handler);
     #if defined(__WIN32__) || defined(__WXMAC__)
-        customButton->SetStatusThread(std::move(customButton->CreatThread(device_name,ip, cfg_t)));
+        customButton->SetStatusThread(std::move(customButton->CreatThread(device_name, host, cfg_t)));
     #else
         customButton->SetSize(wxSize(200, -1));
     #endif
@@ -463,19 +463,16 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
 
 
 
-        boost::regex        ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-        bool                isValidIPAddress = boost::regex_match(host.ToStdString(), ipRegex);
         DynamicPrintConfig *cfg_t = &(printer.config);
 
         UnSelectedButton();
-        if (isValidIPAddress)
-            AddButton(
-                printer_name, host, model_id, fullname,
-                [formattedHost, this](wxMouseEvent &event) {
-                    wxString host = formattedHost;
-                    load_url(host);
-                },
-                true, cfg_t);
+        AddButton(
+            printer_name, host, model_id, fullname,
+            [formattedHost, this](wxMouseEvent &event) {
+                wxString host = formattedHost;
+                load_url(host);
+            },
+            true, cfg_t);
         load_url(formattedHost);
         UpdateLayout();
         //w13
@@ -523,7 +520,7 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
             if (!m_buttons.empty())
                 for (MachineListButton *button : m_buttons) {
                     button->SetSelect(true);
-                    wxString formattedHost = wxString::Format("http://%s:10088", button->getIPLabel());
+                    wxString formattedHost = wxString::Format("http://%s:10088", button->getHostLabel());
 
                     load_url(formattedHost);
                     preset_bundle.physical_printers.select_printer((button->getLabel()).ToStdString());
@@ -573,7 +570,7 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) {
 
 
                 button->SetNameText((wxString::FromUTF8(printer_name)));
-                button->SetIPText(host);
+                button->SetHostText(host);
                 button->SetLabel(fullname);
                 wxString Machine_Name = Machine_Name.Format("%s%s", model_id, "_thumbnail");
 
@@ -662,7 +659,7 @@ void PrinterWebView::load_url(wxString& url)
     url.Remove(url.length() - 6);
     for (MachineListButton *button : m_buttons) {
 
-        if (url == (button->getIPLabel()))
+        if (url == (button->getHostLabel()))
             button->SetSelect(true);
         else
             button->SetSelect(false);
