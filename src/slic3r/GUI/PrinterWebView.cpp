@@ -446,9 +446,9 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
         std::string   printer_name  = printer.name;
         wxString      host          = printer.config.opt_string("print_host");
 
-        wxString formattedHost = wxString::Format("http://%s", host);
-        if (!host.Lower().starts_with("http"))
-            wxString formattedHost = wxString::Format("http://%s", host);
+        wxString formattedHost = host;
+        if (!formattedHost.Lower().starts_with("http"))
+            formattedHost = wxString::Format("http://%s", formattedHost);
         if (!formattedHost.Lower().ends_with("10088"))
             formattedHost = wxString::Format("%s:10088", formattedHost);
 

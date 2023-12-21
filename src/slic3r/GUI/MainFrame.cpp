@@ -2247,9 +2247,9 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                         m_printer_view->AddButton(
                             printer_name, host, (data->model_id), (data->fullname),
                             [host, this](wxMouseEvent &event) {
-                                wxString formattedHost = wxString::Format("http://%s", host);
-                                if (!host.Lower().starts_with("http"))
-                                    wxString formattedHost = wxString::Format("http://%s", host);
+                                wxString formattedHost = host;
+                                if (!formattedHost.Lower().starts_with("http"))
+                                    formattedHost = wxString::Format("http://%s", formattedHost);
                                 if (!formattedHost.Lower().ends_with("10088"))
                                     formattedHost = wxString::Format("%s:10088", formattedHost);
                                 this->m_printer_view->load_url(formattedHost);
