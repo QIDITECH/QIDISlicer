@@ -23,7 +23,9 @@ You can find the printer's firmware here:
 
 ### Report Issues and Make Suggestions
 
-You can contact [After-Sales Service](https://qidi3d.com/pages/warranty-policy-after-sales-support) to report issues and make suggestions.
+Please send your question in the form of video or pictures to us through the [After-Sales Service](https://qidi3d.com/pages/warranty-policy-after-sales-support), we will reply to your information within 12 hours.
+
+Please try to contact us through [After-Sales Service](https://qidi3d.com/pages/warranty-policy-after-sales-support) and report problems or suggestions. On github, we cannot obtain your order information, operation records and other private intelligence, nor can we generate after-sales orders, send repair files, etc. Thank you for your understanding and cooperation.
 
 ### License
 
