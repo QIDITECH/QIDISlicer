@@ -2516,6 +2516,10 @@ void TabPrinter::build_fff()
             return 	create_bed_shape_widget(parent);
         });
 
+//Y18
+        Option option = optgroup->get_option("bed_exclude_area");
+        option.opt.full_width = true;
+        optgroup->append_single_option_line(option);
         optgroup->append_single_option_line("max_print_height");
         optgroup->append_single_option_line("z_offset");
 
@@ -2528,7 +2532,7 @@ void TabPrinter::build_fff()
             def.min = 1;
             def.max = 256;
             def.mode = comExpert;
-        Option option(def, "extruders_count");
+        option = Option(def, "extruders_count");
         optgroup->append_single_option_line(option);
         optgroup->append_single_option_line("single_extruder_multi_material");
 

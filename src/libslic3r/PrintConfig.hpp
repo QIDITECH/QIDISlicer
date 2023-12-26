@@ -774,6 +774,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionBool,               avoid_crossing_perimeters))
     ((ConfigOptionFloatOrPercent,     avoid_crossing_perimeters_max_detour))
     ((ConfigOptionPoints,             bed_shape))
+    //Y18
+    ((ConfigOptionPoints,             bed_exclude_area))
     ((ConfigOptionInts,               bed_temperature))
     //Y16
     ((ConfigOptionBool,               chamber_temperature))

@@ -58,10 +58,11 @@ public:
     {
         full_label   = fullname;
         m_isSelected = isSelected;
+        //w13
         if (isSelected)
-            SetBackgroundColour(wxColour(100, 100, 105)); 
+            SetBackgroundColour(wxColour(30, 30, 32)); 
         else
-            SetBackgroundColour(wxColour(67, 67, 71)); 
+            SetBackgroundColour(wxColour(30, 30, 32)); 
         //Bind(wxEVT_BUTTON, &MachineListButton::OnMouseLeftUp, this);
     }
 
@@ -110,10 +111,11 @@ public:
     void SetSelect(bool isselectd)
     {
         m_isSelected = isselectd;
-        if (m_isSelected)
+        //w13
+        /* if (m_isSelected)
             SetBackgroundColour(wxColour(100, 100, 105));
         else
-            SetBackgroundColour(wxColour(67, 67, 71)); 
+            SetBackgroundColour(wxColour(67, 67, 71)); */
         Refresh();
     }
     bool GetSelected() { return m_isSelected;}
@@ -135,6 +137,9 @@ public:
         m_stopThread = true;
         if (m_statusThread.joinable()) {
             m_statusThread.join();
+        } else {
+            m_statusThread.detach();
+            std::terminate();
         }
     }
     void OnPaint(wxPaintEvent &event);
@@ -185,7 +190,9 @@ public:
     }
 
 private:
-
+    //w13
+    bool mousePressed = false;
+    bool mouseOnButton;
     std::atomic<bool> m_stopThread{false};
     std::atomic<bool> m_pauseThread{false};
 
@@ -230,6 +237,8 @@ public:
     void OnScriptMessage(wxWebViewEvent &evt);
     void UpdateLayout();
     void OnScroll(wxScrollWinEvent &event);
+    void OnScrollup(wxScrollWinEvent &event);
+    void OnScrolldown(wxScrollWinEvent &event);
 
     void SetUpdateHandler(const std::function<void(wxCommandEvent &)> &handler) { m_handlerl = handler; }
     void SetDeleteHandler(const std::function<void(wxCommandEvent &)> &handler) { m_delete_handlerl = handler; }
@@ -248,6 +257,7 @@ public:
     void                        DeleteButton();
     void                        PauseButton();
     void                        ResumeButton();
+    void                        StopAllThread();
     void                        UnSelectedButton();
 
     std::vector<MachineListButton *>     GetButton() { return m_buttons; };
@@ -263,6 +273,8 @@ private:
     wxStaticText *    text_static;
 
 
+    int height = 0; 
+    wxString  m_web;
     std::function<void(wxCommandEvent &)> m_handlerl;
     std::function<void(wxCommandEvent &)> m_delete_handlerl;
 
@@ -278,7 +290,37 @@ private:
 
     // DECLARE_EVENT_TABLE()
 };
+//w13
+class MyRoundButton : public wxButton
+{
+public:
+    wxString m_name;
 
+    MyRoundButton(wxWindow *      parent,
+                  wxWindowID      id    = wxID_ANY,
+                  const wxString &label = "",
+                  const wxString &name  = "",
+                  const wxPoint & pos   = wxDefaultPosition,
+                  const wxSize &  size  = wxDefaultSize,
+                  long            style = 0)
+        : wxButton(parent, id, label, pos, size, style), m_name(name)
+    {
+        //w13
+        //SetBackgroundColour(wxColour(100, 100, 105));
+        //SetMinSize(wxSize(40, -1));
+
+        Bind(wxEVT_PAINT, &MyRoundButton::OnPaint, this);
+        Bind(wxEVT_SET_FOCUS, &MyRoundButton::OnFocusEvent, this);
+        Bind(wxEVT_KILL_FOCUS, &MyRoundButton::OnFocusEvent, this);
+    }
+    void OnFocusEvent(wxFocusEvent &evt);
+    void OnPaint(wxPaintEvent &evt);
+
+private:
+    void DrawRoundedRect(wxDC &dc, wxRect rect, int radius){
+        dc.DrawRoundedRectangle(rect, radius); 
+    }
+};
 
 
 } // GUI

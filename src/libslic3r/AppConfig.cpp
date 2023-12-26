@@ -205,6 +205,10 @@ void AppConfig::set_defaults()
 
     if (get("sys_menu_enabled").empty())
         set("sys_menu_enabled", "1");
+    //B45
+    if (get("machine_list_minification").empty())
+        set("machine_list_minification", "1");
+    
 #endif // _WIN32
 
     // Remove legacy window positions/sizes

@@ -545,6 +545,8 @@ static std::vector<std::string> s_Preset_printer_options {
     "default_print_profile", "inherits",
     "remaining_times", "silent_mode",
     "machine_limits_usage", "thumbnails", "thumbnails_format",
+//Y18
+    "bed_exclude_area",
 //Y16
     "chamber_temperature", "auxiliary_fan", "chamber_fan"
 };
@@ -1349,6 +1351,8 @@ static const std::set<std::string> independent_from_extruder_number_options = {
     "gcode_substitutions",
     "post_process",
     "thumbnails",
+//Y18
+    "bed_exclude_area",
 };
 
 bool PresetCollection::is_independent_from_extruder_number_option(const std::string& opt_key)

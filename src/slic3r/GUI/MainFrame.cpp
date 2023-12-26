@@ -251,6 +251,7 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_S
             return;
         }
         this->shutdown();
+        m_printer_view->StopAllThread();
         // propagate event
         event.Skip();
     });
@@ -2178,7 +2179,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
                     Preset *preset = wxGetApp().preset_bundle->printers.find_preset(preset_name);
                     if (preset != nullptr) {
-                        std::string model_id = preset->config.opt_string("printer_model");
+                        std::string model_id;
+                        if (preset != nullptr) {
+                            if ((preset->config.opt_string("printer_model").empty()))
+                                model_id = "X-MAX 3";
+                            else
+                                model_id = preset->config.opt_string("printer_model");
+                        }
 
                         preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
                                                wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
