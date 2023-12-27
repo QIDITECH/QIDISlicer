@@ -552,7 +552,7 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
         std::string model_id    = "X-MAX 3";
         if (preset != nullptr) {
             if ((preset->config.opt_string("printer_model").empty()))
-                model_id = "X-MAX 3";
+                model_id = "my_printer";
             else
                 model_id = preset->config.opt_string("printer_model");
         }

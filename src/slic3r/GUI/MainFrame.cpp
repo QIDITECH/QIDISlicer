@@ -2182,11 +2182,10 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                         std::string model_id;
                         if (preset != nullptr) {
                             if ((preset->config.opt_string("printer_model").empty()))
-                                model_id = "X-MAX 3";
+                                model_id = "my_printer";
                             else
                                 model_id = preset->config.opt_string("printer_model");
                         }
-
                         preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
                                                wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
                                                model_id});
