@@ -56,14 +56,21 @@ public:
              bool isSelected = false)
         : wxButton(parent, id, label, pos, size, style, validator, name)
     {
+        SetBackgroundColour(wxColour(30, 30, 32));
         full_label   = fullname;
         m_isSelected = isSelected;
-        //w13
-        if (isSelected)
-            SetBackgroundColour(wxColour(30, 30, 32)); 
-        else
-            SetBackgroundColour(wxColour(30, 30, 32)); 
-        //Bind(wxEVT_BUTTON, &MachineListButton::OnMouseLeftUp, this);
+        //if (isSelected)
+        //    SetBackgroundColour(wxColour(100, 100, 105)); 
+        //else
+        //    SetBackgroundColour(wxColour(67, 67, 71)); 
+        #if defined(__WIN32__) || defined(__WXMAC__)
+            SetBackgroundColour(wxColour(30, 30, 32));
+        #else
+            if (isSelected)
+                SetBackgroundColour(wxColour(100, 100, 105));
+            else
+                SetBackgroundColour(wxColour(67, 67, 71)); 
+        #endif
     }
 
     void SetLabel(const wxString &fullname) { full_label = fullname; }
@@ -111,21 +118,20 @@ public:
     void SetSelect(bool isselectd)
     {
         m_isSelected = isselectd;
-        //w13
-        /* if (m_isSelected)
-            SetBackgroundColour(wxColour(100, 100, 105));
-        else
-            SetBackgroundColour(wxColour(67, 67, 71)); */
+        #if defined(__WIN32__) || defined(__WXMAC__)
+            SetBackgroundColour(wxColour(30, 30, 32));
+        #else
+            if (m_isSelected)
+                SetBackgroundColour(wxColour(100, 100, 105));
+            else
+                SetBackgroundColour(wxColour(67, 67, 71));
+        #endif
         Refresh();
     }
     bool GetSelected() { return m_isSelected;}
     void SetSimpleMode(bool issimplemode)
     {
         m_isSimpleMode = issimplemode;
-        //if (m_isSelected)
-        //    SetBackgroundColour(wxColour(100, 100, 105));
-        //else
-        //    SetBackgroundColour(wxColour(67, 67, 71));
         Refresh();
     }
 
@@ -137,17 +143,18 @@ public:
         m_stopThread = true;
         if (m_statusThread.joinable()) {
             m_statusThread.join();
-        } else {
-            m_statusThread.detach();
-            std::terminate();
         }
     }
-    void OnPaint(wxPaintEvent &event);
-    void OnMouseEnter(wxMouseEvent &event);
-    void OnMouseLeave(wxMouseEvent &event);
-    void OnMouseLeftDown(wxMouseEvent &event);
-    void OnMouseLeftUp(wxMouseEvent &event);
-    void OnClickHandler(wxCommandEvent &event);
+    void        OnPaint(wxPaintEvent &event);
+    void        OnSetFocus(wxFocusEvent &event);
+    void        OnKillFocus(wxFocusEvent &event);
+    void        OnKeyDown(wxKeyEvent &event);
+    void        OnKeyUp(wxKeyEvent &event);
+    void        OnMouseEnter(wxMouseEvent &event);
+    void        OnMouseLeave(wxMouseEvent &event);
+    void        OnMouseLeftDown(wxMouseEvent &event);
+    //void        OnMouseLeftUp(wxMouseEvent &event);
+    //void        OnClickHandler(wxCommandEvent &event);
     void SetStatusThread(std::thread thread) { m_statusThread = std::move(thread); }
     std::thread CreatThread(const wxString &buttonText, const wxString &ip, DynamicPrintConfig *cfg_t)
     {
@@ -158,30 +165,33 @@ public:
                  BOOST_LOG_TRIVIAL(error) << ("Could not get a valid Printer Host reference");
                  return;
              }
-             wxString msg;
-             std::string state = "standby";
-            float         progress = 0;
+            wxString msg;
+            std::string state = "standby";
+            float       progress      = 0;
+            int         timeout_times = 0;
             while (true) {
                 if (!m_pauseThread) {
                     state = printhost->get_status(msg);
                     if (state == "offline") {
                         BOOST_LOG_TRIVIAL(info) << boost::format("%1%Got state: %2%") % buttonText % state;
-                        SetStateText(state);
-                        m_pauseThread = true;
+                        timeout_times += 1;
+                        if (timeout_times>3)
+                            m_pauseThread = true;
                     }
                     BOOST_LOG_TRIVIAL(info) << boost::format("%1%Got state: %2%") % buttonText % state;
-                    SetStateText(state);
+                    if (m_state_text != state)
+                        SetStateText(state);
 
                     if (state == "printing") {
-                        progress = (printhost->get_progress(msg)) * 100;
+                        timeout_times   = 0;
+                        progress        = (printhost->get_progress(msg)) * 100;
                         int progressInt = static_cast<int>(progress);
                         SetProgressText(wxString::Format(wxT("(%d%%)"), progressInt));
 
                         BOOST_LOG_TRIVIAL(info) << boost::format("%1%Got progress: %2%") % buttonText % progress;
-                    }
-
-                 } else
-                std::this_thread::sleep_for(std::chrono::seconds(3));
+                    } else if (state == "standby")
+                        timeout_times = 0;
+                } 
                 if (m_stopThread)
                     break;
             }
@@ -190,19 +200,19 @@ public:
     }
 
 private:
-    //w13
-    bool mousePressed = false;
-    bool mouseOnButton;
     std::atomic<bool> m_stopThread{false};
     std::atomic<bool> m_pauseThread{false};
 
     bool m_isSimpleMode;
-    bool m_isSelected;
+    bool m_isSelected = false;
+    bool m_isHovered  = false;
+    //bool m_isClicked  = false; 
 
     std::thread m_statusThread;
+    //wxGraphicsContext *gc;
+    wxPaintDC         * m_dc;
 
     wxBitmap m_bitmap;    
-    bool     m_isHovered; 
     wxString full_label;
     wxString m_name_text; 
     wxString m_ip_text; 
@@ -210,7 +220,6 @@ private:
     wxString m_progress_text; 
     std::function<void(wxMouseEvent &)> m_handlerl;
     wxDECLARE_EVENT_TABLE();
-    //wxDECLARE_EVENT_TABLE();
 };
 
 
@@ -228,6 +237,7 @@ public:
     //B45
     void OnLeftButtonClick(wxCommandEvent &event);
     void OnRightButtonClick(wxCommandEvent &event);
+    void OnCustomButtonClick(std::function<void(wxCommandEvent &)> m_handler, wxCommandEvent &event);
     void OnAddButtonClick(wxCommandEvent &event);
     void OnDeleteButtonClick(wxCommandEvent &event);
     void OnEditButtonClick(wxCommandEvent &event);
@@ -272,12 +282,10 @@ private:
     wxButton *arrow_button;
     wxStaticText *    text_static;
 
-
     int height = 0; 
     wxString  m_web;
     std::function<void(wxCommandEvent &)> m_handlerl;
     std::function<void(wxCommandEvent &)> m_delete_handlerl;
-
 
     wxScrolledWindow *          leftScrolledWindow;
     wxPanel *         leftPanel;
@@ -290,37 +298,7 @@ private:
 
     // DECLARE_EVENT_TABLE()
 };
-//w13
-class MyRoundButton : public wxButton
-{
-public:
-    wxString m_name;
 
-    MyRoundButton(wxWindow *      parent,
-                  wxWindowID      id    = wxID_ANY,
-                  const wxString &label = "",
-                  const wxString &name  = "",
-                  const wxPoint & pos   = wxDefaultPosition,
-                  const wxSize &  size  = wxDefaultSize,
-                  long            style = 0)
-        : wxButton(parent, id, label, pos, size, style), m_name(name)
-    {
-        //w13
-        //SetBackgroundColour(wxColour(100, 100, 105));
-        //SetMinSize(wxSize(40, -1));
-
-        Bind(wxEVT_PAINT, &MyRoundButton::OnPaint, this);
-        Bind(wxEVT_SET_FOCUS, &MyRoundButton::OnFocusEvent, this);
-        Bind(wxEVT_KILL_FOCUS, &MyRoundButton::OnFocusEvent, this);
-    }
-    void OnFocusEvent(wxFocusEvent &evt);
-    void OnPaint(wxPaintEvent &evt);
-
-private:
-    void DrawRoundedRect(wxDC &dc, wxRect rect, int radius){
-        dc.DrawRoundedRectangle(rect, radius); 
-    }
-};
 
 
 } // GUI
