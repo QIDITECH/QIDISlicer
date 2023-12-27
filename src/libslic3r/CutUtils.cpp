@@ -391,6 +391,8 @@ static void distribute_modifiers_from_object(ModelObject* from_obj, const int in
 
     for (ModelVolume* vol : from_obj->volumes)
         if (!vol->is_model_part()) {
+            if (vol->cut_info.is_connector && !vol->cut_info.is_processed)
+                continue;
             auto bb = vol->mesh().transformed_bounding_box(inst_matrix * vol->get_matrix());
             // Don't add modifiers which are not intersecting with solid parts
             if (obj1_bb.intersects(bb))
@@ -421,6 +423,7 @@ static void merge_solid_parts_inside_object(ModelObjectPtrs& objects)
                 if (mv->is_model_part() && !mv->is_cut_connector())
                     mo->delete_volume(i);
             }
+            mo->sort_volumes(true);
         }
     }
 }
@@ -460,6 +463,10 @@ const ModelObjectPtrs& Cut::perform_by_contour(std::vector<Part> parts, int dowe
 
         // Just add Upper and Lower objects to cut_object_ptrs
         post_process(upper, lower, cut_object_ptrs);
+        merge_solid_parts_inside_object(cut_object_ptrs);
+
+        // replace initial objects in model with cut object 
+        finalize(cut_object_ptrs);
     }
     else if (volumes.size() > cut_parts_cnt) {
         // Means that object is cut with connectors
@@ -487,16 +494,16 @@ const ModelObjectPtrs& Cut::perform_by_contour(std::vector<Part> parts, int dowe
         post_process(upper, lower, cut_object_ptrs);
 
         // Add Dowel-connectors as separate objects to cut_object_ptrs
-        if (cut_connectors_obj.size() >= 3)
-            for (size_t id = 2; id < cut_connectors_obj.size(); id++)
-                cut_object_ptrs.push_back(cut_connectors_obj[id]);
-    }
 
     // Now merge all model parts together:
     merge_solid_parts_inside_object(cut_object_ptrs);
 
     finalize(cut_object_ptrs);
 
+        if (cut_connectors_obj.size() >= 3)
+            for (size_t id = 2; id < cut_connectors_obj.size(); id++)
+                m_model.add_object(*cut_connectors_obj[id]);
+    }
     return m_model.objects;
 }
 

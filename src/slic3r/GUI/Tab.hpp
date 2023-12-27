@@ -37,6 +37,7 @@
 #include "OptionsGroup.hpp"
 #include "libslic3r/Preset.hpp"
 
+class CheckBox;
 namespace Slic3r {
 namespace GUI {
 
@@ -56,8 +57,11 @@ class SubstitutionManager
 	std::function<void()> m_cb_edited_substitution{ nullptr };
 	std::function<void()> m_cb_hide_delete_all_btn{ nullptr };
 
-	void validate_lenth();
-	bool is_compatibile_with_ui();
+	std::vector<std::string>	m_substitutions;
+	std::vector<wxWindow*>		m_chb_match_single_lines;
+
+	void validate_length();
+	bool is_compatible_with_ui();
 	bool is_valid_id(int substitution_id, const wxString& message);
 
 public:
@@ -185,7 +189,7 @@ protected:
 
    	struct PresetDependencies {
 		Preset::Type type	  = Preset::TYPE_INVALID;
-		wxCheckBox 	*checkbox = nullptr;
+		wxWindow 	*checkbox = nullptr;
 		ScalableButton 	*btn  = nullptr;
 		std::string  key_list; // "compatible_printers"
 		std::string  key_condition;
@@ -213,6 +217,8 @@ protected:
 	ScalableBitmap 		   *m_bmp_non_system;
 	// Bitmaps to be shown on the "Undo user changes" button next to each input field.
 	ScalableBitmap 			m_bmp_value_revert;
+	// Bitmaps to be shown on the "Undo user changes" button next to each input field.
+	ScalableBitmap 			m_bmp_edit_value;
     
     std::vector<ScalableButton*>	m_scaled_buttons = {};    
     std::vector<ScalableBitmap*>	m_scaled_bitmaps = {};    
@@ -389,6 +395,9 @@ public:
 	bool        validate_custom_gcodes();
     bool        validate_custom_gcodes_was_shown{ false };
 
+    void						edit_custom_gcode(const t_config_option_key& opt_key);
+    virtual const std::string&	get_custom_gcode(const t_config_option_key& opt_key);
+    virtual void				set_custom_gcode(const t_config_option_key& opt_key, const std::string& value);
 protected:
 	void			create_line_with_widget(ConfigOptionsGroup* optgroup, const std::string& opt_key, const std::string& path, widget_t widget);
 	wxSizer*		compatible_widget_create(wxWindow* parent, PresetDependencies &deps);
@@ -450,7 +459,7 @@ class TabFilament : public Tab
     void            create_extruder_combobox();
 	void 			update_volumetric_flow_preset_hints();
 
-    std::map<std::string, wxCheckBox*> m_overrides_options;
+    std::map<std::string, wxWindow*> m_overrides_options;
 public:
 	TabFilament(wxBookCtrlBase* parent) :
 		Tab(parent, _(L("Filament Settings")), Slic3r::Preset::TYPE_FILAMENT) {}
@@ -473,6 +482,8 @@ public:
     void        update_extruder_combobox();
     int         get_active_extruder() const { return m_active_extruder; }
 
+	const std::string&	get_custom_gcode(const t_config_option_key& opt_key) override;
+	void				set_custom_gcode(const t_config_option_key& opt_key, const std::string& value) override;
 protected:
     bool        select_preset_by_name(const std::string& name_w_suffix, bool force) override;
     bool        save_current_preset(const std::string& new_name, bool detach) override;

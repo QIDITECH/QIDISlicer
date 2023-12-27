@@ -14,7 +14,7 @@
 using namespace Slic3r;
 
 std::unique_ptr<CoolingBuffer> make_cooling_buffer(
-    GCode                           &gcode,
+    GCodeGenerator                  &gcode,
     const DynamicPrintConfig        &config         = DynamicPrintConfig{}, 
     const std::vector<unsigned int> &extruder_ids   = { 0 })
 {
@@ -65,7 +65,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
             const double print_time = 100. / (3000. / 60.);
             //FIXME slowdown_below_layer_time is rounded down significantly from 1.8s to 1s.
             config.set_deserialize_strict({ { "slowdown_below_layer_time", { int(print_time * 0.999) } } });
-            GCode gcodegen;
+            GCodeGenerator gcodegen;
             auto buffer = make_cooling_buffer(gcodegen, config);
             std::string gcode = buffer->process_layer("G1 F3000;_EXTRUDE_SET_SPEED\nG1 X100 E1", 0, true);
             bool speed_not_altered = gcode.find("F3000") != gcode.npos;
@@ -83,7 +83,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
         // Print time of gcode.
         const double print_time = 50. / (2500. / 60.) + 100. / (3000. / 60.) + 4. / (400. / 60.);
         config.set_deserialize_strict({ { "slowdown_below_layer_time", { int(print_time * 1.001) } } });
-        GCode gcodegen;
+        GCodeGenerator gcodegen;
         auto buffer = make_cooling_buffer(gcodegen, config);
         std::string gcode = buffer->process_layer(gcode_src, 0, true);
         THEN("speed is altered when elapsed time is lower than slowdown threshold") {
@@ -106,7 +106,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
                 { "fan_below_layer_time"      , int(print_time1 * 0.88) },
                 { "slowdown_below_layer_time" , int(print_time1 * 0.99) }
             });
-            GCode gcodegen;
+            GCodeGenerator gcodegen;
             auto buffer = make_cooling_buffer(gcodegen, config);
             std::string gcode = buffer->process_layer(gcode1, 0, true);
             bool fan_not_activated = gcode.find("M106") == gcode.npos;
@@ -119,7 +119,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
             { "fan_below_layer_time",      { int(print_time2 + 1.), int(print_time2 + 1.) } },
             { "slowdown_below_layer_time", { int(print_time2 + 2.), int(print_time2 + 2.) } }
         });
-        GCode gcodegen;
+        GCodeGenerator gcodegen;
         auto buffer = make_cooling_buffer(gcodegen, config, { 0, 1 });
         std::string gcode = buffer->process_layer(gcode1 + "T1\nG1 X0 E1 F3000\n", 0, true);
         THEN("fan is activated for the 1st tool") {
@@ -134,7 +134,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
     WHEN("G-code block 2") {
         THEN("slowdown is computed on all objects printing at the same Z") {
             config.set_deserialize_strict({ { "slowdown_below_layer_time", int(print_time2 * 0.99) } });
-            GCode gcodegen;
+            GCodeGenerator gcodegen;
             auto buffer = make_cooling_buffer(gcodegen, config);
             std::string gcode = buffer->process_layer(gcode2, 0, true);
             bool ok = gcode.find("F3000") != gcode.npos;
@@ -145,7 +145,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
                 { "fan_below_layer_time",      int(print_time2 * 0.65) },
                 { "slowdown_below_layer_time", int(print_time2 * 0.7) }
             });
-            GCode gcodegen;
+            GCodeGenerator gcodegen;
             auto buffer = make_cooling_buffer(gcodegen, config);
             // use an elapsed time which is < the threshold but greater than it when summed twice
             std::string gcode = buffer->process_layer(gcode2, 0, true) + buffer->process_layer(gcode2, 1, true);
@@ -158,7 +158,7 @@ SCENARIO("Cooling unit tests", "[Cooling]") {
                 { "fan_below_layer_time",      int(print_time2 + 1) },
                 { "slowdown_below_layer_time", int(print_time2 + 1) }
             });
-            GCode gcodegen;
+            GCodeGenerator gcodegen;
             auto buffer = make_cooling_buffer(gcodegen, config);
             // use an elapsed time which is < the threshold but greater than it when summed twice
             std::string gcode = buffer->process_layer(gcode2, 0, true) + buffer->process_layer(gcode2, 1, true);

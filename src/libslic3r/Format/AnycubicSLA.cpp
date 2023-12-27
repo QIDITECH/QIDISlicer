@@ -104,21 +104,21 @@ typedef struct anycubicsla_format_header
 {
     char          tag[12];
     std::uint32_t payload_size;
-    std::float_t  pixel_size_um;
-    std::float_t  layer_height_mm;
-    std::float_t  exposure_time_s;
-    std::float_t  delay_before_exposure_s;
-    std::float_t  bottom_exposure_time_s;
-    std::float_t  bottom_layer_count;
-    std::float_t  lift_distance_mm;
-    std::float_t  lift_speed_mms;
-    std::float_t  retract_speed_mms;
-    std::float_t  volume_ml;
+    float         pixel_size_um;
+    float         layer_height_mm;
+    float         exposure_time_s;
+    float         delay_before_exposure_s;
+    float         bottom_exposure_time_s;
+    float         bottom_layer_count;
+    float         lift_distance_mm;
+    float         lift_speed_mms;
+    float         retract_speed_mms;
+    float         volume_ml;
     std::uint32_t antialiasing;
     std::uint32_t res_x;
     std::uint32_t res_y;
-    std::float_t  weight_g;
-    std::float_t  price;
+    float         weight_g;
+    float         price;
     std::uint32_t price_currency;
     std::uint32_t per_layer_override; // ? unknown meaning ?
     std::uint32_t print_time_s;
@@ -149,19 +149,19 @@ typedef struct anycubicsla_format_layer
 {
     std::uint32_t image_offset;
     std::uint32_t image_size;
-    std::float_t  lift_distance_mm;
-    std::float_t  lift_speed_mms;
-    std::float_t  exposure_time_s;
-    std::float_t  layer_height_mm;
-    std::float_t  layer44; // unkown - usually 0
-    std::float_t  layer48; // unkown - usually 0
+    float         lift_distance_mm;
+    float         lift_speed_mms;
+    float         exposure_time_s;
+    float         layer_height_mm;
+    float         layer44; // unkown - usually 0
+    float         layer48; // unkown - usually 0
 } anycubicsla_format_layer;
 
 typedef struct anycubicsla_format_misc
 {
-    std::float_t bottom_layer_height_mm;
-    std::float_t bottom_lift_distance_mm;
-    std::float_t bottom_lift_speed_mms;
+    float bottom_layer_height_mm;
+    float bottom_lift_distance_mm;
+    float bottom_lift_speed_mms;
 
 } anycubicsla_format_misc;
 
@@ -192,9 +192,9 @@ private:
 
 namespace {
 
-std::float_t get_cfg_value_f(const DynamicConfig &cfg,
+float get_cfg_value_f(const DynamicConfig &cfg,
                              const std::string   &key,
-                             const std::float_t  &def = 0.f)
+                      const float         &def = 0.f)
 {
     if (cfg.has(key)) {
         if (auto opt = cfg.option(key))
@@ -276,10 +276,10 @@ void fill_header(anycubicsla_format_header &h,
 {
     CNumericLocalesSetter locales_setter;
 
-    std::float_t bottle_weight_g;
-    std::float_t bottle_volume_ml;
-    std::float_t bottle_cost;
-    std::float_t material_density;
+    float        bottle_weight_g;
+    float        bottle_volume_ml;
+    float        bottle_cost;
+    float        material_density;
     auto        &cfg     = print.full_print_config();
     auto         mat_opt = cfg.option("material_notes");
     std::string  mnotes  = mat_opt? cfg.option("material_notes")->serialize() : "";
@@ -416,7 +416,7 @@ static void anycubicsla_write_int32(std::ofstream &out, std::uint32_t val)
     out.write((const char *) &i3, 1);
     out.write((const char *) &i4, 1);
 }
-static void anycubicsla_write_float(std::ofstream &out, std::float_t val)
+static void anycubicsla_write_float(std::ofstream &out, float val)
 {
     std::uint32_t *f = (std::uint32_t *) &val;
     anycubicsla_write_int32(out, *f);

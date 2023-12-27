@@ -11,17 +11,20 @@
 
 #include <wx/sizer.h>
 
-int scale(const int val) { return val * Slic3r::GUI::wxGetApp().em_unit(); }
+using namespace Slic3r::GUI;
+
+int scale(const int val) { return val * wxGetApp().em_unit(); }
 int ITEM_WIDTH() { return scale(6); }
 
 static void update_ui(wxWindow* window)
 {
-    Slic3r::GUI::wxGetApp().UpdateDarkUI(window);
+    wxGetApp().UpdateDarkUI(window);
 }
 
 RammingDialog::RammingDialog(wxWindow* parent,const std::string& parameters)
 : wxDialog(parent, wxID_ANY, _(L("Ramming customization")), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE/* | wxRESIZE_BORDER*/)
 {
+    SetFont(wxGetApp().normal_font());
     update_ui(this);
     m_panel_ramming  = new RammingPanel(this,parameters);
 
@@ -38,7 +41,10 @@ RammingDialog::RammingDialog(wxWindow* parent,const std::string& parameters)
 
     auto main_sizer = new wxBoxSizer(wxVERTICAL);
     main_sizer->Add(m_panel_ramming, 1, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
-    main_sizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALIGN_CENTER_HORIZONTAL | wxTOP | wxBOTTOM, 10);
+    auto buttons = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
+    wxGetApp().SetWindowVariantForButton(buttons->GetAffirmativeButton());
+    wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
+    main_sizer->Add(buttons, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP | wxBOTTOM, 10);
     SetSizer(main_sizer);
     main_sizer->SetSizeHints(this);
 
@@ -52,8 +58,7 @@ RammingDialog::RammingDialog(wxWindow* parent,const std::string& parameters)
         EndModal(wxID_OK);
         },wxID_OK);
     this->Show();
-//    wxMessageDialog dlg(this, _(L("Ramming denotes the rapid extrusion just before a tool change in a single-extruder MM printer. Its purpose is to "
-    Slic3r::GUI::MessageDialog dlg(this, _(L("Ramming denotes the rapid extrusion just before a tool change in a single-extruder MM printer. Its purpose is to "
+    MessageDialog dlg(this, _(L("Ramming denotes the rapid extrusion just before a tool change in a single-extruder MM printer. Its purpose is to "
         "properly shape the end of the unloaded filament so it does not prevent insertion of the new filament and can itself "
         "be reinserted later. This phase is important and different materials can require different extrusion speeds to get "
         "the good shape. For this reason, the extrusion rates during ramming are adjustable.\n\nThis is an expert-level "
@@ -100,10 +105,11 @@ RammingPanel::RammingPanel(wxWindow* parent, const std::string& parameters)
 #endif
  	sizer_chart->Add(m_chart, 0, wxALL, 5);
 
-    m_widget_time						= new wxSpinCtrlDouble(this,wxID_ANY,wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,0.,5.0,3.,0.5);        
-    m_widget_volume							  = new wxSpinCtrl(this,wxID_ANY,wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,0,10000,0);        
-    m_widget_ramming_line_width_multiplicator = new wxSpinCtrl(this,wxID_ANY,wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,10,200,100);        
-    m_widget_ramming_step_multiplicator		  = new wxSpinCtrl(this,wxID_ANY,wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,10,200,100);
+    m_widget_time						= new ::SpinInputDouble(this,"", wxEmptyString, wxDefaultPosition, wxSize(ITEM_WIDTH(), -1), style, 0., 5., 3., 0.5);
+    m_widget_time->SetDigits(2);
+    m_widget_volume							  = new ::SpinInput(this,"",wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,0,10000,0);
+    m_widget_ramming_line_width_multiplicator = new ::SpinInput(this,"",wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,10,200,100);
+    m_widget_ramming_step_multiplicator		  = new ::SpinInput(this,"",wxEmptyString,wxDefaultPosition,wxSize(ITEM_WIDTH(), -1),style,10,200,100);
 
 #ifdef _WIN32
     update_ui(m_widget_time->GetText());
@@ -127,7 +133,6 @@ RammingPanel::RammingPanel(wxWindow* parent, const std::string& parameters)
 	sizer_param->Add(gsizer_param, 0, wxTOP, scale(10));
 
     m_widget_time->SetValue(m_chart->get_time());
-    m_widget_time->SetDigits(2);
     m_widget_volume->SetValue(m_chart->get_volume());
     m_widget_volume->Disable();
     m_widget_ramming_line_width_multiplicator->SetValue(m_ramming_line_width_multiplicator);
@@ -143,8 +148,9 @@ RammingPanel::RammingPanel(wxWindow* parent, const std::string& parameters)
 	sizer->SetSizeHints(this);
 	SetSizer(sizer);
 
-    m_widget_time->Bind(wxEVT_TEXT,[this](wxCommandEvent&) {m_chart->set_xy_range(m_widget_time->GetValue(),-1);});
+    m_widget_time->Bind(wxEVT_SPINCTRL,[this](wxCommandEvent&) { m_chart->set_xy_range(m_widget_time->GetValue(),-1); });
     m_widget_time->Bind(wxEVT_CHAR,[](wxKeyEvent&){});      // do nothing - prevents the user to change the value
+    m_widget_time->GetText()->Bind(wxEVT_CHAR,[](wxKeyEvent&){}); // do nothing - prevents the user to change the value
     m_widget_volume->Bind(wxEVT_CHAR,[](wxKeyEvent&){});    // do nothing - prevents the user to change the value   
     Bind(EVT_WIPE_TOWER_CHART_CHANGED,[this](wxCommandEvent&) {m_widget_volume->SetValue(m_chart->get_volume()); m_widget_time->SetValue(m_chart->get_time());} );
     Refresh(true); // erase background
@@ -174,9 +180,11 @@ std::string RammingPanel::get_parameters()
 WipingDialog::WipingDialog(wxWindow* parent, const std::vector<float>& matrix, const std::vector<float>& extruders, const std::vector<std::string>& extruder_colours)
 : wxDialog(parent, wxID_ANY, _(L("Wipe tower - Purging volume adjustment")), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE/* | wxRESIZE_BORDER*/)
 {
+    SetFont(wxGetApp().normal_font());
     update_ui(this);
     auto widget_button = new wxButton(this,wxID_ANY,"-",wxPoint(0,0),wxDefaultSize);
     update_ui(widget_button);
+    wxGetApp().SetWindowVariantForButton(widget_button);
     m_panel_wiping  = new WipingPanel(this,matrix,extruders, extruder_colours, widget_button);
 
     auto main_sizer = new wxBoxSizer(wxVERTICAL);
@@ -187,7 +195,10 @@ WipingDialog::WipingDialog(wxWindow* parent, const std::vector<float>& matrix, c
 
     main_sizer->Add(m_panel_wiping, 0, wxEXPAND | wxALL, 5);
 	main_sizer->Add(widget_button, 0, wxALIGN_CENTER_HORIZONTAL | wxCENTER | wxBOTTOM, 5);
-    main_sizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 10);
+    auto buttons = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
+    wxGetApp().SetWindowVariantForButton(buttons->GetAffirmativeButton());
+    wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
+    main_sizer->Add(buttons, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 10);
     SetSizer(main_sizer);
     main_sizer->SetSizeHints(this);
 
@@ -310,35 +321,12 @@ WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, con
 	gridsizer_simple->Add(new wxStaticText(m_page_simple, wxID_ANY, wxString(_(L("unloaded")))), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);
     gridsizer_simple->Add(new wxStaticText(m_page_simple,wxID_ANY,wxString(_(L("loaded")))), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);
 
-    auto add_spin_ctrl = [this](std::vector<wxSpinCtrl*>& vec, float initial)
+    auto add_spin_ctrl = [this](std::vector<::SpinInput*>& vec, float initial)
     {
-        wxSpinCtrl* spin_ctrl = new wxSpinCtrl(m_page_simple, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(ITEM_WIDTH(), -1), style | wxALIGN_RIGHT, 0, 300, (int)initial);
+        ::SpinInput* spin_ctrl = new ::SpinInput(m_page_simple, "", wxEmptyString, wxDefaultPosition, wxSize(ITEM_WIDTH(), -1), style | wxALIGN_RIGHT, 0, 300, (int)initial);
         update_ui(spin_ctrl);
         vec.push_back(spin_ctrl);
 
-#ifdef __WXOSX__
-        // On OSX / Cocoa, wxSpinCtrl::GetValue() doesn't return the new value
-        // when it was changed from the text control, so the on_change callback
-        // gets the old one, and on_kill_focus resets the control to the old value.
-        // As a workaround, we get the new value from $event->GetString and store
-        // here temporarily so that we can return it from get_value()
-        spin_ctrl->Bind(wxEVT_TEXT, ([spin_ctrl](wxCommandEvent e)
-        {
-            long value;
-            const bool parsed = e.GetString().ToLong(&value);
-            int tmp_value = parsed && value >= INT_MIN && value <= INT_MAX ? (int)value : INT_MIN;
-
-            // Forcibly set the input value for SpinControl, since the value 
-            // inserted from the keyboard or clipboard is not updated under OSX
-            if (tmp_value != INT_MIN) {
-                spin_ctrl->SetValue(tmp_value);
-
-                // But in SetValue() is executed m_text_ctrl->SelectAll(), so
-                // discard this selection and set insertion point to the end of string
-                spin_ctrl->GetText()->SetInsertionPointEnd();
-            }
-        }), spin_ctrl->GetId());
-#endif
     };
 
 	for (unsigned int i=0;i<m_number_of_extruders;++i) {
@@ -353,7 +341,7 @@ WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, con
         hsizer->AddSpacer(10);
         hsizer->Add(new wxStaticText(m_page_simple, wxID_ANY, wxString(_(L("Tool #"))) << i + 1 << ": "), 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
 
-        gridsizer_simple->Add(hsizer, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL);
+        gridsizer_simple->Add(hsizer, 1, wxEXPAND);
         gridsizer_simple->Add(m_old.back(),0);
         gridsizer_simple->Add(m_new.back(),0);
 	}
@@ -440,8 +428,7 @@ bool WipingPanel::advanced_matches_simple() {
 // Switches the dialog from simple to advanced mode and vice versa
 void WipingPanel::toggle_advanced(bool user_action) {
     if (m_advanced && !advanced_matches_simple() && user_action) {
-//        if (wxMessageDialog(this,wxString(_(L("Switching to simple settings will discard changes done in the advanced mode!\n\nDo you want to proceed?"))),
-        if (Slic3r::GUI::MessageDialog(this, _L("Switching to simple settings will discard changes done in the advanced mode!\n\nDo you want to proceed?"),
+        if (MessageDialog(this, _L("Switching to simple settings will discard changes done in the advanced mode!\n\nDo you want to proceed?"),
                             _L("Warning"),wxYES_NO|wxICON_EXCLAMATION).ShowModal() != wxID_YES)
             return;
     }

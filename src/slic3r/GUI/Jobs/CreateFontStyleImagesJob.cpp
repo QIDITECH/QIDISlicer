@@ -47,8 +47,7 @@ void CreateFontStyleImagesJob::process(Ctl &ctl)
         for (ExPolygon &shape : shapes) shape.translate(-bounding_box.min);
         
         // calculate conversion from FontPoint to screen pixels by size of font
-        const FontFile::Info &info = get_font_info(*item.font.font_file, item.prop);
-        double scale = item.prop.size_in_mm / info.unit_per_em * SHAPE_SCALE * m_input.ppm;
+        double scale = get_text_shape_scale(item.prop, *item.font.font_file);
         scales[index] = scale;
 
         //double scale = font_prop.size_in_mm * SCALING_FACTOR;

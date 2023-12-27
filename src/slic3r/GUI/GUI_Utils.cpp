@@ -1,5 +1,6 @@
 #include "GUI_Utils.hpp"
 #include "GUI_App.hpp"
+#include "format.hpp"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
@@ -300,8 +301,10 @@ TaskTimer::~TaskTimer()
 {
     std::chrono::milliseconds stop_timer = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch());
-    auto process_duration = std::chrono::milliseconds(stop_timer - start_timer).count();
-    std::string out = (boost::format("\n!!! %1% duration = %2% ms \n\n") % task_name % process_duration).str();
+    const auto timer_delta = stop_timer - start_timer;
+    const auto process_duration_ms = std::chrono::milliseconds(timer_delta).count();
+    const auto process_duration_s = std::chrono::duration_cast<std::chrono::duration<float>>(timer_delta).count();
+    std::string out = format("\n!   \"%1%\" duration = %2% s (%3% ms) \n", task_name, process_duration_s, process_duration_ms);
     printf("%s", out.c_str());
 #ifdef __WXMSW__
     std::wstring stemp = std::wstring(out.begin(), out.end());

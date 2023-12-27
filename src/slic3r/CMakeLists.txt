@@ -18,33 +18,6 @@ set(SLIC3R_GUI_SOURCES
     GUI/BackgroundSlicingProcess.hpp
     GUI/BitmapCache.cpp
     GUI/BitmapCache.hpp
-    GUI/Widgets/StateColor.cpp
-    GUI/Widgets/StateColor.hpp
-    GUI/Widgets/WebView.cpp
-    GUI/Widgets/WebView.hpp
-    GUI/Widgets/Label.cpp
-    GUI/Widgets/Label.hpp
-    GUI/Widgets/StateHandler.cpp
-    GUI/Widgets/StateHandler.hpp
-    GUI/Widgets/StaticBox.cpp
-    GUI/Widgets/StaticBox.hpp
-    GUI/Widgets/Button.cpp
-    GUI/Widgets/Button.hpp
-    GUI/Widgets/CheckBoxInWT.cpp
-    GUI/Widgets/CheckBoxInWT.hpp
-    GUI/Widgets/ComboBox.cpp
-    GUI/Widgets/ComboBox.hpp
-    GUI/Widgets/TextInput.cpp
-    GUI/Widgets/TextInput.hpp
-    GUI/Widgets/TextCtrl.h
-    GUI/Widgets/RoundedRectangle.cpp
-    GUI/Widgets/RoundedRectangle.hpp
-    GUI/Widgets/RadioBox.cpp
-    GUI/Widgets/RadioBox.hpp
-    GUI/Widgets/DropDown.cpp
-    GUI/Widgets/DropDown.hpp
-    GUI/Widgets/PopupWindow.cpp
-    GUI/Widgets/PopupWindow.hpp
     GUI/ConfigSnapshotDialog.cpp
     GUI/ConfigSnapshotDialog.hpp
     GUI/calib_dlg.cpp
@@ -96,6 +69,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/Gizmos/GLGizmoSeam.hpp
     GUI/Gizmos/GLGizmoSimplify.cpp
     GUI/Gizmos/GLGizmoSimplify.hpp
+    GUI/Gizmos/GLGizmoSVG.cpp
+    GUI/Gizmos/GLGizmoSVG.hpp
     GUI/Gizmos/GLGizmoMmuSegmentation.cpp
     GUI/Gizmos/GLGizmoMmuSegmentation.hpp
     GUI/Gizmos/GLGizmoMeasure.cpp
@@ -138,6 +113,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/PresetComboBoxes.cpp
     GUI/BitmapComboBox.hpp
     GUI/BitmapComboBox.cpp
+    GUI/EditGCodeDialog.hpp
+    GUI/EditGCodeDialog.cpp
     GUI/SavePresetDialog.hpp
     GUI/SavePresetDialog.cpp
     GUI/PhysicalPrinterDialog.hpp
@@ -223,6 +200,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/FirmwareDialog.hpp
     GUI/PrintHostDialogs.cpp
     GUI/PrintHostDialogs.hpp
+    GUI/WifiConfigDialog.cpp
+    GUI/WifiConfigDialog.hpp
     GUI/Jobs/Job.hpp
     GUI/Jobs/Worker.hpp
     GUI/Jobs/BoostThreadWorker.hpp
@@ -274,6 +253,38 @@ set(SLIC3R_GUI_SOURCES
     GUI/DesktopIntegrationDialog.hpp
     GUI/HintNotification.cpp
     GUI/HintNotification.hpp
+    GUI/Widgets/BitmapToggleButton.cpp
+    GUI/Widgets/BitmapToggleButton.hpp
+    GUI/Widgets/Button.cpp
+    GUI/Widgets/Button.hpp
+    GUI/Widgets/CheckBox.cpp
+    GUI/Widgets/CheckBox.hpp
+    GUI/Widgets/ComboBox.cpp
+    GUI/Widgets/ComboBox.hpp
+    GUI/Widgets/DropDown.cpp
+    GUI/Widgets/DropDown.hpp
+    GUI/Widgets/StateColor.cpp
+    GUI/Widgets/StateColor.hpp
+    GUI/Widgets/WebView.cpp
+    GUI/Widgets/WebView.hpp
+    GUI/Widgets/Label.cpp
+    GUI/Widgets/Label.hpp
+    GUI/Widgets/StateHandler.cpp
+    GUI/Widgets/StateHandler.hpp
+    GUI/Widgets/StaticBox.cpp
+    GUI/Widgets/StaticBox.hpp
+    GUI/Widgets/SpinInput.cpp
+    GUI/Widgets/SpinInput.hpp
+    GUI/Widgets/SwitchButton.cpp
+    GUI/Widgets/SwitchButton.hpp
+    GUI/Widgets/TextInput.cpp
+    GUI/Widgets/TextInput.hpp
+    GUI/Widgets/TextCtrl.h
+    GUI/Widgets/RoundedRectangle.cpp
+    GUI/Widgets/RoundedRectangle.hpp
+    GUI/Widgets/PopupWindow.cpp
+    GUI/Widgets/PopupWindow.hpp
+    GUI/Widgets/UIColors.hpp
     GUI/FileArchiveDialog.cpp
     GUI/FileArchiveDialog.hpp
     GUI/Downloader.cpp
@@ -294,8 +305,6 @@ set(SLIC3R_GUI_SOURCES
     Utils/Duet.hpp
     Utils/EmbossStyleManager.cpp
     Utils/EmbossStyleManager.hpp
-    Utils/EmbossStylesSerializable.cpp
-    Utils/EmbossStylesSerializable.hpp
     Utils/FlashAir.cpp
     Utils/FlashAir.hpp
     Utils/FontConfigHelp.cpp
@@ -328,6 +337,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/WinRegistry.hpp
     Utils/WxFontUtils.cpp
     Utils/WxFontUtils.hpp
+    Utils/WifiScanner.hpp
+    Utils/WifiScanner.cpp
 )
 
 find_package(NanoSVG REQUIRED)
@@ -337,6 +348,8 @@ if (APPLE)
             Utils/RetinaHelperImpl.mm
             Utils/MacDarkMode.mm
             Utils/MacUtils.mm
+            Utils/WifiScannerMac.h
+            Utils/WifiScannerMac.mm
             GUI/RemovableDriveManagerMM.mm
             GUI/RemovableDriveManagerMM.h
             GUI/Mouse3DHandlerMac.mm
@@ -344,12 +357,13 @@ if (APPLE)
             GUI/InstanceCheckMac.h
         )
     FIND_LIBRARY(DISKARBITRATION_LIBRARY DiskArbitration)
+    FIND_LIBRARY(COREWLAN_LIBRARY CoreWLAN)
 endif ()
 
 add_library(libslic3r_gui STATIC ${SLIC3R_GUI_SOURCES})
 
 if (WIN32)
-    target_include_directories(libslic3r_gui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/WebView2/include)
+    target_include_directories(libslic3r_gui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/+WebView2/include)
 endif()
 
 foreach(_source IN ITEMS ${SLIC3R_GUI_SOURCES})
@@ -367,14 +381,14 @@ if (MSVC)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(libslic3r_gui ${DBUS_LIBRARIES}) 
 elseif (APPLE)
-    target_link_libraries(libslic3r_gui ${DISKARBITRATION_LIBRARY})
+    target_link_libraries(libslic3r_gui ${DISKARBITRATION_LIBRARY} ${COREWLAN_LIBRARY})
 endif()
 
-if (SLIC3R_STATIC)
+#if (SLIC3R_STATIC)
     # FIXME: This was previously exported by wx-config but the wxWidgets
     # cmake build forgets this and the build fails in debug mode (or on raspberry release)
-    target_compile_definitions(libslic3r_gui PUBLIC -DwxDEBUG_LEVEL=0)
-endif()
+#    target_compile_definitions(libslic3r_gui PUBLIC -DwxDEBUG_LEVEL=0)
+#endif()
 
 if (SLIC3R_PCH AND NOT SLIC3R_SYNTAXONLY)
     add_precompiled_header(libslic3r_gui pchheader.hpp FORCEINCLUDE)

@@ -108,7 +108,7 @@ std::unique_ptr<Emboss::FontFile> WxFontUtils::create_font_file(const wxFont &fo
 #endif
 }
 
-EmbossStyle::Type WxFontUtils::get_actual_type()
+EmbossStyle::Type WxFontUtils::get_current_type()
 {
 #ifdef _WIN32
     return EmbossStyle::Type::wx_win_font_descr;
@@ -125,7 +125,7 @@ EmbossStyle WxFontUtils::create_emboss_style(const wxFont &font, const std::stri
 {
     std::string name_item = name.empty()? get_human_readable_name(font) : name;
     std::string fontDesc = store_wxFont(font);
-    EmbossStyle::Type type     = get_actual_type();
+    EmbossStyle::Type type = get_current_type();
 
     // synchronize font property with actual font
     FontProp font_prop; 
@@ -134,7 +134,6 @@ EmbossStyle WxFontUtils::create_emboss_style(const wxFont &font, const std::stri
     // is approximately 0.0139 inch or 352.8 um. But it is too small, so I
     // decide use point size as mm for emboss
     font_prop.size_in_mm = font.GetPointSize(); // *0.3528f;
-    font_prop.emboss     = font_prop.size_in_mm / 2.f;
 
     WxFontUtils::update_property(font_prop, font);
     return { name_item, fontDesc, type, font_prop };

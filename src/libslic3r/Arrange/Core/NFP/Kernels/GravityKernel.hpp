@@ -14,7 +14,9 @@ struct GravityKernel {
     std::optional<Vec2crd> item_sink;
     Vec2d active_sink;
 
-    GravityKernel(Vec2crd gravity_center) : sink{gravity_center} {}
+    GravityKernel(Vec2crd gravity_center) :
+        sink{gravity_center}, active_sink{unscaled(gravity_center)} {}
+
     GravityKernel() = default;
 
     template<class ArrItem>

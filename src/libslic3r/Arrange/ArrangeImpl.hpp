@@ -441,7 +441,7 @@ ArrItem AdvancedItemConverter<ArrItem>::get_arritem(const Arrangeable &arrbl,
 
     auto simpl_tol = static_cast<double>(this->simplification_tolerance());
 
-    if (simpl_tol > 0)
+    if (simpl_tol > 0.)
     {
         outline = expolygons_simplify(outline, simpl_tol);
         if (!envelope.empty())

@@ -154,7 +154,7 @@ TextLines select_closest_contour(const std::vector<Polygons> &line_contours) {
         std::vector<Linef> linesf = to_linesf(expolygons);
         AABBTreeIndirect::Tree2d tree = AABBTreeLines::build_aabb_tree_over_indexed_lines(linesf);
 
-        size_t line_idx;
+        size_t line_idx = 0;
         Vec2d  hit_point;
         // double distance = 
         AABBTreeLines::squared_distance_to_indexed_lines(linesf, tree, zero, line_idx, hit_point);
@@ -218,24 +218,6 @@ GLModel::Geometry create_geometry(const TextLines &lines, float radius, bool is_
     return geometry;    
 }
 
-bool get_line_height_offset(const FontProp &fp, const FontFile &ff, double &line_height_mm, double &line_offset_mm)
-{
-    double third_ascent_shape_size = get_font_info(ff, fp).ascent / 3.;
-    int    line_height_shape_size  = get_line_height(ff, fp); // In shape size
-
-    double scale   = get_shape_scale(fp, ff);
-    line_offset_mm = third_ascent_shape_size * scale / SHAPE_SCALE;
-    line_height_mm = line_height_shape_size * scale;
-
-    if (line_height_mm < 0)
-        return false;
-
-    // fix for bad filled ascent in font file
-    if (line_offset_mm <= 0)
-        line_offset_mm = line_height_mm / 3;
-
-    return true;
-}
 } // namespace
 
 void TextLinesModel::init(const Transform3d      &text_tr,
@@ -259,8 +241,9 @@ void TextLinesModel::init(const Transform3d      &text_tr,
 
     FontProp::VerticalAlign align = fp.align.second;
 
-    double line_height_mm, line_offset_mm;
-    if (!get_line_height_offset(fp, ff, line_height_mm, line_offset_mm))
+    double line_height_mm = calc_line_height_in_mm(ff, fp);
+    assert(line_height_mm > 0);
+    if (line_height_mm <= 0)
         return;
 
     m_model.reset();
@@ -364,9 +347,9 @@ void TextLinesModel::render(const Transform3d &text_world)
     shader->stop_using();
 }
 
-double TextLinesModel::calc_line_height(const Slic3r::Emboss::FontFile &ff, const FontProp &fp)
+double TextLinesModel::calc_line_height_in_mm(const Slic3r::Emboss::FontFile &ff, const FontProp &fp)
 {
     int line_height = Slic3r::Emboss::get_line_height(ff, fp); // In shape size
-    double scale = Slic3r::Emboss::get_shape_scale(fp, ff);
+    double scale = Slic3r::Emboss::get_text_shape_scale(fp, ff);
     return line_height * scale;
 }

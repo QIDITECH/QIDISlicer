@@ -91,7 +91,7 @@ void fill_distances(const Polygon &poly, std::vector<double> &distances)
 
     double dist = 0.;
     auto lrange = line_range(poly);
-    for (const Line &l : lrange) {
+    for (const Line l : lrange) {
         dist += l.length();
         distances.emplace_back(dist);
     }

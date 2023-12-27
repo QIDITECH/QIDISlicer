@@ -90,11 +90,11 @@ void AppConfig::set_defaults()
             set("associate_3mf", "0");
         if (get("associate_stl").empty())
             set("associate_stl", "0");
-        if (get("associate_step").empty())
-            set("associate_step", "0");
 
         if (get("tabs_as_menu").empty())
             set("tabs_as_menu", "0");
+        if (get("suppress_round_corners").empty())
+            set("suppress_round_corners", "1");
 #endif // _WIN32
 
         // remove old 'use_legacy_opengl' parameter from this config, if present
@@ -151,7 +151,7 @@ void AppConfig::set_defaults()
             set("default_action_on_new_project", "none");       // , "keep(transfer)", "discard" or "save" 
 
         if (get("color_mapinulation_panel").empty())
-            set("color_mapinulation_panel", "1");
+            set("color_mapinulation_panel", "0");
 
         if (get("order_volumes").empty())
             set("order_volumes", "1");
@@ -166,6 +166,8 @@ void AppConfig::set_defaults()
 #ifdef _WIN32
         if (get("associate_gcode").empty())
             set("associate_gcode", "0");
+        if (get("associate_bgcode").empty())
+            set("associate_bgcode", "0");
 #endif // _WIN32
     }
 
@@ -196,6 +198,8 @@ void AppConfig::set_defaults()
     if (get("allow_ip_resolve").empty())
         set("allow_ip_resolve", "1");
 
+    if (get("wifi_config_dialog_declined").empty())
+        set("wifi_config_dialog_declined", "0");
 #ifdef _WIN32
     if (get("use_legacy_3DConnexion").empty())
         set("use_legacy_3DConnexion", "0");
@@ -208,7 +212,6 @@ void AppConfig::set_defaults()
     //B45
     if (get("machine_list_minification").empty())
         set("machine_list_minification", "1");
-    
 #endif // _WIN32
 
     // Remove legacy window positions/sizes
@@ -360,21 +363,11 @@ std::string AppConfig::load(const std::string &path)
                 const auto model_name = kvp.first.substr(MODEL_PREFIX.size());
                 std::vector<std::string> variants;
                 //B9
-                std::vector<std::string> emails;
-                std::vector<std::string> skypes;
                 if (! unescape_strings_cstyle(kvp.second.data(), variants)) { continue; }
                 for (const auto &variant : variants) {
                     vendor[model_name].insert(variant);
                 }
                 //B19
-                if (! unescape_strings_cstyle(kvp.second.data(), emails)) { continue; }
-                for (const auto &email : emails) {
-                    vendor[model_name].insert(email);
-                }
-                if (! unescape_strings_cstyle(kvp.second.data(), skypes)) { continue; }
-                for (const auto &skype : skypes) {
-                    vendor[model_name].insert(skype);
-                }
             }
     	} else {
     		// This must be a section name. Read the entries of a section.
@@ -390,11 +383,17 @@ std::string AppConfig::load(const std::string &path)
     //B7
     // if (ini_ver) {
     //     m_orig_version = *ini_ver;
+    if (ini_ver) {
+        m_orig_version = *ini_ver;
     //     // Make 1.40.0 alphas compare well
     //     ini_ver->set_metadata(boost::none);
     //     ini_ver->set_prerelease(boost::none);
     //     m_legacy_datadir = ini_ver < Semver(1, 40, 0);
     // }
+        ini_ver->set_metadata(boost::none);
+        ini_ver->set_prerelease(boost::none);
+        m_legacy_datadir = ini_ver < Semver(1, 40, 0);
+    }
 
     // Legacy conversion
     if (m_mode == EAppMode::Editor) {

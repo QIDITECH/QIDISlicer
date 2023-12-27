@@ -95,12 +95,14 @@ public:
 		Semver version;
 		std::string comment;
 		std::string changelog_url;
+		std::string new_printers;
 
-		Update(std::string vendor, Semver version, std::string comment, std::string changelog_url)
+		Update(std::string vendor, Semver version, std::string comment, std::string changelog_url, std::string new_printers)
 			: vendor(std::move(vendor))
 			, version(std::move(version))
 			, comment(std::move(comment))
 			, changelog_url(std::move(changelog_url))
+			, new_printers(std::move(new_printers))
 		{}
 	};
 
@@ -123,12 +125,14 @@ public:
 		Semver version;
 		std::string comment;
 		std::string changelog_url;
+		std::string new_printers;
 
-		Update(std::string vendor, Semver version, std::string comment, std::string changelog_url)
+		Update(std::string vendor, Semver version, std::string comment, std::string changelog_url, std::string new_printers)
 			: vendor(std::move(vendor))
 			, version(std::move(version))
 			, comment(std::move(comment))
 			, changelog_url(std::move(changelog_url))
+			, new_printers(std::move(new_printers))
 		{}
 	};
 

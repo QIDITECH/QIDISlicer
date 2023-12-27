@@ -813,11 +813,13 @@ FirmwareDialog::FirmwareDialog(wxWindow *parent) :
 	p->hex_picker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, /*wxFileSelectorPromptStr*/_L("Select a file"),
 		"Hex files (*.hex)|*.hex|All files|*.*");
 	p->hex_picker->GetPickerCtrl()->SetLabelText(_(L("Browse")));
+	GUI::wxGetApp().SetWindowVariantForButton(static_cast<wxButton*>(p->hex_picker->GetPickerCtrl()));
 
 	auto *label_port_picker = new wxStaticText(panel, wxID_ANY, _(L("Serial port:")));
 	p->port_picker = new wxComboBox(panel, wxID_ANY);
 	p->txt_port_autodetect = new wxStaticText(panel, wxID_ANY, _(L("Autodetected")));
 	p->btn_rescan = new wxButton(panel, wxID_ANY, _(L("Rescan")));
+    GUI::wxGetApp().SetWindowVariantForButton(p->btn_rescan);
 	auto *port_sizer = new wxBoxSizer(wxHORIZONTAL);
 	port_sizer->Add(p->port_picker, 1, wxEXPAND | wxRIGHT, SPACING);
 	port_sizer->Add(p->btn_rescan, 0);
@@ -841,7 +843,7 @@ FirmwareDialog::FirmwareDialog(wxWindow *parent) :
 	grid->Add(port_sizer, 0, wxEXPAND);
 
 	grid->Add(label_progress, 0, wxALIGN_CENTER_VERTICAL);
-	grid->Add(p->progressbar, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL);
+	grid->Add(p->progressbar, 1, wxEXPAND);
 
 	grid->Add(label_status, 0, wxALIGN_CENTER_VERTICAL);
 	grid->Add(p->txt_status, 0, wxEXPAND);
@@ -860,7 +862,9 @@ FirmwareDialog::FirmwareDialog(wxWindow *parent) :
 	vsizer->Add(p->spoiler, 1, wxEXPAND | wxBOTTOM, SPACING);
 
 	p->btn_close = new wxButton(panel, wxID_CLOSE, _(L("Close")));   // Note: The label needs to be present, otherwise we get accelerator bugs on Mac
+	GUI::wxGetApp().SetWindowVariantForButton(p->btn_close);
 	p->btn_flash = new wxButton(panel, wxID_ANY, p->btn_flash_label_ready);
+	GUI::wxGetApp().SetWindowVariantForButton(p->btn_flash);
 	p->btn_flash->Disable();
 	auto *bsizer = new wxBoxSizer(wxHORIZONTAL);
 	bsizer->Add(p->btn_close);

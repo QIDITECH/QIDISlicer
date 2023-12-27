@@ -7,9 +7,20 @@
 #include "objparser.hpp"
 
 #include "libslic3r/LocalesUtils.hpp"
+#include "fast_float/fast_float.h"
 
 namespace ObjParser {
 
+static double strtod_clocale(const char* str, char const** str_end)
+{
+	double val = 0.;
+	auto [pend, ec] = fast_float::from_chars(str, *str_end, val);
+	if (pend != str && ec != std::errc::result_out_of_range)
+		*str_end = pend; // success
+	else
+		*str_end = str;
+	return val;
+}
 static bool obj_parseline(const char *line, ObjData &data)
 {
 #define EATWS() while (*line == ' ' || *line == '\t') ++ line
@@ -41,15 +52,15 @@ static bool obj_parseline(const char *line, ObjData &data)
 			if (c2 != ' ' && c2 != '\t')
 				return false;
 			EATWS();
-			char *endptr = 0;
-			double u = strtod(line, &endptr);
+			const char *endptr = 0;
+			double u = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t'))
 				return false;
 			line = endptr;
 			EATWS();
 			double v = 0;
 			if (*line != 0) {
-				v = strtod(line, &endptr);
+				v = strtod_clocale(line, &endptr);
 				if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 					return false;
 				line = endptr;
@@ -57,7 +68,7 @@ static bool obj_parseline(const char *line, ObjData &data)
 			}
 			double w = 0;
 			if (*line != 0) {
-				w = strtod(line, &endptr);
+				w = strtod_clocale(line, &endptr);
 				if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 					return false;
 				line = endptr;
@@ -78,18 +89,18 @@ static bool obj_parseline(const char *line, ObjData &data)
 			if (c2 != ' ' && c2 != '\t')
 				return false;
 			EATWS();
-			char *endptr = 0;
-			double x = strtod(line, &endptr);
+			const char *endptr = 0;
+			double x = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t'))
 				return false;
 			line = endptr;
 			EATWS();
-			double y = strtod(line, &endptr);
+			double y = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t'))
 				return false;
 			line = endptr;
 			EATWS();
-			double z = strtod(line, &endptr);
+			double z = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 				return false;
 			line = endptr;
@@ -108,20 +119,20 @@ static bool obj_parseline(const char *line, ObjData &data)
 			if (c2 != ' ' && c2 != '\t')
 				return false;
 			EATWS();
-			char *endptr = 0;
-			double u = strtod(line, &endptr);
+			const char *endptr = 0;
+			double u = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 				return false;
 			line = endptr;
 			EATWS();
-			double v = strtod(line, &endptr);
+			double v = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 				return false;
 			line = endptr;
 			EATWS();
 			double w = 0;
 			if (*line != 0) {
-				w = strtod(line, &endptr);
+				w = strtod_clocale(line, &endptr);
 				if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 					return false;
 				line = endptr;
@@ -140,25 +151,25 @@ static bool obj_parseline(const char *line, ObjData &data)
 			if (c2 != ' ' && c2 != '\t')
 				return false;
 			EATWS();
-			char *endptr = 0;
-			double x = strtod(line, &endptr);
+			const char *endptr = 0;
+			double x = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t'))
 				return false;
 			line = endptr;
 			EATWS();
-			double y = strtod(line, &endptr);
+			double y = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t'))
 				return false;
 			line = endptr;
 			EATWS();
-			double z = strtod(line, &endptr);
+			double z = strtod_clocale(line, &endptr);
 			if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 				return false;
 			line = endptr;
 			EATWS();
 			double w = 1.0;
 			if (*line != 0) {
-				w = strtod(line, &endptr);
+				w = strtod_clocale(line, &endptr);
 				if (endptr == 0 || (*endptr != ' ' && *endptr != '\t' && *endptr != 0))
 					return false;
 				line = endptr;

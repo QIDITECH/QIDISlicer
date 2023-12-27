@@ -27,7 +27,6 @@ class ModelConfig;
 class ModelObject;
 class ModelVolume;
 class TriangleMesh;
-struct TextConfiguration;
 enum class ModelVolumeType : int;
 
 // FIXME: broken build on mac os because of this is missing:
@@ -38,7 +37,7 @@ typedef std::pair<coordf_t, coordf_t>               t_layer_height_range;
 typedef std::map<t_layer_height_range, ModelConfig> t_layer_config_ranges;
 
 // Manifold mesh may contain self-intersections, so we want to always allow fixing the mesh.
-#define FIX_THROUGH_NETFABB_ALWAYS 1
+#define FIX_THROUGH_WINSDK_ALWAYS 1
 
 namespace GUI {
 
@@ -251,15 +250,12 @@ public:
     bool                is_instance_or_object_selected();
     bool                is_selected_object_cut();
     void                load_subobject(ModelVolumeType type, bool from_galery = false);
-    // ! ysFIXME - delete commented code after testing and rename "load_modifier" to something common
-    //void                load_part(ModelObject& model_object, std::vector<ModelVolume*>& added_volumes, ModelVolumeType type, bool from_galery = false);
-    void                load_modifier(const wxArrayString& input_files, ModelObject& model_object, std::vector<ModelVolume*>& added_volumes, ModelVolumeType type, bool from_galery = false);
+    void                load_from_files(const wxArrayString& input_files, ModelObject& model_object, std::vector<ModelVolume*>& added_volumes, ModelVolumeType type, bool from_galery = false);
     void                load_generic_subobject(const std::string& type_name, const ModelVolumeType type);
     void                load_shape_object(const std::string &type_name);
     void                load_shape_object_from_gallery();
     void                load_shape_object_from_gallery(const wxArrayString& input_files);
-    void                load_mesh_object(const TriangleMesh &mesh, const std::string &name, bool center = true, 
-                                         const TextConfiguration* text_config = nullptr, const Transform3d* transformation = nullptr);
+    void                load_mesh_object(const TriangleMesh &mesh, const std::string &name, bool center = true);
     bool                del_object(const int obj_idx);
     bool                del_subobject_item(wxDataViewItem& item);
     void                del_settings_from_config(const wxDataViewItem& parent_item);
@@ -385,7 +381,7 @@ public:
     void instances_to_separated_objects(const int obj_idx);
     void split_instances();
     void rename_item();
-    void fix_through_netfabb();
+    void fix_through_winsdk();
     void simplify();
     void update_item_error_icon(const int obj_idx, int vol_idx) const ;
 

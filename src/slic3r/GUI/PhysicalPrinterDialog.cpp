@@ -180,7 +180,7 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow* parent, wxString printer_
     m_add_preset_btn->SetToolTip(_L("Add preset for this printer device")); 
     m_add_preset_btn->Bind(wxEVT_BUTTON, &PhysicalPrinterDialog::AddPreset, this);
 
-    m_printer_name    = new wxTextCtrl(this, wxID_ANY, printer_name, wxDefaultPosition, wxDefaultSize);
+    m_printer_name    = new ::TextInput(this,printer_name);
     wxGetApp().UpdateDarkUI(m_printer_name);
     m_printer_name->Bind(wxEVT_TEXT, [this](wxEvent&) { this->update_full_printer_names(); });
 
@@ -238,7 +238,7 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow* parent, wxString printer_
 
     if (new_printer) {
         m_printer_name->SetFocus();
-        m_printer_name->SelectAll();
+        m_printer_name->GetTextCtrl()->SelectAll();
     }
 
     this->Fit();
@@ -432,11 +432,14 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
 
     m_optgroup->activate();
 
+    const auto opt = m_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
+    m_last_host_type = opt->value;
+    m_opened_as_connect = (m_last_host_type == htQIDIConnect);
     Field* printhost_field = m_optgroup->get_field("print_host");
     if (printhost_field)
     {
-        wxTextCtrl* temp = dynamic_cast<wxTextCtrl*>(printhost_field->getWindow());
-        if (temp)
+        text_ctrl* temp = dynamic_cast<text_ctrl*>(printhost_field->getWindow());
+        if (temp) {
             temp->Bind(wxEVT_TEXT, ([printhost_field, temp](wxEvent& e)
             {
 #ifndef __WXGTK__
@@ -453,6 +456,7 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
                 if (field)
                     field->propagate_value();
             }), temp->GetId());
+    }
     }
 
     // Always fill in the "printhost_port" combo box from the config and select it.
@@ -484,13 +488,7 @@ void PhysicalPrinterDialog::update(bool printer_change)
         const auto opt = m_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
         m_optgroup->show_field("host_type");
 
-        // hide QIDIConnect address
-        if (Field* printhost_field = m_optgroup->get_field("print_host"); printhost_field) {
-            if (wxTextCtrl* temp = dynamic_cast<wxTextCtrl*>(printhost_field->getWindow()); temp && temp->GetValue() == L"https://connect.qidi3d.com") {
-                temp->SetValue(wxString());
-            }
-        }
-        if (opt->value == htQIDILink) { // QIDIConnect does NOT allow http digest
+        if (opt->value == htQIDILink) { // PrusaConnect does NOT allow http digest
             m_optgroup->show_field("printhost_authorization_type");
             AuthorizationType auth_type = m_config->option<ConfigOptionEnum<AuthorizationType>>("printhost_authorization_type")->value;
             m_optgroup->show_field("printhost_apikey", auth_type == AuthorizationType::atKeyPassword);
@@ -502,15 +500,30 @@ void PhysicalPrinterDialog::update(bool printer_change)
             for (const std::string& opt_key : std::vector<std::string>{ "printhost_user", "printhost_password" })
                 m_optgroup->hide_field(opt_key);
             supports_multiple_printers = opt && opt->value == htRepetier;
-            if (opt->value == htQIDIConnect) { // automatically show default qidiconnect address
-                if (Field* printhost_field = m_optgroup->get_field("print_host"); printhost_field) {
-                    if (wxTextCtrl* temp = dynamic_cast<wxTextCtrl*>(printhost_field->getWindow()); temp && temp->GetValue().IsEmpty()) {
-                        temp->SetValue(L"https://connect.qidi3d.com");
                     }
+        // Hide Browse and Test buttons for Connect
+        if (opt->value == htQIDIConnect) {
+            m_printhost_browse_btn->Hide();
+            // hide show hostname and PrusaConnect address
+            Field* printhost_field = m_optgroup->get_field("print_host");
+            text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
+            if (!m_opened_as_connect && printhost_win && m_last_host_type != htQIDIConnect){
+                m_stored_host = printhost_win->GetValue();
+                printhost_win->SetValue(L"https://connect.prusa3d.com");
                 }
+        } else {
+            m_printhost_browse_btn->Show();
+            // hide PrusaConnect address and show hostname
+            Field* printhost_field = m_optgroup->get_field("print_host");
+            text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
+            if (!m_opened_as_connect && printhost_win && m_last_host_type == htQIDIConnect) {
+                wxString temp_host = printhost_win->GetValue();
+                printhost_win->SetValue(m_stored_host);
+                m_stored_host = temp_host;
             }
         }
         
+        m_last_host_type = opt->value;
     }
     else {
         m_optgroup->set_value("host_type", int(PrintHostType::htOctoPrint), false);
@@ -554,16 +567,19 @@ void PhysicalPrinterDialog::update_host_type(bool printer_change)
                 || boost::starts_with(model, "XL")
                 );
     };
-    // allowed models are: all MK3/S and MK2.5/S
+    // allowed models are: all MK3/S and MK2.5/S. 
+    // Since 2.6.2 also MINI, which makes list of supported printers same for both services.
+    // Lets keep these 2 functions separated for now.
     auto model_supports_qidiconnect = [](const std::string& model) {
         return model.size() >= 2 &&
                 ((boost::starts_with(model, "MK") && model[2] > '2' && model[2] <= '9')
+                || boost::starts_with(model, "MINI")
                 || boost::starts_with(model, "MK2.5")
                 || boost::starts_with(model, "XL")
                 );
     };
 
-    // set all_presets_are_qidilink_supported
+    // set all_presets_are_prusalink_supported
     for (PresetForPrinter* prstft : m_presets) {
         std::string preset_name = prstft->get_preset_name();
         if (Preset* preset = wxGetApp().preset_bundle->printers.find_preset(preset_name)) {
@@ -667,7 +683,7 @@ void PhysicalPrinterDialog::update_full_printer_names()
             InfoDialog(this, format_wxstr("%1%: \"%2%\" ", _L("Unexpected character"),  str), 
                        _L("The following characters are not allowed in the name") + ": " + unusable_symbols).ShowModal();
             m_printer_name->SetValue(printer_name);
-            m_printer_name->SetInsertionPointEnd();
+            m_printer_name->GetTextCtrl()->SetInsertionPointEnd();
             return;
         }
     }
@@ -724,6 +740,18 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
         return;
     }
 
+    Field* printhost_field = m_optgroup->get_field("print_host");
+    text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
+    const auto opt = m_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
+    if (opt->value == htQIDIConnect) {
+        if (printhost_win && printhost_win->GetValue() != L"https://connect.qidi3d.com"){
+            InfoDialog msg(this, _L("Warning"), _L("URL of QIDIConnect is different from https://connect.qidi3d.com. Do you want to continue?"), true, wxYES_NO);
+            if(msg.ShowModal() != wxID_YES){
+                printhost_win->SetValue(L"https://connect.qidi3d.com");
+                return;
+            }
+        }
+    }
     PhysicalPrinterCollection& printers = wxGetApp().preset_bundle->physical_printers;
     const PhysicalPrinter* existing = printers.find_printer(into_u8(printer_name), false);
     if (existing && into_u8(printer_name) != printers.get_selected_printer_name())

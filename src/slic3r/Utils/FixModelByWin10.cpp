@@ -241,7 +241,7 @@ void fix_model_by_win10_sdk(const std::string &path_src, const std::string &path
 		unsigned num_meshes = 0;
 		hr = meshes->get_Size(&num_meshes);
 		
-		on_progress(L("Repairing model by the Netfabb service"), 40);
+		on_progress(L("Repairing model by Windows repair algorithm"), 40);
 		
 		Microsoft::WRL::ComPtr<ABI::Windows::Foundation::IAsyncAction>					  repairAsync;
 		hr = model->RepairAsync(repairAsync.GetAddressOf());
@@ -365,7 +365,7 @@ bool fix_model_by_win10_sdk_gui(ModelObject &model_object, int volume_idx, wxPro
                 ModelObject *mo = model.add_object();
                 mo->add_volume(*volumes[ivolume]);
 
-                // We are about to save a 3mf, fix it by netfabb and load the fixed 3mf back.
+                // We are about to save a 3mf, fix it by winsdk and load the fixed 3mf back.
                 // store_3mf currently bakes the volume transformation into the mesh itself.
                 // If we then loaded the repaired 3mf and pushed the mesh into the original ModelVolume
                 // (which remembers the matrix the whole time), the transformation would be used twice.

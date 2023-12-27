@@ -2,14 +2,10 @@
 #define slic3r_GUI_StateHandler_hpp_
 
 #include <wx/event.h>
+#include <memory>
 
 #include "StateColor.hpp"
 
-//B35
-#if defined __linux__
-#include<memory>
-#include <wx/wx.h> 
-#endif
 
 
 wxDECLARE_EVENT(EVT_ENABLE_CHANGED, wxCommandEvent);
@@ -48,7 +44,6 @@ public:
 
     int states() const { return states_ | states2_; }
 
-    void set_state(int state, int mask);
 
 private:
     StateHandler(StateHandler * parent, wxWindow *owner);

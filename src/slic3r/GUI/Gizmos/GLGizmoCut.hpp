@@ -135,6 +135,7 @@ class GLGizmoCut3D : public GLGizmoBase
 
     float m_connector_depth_ratio{ 3.f };
     float m_connector_size{ 2.5f };
+    float m_connector_angle{ 0.f };
 
     float m_connector_depth_ratio_tolerance{ 0.1f };
     float m_connector_size_tolerance{ 0.f };
@@ -303,6 +304,7 @@ protected:
     void render_color_marker(float size, const ImU32& color);
     void render_groove_float_input(const std::string &label, float &in_val, const float &init_val, float &in_tolerance);
     void render_groove_angle_input(const std::string &label, float &in_val, const float &init_val, float min_val, float max_val);
+    bool render_angle_input(const std::string& label, float& in_val, const float& init_val, float min_val, float max_val);
     void render_snap_specific_input(const std::string& label, const wxString& tooltip, float& in_val, const float& init_val, const float min_val, const float max_val);
     void render_cut_plane_input_window(CutConnectors &connectors);
     void init_input_window_data(CutConnectors &connectors);

@@ -838,13 +838,7 @@ UnsavedChangesDialog::UnsavedChangesDialog(Preset::Type type, PresetCollection* 
 
 void UnsavedChangesDialog::build(Preset::Type type, PresetCollection* dependent_presets, const std::string& new_selected_preset, const wxString& header)
 {
-#if defined(__WXMSW__)
-    // ys_FIXME! temporary workaround for correct font scaling
-    // Because of from wxWidgets 3.1.3 auto rescaling is implemented for the Fonts,
-    // From the very beginning set dialog font to the wxSYS_DEFAULT_GUI_FONT
-//    this->SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
     this->SetFont(wxGetApp().normal_font());
-#endif // __WXMSW__
 
     int border = 10;
     int em = em_unit();
@@ -1209,11 +1203,6 @@ static wxString get_string_value(std::string opt_key, const DynamicPrintConfig& 
             BedShape shape(*config.option<ConfigOptionPoints>(opt_key));
             return shape.get_full_name_with_params();
         }
-//Y18
-        if (opt_key == "bed_exclude_area")
-            return get_thumbnails_string(config.option<ConfigOptionPoints>(opt_key)->values);
-        if (opt_key == "thumbnails")
-            return get_thumbnails_string(config.option<ConfigOptionPoints>(opt_key)->values);
 
         Vec2d val = config.opt<ConfigOptionPoints>(opt_key)->get_at(opt_idx);
         return from_u8((boost::format("[%1%]") % ConfigOptionPoint(val).serialize()).str());
@@ -1342,7 +1331,7 @@ void UnsavedChangesDialog::on_dpi_changed(const wxRect& suggested_rect)
 {
     int em = em_unit();
 
-    msw_buttons_rescale(this, em, { wxID_CANCEL, m_save_btn_id, m_move_btn_id, m_continue_btn_id });
+    msw_buttons_rescale(this, em, { wxID_CANCEL, m_save_btn_id, m_move_btn_id, m_continue_btn_id }, 1.5);
 
     const wxSize& size = wxSize(70 * em, 30 * em);
     SetMinSize(size);
@@ -1491,6 +1480,7 @@ void DiffPresetDialog::create_presets_sizer()
         auto add_preset_combobox = [collection, sizer, new_type, this](PresetComboBox** cb_, PresetBundle* preset_bundle) {
             *cb_ = new PresetComboBox(this, new_type, wxSize(em_unit() * 35, -1), preset_bundle);
             PresetComboBox*cb = (*cb_);
+            cb->SetFont(this->GetFont());
             cb->show_modif_preset_separately();
             cb->set_selection_changed_function([this, new_type, preset_bundle, cb](int selection) {
                 std::string preset_name = Preset::remove_suffix_modified(cb->GetString(selection).ToUTF8().data());
@@ -1555,6 +1545,7 @@ void DiffPresetDialog::create_info_lines()
 void DiffPresetDialog::create_tree()
 {
     m_tree = new DiffViewCtrl(this, wxSize(em_unit() * 65, em_unit() * 40));
+    m_tree->SetFont(this->GetFont());
     m_tree->AppendToggleColumn_(L"\u2714", DiffModel::colToggle, wxLinux ? 9 : 6);
     m_tree->AppendBmpTextColumn("",                      DiffModel::colIconText, 35);
     m_tree->AppendBmpTextColumn(_L("Left Preset Value"), DiffModel::colOldValue, 15);
@@ -1676,16 +1667,9 @@ void DiffPresetDialog::complete_dialog_creation()
 }
 
 DiffPresetDialog::DiffPresetDialog(MainFrame* mainframe)
-    : DPIDialog(mainframe, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    : DPIDialog(mainframe, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, "diff_presets_dialog", mainframe->normal_font().GetPointSize()),
     m_pr_technology(wxGetApp().preset_bundle->printers.get_edited_preset().printer_technology())
 {    
-#if defined(__WXMSW__)
-    // ys_FIXME! temporary workaround for correct font scaling
-    // Because of from wxWidgets 3.1.3 auto rescaling is implemented for the Fonts,
-    // From the very beginning set dialog font to the wxSYS_DEFAULT_GUI_FONT
-//    this->SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-    this->SetFont(mainframe->normal_font());
-#endif // __WXMSW__
 
     // Init bundles
 

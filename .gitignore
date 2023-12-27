@@ -1,32 +1,24 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+Build
+Build.bat
+/build/
+MYMETA.json
+MYMETA.yml
+_build
+blib
+xs/buildtmp
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+MANIFEST.bak
+xs/MANIFEST.bak
+xs/assertlib*
+.init_bundle.ini
+.vs/*
+local-lib
+/src/TAGS
+/.vscode/
+build-linux/*
+deps/build*
+deps/build-linux/*
+**/.DS_Store
+**/.idea/
+.pkg_cache
+CMakeUserPresets.json

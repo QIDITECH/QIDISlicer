@@ -157,7 +157,7 @@ void SLAImportJob::finalize(bool canceled, std::exception_ptr &eptr)
 
         if (Preset::printer_technology(config) == ptSLA) {
             wxGetApp().preset_bundle->load_config_model(name, std::move(config));
-            p->plater->check_selected_presets_visibility(ptSLA);
+            p->plater->notify_about_installed_presets();;
             wxGetApp().load_current_presets();
         } else {
             p->plater->get_notification_manager()->push_notification(

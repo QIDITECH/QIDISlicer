@@ -2,6 +2,7 @@
 #include "ExtrusionEntityCollection.hpp"
 #include "ExPolygon.hpp"
 #include "ClipperUtils.hpp"
+#include "Exception.hpp"
 #include "Extruder.hpp"
 #include "Flow.hpp"
 #include <cmath>
@@ -38,12 +39,12 @@ double ExtrusionPath::length() const
 void ExtrusionPath::_inflate_collection(const Polylines &polylines, ExtrusionEntityCollection* collection) const
 {
     for (const Polyline &polyline : polylines)
-        collection->entities.emplace_back(new ExtrusionPath(polyline, *this));
+        collection->entities.emplace_back(new ExtrusionPath(polyline, this->attributes()));
 }
 
 void ExtrusionPath::polygons_covered_by_width(Polygons &out, const float scaled_epsilon) const
 {
-    polygons_append(out, offset(this->polyline, float(scale_(this->width/2)) + scaled_epsilon));
+    polygons_append(out, offset(this->polyline, float(scale_(m_attributes.width/2)) + scaled_epsilon));
 }
 
 void ExtrusionPath::polygons_covered_by_spacing(Polygons &out, const float scaled_epsilon) const
@@ -51,8 +52,8 @@ void ExtrusionPath::polygons_covered_by_spacing(Polygons &out, const float scale
     // Instantiating the Flow class to get the line spacing.
     // Don't know the nozzle diameter, setting to zero. It shall not matter it shall be optimized out by the compiler.
     bool bridge = this->role().is_bridge();
-    assert(! bridge || this->width == this->height);
-    auto flow = bridge ? Flow::bridging_flow(this->width, 0.f) : Flow(this->width, this->height, 0.f);
+    assert(! bridge || m_attributes.width == m_attributes.height);
+    auto flow = bridge ? Flow::bridging_flow(m_attributes.width, 0.f) : Flow(m_attributes.width, m_attributes.height, 0.f);
     polygons_append(out, offset(this->polyline, 0.5f * float(flow.scaled_spacing()) + scaled_epsilon));
 }
 
@@ -87,7 +88,7 @@ double ExtrusionMultiPath::min_mm3_per_mm() const
 {
     double min_mm3_per_mm = std::numeric_limits<double>::max();
     for (const ExtrusionPath &path : this->paths)
-        min_mm3_per_mm = std::min(min_mm3_per_mm, path.mm3_per_mm);
+        min_mm3_per_mm = std::min(min_mm3_per_mm, path.min_mm3_per_mm());
     return min_mm3_per_mm;
 }
 
@@ -112,21 +113,34 @@ Polyline ExtrusionMultiPath::as_polyline() const
     return out;
 }
 
-bool ExtrusionLoop::make_clockwise()
+double ExtrusionLoop::area() const
 {
-    bool was_ccw = this->polygon().is_counter_clockwise();
-    if (was_ccw) this->reverse();
-    return was_ccw;
-}
-
-bool ExtrusionLoop::make_counter_clockwise()
-{
-    bool was_cw = this->polygon().is_clockwise();
-    if (was_cw) this->reverse();
-    return was_cw;
+    double a = 0;
+    for (const ExtrusionPath &path : this->paths) {
+        assert(path.size() >= 2);
+        if (path.size() >= 2) {
+            // Assumming that the last point of one path segment is repeated at the start of the following path segment.
+            auto it = path.polyline.points.begin();
+            Point prev = *it ++;
+            for (; it != path.polyline.points.end(); ++ it) {
+                a += cross2(prev.cast<double>(), it->cast<double>());
+                prev = *it;
+            }
+        }
+    }
+    return a * 0.5;
 }
 
 void ExtrusionLoop::reverse()
+{
+#if 0
+    this->reverse_loop();
+#else
+    throw Slic3r::LogicError("ExtrusionLoop::reverse() must NOT be called");
+#endif
+}
+
+void ExtrusionLoop::reverse_loop()
 {
     for (ExtrusionPath &path : this->paths)
         path.reverse();
@@ -248,8 +262,8 @@ void ExtrusionLoop::split_at(const Point &point, bool prefer_non_overhang, const
     
     // now split path_idx in two parts
     const ExtrusionPath &path = this->paths[path_idx];
-    ExtrusionPath p1(path.role(), path.mm3_per_mm, path.width, path.height);
-    ExtrusionPath p2(path.role(), path.mm3_per_mm, path.width, path.height);
+    ExtrusionPath p1(path.attributes());
+    ExtrusionPath p2(path.attributes());
     path.polyline.split_at(p, &p1.polyline, &p2.polyline);
     
     if (this->paths.size() == 1) {
@@ -316,7 +330,7 @@ double ExtrusionLoop::min_mm3_per_mm() const
 {
     double min_mm3_per_mm = std::numeric_limits<double>::max();
     for (const ExtrusionPath &path : this->paths)
-        min_mm3_per_mm = std::min(min_mm3_per_mm, path.mm3_per_mm);
+        min_mm3_per_mm = std::min(min_mm3_per_mm, path.min_mm3_per_mm());
     return min_mm3_per_mm;
 }
 

@@ -52,6 +52,7 @@ private:
 public:
     explicit ArrangeSettingsDb_AppCfg(AppConfig *appcfg);
 
+    void sync();
     float get_distance_from_objects() const override { return get_ref(this).d_obj; }
     float get_distance_from_bed() const  override { return get_ref(this).d_bed; }
     bool  is_rotation_enabled() const override { return get_ref(this).rotations; }

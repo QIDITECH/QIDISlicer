@@ -4,7 +4,7 @@
 namespace Slic3r {
 
 REGISTER_CLASS(ExPolygon, "ExPolygon");
-REGISTER_CLASS(GCode, "GCode");
+REGISTER_CLASS(GCodeGenerator, "GCode");
 REGISTER_CLASS(Line, "Line");
 REGISTER_CLASS(Polygon, "Polygon");
 REGISTER_CLASS(Polyline, "Polyline");

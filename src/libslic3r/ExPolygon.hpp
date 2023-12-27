@@ -372,6 +372,10 @@ inline Points to_points(const ExPolygon &expoly)
     return out;
 }
 
+inline void translate(ExPolygons &expolys, const Point &p) {
+    for (ExPolygon &expoly : expolys)
+        expoly.translate(p);
+}
 inline void polygons_append(Polygons &dst, const ExPolygon &src) 
 { 
     dst.reserve(dst.size() + src.holes.size() + 1);
@@ -461,6 +465,7 @@ std::vector<BoundingBox> get_extents_vector(const ExPolygons &polygons);
 bool has_duplicate_points(const ExPolygon &expoly);
 bool has_duplicate_points(const ExPolygons &expolys);
 
+bool remove_same_neighbor(ExPolygons &expolys);
 bool remove_sticks(ExPolygon &poly);
 void keep_largest_contour_only(ExPolygons &polygons);
 

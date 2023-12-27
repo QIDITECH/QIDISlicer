@@ -84,16 +84,16 @@ TEST_CASE("Line::perpendicular_to", "[Geometry]") {
 TEST_CASE("Polygon::contains works properly", "[Geometry]"){
    // this test was failing on Windows (GH #1950)
     Slic3r::Polygon polygon(Points({
-        Point(207802834,-57084522),
-        Point(196528149,-37556190),
-        Point(173626821,-25420928),
-        Point(171285751,-21366123),
-        Point(118673592,-21366123),
-        Point(116332562,-25420928),
-        Point(93431208,-37556191),
-        Point(82156517,-57084523),
-        Point(129714478,-84542120),
-        Point(160244873,-84542120)
+        {207802834,-57084522},
+        {196528149,-37556190},
+        {173626821,-25420928},
+        {171285751,-21366123},
+        {118673592,-21366123},
+        {116332562,-25420928},
+        {93431208,-37556191},
+        {82156517,-57084523},
+        {129714478,-84542120},
+        {160244873,-84542120}
     }));
     Point point(95706562, -57294774);
     REQUIRE(polygon.contains(point));
@@ -196,6 +196,40 @@ TEST_CASE("Offseting a line generates a polygon correctly", "[Geometry]"){
     REQUIRE(area.area() == Slic3r::Polygon(Points({Point(10,5),Point(20,5),Point(20,15),Point(10,15)})).area());
 }
 
+SCENARIO("Circle Fit, 3 points", "[Geometry]") {
+    WHEN("Three points make a circle") {
+        double s1 = scaled<double>(1.);
+        THEN("circle_center(): A center point { 0, 0 } is returned") {
+            Vec2d center = Geometry::circle_center(Vec2d{ s1, 0. }, Vec2d{ 0, s1 }, Vec2d{ -s1, 0. }, SCALED_EPSILON);
+            REQUIRE(is_approx(center, Vec2d(0, 0)));
+        }
+        THEN("circle_center(): A center point { 0, 0 } is returned for points in reverse") {
+            Vec2d center = Geometry::circle_center(Vec2d{ -s1, 0. }, Vec2d{ 0, s1 }, Vec2d{ s1, 0. }, SCALED_EPSILON);
+            REQUIRE(is_approx(center, Vec2d(0, 0)));
+        }
+        THEN("try_circle_center(): A center point { 0, 0 } is returned") {
+            std::optional<Vec2d> center = Geometry::try_circle_center(Vec2d{ s1, 0. }, Vec2d{ 0, s1 }, Vec2d{ -s1, 0. }, SCALED_EPSILON);
+            REQUIRE(center);
+            REQUIRE(is_approx(*center, Vec2d(0, 0)));
+        }
+        THEN("try_circle_center(): A center point { 0, 0 } is returned for points in reverse") {
+            std::optional<Vec2d> center = Geometry::try_circle_center(Vec2d{ -s1, 0. }, Vec2d{ 0, s1 }, Vec2d{ s1, 0. }, SCALED_EPSILON);
+            REQUIRE(center);
+            REQUIRE(is_approx(*center, Vec2d(0, 0)));
+        }
+    }
+    WHEN("Three points are collinear") {
+        double s1 = scaled<double>(1.);
+        THEN("circle_center(): A center point { 2, 0 } is returned") {
+            Vec2d center = Geometry::circle_center(Vec2d{ s1, 0. }, Vec2d{ 2. * s1, 0. }, Vec2d{ 3. * s1, 0. }, SCALED_EPSILON);
+            REQUIRE(is_approx(center, Vec2d(2. * s1, 0)));
+        }
+        THEN("try_circle_center(): Fails for collinear points") {
+            std::optional<Vec2d> center = Geometry::try_circle_center(Vec2d{ s1, 0. }, Vec2d{ 2. * s1, 0. }, Vec2d{ 3. * s1, 0. }, SCALED_EPSILON);
+            REQUIRE(! center);
+        }
+    }
+}
 SCENARIO("Circle Fit, TaubinFit with Newton's method", "[Geometry]") {
     GIVEN("A vector of Vec2ds arranged in a half-circle with approximately the same distance R from some point") {
         Vec2d expected_center(-6, 0);
@@ -288,6 +322,53 @@ SCENARIO("Circle Fit, TaubinFit with Newton's method", "[Geometry]") {
     }
 }
 
+SCENARIO("Circle Fit, least squares by decomposition or by solving normal equation", "[Geometry]") {
+    auto test_circle_fit = [](const Geometry::Circled &circle, const Vec2d &center, const double radius) {
+        THEN("A center point matches.") {
+            REQUIRE(is_approx(circle.center, center));
+        }
+        THEN("Radius matches") {
+            REQUIRE(is_approx(circle.radius, radius));
+        }
+    };
+
+    GIVEN("A vector of Vec2ds arranged in a half-circle with approximately the same distance R from some point") {
+        const Vec2d  expected_center(-6., 0.);
+        const double expected_radius = 6.;
+        Vec2ds sample{Vec2d(6.0, 0), Vec2d(5.1961524, 3), Vec2d(3 ,5.1961524), Vec2d(0, 6.0), Vec2d(3, 5.1961524), Vec2d(-5.1961524, 3), Vec2d(-6.0, 0)};
+        std::transform(sample.begin(), sample.end(), sample.begin(), [expected_center] (const Vec2d &a) { return a + expected_center; });
+
+        WHEN("Circle fit is called on the entire array, least squares SVD") {
+            test_circle_fit(Geometry::circle_linear_least_squares_svd(sample), expected_center, expected_radius);
+        }
+        WHEN("Circle fit is called on the first four points, least squares SVD") {
+            test_circle_fit(Geometry::circle_linear_least_squares_svd(Vec2ds(sample.cbegin(), sample.cbegin() + 4)), expected_center, expected_radius);
+        }
+        WHEN("Circle fit is called on the middle four points, least squares SVD") {
+            test_circle_fit(Geometry::circle_linear_least_squares_svd(Vec2ds(sample.cbegin() + 2, sample.cbegin() + 6)), expected_center, expected_radius);
+        }
+
+        WHEN("Circle fit is called on the entire array, least squares QR decomposition") {
+            test_circle_fit(Geometry::circle_linear_least_squares_qr(sample), expected_center, expected_radius);
+        }
+        WHEN("Circle fit is called on the first four points, least squares QR decomposition") {
+            test_circle_fit(Geometry::circle_linear_least_squares_qr(Vec2ds(sample.cbegin(), sample.cbegin() + 4)), expected_center, expected_radius);
+        }
+        WHEN("Circle fit is called on the middle four points, least squares QR decomposition") {
+            test_circle_fit(Geometry::circle_linear_least_squares_qr(Vec2ds(sample.cbegin() + 2, sample.cbegin() + 6)), expected_center, expected_radius);
+        }
+
+        WHEN("Circle fit is called on the entire array, least squares by normal equations") {
+            test_circle_fit(Geometry::circle_linear_least_squares_normal(sample), expected_center, expected_radius);
+        }
+        WHEN("Circle fit is called on the first four points, least squares by normal equations") {
+            test_circle_fit(Geometry::circle_linear_least_squares_normal(Vec2ds(sample.cbegin(), sample.cbegin() + 4)), expected_center, expected_radius);
+        }
+        WHEN("Circle fit is called on the middle four points, least squares by normal equations") {
+            test_circle_fit(Geometry::circle_linear_least_squares_normal(Vec2ds(sample.cbegin() + 2, sample.cbegin() + 6)), expected_center, expected_radius);
+        }
+    }
+}
 TEST_CASE("smallest_enclosing_circle_welzl", "[Geometry]") {
     // Some random points in plane.
     Points pts { 
@@ -310,6 +391,7 @@ SCENARIO("Path chaining", "[Geometry]") {
 	GIVEN("A path") {
 		Points points = { Point(26,26),Point(52,26),Point(0,26),Point(26,52),Point(26,0),Point(0,52),Point(52,52),Point(52,0) };
 		THEN("Chained with no diagonals (thus 26 units long)") {
+            // if chain_points() works correctly, these points should be joined with no diagonal paths
 			std::vector<Points::size_type> indices = chain_points(points);
 			for (Points::size_type i = 0; i + 1 < indices.size(); ++ i) {
 				double dist = (points.at(indices.at(i)).cast<double>() - points.at(indices.at(i+1)).cast<double>()).norm();

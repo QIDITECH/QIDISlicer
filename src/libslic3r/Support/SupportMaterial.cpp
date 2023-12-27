@@ -1023,7 +1023,7 @@ namespace SupportMaterialInternal {
         assert(expansion_scaled >= 0.f);
         for (const ExtrusionPath &ep : loop.paths)
             if (ep.role() == ExtrusionRole::OverhangPerimeter && ! ep.polyline.empty()) {
-                float exp = 0.5f * (float)scale_(ep.width) + expansion_scaled;
+                float exp = 0.5f * (float)scale_(ep.width()) + expansion_scaled;
                 if (ep.is_closed()) {
                     if (ep.size() >= 3) {
                         // This is a complete loop.

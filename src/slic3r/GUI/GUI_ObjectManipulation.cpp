@@ -21,6 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include "slic3r/Utils/FixModelByWin10.hpp"
 
+#include "Widgets/CheckBox.hpp"
 // For special mirroring in manipulation gizmo
 #include "Gizmos/GLGizmosManager.hpp"
 #include "Gizmos/GLGizmoEmboss.hpp"
@@ -73,7 +74,7 @@ static choice_ctrl* create_word_local_combo(wxWindow *parent)
     wxSize size(15 * wxGetApp().em_unit(), -1);
 
     choice_ctrl* temp = nullptr;
-#ifdef __WXOSX__
+#if 0//def __WXOSX__
     /* wxBitmapComboBox with wxCB_READONLY style return NULL for GetTextCtrl(),
      * so ToolTip doesn't shown.
      * Next workaround helps to solve this problem
@@ -82,7 +83,7 @@ static choice_ctrl* create_word_local_combo(wxWindow *parent)
     temp->SetTextCtrlStyle(wxTE_READONLY);
 	temp->Create(parent, wxID_ANY, wxString(""), wxDefaultPosition, size, 0, nullptr);
 #else
-	temp = new choice_ctrl(parent, wxID_ANY, wxString(""), wxDefaultPosition, size, 0, nullptr, wxCB_READONLY | wxBORDER_SIMPLE);
+	temp = new choice_ctrl(parent, wxID_ANY, wxString(""), wxDefaultPosition, size, 0, nullptr, wxCB_READONLY | DD_NO_CHECK_ICON);
 #endif //__WXOSX__
 
     temp->SetFont(Slic3r::GUI::wxGetApp().normal_font());
@@ -133,7 +134,7 @@ void msw_rescale_word_local_combo(choice_ctrl* combo)
 static void set_font_and_background_style(wxWindow* win, const wxFont& font)
 {
     win->SetFont(font);
-    win->SetBackgroundStyle(wxBG_STYLE_PAINT);
+    if (!wxOSX) win->SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
 
 static const wxString axes_color_text[] = { "#990000", "#009900", "#000099" };
@@ -158,19 +159,19 @@ ObjectManipulation::ObjectManipulation(wxWindow* parent) :
     // Add "Name" label with warning icon
     auto sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_fix_throught_netfab_bitmap = new wxStaticBitmap(parent, wxID_ANY, wxNullBitmap);
+    m_fix_by_winsdk_bitmap = new wxStaticBitmap(parent, wxID_ANY, wxNullBitmap);
     if (is_windows10())
-        m_fix_throught_netfab_bitmap->Bind(wxEVT_CONTEXT_MENU, [this](wxCommandEvent& e)
+        m_fix_by_winsdk_bitmap->Bind(wxEVT_CONTEXT_MENU, [this](wxCommandEvent& e)
             {
                 // if object/sub-object has no errors
-                if (m_fix_throught_netfab_bitmap->GetBitmap().GetRefData() == wxNullBitmap.GetRefData())
+                if (m_fix_by_winsdk_bitmap->GetBitmap().GetRefData() == wxNullBitmap.GetRefData())
                     return;
 
-                wxGetApp().obj_list()->fix_through_netfabb();
+                wxGetApp().obj_list()->fix_through_winsdk();
                 update_warning_icon_state(wxGetApp().obj_list()->get_mesh_errors_info());
             });
 
-    sizer->Add(m_fix_throught_netfab_bitmap);
+    sizer->Add(m_fix_by_winsdk_bitmap);
 
     auto name_label = new wxStaticText(m_parent, wxID_ANY, _L("Name")+":");
     set_font_and_background_style(name_label, wxGetApp().normal_font());
@@ -491,16 +492,16 @@ ObjectManipulation::ObjectManipulation(wxWindow* parent) :
         });
     m_main_grid_sizer->Add(m_reset_skew_button);
 
-    m_check_inch = new wxCheckBox(parent, wxID_ANY, _L("Inches"));
+    m_check_inch = CheckBox::GetNewWin(parent, _L("Inches"));
     m_check_inch->SetFont(wxGetApp().normal_font());
 
-    m_check_inch->SetValue(m_imperial_units);
+    CheckBox::SetValue(m_check_inch, m_imperial_units);
     m_check_inch->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) {
-        wxGetApp().app_config->set("use_inches", m_check_inch->GetValue() ? "1" : "0");
+        wxGetApp().app_config->set("use_inches", CheckBox::GetValue(m_check_inch) ? "1" : "0");
         wxGetApp().sidebar().update_ui_from_settings();
     });
 
-    m_main_grid_sizer->Add(m_check_inch, 1, wxEXPAND);
+    m_main_grid_sizer->Add(m_check_inch);
 
     m_og->activate();
     m_og->sizer->Clear(true);
@@ -529,7 +530,7 @@ void ObjectManipulation::Show(const bool show)
         const Selection& selection = wxGetApp().plater()->canvas3D()->get_selection();
         bool show_world_local_combo = wxGetApp().get_mode() != comSimple && (selection.is_single_full_instance() || selection.is_single_volume_or_modifier());
         if (selection.is_single_volume_or_modifier() && m_word_local_combo->GetCount() < 3) {
-#ifdef __linux__
+#if 0//def __linux__
             m_word_local_combo->Insert(coordinate_type_str(ECoordinatesType::Local), 2);
 #else
             m_word_local_combo->Insert(coordinate_type_str(ECoordinatesType::Local), wxNullBitmap, 2);
@@ -611,7 +612,7 @@ void ObjectManipulation::update_ui_from_settings()
             update(3/*meSize*/,     m_new_size);
         }
     }
-    m_check_inch->SetValue(m_imperial_units);
+    CheckBox::SetValue(m_check_inch, m_imperial_units);
 
     if (m_use_colors != wxGetApp().app_config->get_bool("color_mapinulation_panel")) {
         m_use_colors  = wxGetApp().app_config->get_bool("color_mapinulation_panel");
@@ -891,9 +892,9 @@ void ObjectManipulation::update_warning_icon_state(const MeshErrorsInfo& warning
         !warning_icon_name.empty())
         m_manifold_warning_bmp = ScalableBitmap(m_parent, warning_icon_name);
     const wxString& tooltip = warning.tooltip;
-    m_fix_throught_netfab_bitmap->SetBitmap(tooltip.IsEmpty() ? wxNullBitmap : m_manifold_warning_bmp.bmp());
-    m_fix_throught_netfab_bitmap->SetMinSize(tooltip.IsEmpty() ? wxSize(0,0) : m_manifold_warning_bmp.GetSize());
-    m_fix_throught_netfab_bitmap->SetToolTip(tooltip);
+    m_fix_by_winsdk_bitmap->SetBitmap(tooltip.IsEmpty() ? wxNullBitmap : m_manifold_warning_bmp.bmp());
+    m_fix_by_winsdk_bitmap->SetMinSize(tooltip.IsEmpty() ? wxSize(0,0) : m_manifold_warning_bmp.GetSize());
+    m_fix_by_winsdk_bitmap->SetToolTip(tooltip);
 }
 
 wxString ObjectManipulation::coordinate_type_str(ECoordinatesType type)
@@ -1168,9 +1169,9 @@ void ObjectManipulation::msw_rescale()
     msw_rescale_word_local_combo(m_word_local_combo);
     m_word_local_combo_sizer->SetMinSize(wxSize(-1, m_word_local_combo->GetBestHeight(-1)));
 
-    const wxString& tooltip = m_fix_throught_netfab_bitmap->GetToolTipText();
-    m_fix_throught_netfab_bitmap->SetBitmap(tooltip.IsEmpty() ? wxNullBitmap : m_manifold_warning_bmp.bmp());
-    m_fix_throught_netfab_bitmap->SetMinSize(tooltip.IsEmpty() ? wxSize(0, 0) : m_manifold_warning_bmp.GetSize());
+    const wxString& tooltip = m_fix_by_winsdk_bitmap->GetToolTipText();
+    m_fix_by_winsdk_bitmap->SetBitmap(tooltip.IsEmpty() ? wxNullBitmap : m_manifold_warning_bmp.bmp());
+    m_fix_by_winsdk_bitmap->SetMinSize(tooltip.IsEmpty() ? wxSize(0, 0) : m_manifold_warning_bmp.GetSize());
 
     // rescale label-heights
     // Text trick to grid sizer layout:
@@ -1196,6 +1197,7 @@ void ObjectManipulation::sys_color_changed()
     wxGetApp().UpdateDarkUI(m_word_local_combo);
     wxGetApp().UpdateDarkUI(m_check_inch);
 #endif
+    CheckBox::SysColorChanged(m_check_inch);
     for (ManipulationEditor* editor : m_editors)
         editor->sys_color_changed(this);
 
@@ -1224,19 +1226,12 @@ static const char axes[] = { 'x', 'y', 'z' };
 ManipulationEditor::ManipulationEditor(ObjectManipulation* parent,
                                        const std::string& opt_key,
                                        int axis) :
-    wxTextCtrl(parent->parent(), wxID_ANY, wxEmptyString, wxDefaultPosition,
-        wxSize((wxOSX ? 5 : 6)*int(wxGetApp().em_unit()), wxDefaultCoord), wxTE_PROCESS_ENTER
-#ifdef _WIN32
-        | wxBORDER_SIMPLE
-#endif 
-    ),
+    ::TextInput(parent->parent(), "", "", "", wxDefaultPosition,
+        wxSize(int(5.8 * wxGetApp().em_unit()), wxDefaultCoord), wxTE_PROCESS_ENTER),
     m_opt_key(opt_key),
     m_axis(axis)
 {
     set_font_and_background_style(this, wxGetApp().normal_font());
-#ifdef __WXOSX__
-    this->OSXDisableAllSmartSubstitutions();
-#endif // __WXOSX__
     if (parent->use_colors()) {
         this->SetBackgroundColour(wxColour(axes_color_back[axis]));
         this->SetForegroundColour(*wxBLACK);
@@ -1266,14 +1261,14 @@ ManipulationEditor::ManipulationEditor(ObjectManipulation* parent,
         e.Skip();
     }, this->GetId());
 
-    this->Bind(wxEVT_SET_FOCUS, [this, parent](wxFocusEvent& e)
+    this->GetTextCtrl()->Bind(wxEVT_SET_FOCUS, [this, parent](wxFocusEvent& e)
     {
         parent->set_focused_editor(this);
 
         // needed to show the visual hints in 3D scene
         wxGetApp().plater()->canvas3D()->handle_sidebar_focus_event(m_full_opt_name, true);
         e.Skip();
-    }, this->GetId());
+    });
 
     this->Bind(wxEVT_CHAR, ([this](wxKeyEvent& event)
     {
@@ -1292,8 +1287,7 @@ ManipulationEditor::ManipulationEditor(ObjectManipulation* parent,
 
 void ManipulationEditor::msw_rescale()
 {
-    const int em = wxGetApp().em_unit();
-    SetMinSize(wxSize(5 * em, wxDefaultCoord));
+    SetCtrlSize(wxSize(int(5.8 * wxGetApp().em_unit()), wxDefaultCoord));
 }
 
 void ManipulationEditor::sys_color_changed(ObjectManipulation* parent)

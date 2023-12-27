@@ -89,6 +89,9 @@ inline bool operator!=(const Polyline &lhs, const Polyline &rhs) { return lhs.po
 extern BoundingBox get_extents(const Polyline &polyline);
 extern BoundingBox get_extents(const Polylines &polylines);
 
+// Return True when erase some otherwise False.
+bool remove_same_neighbor(Polyline &polyline);
+bool remove_same_neighbor(Polylines &polylines);
 inline double total_length(const Polylines &polylines) {
     double total = 0;
     for (const Polyline &pl : polylines)

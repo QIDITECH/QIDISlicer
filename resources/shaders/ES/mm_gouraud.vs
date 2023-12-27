@@ -1,11 +1,9 @@
 #version 100
 
-const vec3 ZERO = vec3(0.0, 0.0, 0.0);
-
 uniform mat4 view_model_matrix;
 uniform mat4 projection_matrix;
-
 uniform mat4 volume_world_matrix;
+
 // Clipping plane, x = min z, y = max z. Used by the FFF and SLA previews to clip with a top / bottom plane.
 uniform vec2 z_range;
 // Clipping plane - general orientation. Used by the SLA gizmo.

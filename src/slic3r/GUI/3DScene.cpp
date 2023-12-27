@@ -212,6 +212,10 @@ const std::array<ColorRGBA, 4> GLVolume::MODEL_COLOR = { {
     { 0.5f, 1.0f, 0.5f, 1.0f },
     { 0.5f, 0.5f, 1.0f, 1.0f }
 } };
+const ColorRGBA GLVolume::NEGATIVE_VOLUME_COLOR     = { 0.2f, 0.2f, 0.2f, 0.5f };
+const ColorRGBA GLVolume::PARAMETER_MODIFIER_COLOR  = { 1.0, 1.0f, 0.2f, 0.5f };
+const ColorRGBA GLVolume::SUPPORT_BLOCKER_COLOR     = { 1.0f, 0.2f, 0.2f, 0.5f };
+const ColorRGBA GLVolume::SUPPORT_ENFORCER_COLOR    = { 0.2f, 0.2f, 1.0f, 0.5f };
 
 GLVolume::GLVolume(float r, float g, float b, float a)
     : m_sla_shift_z(0.0)
@@ -242,7 +246,7 @@ GLVolume::GLVolume(float r, float g, float b, float a)
 
 void GLVolume::set_render_color(bool force_transparent)
 {
-    bool outside = is_outside || is_below_printbed();
+    bool outside = is_outside || (!is_modifier && is_below_printbed());
 
     if (force_native_color || force_neutral_color) {
         if (outside && shader_outside_printer_detection_enabled)
@@ -282,16 +286,13 @@ ColorRGBA color_from_model_volume(const ModelVolume& model_volume)
 {
     ColorRGBA color;
     if (model_volume.is_negative_volume())
-        color = { 0.2f, 0.2f, 0.2f, 1.0f };
+        color = GLVolume::NEGATIVE_VOLUME_COLOR;
     else if (model_volume.is_modifier())
-        color = { 1.0, 1.0f, 0.2f, 1.0f };
+        color = GLVolume::PARAMETER_MODIFIER_COLOR;
     else if (model_volume.is_support_blocker())
-        color = { 1.0f, 0.2f, 0.2f, 1.0f };
+        color = GLVolume::SUPPORT_BLOCKER_COLOR;
     else if (model_volume.is_support_enforcer())
-        color = { 0.2f, 0.2f, 1.0f, 1.0f };
-
-    if (!model_volume.is_model_part())
-        color.a(0.5f);
+        color = GLVolume::SUPPORT_ENFORCER_COLOR;
 
     return color;
 }
@@ -1446,8 +1447,8 @@ void _3DScene::extrusionentity_to_verts(const ExtrusionPath& extrusion_path, flo
     polyline.remove_duplicate_points();
     polyline.translate(copy);
     const Lines               lines = polyline.lines();
-    std::vector<double> widths(lines.size(), extrusion_path.width);
-    std::vector<double> heights(lines.size(), extrusion_path.height);
+    std::vector<double> widths(lines.size(), extrusion_path.width());
+    std::vector<double> heights(lines.size(), extrusion_path.height());
     thick_lines_to_verts(lines, widths, heights, false, print_z, geometry);
 }
 
@@ -1463,8 +1464,8 @@ void _3DScene::extrusionentity_to_verts(const ExtrusionLoop& extrusion_loop, flo
         polyline.translate(copy);
         const Lines lines_this = polyline.lines();
         append(lines, lines_this);
-        widths.insert(widths.end(), lines_this.size(), extrusion_path.width);
-        heights.insert(heights.end(), lines_this.size(), extrusion_path.height);
+        widths.insert(widths.end(), lines_this.size(), extrusion_path.width());
+        heights.insert(heights.end(), lines_this.size(), extrusion_path.height());
     }
     thick_lines_to_verts(lines, widths, heights, true, print_z, geometry);
 }
@@ -1481,8 +1482,8 @@ void _3DScene::extrusionentity_to_verts(const ExtrusionMultiPath& extrusion_mult
         polyline.translate(copy);
         const Lines lines_this = polyline.lines();
         append(lines, lines_this);
-        widths.insert(widths.end(), lines_this.size(), extrusion_path.width);
-        heights.insert(heights.end(), lines_this.size(), extrusion_path.height);
+        widths.insert(widths.end(), lines_this.size(), extrusion_path.width());
+        heights.insert(heights.end(), lines_this.size(), extrusion_path.height());
     }
     thick_lines_to_verts(lines, widths, heights, false, print_z, geometry);
 }

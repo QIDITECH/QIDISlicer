@@ -25,7 +25,7 @@ static void RGBtoHSV(float r, float g, float b, float& h, float& s, float& v)
 			h = 60.0f * (std::fmod(((g - b) / delta), 6.0f));
 		else if (max_comp == g)
 			h = 60.0f * (((b - r) / delta) + 2.0f);
-		else if (max_comp == b)
+		else  // max_comp == b
 			h = 60.0f * (((r - g) / delta) + 4.0f);
 
 		s = (max_comp > 0.0f) ? delta / max_comp : 0.0f;

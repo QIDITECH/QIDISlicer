@@ -5,6 +5,11 @@ namespace Slic3r {
 
 ArrangeSettingsDb_AppCfg::ArrangeSettingsDb_AppCfg(AppConfig *appcfg) : m_appcfg{appcfg}
 {
+    sync();
+}
+
+void ArrangeSettingsDb_AppCfg::sync()
+{
     m_settings_fff.postfix = "_fff";
     m_settings_fff_seq.postfix = "_fff_seq_print";
     m_settings_sla.postfix = "_sla";
@@ -57,27 +62,41 @@ ArrangeSettingsDb_AppCfg::ArrangeSettingsDb_AppCfg(AppConfig *appcfg) : m_appcfg
 
     if (!dist_fff_str.empty())
         m_settings_fff.vals.d_obj = string_to_float_decimal_point(dist_fff_str);
+    else
+        m_settings_fff.vals.d_obj = m_settings_fff.defaults.d_obj;
 
     if (!dist_bed_fff_str.empty())
         m_settings_fff.vals.d_bed = string_to_float_decimal_point(dist_bed_fff_str);
+    else
+        m_settings_fff.vals.d_bed = m_settings_fff.defaults.d_bed;
 
     if (!dist_fff_seq_print_str.empty())
         m_settings_fff_seq.vals.d_obj = string_to_float_decimal_point(dist_fff_seq_print_str);
+    else
+        m_settings_fff_seq.vals.d_obj = m_settings_fff_seq.defaults.d_obj;
 
     if (!dist_bed_fff_seq_print_str.empty())
         m_settings_fff_seq.vals.d_bed = string_to_float_decimal_point(dist_bed_fff_seq_print_str);
+    else
+        m_settings_fff_seq.vals.d_bed = m_settings_fff_seq.defaults.d_bed;
 
     if (!dist_sla_str.empty())
         m_settings_sla.vals.d_obj = string_to_float_decimal_point(dist_sla_str);
+    else
+        m_settings_sla.vals.d_obj = m_settings_sla.defaults.d_obj;
 
     if (!dist_bed_sla_str.empty())
         m_settings_sla.vals.d_bed = string_to_float_decimal_point(dist_bed_sla_str);
+    else
+        m_settings_sla.vals.d_bed = m_settings_sla.defaults.d_bed;
 
     if (!en_rot_fff_str.empty())
         m_settings_fff.vals.rotations = (en_rot_fff_str == "1" || en_rot_fff_str == "yes");
 
     if (!en_rot_fff_seqp_str.empty())
         m_settings_fff_seq.vals.rotations = (en_rot_fff_seqp_str == "1" || en_rot_fff_seqp_str == "yes");
+    else
+        m_settings_fff_seq.vals.rotations = m_settings_fff_seq.defaults.rotations;
 
     if (!en_rot_sla_str.empty())
         m_settings_sla.vals.rotations = (en_rot_sla_str == "1" || en_rot_sla_str == "yes");
@@ -90,38 +109,26 @@ ArrangeSettingsDb_AppCfg::ArrangeSettingsDb_AppCfg(AppConfig *appcfg) : m_appcfg
 
     //    if (!alignment_fff_seqp_str.empty())
     //        m_arrange_settings_fff_seq_print.alignment = std::stoi(alignment_fff_seqp_str);
+    else
+        m_settings_sla.vals.rotations = m_settings_sla.defaults.rotations;
 
     // Override default alignment and save save/load it to a temporary slot "alignment_xl"
-    ArrangeSettingsView::XLPivots arr_alignment = ArrangeSettingsView::xlpFrontLeft;
-    if (!alignment_xl_str.empty()) {
-        int align_val = std::stoi(alignment_xl_str);
-
-        if (align_val >= 0 && align_val < ArrangeSettingsView::xlpCount)
-            arr_alignment =
-                static_cast<ArrangeSettingsView::XLPivots>(align_val);
-    }
+    auto arr_alignment = ArrangeSettingsView::to_xl_pivots(alignment_xl_str)
+                             .value_or(m_settings_fff.defaults.xl_align);
 
     m_settings_sla.vals.xl_align = arr_alignment ;
     m_settings_fff.vals.xl_align = arr_alignment ;
     m_settings_fff_seq.vals.xl_align = arr_alignment ;
 
-    ArrangeSettingsView::GeometryHandling geom_handl = arr2::ArrangeSettingsView::ghConvex;
-    if (!geom_handling_str.empty()) {
-        int gh = std::stoi(geom_handling_str);
-        if(gh >= 0 && gh < ArrangeSettingsView::GeometryHandling::ghCount)
-            geom_handl = static_cast<ArrangeSettingsView::GeometryHandling>(gh);
-    }
+    auto geom_handl = ArrangeSettingsView::to_geometry_handling(geom_handling_str)
+                          .value_or(m_settings_fff.defaults.geom_handling);
 
     m_settings_sla.vals.geom_handling = geom_handl;
     m_settings_fff.vals.geom_handling = geom_handl;
     m_settings_fff_seq.vals.geom_handling = geom_handl;
 
-    ArrangeSettingsView::ArrangeStrategy arr_strategy = arr2::ArrangeSettingsView::asAuto;
-    if (!strategy_str.empty()) {
-        int strateg = std::stoi(strategy_str);
-        if(strateg >= 0 && strateg < ArrangeSettingsView::ArrangeStrategy::asCount)
-            arr_strategy = static_cast<ArrangeSettingsView::ArrangeStrategy>(strateg);
-    }
+    auto arr_strategy = ArrangeSettingsView::to_arrange_strategy(strategy_str)
+                            .value_or(m_settings_fff.defaults.arr_strategy);
 
     m_settings_sla.vals.arr_strategy = arr_strategy;
     m_settings_fff.vals.arr_strategy = arr_strategy;
@@ -174,7 +181,7 @@ arr2::ArrangeSettingsDb& ArrangeSettingsDb_AppCfg::set_rotation_enabled(bool v)
 arr2::ArrangeSettingsDb& ArrangeSettingsDb_AppCfg::set_xl_alignment(XLPivots v)
 {
     m_settings_fff.vals.xl_align = v;
-    m_appcfg->set("arrange", "alignment_xl", std::to_string(v));
+    m_appcfg->set("arrange", "alignment_xl", std::string{get_label(v)});
 
     return *this;
 }
@@ -182,7 +189,7 @@ arr2::ArrangeSettingsDb& ArrangeSettingsDb_AppCfg::set_xl_alignment(XLPivots v)
 arr2::ArrangeSettingsDb& ArrangeSettingsDb_AppCfg::set_geometry_handling(GeometryHandling v)
 {
     m_settings_fff.vals.geom_handling = v;
-    m_appcfg->set("arrange", "geometry_handling", std::to_string(v));
+    m_appcfg->set("arrange", "geometry_handling", std::string{get_label(v)});
 
     return *this;
 }
@@ -190,7 +197,7 @@ arr2::ArrangeSettingsDb& ArrangeSettingsDb_AppCfg::set_geometry_handling(Geometr
 arr2::ArrangeSettingsDb& ArrangeSettingsDb_AppCfg::set_arrange_strategy(ArrangeStrategy v)
 {
     m_settings_fff.vals.arr_strategy = v;
-    m_appcfg->set("arrange", "arrange_strategy", std::to_string(v));
+    m_appcfg->set("arrange", "arrange_strategy", std::string{get_label(v)});
 
     return *this;
 }

@@ -155,6 +155,15 @@ public:
     bool slider_optional_int(const char* label, std::optional<int> &v, int v_min, int v_max, const char* format = "%.3f", float power = 1.0f, bool clamp = true, const wxString& tooltip = {}, bool show_edit_btn = true, int def_val = 0);
 
     /// <summary>
+    /// Change position of imgui window
+    /// </summary>
+    /// <param name="window_name">ImGui identifier of window</param>
+    /// <param name="output_window_offset">[output] optional </param>
+    /// <param name="try_to_fix">When True Only move to be full visible otherwise reset position</param>
+    /// <returns>New offset of window for function ImGui::SetNextWindowPos</returns>
+    static std::optional<ImVec2> change_window_position(const char *window_name, bool try_to_fix);
+
+    /// <summary>
     /// Use ImGui internals to unactivate (lose focus) in input.
     /// When input is activ it can't change value by application.
     /// </summary>

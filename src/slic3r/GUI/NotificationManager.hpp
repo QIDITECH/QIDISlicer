@@ -60,6 +60,7 @@ enum class NotificationType
 	// Notification on the start of QIDISlicer, when updates of system profiles are detected.
 	// Contains a hyperlink to execute installation of the new system profiles.
 	PresetUpdateAvailable,
+	PresetUpdateAvailableNewPrinter,
 //	LoadingFailed,
 	// Errors emmited by Print::validate
 	// difference from Slicing error is that they disappear not grey out at update_background_process
@@ -115,14 +116,16 @@ enum class NotificationType
 	SimplifySuggestion,
 	// Change of text will change font to similar one on.
 	UnknownFont,
-	// information about netfabb is finished repairing model (blocking proccess)
-	NetfabbFinished,
+	// information that repairing model finished (blocking proccess)
+	RepairFinished,
 	// Short meesage to fill space between start and finish of export
 	ExportOngoing,
 	// Progressbar of download from qidislicer:// url
 	URLDownload,
 	// MacOS specific - PS comes forward even when downloader is not allowed
 	URLNotRegistered,
+	// Config file was detected during startup, open wifi config dialog via hypertext
+	WifiConfigFileDetected
 };
 
 class NotificationManager

@@ -109,6 +109,9 @@ inline bool has_duplicate_points(Polygon &&poly)      { return has_duplicate_poi
 inline bool has_duplicate_points(const Polygon &poly) { return has_duplicate_points(poly.points); }
 bool        has_duplicate_points(const Polygons &polys);
 
+// Return True when erase some otherwise False.
+bool remove_same_neighbor(Polygon &polygon);
+bool remove_same_neighbor(Polygons &polygons);
 inline double total_length(const Polygons &polylines) {
     double total = 0;
     for (Polygons::const_iterator it = polylines.begin(); it != polylines.end(); ++it)
@@ -243,6 +246,17 @@ inline Polylines to_polylines(Polygons &&polys)
     return polylines;
 }
 
+// close polyline to polygon (connect first and last point in polyline)
+inline Polygons to_polygons(const Polylines &polylines)
+{
+    Polygons out;
+    out.reserve(polylines.size());
+    for (const Polyline &polyline : polylines) {
+        if (polyline.size())
+        out.emplace_back(polyline.points);
+    }
+    return out;
+}
 inline Polygons to_polygons(const VecOfPoints &paths)
 {
     Polygons out;

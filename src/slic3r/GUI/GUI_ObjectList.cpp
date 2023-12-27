@@ -477,7 +477,7 @@ MeshErrorsInfo ObjectList::get_mesh_errors_info(const int obj_idx, const int vol
         *sidebar_info = stats.manifold() ? auto_repaired_info : (remaining_info + (stats.repaired() ? ("\n" + auto_repaired_info) : ""));
 
     if (is_windows10() && !sidebar_info)
-        tooltip += "\n" + _L("Right button click the icon to fix STL through Netfabb");
+        tooltip += "\n" + _L("Right button click the icon to fix STL by Windows repair algorithm");
 
     return { tooltip, get_warning_icon_name(stats) };
 }
@@ -996,7 +996,7 @@ void ObjectList::list_manipulation(const wxPoint& mouse_pos, bool evt_context_me
         {
             if (is_windows10() && m_objects_model->HasWarningIcon(item) &&
                 mouse_pos.x > 2 * wxGetApp().em_unit() && mouse_pos.x < 4 * wxGetApp().em_unit())
-                fix_through_netfabb();
+                fix_through_winsdk();
             else if (evt_context_menu)
                 show_context_menu(evt_context_menu); // show context menu for "Name" column too
         }
@@ -1034,7 +1034,11 @@ void ObjectList::show_context_menu(const bool evt_context_menu)
                 get_selected_item_indexes(obj_idx, vol_idx, item);
                 if (obj_idx < 0 || vol_idx < 0)
                     return;
-                menu = object(obj_idx)->volumes[vol_idx]->text_configuration.has_value() ? plater->text_part_menu() : plater->part_menu();
+                const ModelVolume *volume = object(obj_idx)->volumes[vol_idx];
+
+                menu = volume->is_text() ? plater->text_part_menu() : 
+                       volume->is_svg() ? plater->svg_part_menu() : 
+                    plater->part_menu();
             }
             else
                 menu = type & itInstance             ? plater->instance_menu() :
@@ -1512,12 +1516,7 @@ void ObjectList::load_subobject(ModelVolumeType type, bool from_galery/* = false
     take_snapshot((type == ModelVolumeType::MODEL_PART) ? _L("Load Part") : _L("Load Modifier"));
 
     std::vector<ModelVolume*> volumes;
-    // ! ysFIXME - delete commented code after testing and rename "load_modifier" to something common
-    /*
-    if (type == ModelVolumeType::MODEL_PART)
-        load_part(*(*m_objects)[obj_idx], volumes, type, from_galery);
-    else*/
-        load_modifier(input_files, *(*m_objects)[obj_idx], volumes, type, from_galery);
+    load_from_files(input_files, *(*m_objects)[obj_idx], volumes, type, from_galery);
 
     if (volumes.empty())
         return;
@@ -1537,71 +1536,9 @@ void ObjectList::load_subobject(ModelVolumeType type, bool from_galery/* = false
 
     selection_changed();
 }
-/*
-void ObjectList::load_part(ModelObject& model_object, std::vector<ModelVolume*>& added_volumes, ModelVolumeType type, bool from_galery = false)
+
+void ObjectList::load_from_files(const wxArrayString& input_files, ModelObject& model_object, std::vector<ModelVolume*>& added_volumes, ModelVolumeType type, bool from_galery)
 {
-    if (type != ModelVolumeType::MODEL_PART)
-        return;
-
-    wxWindow* parent = wxGetApp().tab_panel()->GetPage(0);
-
-    wxArrayString input_files;
-
-    if (from_galery) {
-        GalleryDialog dlg(this);
-        if (dlg.ShowModal() == wxID_CLOSE)
-            return;
-        dlg.get_input_files(input_files);
-        if (input_files.IsEmpty())
-            return;
-    }
-    else
-        wxGetApp().import_model(parent, input_files);
-
-    wxProgressDialog dlg(_L("Loading") + dots, "", 100, wxGetApp().mainframe wxPD_AUTO_HIDE);
-    wxBusyCursor busy;
-
-    for (size_t i = 0; i < input_files.size(); ++i) {
-        std::string input_file = input_files.Item(i).ToUTF8().data();
-
-        dlg.Update(static_cast<int>(100.0f * static_cast<float>(i) / static_cast<float>(input_files.size())),
-            _L("Loading file") + ": " + from_path(boost::filesystem::path(input_file).filename()));
-        dlg.Fit();
-
-        Model model;
-        try {
-            model = Model::read_from_file(input_file);
-        }
-        catch (std::exception &e) {
-            auto msg = _L("Error!") + " " + input_file + " : " + e.what() + ".";
-            show_error(parent, msg);
-            exit(1);
-        }
-
-        for (auto object : model.objects) {
-            Vec3d delta = Vec3d::Zero();
-            if (model_object.origin_translation != Vec3d::Zero()) {
-                object->center_around_origin();
-                delta = model_object.origin_translation - object->origin_translation;
-            }
-            for (auto volume : object->volumes) {
-                volume->translate(delta);
-                auto new_volume = model_object.add_volume(*volume, type);
-                new_volume->name = boost::filesystem::path(input_file).filename().string();
-                // set a default extruder value, since user can't add it manually
-                new_volume->config.set_key_value("extruder", new ConfigOptionInt(0));
-
-                added_volumes.push_back(new_volume);
-            }
-        }
-    }
-}
-*/
-void ObjectList::load_modifier(const wxArrayString& input_files, ModelObject& model_object, std::vector<ModelVolume*>& added_volumes, ModelVolumeType type, bool from_galery)
-{
-    // ! ysFIXME - delete commented code after testing and rename "load_modifier" to something common
-    //if (type == ModelVolumeType::MODEL_PART)
-    //    return;
 
     wxWindow* parent = wxGetApp().tab_panel()->GetPage(0);
 
@@ -1841,12 +1778,7 @@ void ObjectList::load_shape_object_from_gallery(const wxArrayString& input_files
         wxGetApp().mainframe->update_title();
 }
 
-void ObjectList::load_mesh_object(
-    const TriangleMesh &     mesh,
-    const std::string &      name,
-    bool                     center,
-    const TextConfiguration *text_config /* = nullptr*/,
-    const Transform3d *      transformation /* = nullptr*/)
+void ObjectList::load_mesh_object(const TriangleMesh &mesh, const std::string &name, bool center)
 {   
     PlaterAfterLoadAutoArrange plater_after_load_auto_arrange;
     // Add mesh to model as a new object
@@ -1856,7 +1788,6 @@ void ObjectList::load_mesh_object(
     check_model_ids_validity(model);
 #endif /* _DEBUG */
     
-    std::vector<size_t> object_idxs;
     ModelObject* new_object = model.add_object();
     new_object->name = name;
     new_object->add_instance(); // each object should have at list one instance
@@ -1864,31 +1795,22 @@ void ObjectList::load_mesh_object(
     ModelVolume* new_volume = new_object->add_volume(mesh);
     new_object->sort_volumes(wxGetApp().app_config->get_bool("order_volumes"));
     new_volume->name = name;
-    if (text_config)
-        new_volume->text_configuration = *text_config;
     // set a default extruder value, since user can't add it manually
     new_volume->config.set_key_value("extruder", new ConfigOptionInt(0));
     new_object->invalidate_bounding_box();
-    if (transformation) {
-        assert(!center);
-        Slic3r::Geometry::Transformation tr(*transformation);
-        new_object->instances[0]->set_transformation(tr);
-    } else {
         auto bb = mesh.bounding_box();
         new_object->translate(-bb.center());
         new_object->instances[0]->set_offset(
             center ? to_3d(wxGetApp().plater()->build_volume().bounding_volume2d().center(), -new_object->origin_translation.z()) :
         bb.center());
-    }
 
     new_object->ensure_on_bed();
 
-    object_idxs.push_back(model.objects.size() - 1);
 #ifdef _DEBUG
     check_model_ids_validity(model);
 #endif /* _DEBUG */
     
-    paste_objects_into_list(object_idxs);
+    paste_objects_into_list({model.objects.size() - 1});
 
 #ifdef _DEBUG
     check_model_ids_validity(model);
@@ -2544,7 +2466,9 @@ bool ObjectList::has_selected_cut_object() const
 
     for (wxDataViewItem item : sels) {
         const int obj_idx = m_objects_model->GetObjectIdByItem(item);
-        if (obj_idx >= 0 && object(obj_idx)->is_cut())
+        // ys_FIXME: The obj_idx<size condition is a workaround for https://github.com/prusa3d/PrusaSlicer/issues/11186,
+        // but not the correct fix. The deleted item probably should not be in sels in the first place.
+        if (obj_idx >= 0 && obj_idx < int(m_objects->size()) && object(obj_idx)->is_cut())
             return true;
     }
 
@@ -3061,6 +2985,7 @@ wxDataViewItemArray ObjectList::add_volumes_to_object_in_list(size_t obj_idx, st
                 volume_idx,
                 volume->type(),
                 volume->is_text(),
+                volume->is_svg(),
                 get_warning_icon_name(volume->mesh().stats()),
                 extruder2str(volume->config.has("extruder") ? volume->config.extruder() : 0));
             add_settings_item(vol_item, &volume->config.get());
@@ -4337,7 +4262,8 @@ void ObjectList::change_part_type()
         types.emplace_back(ModelVolumeType::PARAMETER_MODIFIER);
     }
 
-    if (!volume->text_configuration.has_value()) {
+    // is not embossed(SVG or Text)
+    if (!volume->emboss_shape.has_value()) {
         for (const wxString&        name    : { _L("Support Blocker"),          _L("Support Enforcer") })
             names.Add(name);
         for (const ModelVolumeType  type_id : { ModelVolumeType::SUPPORT_BLOCKER, ModelVolumeType::SUPPORT_ENFORCER })
@@ -4629,7 +4555,7 @@ void ObjectList::rename_item()
         update_name_in_model(item);
 }
 
-void ObjectList::fix_through_netfabb() 
+void ObjectList::fix_through_winsdk() 
 {
     // Do not fix anything when a gizmo is open. There might be issues with updates
     // and what is worse, the snapshot time would refer to the internal stack.
@@ -4649,21 +4575,21 @@ void ObjectList::fix_through_netfabb()
     // clear selections from the non-broken models if any exists
     // and than fill names of models to repairing 
     if (vol_idxs.empty()) {
-#if !FIX_THROUGH_NETFABB_ALWAYS
+#if !FIX_THROUGH_WINSDK_ALWAYS
         for (int i = int(obj_idxs.size())-1; i >= 0; --i)
                 if (object(obj_idxs[i])->get_repaired_errors_count() == 0)
                     obj_idxs.erase(obj_idxs.begin()+i);
-#endif // FIX_THROUGH_NETFABB_ALWAYS
+#endif // FIX_THROUGH_WINSDK_ALWAYS
         for (int obj_idx : obj_idxs)
             model_names.push_back(object(obj_idx)->name);
     }
     else {
         ModelObject* obj = object(obj_idxs.front());
-#if !FIX_THROUGH_NETFABB_ALWAYS
+#if !FIX_THROUGH_WINSDK_ALWAYS
         for (int i = int(vol_idxs.size()) - 1; i >= 0; --i)
             if (obj->get_repaired_errors_count(vol_idxs[i]) == 0)
                 vol_idxs.erase(vol_idxs.begin() + i);
-#endif // FIX_THROUGH_NETFABB_ALWAYS
+#endif // FIX_THROUGH_WINSDK_ALWAYS
         for (int vol_idx : vol_idxs)
             model_names.push_back(obj->volumes[vol_idx]->name);
     }
@@ -4707,19 +4633,19 @@ void ObjectList::fix_through_netfabb()
         return true;
     };
 
-    Plater::TakeSnapshot snapshot(plater, _L("Fix through NetFabb"));
+    Plater::TakeSnapshot snapshot(plater, _L("Fix by Windows repair algorithm"));
 
     // Open a progress dialog.
-    wxProgressDialog progress_dlg(_L("Fixing through NetFabb"), "", 100, find_toplevel_parent(plater),
+    wxProgressDialog progress_dlg(_L("Fixing by Windows repair algorithm"), "", 100, find_toplevel_parent(plater),
                                     wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_CAN_ABORT);
     int model_idx{ 0 };
     if (vol_idxs.empty()) {
         int vol_idx{ -1 };
         for (int obj_idx : obj_idxs) {
-#if !FIX_THROUGH_NETFABB_ALWAYS
+#if !FIX_THROUGH_WINSDK_ALWAYS
             if (object(obj_idx)->get_repaired_errors_count(vol_idx) == 0)
                 continue;
-#endif // FIX_THROUGH_NETFABB_ALWAYS
+#endif // FIX_THROUGH_WINSDK_ALWAYS
             if (!fix_and_update_progress(obj_idx, vol_idx, model_idx, progress_dlg, succes_models, failed_models))
                 break;
             model_idx++;
@@ -4752,7 +4678,7 @@ void ObjectList::fix_through_netfabb()
     }
     if (msg.IsEmpty())
         msg = _L("Repairing was canceled");
-    plater->get_notification_manager()->push_notification(NotificationType::NetfabbFinished, NotificationManager::NotificationLevel::PrintInfoShortNotificationLevel, boost::nowide::narrow(msg));
+    plater->get_notification_manager()->push_notification(NotificationType::RepairFinished, NotificationManager::NotificationLevel::PrintInfoShortNotificationLevel, boost::nowide::narrow(msg));
 }
 
 void ObjectList::simplify()

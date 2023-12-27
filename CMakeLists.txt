@@ -32,7 +32,7 @@ option(SLIC3R_MSVC_PDB          "Generate PDB files on MSVC in Release mode" 1)
 option(SLIC3R_PERL_XS           "Compile XS Perl module and enable Perl unit and integration tests" 0)
 option(SLIC3R_ASAN              "Enable ASan on Clang and GCC" 0)
 option(SLIC3R_UBSAN             "Enable UBSan on Clang and GCC" 0)
-option(SLIC3R_ENABLE_FORMAT_STEP "Enable compilation of STEP file support" 1)
+option(SLIC3R_ENABLE_FORMAT_STEP "Enable compilation of STEP file support" ON)
 # If SLIC3R_FHS is 1 -> SLIC3R_DESKTOP_INTEGRATION is always 0, othrewise variable.
 CMAKE_DEPENDENT_OPTION(SLIC3R_DESKTOP_INTEGRATION "Allow perfoming desktop integration during runtime" 1 "NOT SLIC3R_FHS" 0)
 
@@ -50,6 +50,14 @@ if (SLIC3R_STATIC)
     set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 endif ()
 
+# Dependency build management
+option(${PROJECT_NAME}_BUILD_DEPS "Build dependencies before the project" OFF)
+option(${PROJECT_NAME}_DEPS_OUTPUT_QUIET "Don't print build output for dependencies" OFF)
+set(${PROJECT_NAME}_DEPS_PRESET "default" CACHE STRING "Preset of the dependencies when ${PROJECT_NAME}_BUILD_DEPS is ON")
+set(${PROJECT_NAME}_DEPS_BUILD_DIR "" CACHE PATH "Binary dir of the dependencies build when ${PROJECT_NAME}_BUILD_DEPS is ON")
+if (${PROJECT_NAME}_BUILD_DEPS)
+    include(deps/autobuild.cmake)
+endif ()
 if (APPLE)
     set(CMAKE_FIND_FRAMEWORK LAST)
     set(CMAKE_FIND_APPBUNDLE LAST)
@@ -175,7 +183,7 @@ if(WIN32)
         else()
             message("WIN10SDK_PATH is invalid: ${WIN10SDK_PATH}")
             message("${WIN10SDK_PATH}/include/winrt/windows.graphics.printing3d.h was not found")
-            message("STL fixing by the Netfabb service will not be compiled")
+            message("STL fixing by WinSDK will not be compiled")
             unset(WIN10SDK_PATH)
         endif()
     else()
@@ -183,16 +191,16 @@ if(WIN32)
         set(WIN10SDK_INCLUDE_PATH "$ENV{WindowsSdkDir}/Include/$ENV{WindowsSDKVersion}")
         if (NOT EXISTS "${WIN10SDK_INCLUDE_PATH}/winrt/windows.graphics.printing3d.h")
             message("${WIN10SDK_INCLUDE_PATH}/winrt/windows.graphics.printing3d.h was not found")
-            message("STL fixing by the Netfabb service will not be compiled")
+            message("STL fixing by WinSDK will not be compiled")
             unset(WIN10SDK_INCLUDE_PATH)
         endif()
     endif()
     if(WIN10SDK_INCLUDE_PATH)
-        message("Building with Win10 Netfabb STL fixing service support")
+        message("Building with Win10 STL fixing service support")
         add_definitions(-DHAS_WIN10SDK)
         include_directories("${WIN10SDK_INCLUDE_PATH}")
     else()
-        message("Building without Win10 Netfabb STL fixing service support")
+        message("Building without Win10 STL fixing service support")
     endif()
 endif()
 
@@ -582,17 +590,12 @@ function(qidislicer_copy_dlls target)
     
     # This has to be a separate target due to the windows command line lenght limits    
     add_custom_command(TARGET ${target} POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy ${TOP_LEVEL_PROJECT_DIR}/deps/GMP/gmp/lib/win${_bits}/libgmp-10.dll ${_out_dir}
+        COMMAND ${CMAKE_COMMAND} -E copy ${TOP_LEVEL_PROJECT_DIR}/deps/+GMP/gmp/lib/win${_bits}/libgmp-10.dll ${_out_dir}
         COMMENT "Copy gmp runtime to build tree"
         VERBATIM)
     
     add_custom_command(TARGET ${target} POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy ${TOP_LEVEL_PROJECT_DIR}/deps/MPFR/mpfr/lib/win${_bits}/libmpfr-4.dll ${_out_dir}
-        COMMENT "Copy mpfr runtime to build tree"
-        VERBATIM)
-
-    add_custom_command(TARGET ${target} POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy ${TOP_LEVEL_PROJECT_DIR}/deps/MPFR/mpfr/lib/win${_bits}/WebView2Loader.dll ${_out_dir}
+        COMMAND ${CMAKE_COMMAND} -E copy ${TOP_LEVEL_PROJECT_DIR}/deps/+MPFR/mpfr/lib/win${_bits}/libmpfr-4.dll ${_out_dir}
         COMMENT "Copy mpfr runtime to build tree"
         VERBATIM)
 

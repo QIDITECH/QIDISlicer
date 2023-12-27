@@ -89,6 +89,86 @@ inline Grids line_rasterization(const Line &line, int64_t xdist = RasteXDistance
 }
 } // namespace RasterizationImpl
 
+static std::vector<ExtrusionPaths> getFakeExtrusionPathsFromWipeTower(const WipeTowerData& wtd)
+{
+    float h = wtd.height;
+    float lh = wtd.first_layer_height;
+    int   d = scale_(wtd.depth);
+    int   w = scale_(wtd.width);
+    int   bd = scale_(wtd.brim_width);
+    Point minCorner = { -wtd.brim_width, -wtd.brim_width };
+    Point maxCorner = { minCorner.x() + w + bd, minCorner.y() + d + bd };
+    float width = wtd.width;
+    float depth = wtd.depth;
+    float height = wtd.height;
+    float cone_angle = wtd.cone_angle;
+    const auto& z_and_depth_pairs = wtd.z_and_depth_pairs;
+
+    const auto [cone_base_R, cone_scale_x] = WipeTower::get_wipe_tower_cone_base(width, height, depth, cone_angle);
+
+    std::vector<ExtrusionPaths> paths;
+    for (float hh = 0.f; hh < h; hh += lh) {
+        
+        if (hh != 0.f) {
+            // The wipe tower may be getting smaller. Find the depth for this layer.
+            size_t i = 0;
+            for (i=0; i<z_and_depth_pairs.size()-1; ++i)
+                if (hh >= z_and_depth_pairs[i].first && hh < z_and_depth_pairs[i+1].first)
+                    break;
+            d = scale_(z_and_depth_pairs[i].second);
+            minCorner = {0.f, -d/2 + scale_(z_and_depth_pairs.front().second/2.f)};
+            maxCorner = { minCorner.x() + w, minCorner.y() + d };
+        }
+
+
+        ExtrusionPath path({ minCorner, {maxCorner.x(), minCorner.y()}, maxCorner, {minCorner.x(), maxCorner.y()}, minCorner },
+            ExtrusionAttributes{ ExtrusionRole::WipeTower, ExtrusionFlow{ 0.0, 0.0, lh } });
+        paths.push_back({ path });
+
+        // We added the border, now add several parallel lines so we can detect an object that is fully inside the tower.
+        // For now, simply use fixed spacing of 3mm.
+        for (coord_t y=minCorner.y()+scale_(3.); y<maxCorner.y(); y+=scale_(3.)) {
+            path.polyline = { {minCorner.x(), y}, {maxCorner.x(), y} };
+            paths.back().emplace_back(path);
+        }
+
+        // And of course the stabilization cone and its base...
+        if (cone_base_R > 0.) {
+            path.polyline.clear();
+            double r = cone_base_R * (1 - hh/height);
+            for (double alpha=0; alpha<2.01*M_PI; alpha+=2*M_PI/20.)
+                path.polyline.points.emplace_back(Point::new_scale(width/2. + r * std::cos(alpha)/cone_scale_x, depth/2. + r * std::sin(alpha)));
+            paths.back().emplace_back(path);
+            if (hh == 0.f) { // Cone brim.
+                for (float bw=wtd.brim_width; bw>0.f; bw-=3.f) {
+                    path.polyline.clear();
+                    for (double alpha=0; alpha<2.01*M_PI; alpha+=2*M_PI/20.) // see load_wipe_tower_preview, where the same is a bit clearer
+                        path.polyline.points.emplace_back(Point::new_scale(
+                            width/2. + cone_base_R * std::cos(alpha)/cone_scale_x * (1. + cone_scale_x*bw/cone_base_R),
+                            depth/2. + cone_base_R * std::sin(alpha) * (1. + bw/cone_base_R))
+                        );
+                    paths.back().emplace_back(path);
+                }
+            }
+        }
+
+        // Only the first layer has brim.
+        if (hh == 0.f) {
+            minCorner = minCorner + Point(bd, bd);
+            maxCorner = maxCorner - Point(bd, bd);
+        }
+    }
+
+    // Rotate and translate the tower into the final position.
+    for (ExtrusionPaths& ps : paths) {
+        for (ExtrusionPath& p : ps) {
+            p.polyline.rotate(Geometry::deg2rad(wtd.rotation_angle));
+            p.polyline.translate(scale_(wtd.position.x()), scale_(wtd.position.y()));
+        }
+    }
+
+    return paths;
+}
 void LinesBucketQueue::emplace_back_bucket(std::vector<ExtrusionPaths> &&paths, const void *objPtr, Points offsets)
 {
     if (_objsPtrToId.find(objPtr) == _objsPtrToId.end()) {
@@ -165,14 +245,14 @@ ExtrusionPaths getExtrusionPathsFromLayer(LayerRegionPtrs layerRegionPtrs)
     return paths;
 }
 
-ExtrusionPaths getExtrusionPathsFromSupportLayer(SupportLayer *supportLayer)
+ExtrusionPaths getExtrusionPathsFromSupportLayer(const SupportLayer *supportLayer)
 {
     ExtrusionPaths paths;
     getExtrusionPathsFromEntity(&supportLayer->support_fills, paths);
     return paths;
 }
 
-std::pair<std::vector<ExtrusionPaths>, std::vector<ExtrusionPaths>> getAllLayersExtrusionPathsFromObject(PrintObject *obj)
+std::pair<std::vector<ExtrusionPaths>, std::vector<ExtrusionPaths>> getAllLayersExtrusionPathsFromObject(const PrintObject *obj)
 {
     std::vector<ExtrusionPaths> objPaths, supportPaths;
 
@@ -203,17 +283,22 @@ ConflictComputeOpt ConflictChecker::find_inter_of_lines(const LineWithIDs &lines
     return {};
 }
 
-ConflictResultOpt ConflictChecker::find_inter_of_lines_in_diff_objs(PrintObjectPtrs                      objs,
-                                                                  std::optional<const FakeWipeTower *> wtdptr) // find the first intersection point of lines in different objects
+ConflictResultOpt ConflictChecker::find_inter_of_lines_in_diff_objs(SpanOfConstPtrs<PrintObject> objs,
+                                                                    const WipeTowerData& wipe_tower_data) // find the first intersection point of lines in different objects
 {
     if (objs.empty() || (objs.size() == 1 && objs.front()->instances().size() == 1)) { return {}; }
 
+    // The code ported from BS uses void* to identify objects...
+    // Let's use the address of this variable to represent the wipe tower.
+    int wtptr = 0;
     LinesBucketQueue conflictQueue;
-    if (wtdptr.has_value()) { // wipe tower at 0 by default
-        std::vector<ExtrusionPaths> wtpaths = (*wtdptr)->getFakeExtrusionPathsFromWipeTower();
-        conflictQueue.emplace_back_bucket(std::move(wtpaths), *wtdptr, Points{Point((*wtdptr)->plate_origin)});
+    if (! wipe_tower_data.z_and_depth_pairs.empty()) {
+        // The wipe tower is being generated.
+        const Vec2d plate_origin = Vec2d::Zero();
+        std::vector<ExtrusionPaths> wtpaths = getFakeExtrusionPathsFromWipeTower(wipe_tower_data);
+        conflictQueue.emplace_back_bucket(std::move(wtpaths), &wtptr, Points{Point(plate_origin)});
     }
-    for (PrintObject *obj : objs) {
+    for (const PrintObject *obj : objs) {
         std::pair<std::vector<ExtrusionPaths>, std::vector<ExtrusionPaths>> layers = getAllLayersExtrusionPathsFromObject(obj);
 
         Points instances_shifts;
@@ -256,14 +341,12 @@ ConflictResultOpt ConflictChecker::find_inter_of_lines_in_diff_objs(PrintObjectP
         const void *ptr1           = conflictQueue.idToObjsPtr(conflict[0].first._obj1);
         const void *ptr2           = conflictQueue.idToObjsPtr(conflict[0].first._obj2);
         double      conflictHeight = conflict[0].second;
-        if (wtdptr.has_value()) {
-            const FakeWipeTower* wtdp = *wtdptr;
-            if (ptr1 == wtdp || ptr2 == wtdp) {
-                if (ptr2 == wtdp) { std::swap(ptr1, ptr2); }
+        if (ptr1 == &wtptr || ptr2 == &wtptr) {
+            assert(! wipe_tower_data.z_and_depth_pairs.empty());
+            if (ptr2 == &wtptr) { std::swap(ptr1, ptr2); }
                 const PrintObject *obj2 = reinterpret_cast<const PrintObject *>(ptr2);
                 return std::make_optional<ConflictResult>("WipeTower", obj2->model_object()->name, conflictHeight, nullptr, ptr2);
             }
-        }
         const PrintObject *obj1 = reinterpret_cast<const PrintObject *>(ptr1);
         const PrintObject *obj2 = reinterpret_cast<const PrintObject *>(ptr2);
         return std::make_optional<ConflictResult>(obj1->model_object()->name, obj2->model_object()->name, conflictHeight, ptr1, ptr2);

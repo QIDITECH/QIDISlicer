@@ -22,6 +22,9 @@
 #include "wxExtensions.hpp"
 #include "slic3r/GUI/MainFrame.hpp"
 #include "GUI_App.hpp"
+
+#include "Widgets/CheckBox.hpp"
+
 //Y
 #include "libslic3r/AppConfig.cpp"
 
@@ -87,6 +90,7 @@ void MsgDialog::SetButtonLabel(wxWindowID btn_id, const wxString& label, bool se
 wxButton* MsgDialog::add_button(wxWindowID btn_id, bool set_focus /*= false*/, const wxString& label/* = wxString()*/)
 {
     wxButton* btn = new wxButton(this, btn_id, label);
+    wxGetApp().SetWindowVariantForButton(btn);
     if (set_focus) {
         btn->SetFocus();
         // For non-MSW platforms SetFocus is not enought to use it as default, when the dialog is closed by ENTER
@@ -106,6 +110,7 @@ wxButton* MsgDialog::get_button(wxWindowID btn_id){
 //B44
 void MsgDialog::apply_style(long style)
 {
+    if (style & wxOK)       add_button(wxID_OK, true);
     if (style & wxYES)      add_button(wxID_YES,   !(style & wxNO_DEFAULT));
     if (style & wxNO)       add_button(wxID_NO,     (style & wxNO_DEFAULT));
     if (style & wxCANCEL)   add_button(wxID_CANCEL, (style & wxCANCEL_DEFAULT));
@@ -125,19 +130,19 @@ void MsgDialog::finalize()
 
 
 // Text shown as HTML, so that mouse selection and Ctrl-V to copy will work.
-static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxString msg, bool monospaced_font = false, bool is_marked_msg = false)
+static void add_msg_content(MsgDialog* parent, wxBoxSizer* content_sizer, const HtmlContent& content)
 {
     wxHtmlWindow* html = new wxHtmlWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHW_SCROLLBAR_AUTO);
 
     // count lines in the message
     int msg_lines = 0;
-    if (!monospaced_font) {
+    if (!content.is_monospaced_font) {
         int line_len = 55;// count of symbols in one line
         int start_line = 0;
-        for (auto i = msg.begin(); i != msg.end(); ++i) {
+        for (auto i = content.msg.begin(); i != content.msg.end(); ++i) {
             if (*i == '\n') {
-                int cur_line_len = i - msg.begin() - start_line;
-                start_line = i - msg.begin();
+                int cur_line_len = i - content.msg.begin() - start_line;
+                start_line = i - content.msg.begin();
                 if (cur_line_len == 0 || line_len > cur_line_len)
                     msg_lines++;
                 else
@@ -176,11 +181,11 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
     }
 
     // if message containes the table
-    if (msg.Contains("<tr>")) {
-        int lines = msg.Freq('\n') + 1;
+    if (content.msg.Contains("<tr>")) {
+        int lines = content.msg.Freq('\n') + 1;
         int pos = 0;
-        while (pos < (int)msg.Len() && pos != wxNOT_FOUND) {
-            pos = msg.find("<tr>", pos + 1);
+        while (pos < (int)content.msg.Len() && pos != wxNOT_FOUND) {
+            pos = content.msg.find("<tr>", pos + 1);
             lines += 2;
         }
         int page_height = std::min(int(font.GetPixelSize().y+2) * lines, 68 * em);
@@ -188,16 +193,16 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
     }
     else {
         wxClientDC dc(parent);
-        wxSize msg_sz = dc.GetMultiLineTextExtent(msg);
+        wxSize msg_sz = dc.GetMultiLineTextExtent(content.msg);
         page_size = wxSize(std::min(msg_sz.GetX() + 2 * em, 68 * em),
-                           std::min(msg_sz.GetY() + 8 * em, 68 * em));
+                           std::min(msg_sz.GetY() + 2 * em, 68 * em));
     }
     html->SetMinSize(page_size);
 
-    std::string msg_escaped = xml_escape(into_u8(msg), is_marked_msg);
+    std::string msg_escaped = xml_escape(into_u8(content.msg), content.is_marked_msg || content.on_link_clicked);
     boost::replace_all(msg_escaped, "\r\n", "<br>");
     boost::replace_all(msg_escaped, "\n", "<br>");
-    if (monospaced_font)
+    if (content.is_monospaced_font)
         // Code formatting will be preserved. This is useful for reporting errors from the placeholder parser.
         msg_escaped = std::string("<pre><code>") + msg_escaped + "</code></pre>";
 //Y
@@ -211,13 +216,17 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
                                     "<body bgcolor=%1% link=%2%>"
                                         "<font color=%2%>"
                                             "%3%"
-                                            "%4%"
                                         "</font>"
                                     "</body>"
                                "</html>", 
-                    bgr_clr_str, text_clr_str, from_u8(msg_escaped), is_that_msg ? "<br />You can get the latest version of the software through the link below:\n<a href=\"https://qidi3d.com/pages/software-firmware\">https://qidi3d.com/pages/software-firmware</a>" : ""));
+                    bgr_clr_str, text_clr_str, from_u8(msg_escaped)));
 
-    html->Bind(wxEVT_HTML_LINK_CLICKED, [parent](wxHtmlLinkEvent& event) {
+    html->Bind(wxEVT_HTML_LINK_CLICKED, [parent, &content](wxHtmlLinkEvent& event) {
+        if (content.on_link_clicked) {
+            parent->EndModal(wxID_CLOSE);
+            content.on_link_clicked(into_u8(event.GetLinkInfo().GetHref()));
+        }
+        else
         wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref(), parent, false);
         event.Skip(false);
     });
@@ -228,21 +237,33 @@ static void add_msg_content(wxWindow* parent, wxBoxSizer* content_sizer, wxStrin
 
 // ErrorDialog
 
-ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, bool monospaced_font)
-    : MsgDialog(parent, wxString::Format(_(L("%s error")), SLIC3R_APP_NAME), 
-                        wxString::Format(_(L("%s has encountered an error")), SLIC3R_APP_NAME), wxOK)
-	, msg(msg)
+void ErrorDialog::create(const HtmlContent& content, int icon_width)
 {
-    add_msg_content(this, content_sizer, msg, monospaced_font);
+    add_msg_content(this, content_sizer, content);
 
 	// Use a small bitmap with monospaced font, as the error text will not be wrapped.
-	logo->SetBitmap(*get_bmp_bundle("QIDISlicer_192px_grayscale.png", monospaced_font ? 48 : /*1*/84));
+	logo->SetBitmap(*get_bmp_bundle("QIDISlicer_192px_grayscale.png", icon_width));
 
     SetMaxSize(wxSize(-1, CONTENT_MAX_HEIGHT*wxGetApp().em_unit()));
 
     finalize();
 }
 
+ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, bool monospaced_font)
+    : MsgDialog(parent, wxString::Format(_L("%s error"), SLIC3R_APP_NAME), 
+                        wxString::Format(_L("%s has encountered an error"), SLIC3R_APP_NAME), wxOK)
+    , m_content(HtmlContent{ msg, monospaced_font, true })
+{
+    create(m_content, monospaced_font ? 48 : 84);
+}
+
+ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, const std::function<void(const std::string&)> &on_link_clicked)
+    : MsgDialog(parent, wxString::Format(_L("%s error"), SLIC3R_APP_NAME), 
+                        wxString::Format(_L("%s has encountered an error"), SLIC3R_APP_NAME), wxOK)
+    , m_content(HtmlContent{ msg, false, true, on_link_clicked })
+{
+    create(m_content, 84);
+}
 // WarningDialog
 
 WarningDialog::WarningDialog(wxWindow *parent,
@@ -252,7 +273,7 @@ WarningDialog::WarningDialog(wxWindow *parent,
     : MsgDialog(parent, caption.IsEmpty() ? wxString::Format(_L("%s warning"), SLIC3R_APP_NAME) : caption, 
                         wxString::Format(_L("%s has a warning")+":", SLIC3R_APP_NAME), style)
 {
-    add_msg_content(this, content_sizer, message);
+    add_msg_content(this, content_sizer, HtmlContent{ message });
     finalize();
 }
 
@@ -265,7 +286,7 @@ MessageDialog::MessageDialog(wxWindow* parent,
     long style/* = wxOK*/)
     : MsgDialog(parent, caption.IsEmpty() ? wxString::Format(_L("%s info"), SLIC3R_APP_NAME) : caption, wxEmptyString, style)
 {
-    add_msg_content(this, content_sizer, get_wraped_wxString(message));
+    add_msg_content(this, content_sizer, HtmlContent{ get_wraped_wxString(message) });
     finalize();
 }
 
@@ -278,9 +299,9 @@ RichMessageDialog::RichMessageDialog(wxWindow* parent,
     long style/* = wxOK*/)
     : MsgDialog(parent, caption.IsEmpty() ? wxString::Format(_L("%s info"), SLIC3R_APP_NAME) : caption, wxEmptyString, style)
 {
-    add_msg_content(this, content_sizer, get_wraped_wxString(message));
+    add_msg_content(this, content_sizer, HtmlContent{ get_wraped_wxString(message) });
 
-    m_checkBox = new wxCheckBox(this, wxID_ANY, m_checkBoxText);
+    m_checkBox = new ::CheckBox(this, m_checkBoxText);
     wxGetApp().UpdateDarkUI(m_checkBox);
     m_checkBox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) { m_checkBoxValue = m_checkBox->GetValue(); });
 
@@ -293,8 +314,10 @@ int RichMessageDialog::ShowModal()
 {
     if (m_checkBoxText.IsEmpty())
         m_checkBox->Hide();
-    else
+    else {
         m_checkBox->SetLabelText(m_checkBoxText);
+        m_checkBox->Update();
+    }
     Layout();
 
     return wxDialog::ShowModal();
@@ -307,7 +330,7 @@ InfoDialog::InfoDialog(wxWindow* parent, const wxString &title, const wxString& 
 	: MsgDialog(parent, wxString::Format(_L("%s information"), SLIC3R_APP_NAME), title, style)
 	, msg(msg)
 {
-    add_msg_content(this, content_sizer, msg, false, is_marked_msg);
+    add_msg_content(this, content_sizer, HtmlContent{ msg, false, is_marked_msg });
     finalize();
 }
 

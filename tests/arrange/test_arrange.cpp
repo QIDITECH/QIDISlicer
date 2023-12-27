@@ -202,10 +202,10 @@ static void check_nfp(const std::string & outfile_prefix,
     ExPolygons bed_negative = diff_ex(bedrect, bedpoly);
     ExPolygons orb_ex_r = to_expolygons(orbiter);
     ExPolygons orb_ex_r_ch = {ExPolygon(Geometry::convex_hull(orb_ex_r))};
-    auto orb_ex_offs_pos_r = offset_ex(orb_ex_r,  SCALED_EPSILON);
-    auto orb_ex_offs_neg_r = offset_ex(orb_ex_r, -SCALED_EPSILON);
-    auto orb_ex_offs_pos_r_ch = offset_ex(orb_ex_r_ch,  SCALED_EPSILON);
-    auto orb_ex_offs_neg_r_ch = offset_ex(orb_ex_r_ch, -SCALED_EPSILON);
+    auto orb_ex_offs_pos_r = offset_ex(orb_ex_r,  scaled<float>(EPSILON));
+    auto orb_ex_offs_neg_r = offset_ex(orb_ex_r, -scaled<float>(EPSILON));
+    auto orb_ex_offs_pos_r_ch = offset_ex(orb_ex_r_ch,  scaled<float>(EPSILON));
+    auto orb_ex_offs_neg_r_ch = offset_ex(orb_ex_r_ch, -scaled<float>(EPSILON));
 
     auto bedpoly_offs = offset_ex(bedpoly, SCALED_EPSILON);
 

@@ -100,8 +100,8 @@ enum class SupportPointCause {
 //    Note that the force is only the difference - the amount needed to stabilize the object again.
 struct SupportPoint
 {
-    SupportPoint(SupportPointCause cause, const Vec3f &position, float force, float spot_radius, const Vec2f &direction)
-        : cause(cause), position(position), force(force), spot_radius(spot_radius), direction(direction)
+    SupportPoint(SupportPointCause cause, const Vec3f &position, float spot_radius)
+        : cause(cause), position(position), spot_radius(spot_radius)
     {}
 
     bool is_local_extrusion_support() const
@@ -113,17 +113,9 @@ struct SupportPoint
     SupportPointCause cause; // reason why this support point was generated. Used for the user alerts
     // position is in unscaled coords. The z coordinate is aligned with the layers bottom_z coordiantes
     Vec3f position;
-    // force that destabilizes the object to the point of falling/breaking. g*mm/s^2 units
-    // It is valid only for global_object_support. For local extrusion support points, the force is -EPSILON
-    // values gathered from large XL model: Min : 0 | Max : 18713800 | Average : 1361186 | Median : 329103
-    // For reference 18713800 is weight of 1.8 Kg object, 329103 is weight of 0.03 Kg
-    // The final sliced object weight was approx 0.5 Kg
-    float force;
     // Expected spot size. The support point strength is calculated from the area defined by this value.
     // Currently equal to the support_points_interface_radius parameter above
     float spot_radius;
-    // direction of the fall of the object (z part is neglected)
-    Vec2f direction;
 };
 
 using SupportPoints = std::vector<SupportPoint>;
@@ -143,6 +135,104 @@ struct PartialObject
     bool  connected_to_bed;
 };
 
+/**
+ * Unsacled values of integrals over a polygonal domain.
+ */
+class Integrals{
+  public:
+    /**
+     * Construct integral x_i int x_i^2 (i=1,2), xy and integral 1 (area).
+     *
+     * @param polygons List of polygons specifing the domain.
+     */
+    explicit Integrals(const Polygons& polygons);
+
+    // TODO refactor and delete the default constructor
+    Integrals() = default;
+
+    float area{};
+    Vec2f x_i{Vec2f::Zero()};
+    Vec2f x_i_squared{Vec2f::Zero()};
+    float xy{};
+};
+
+float compute_second_moment(
+    const Integrals& integrals,
+    const Vec2f& axis_direction
+);
+
+class ExtrusionLine
+{
+public:
+    ExtrusionLine();
+    ExtrusionLine(const Vec2f &a, const Vec2f &b, float len, const ExtrusionEntity *origin_entity);
+    ExtrusionLine(const Vec2f &a, const Vec2f &b);
+
+    bool is_external_perimeter() const;
+
+    Vec2f                  a;
+    Vec2f                  b;
+    float                  len;
+    const ExtrusionEntity *origin_entity;
+
+    std::optional<SupportSpotsGenerator::SupportPointCause> support_point_generated = {};
+    float form_quality            = 1.0f;
+    float curled_up_height        = 0.0f;
+
+    static const constexpr int Dim = 2;
+    using Scalar                   = Vec2f::Scalar;
+};
+
+struct SliceConnection
+{
+    float area{};
+    Vec3f centroid_accumulator              = Vec3f::Zero();
+    Vec2f second_moment_of_area_accumulator = Vec2f::Zero();
+    float second_moment_of_area_covariance_accumulator{};
+
+    void add(const SliceConnection &other);
+
+    void print_info(const std::string &tag) const;
+};
+
+Polygons get_brim(const ExPolygon& slice_polygon, const BrimType brim_type, const float brim_width);
+
+class ObjectPart
+{
+public:
+    float volume{};
+    Vec3f volume_centroid_accumulator = Vec3f::Zero();
+    float sticking_area{};
+    Vec3f sticking_centroid_accumulator              = Vec3f::Zero();
+    Vec2f sticking_second_moment_of_area_accumulator = Vec2f::Zero();
+    float sticking_second_moment_of_area_covariance_accumulator{};
+    bool  connected_to_bed = false;
+
+    ObjectPart(
+        const std::vector<const ExtrusionEntityCollection*>& extrusion_collections,
+        const bool connected_to_bed,
+        const coordf_t print_head_z,
+        const coordf_t layer_height,
+        const std::optional<Polygons>& brim
+    );
+
+    void add(const ObjectPart &other);
+
+    void add_support_point(const Vec3f &position, float sticking_area);
+
+
+    float compute_elastic_section_modulus(
+        const Vec2f &line_dir,
+        const Vec3f &extreme_point,
+        const Integrals& integrals
+    ) const;
+
+    std::tuple<float, SupportPointCause> is_stable_while_extruding(const SliceConnection &connection,
+                                    const ExtrusionLine   &extruded_line,
+                                    const Vec3f           &extreme_point,
+                                    float                  layer_z,
+                                    const Params          &params) const;
+};
 using PartialObjects = std::vector<PartialObject>;
 
 // Both support points and partial objects are sorted from the lowest z to the highest

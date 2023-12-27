@@ -738,8 +738,8 @@ bool is_collision_free(const Slic3r::Range<It> &item_range)
 
     bool collision_free = true;
     foreach_combo(item_range, [&collision_free](auto &itm1, auto &itm2) {
-        auto outline1 = offset(arr2::fixed_outline(itm1), -SCALED_EPSILON);
-        auto outline2 = offset(arr2::fixed_outline(itm2), -SCALED_EPSILON);
+        auto outline1 = offset(arr2::fixed_outline(itm1), -scaled<float>(EPSILON));
+        auto outline2 = offset(arr2::fixed_outline(itm2), -scaled<float>(EPSILON));
 
         auto inters = intersection(outline1, outline2);
         collision_free = collision_free && inters.empty();

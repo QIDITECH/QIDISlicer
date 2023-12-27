@@ -119,20 +119,18 @@ ExtrusionMultiPath PerimeterGenerator::thick_polyline_to_multi_path(const ThickP
 
         const double w        = fmax(line.a_width, line.b_width);
         const Flow   new_flow = (role.is_bridge() && flow.bridge()) ? flow : flow.with_width(unscale<float>(w) + flow.height() * float(1. - 0.25 * PI));
-        if (path.polyline.points.empty()) {
-            path.polyline.append(line.a);
-            path.polyline.append(line.b);
+        if (path.empty()) {
             // Convert from spacing to extrusion width based on the extrusion model
             // of a square extrusion ended with semi circles.
+            path = { ExtrusionAttributes{ path.role(), new_flow } };
+            path.polyline.append(line.a);
+            path.polyline.append(line.b);
             #ifdef SLIC3R_DEBUG
             printf("  filling %f gap\n", flow.width);
             #endif
-            path.mm3_per_mm  = new_flow.mm3_per_mm();
-            path.width       = new_flow.width();
-            path.height      = new_flow.height();
         } else {
-            assert(path.width >= EPSILON);
-            thickness_delta = scaled<double>(fabs(path.width - new_flow.width()));
+            assert(path.width() >= EPSILON);
+            thickness_delta = scaled<double>(fabs(path.width() - new_flow.width()));
             if (thickness_delta <= merge_tolerance) {
                 // the width difference between this line and the current flow
                 // (of the previous line) width is within the accepted tolerance
@@ -325,10 +323,12 @@ static ExtrusionEntityCollection traverse_loops_classic(const PerimeterGenerator
             extrusion_paths_append(
                 paths,
                 intersection_pl({ polygon }, lower_slices_polygons_clipped),
+                ExtrusionAttributes{
                 role_normal,
-                is_external ? params.ext_mm3_per_mm           : params.mm3_per_mm,
+                    ExtrusionFlow{ is_external ? params.ext_mm3_per_mm : params.mm3_per_mm,
                 is_external ? params.ext_perimeter_flow.width() : params.perimeter_flow.width(),
-                float(params.layer_height));
+                                   float(params.layer_height)
+                } });
             
             // get overhang paths by checking what parts of this loop fall 
             // outside the grown lower slices (thus where the distance between
@@ -336,21 +336,24 @@ static ExtrusionEntityCollection traverse_loops_classic(const PerimeterGenerator
             extrusion_paths_append(
                 paths,
                 diff_pl({ polygon }, lower_slices_polygons_clipped),
+                ExtrusionAttributes{
                 role_overhang,
-                params.mm3_per_mm_overhang,
-                params.overhang_flow.width(),
-                params.overhang_flow.height());
+                    ExtrusionFlow{ params.mm3_per_mm_overhang, params.overhang_flow.width(), params.overhang_flow.height() }
+                });
             
             // Reapply the nearest point search for starting point.
             // We allow polyline reversal because Clipper may have randomly reversed polylines during clipping.
             chain_and_reorder_extrusion_paths(paths, &paths.front().first_point());
         } else {
-            ExtrusionPath path(role_normal);
-            path.polyline   = polygon.split_at_first_point();
-            path.mm3_per_mm = is_external ? params.ext_mm3_per_mm             : params.mm3_per_mm;
-            path.width      = is_external ? params.ext_perimeter_flow.width() : params.perimeter_flow.width();
-            path.height     = float(params.layer_height);
-            paths.push_back(path);
+            paths.emplace_back(polygon.split_at_first_point(),
+                ExtrusionAttributes{
+                    role_normal,
+                    ExtrusionFlow{
+                        is_external ? params.ext_mm3_per_mm : params.mm3_per_mm,
+                        is_external ? params.ext_perimeter_flow.width() : params.perimeter_flow.width(),
+                        float(params.layer_height)
+                    }
+                });
         }
         
         coll.append(ExtrusionLoop(std::move(paths), loop_role));
@@ -383,11 +386,13 @@ static ExtrusionEntityCollection traverse_loops_classic(const PerimeterGenerator
             ExtrusionLoop *eloop = static_cast<ExtrusionLoop*>(coll.entities[idx.first]);
             coll.entities[idx.first] = nullptr;
             if (loop.is_contour) {
-                eloop->make_counter_clockwise();
+                if (eloop->is_clockwise())
+                    eloop->reverse_loop();
                 out.append(std::move(children.entities));
                 out.entities.emplace_back(eloop);
             } else {
-                eloop->make_clockwise();
+                if (eloop->is_counter_clockwise())
+                    eloop->reverse_loop();
                 out.entities.emplace_back(eloop);
                 out.append(std::move(children.entities));
             }
@@ -603,10 +608,8 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
             if (extrusion->is_closed) {
                 ExtrusionLoop extrusion_loop(std::move(paths));
                 // Restore the orientation of the extrusion loop.
-                if (pg_extrusion.is_contour)
-                    extrusion_loop.make_counter_clockwise();
-                else
-                    extrusion_loop.make_clockwise();
+                if (pg_extrusion.is_contour == extrusion_loop.is_clockwise())
+                    extrusion_loop.reverse_loop();
 
                 for (auto it = std::next(extrusion_loop.paths.begin()); it != extrusion_loop.paths.end(); ++it) {
                     assert(it->polyline.points.size() >= 2);
@@ -960,11 +963,9 @@ std::tuple<std::vector<ExtrusionPaths>, Polygons> generate_extra_perimeters_over
 
                 if (perimeter_polygon.empty()) { // fill possible gaps of single extrusion width
                     Polygons shrinked = intersection(offset(prev, -0.3 * overhang_flow.scaled_spacing()), expanded_overhang_to_cover);
-                    if (!shrinked.empty()) {
+                    if (!shrinked.empty())
                         extrusion_paths_append(overhang_region, reconnect_polylines(perimeter, overhang_flow.scaled_spacing()),
-                                               ExtrusionRole::OverhangPerimeter, overhang_flow.mm3_per_mm(), overhang_flow.width(),
-                                               overhang_flow.height());
-                    }
+                                               ExtrusionAttributes{ ExtrusionRole::OverhangPerimeter, overhang_flow });
 
                     Polylines  fills;
                     ExPolygons gap = shrinked.empty() ? offset_ex(prev, overhang_flow.scaled_spacing() * 0.5) : to_expolygons(shrinked);
@@ -975,14 +976,12 @@ std::tuple<std::vector<ExtrusionPaths>, Polygons> generate_extra_perimeters_over
                     if (!fills.empty()) {
                         fills = intersection_pl(fills, shrinked_overhang_to_cover);
                         extrusion_paths_append(overhang_region, reconnect_polylines(fills, overhang_flow.scaled_spacing()),
-                                               ExtrusionRole::OverhangPerimeter, overhang_flow.mm3_per_mm(), overhang_flow.width(),
-                                               overhang_flow.height());
+                                               ExtrusionAttributes{ ExtrusionRole::OverhangPerimeter, overhang_flow });
                     }
                     break;
                 } else {
                     extrusion_paths_append(overhang_region, reconnect_polylines(perimeter, overhang_flow.scaled_spacing()),
-                                           ExtrusionRole::OverhangPerimeter, overhang_flow.mm3_per_mm(), overhang_flow.width(),
-                                           overhang_flow.height());
+                                           ExtrusionAttributes{ExtrusionRole::OverhangPerimeter, overhang_flow });
                 }
 
                 if (intersection(perimeter_polygon, real_overhang).empty()) { continuation_loops--; }

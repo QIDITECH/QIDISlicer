@@ -185,7 +185,7 @@ void MeasuringImpl::update_planes()
                 int neighbor_idx = face_neighbors[facets[face_id]][edge_id];
                 if (neighbor_idx == -1)
                     goto PLANE_FAILURE;
-                if (visited[face_id][edge_id] || (int)face_to_plane[neighbor_idx] == plane_id) {
+                if (visited[face_id][edge_id] || face_to_plane[neighbor_idx] == plane_id) {
                     visited[face_id][edge_id] = true;
                     continue;
                 }
@@ -219,7 +219,7 @@ void MeasuringImpl::update_planes()
                     // Remember all halfedges we saw to break out of such infinite loops.
                     boost::container::small_vector<Halfedge_index, 10> he_seen;
 
-                    while ( (int)face_to_plane[sm.face(he)] == plane_id && he != he_orig) {
+                    while ( face_to_plane[sm.face(he)] == plane_id && he != he_orig) {
                         he_seen.emplace_back(he);
                         he = sm.next_around_target(he);
                         if (he.is_invalid() || std::find(he_seen.begin(), he_seen.end(), he) != he_seen.end())

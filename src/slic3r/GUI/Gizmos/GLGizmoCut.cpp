@@ -228,6 +228,7 @@ GLGizmoCut3D::GLGizmoCut3D(GLCanvas3D& parent, const std::string& icon_filename,
         {"Shape"        , _u8L("Shape")},
         {"Depth"        , _u8L("Depth")},
         {"Size"         , _u8L("Size")},
+        {"Rotation"     , _u8L("Rotation")},
         {"Groove"       , _u8L("Groove")},
         {"Width"        , _u8L("Width")},
         {"Flap Angle"   , _u8L("Flap Angle")},
@@ -559,10 +560,10 @@ bool GLGizmoCut3D::render_double_input(const std::string& label, double& value_i
 
 bool GLGizmoCut3D::render_slider_double_input(const std::string& label, float& value_in, float& tolerance_in, float min_val/* = -0.1f*/, float max_tolerance/* = -0.1f*/)
 {
-    constexpr float UndefMinVal = -0.1f;
+    static constexpr const float UndefMinVal = -0.1f;
     const float f_mm_to_in = static_cast<float>(ObjectManipulation::mm_to_in);
 
-    auto render_slider = [this, UndefMinVal, f_mm_to_in]
+    auto render_slider = [this, f_mm_to_in]
                          (const std::string& label, float& val, float def_val, float max_val, const wxString& tooltip) {
         float min_val = val < 0.f ? UndefMinVal : def_val;
         float value = val;
@@ -2326,6 +2327,10 @@ void GLGizmoCut3D::render_connectors_input_window(CutConnectors &connectors)
                 connectors[idx].radius_tolerance = 0.5f * m_connector_size_tolerance;
         });
 
+    if (render_angle_input(m_labels_map["Rotation"], m_connector_angle, 0.f, 0.f, 180.f))
+        apply_selected_connectors([this, &connectors](size_t idx) {
+            connectors[idx].z_angle = m_connector_angle;
+        });
     if (m_connector_type == CutConnectorType::Snap) {
         render_snap_specific_input(_u8L("Bulge"), _L("Bulge proportion related to radius"), m_snap_bulge_proportion, 0.15f, 5.f, 100.f * m_snap_space_proportion);
         render_snap_specific_input(_u8L("Space"), _L("Space proportion related to radius"), m_snap_space_proportion, 0.3f, 10.f, 50.f);
@@ -2535,7 +2540,7 @@ void GLGizmoCut3D::render_groove_float_input(const std::string& label, float& in
     }
 }
 
-void GLGizmoCut3D::render_groove_angle_input(const std::string& label, float& in_val, const float& init_val, float min_val, float max_val)
+bool GLGizmoCut3D::render_angle_input(const std::string& label, float& in_val, const float& init_val, float min_val, float max_val)
 {
     bool is_changed{ false };
 
@@ -2548,13 +2553,15 @@ void GLGizmoCut3D::render_groove_angle_input(const std::string& label, float& in
     const float old_val = val;
 
     const std::string format = "%.0f " + _u8L("°");
-    m_imgui->slider_float(("##groove_" + label).c_str(), &val, min_val, max_val, format.c_str(), 1.f, true, from_u8(label));
+    m_imgui->slider_float(("##angle_" + label).c_str(), &val, min_val, max_val, format.c_str(), 1.f, true, from_u8(label));
 
     m_is_slider_editing_done |= m_imgui->get_last_slider_status().deactivated_after_edit;
     if (!is_approx(old_val, val)) {
         if (m_imgui->get_last_slider_status().can_take_snapshot) {
-            Plater::TakeSnapshot snapshot(wxGetApp().plater(), format_wxstr("%1%: %2%", _L("Groove change"), label), UndoRedo::SnapshotType::GizmoAction);
+            // TRN: This is an entry in the Undo/Redo stack. The whole line will be 'Edited: (name of whatever was edited)'.
+            Plater::TakeSnapshot snapshot(wxGetApp().plater(), format_wxstr("%1%: %2%", _L("Edited"), label), UndoRedo::SnapshotType::GizmoAction);
             m_imgui->get_last_slider_status().invalidate_snapshot();
+            if (m_mode == size_t(CutMode::cutTongueAndGroove))
             m_groove_editing = true;
         }
         in_val = deg2rad(val);
@@ -2565,14 +2572,19 @@ void GLGizmoCut3D::render_groove_angle_input(const std::string& label, float& in
 
     m_imgui->disabled_begin(is_approx(in_val, init_val));
     const std::string act_name = _u8L("Reset");
-    if (render_reset_button(("##groove_" + label + act_name).c_str(), act_name)) {
+    if (render_reset_button(("##angle_" + label + act_name).c_str(), act_name)) {
         Plater::TakeSnapshot snapshot(wxGetApp().plater(), format_wxstr("%1%: %2%", act_name, label), UndoRedo::SnapshotType::GizmoAction);
         in_val = init_val;
         is_changed = true;
     }
     m_imgui->disabled_end();
 
-    if (is_changed) {
+    return is_changed;
+}
+
+void GLGizmoCut3D::render_groove_angle_input(const std::string& label, float& in_val, const float& init_val, float min_val, float max_val)
+{
+    if (render_angle_input(label, in_val, init_val, min_val, max_val)) {
         update_plane_model();
         reset_cut_by_contours();
     }
@@ -2790,6 +2802,8 @@ void GLGizmoCut3D::validate_connector_settings()
         m_connector_size = 2.5f;
     if (m_connector_size_tolerance < 0.f)
         m_connector_size_tolerance = 0.f;
+    if (m_connector_angle < 0.f || m_connector_angle > float(PI) )
+        m_connector_angle = 0.f;
 
     if (m_connector_type == CutConnectorType::Undef)
         m_connector_type = CutConnectorType::Plug;
@@ -2809,6 +2823,7 @@ void GLGizmoCut3D::init_input_window_data(CutConnectors &connectors)
         float               depth_ratio_tolerance   { UndefFloat };
         float               radius                  { UndefFloat };
         float               radius_tolerance        { UndefFloat };
+        float               angle                   { UndefFloat };
         CutConnectorType    type                    { CutConnectorType::Undef };
         CutConnectorStyle   style                   { CutConnectorStyle::Undef };
         CutConnectorShape   shape                   { CutConnectorShape::Undef };
@@ -2822,6 +2837,7 @@ void GLGizmoCut3D::init_input_window_data(CutConnectors &connectors)
                     depth_ratio_tolerance   = connector.height_tolerance;
                     radius                  = connector.radius;
                     radius_tolerance        = connector.radius_tolerance;
+                    angle                   = connector.z_angle;
                     type                    = connector.attribs.type;
                     style                   = connector.attribs.style;
                     shape                   = connector.attribs.shape;
@@ -2839,6 +2855,8 @@ void GLGizmoCut3D::init_input_window_data(CutConnectors &connectors)
                         radius              = UndefFloat;
                     if (!is_approx(radius_tolerance, connector.radius_tolerance))
                         radius_tolerance    = UndefFloat;
+                    if (!is_approx(angle, connector.z_angle))
+                        angle               = UndefFloat;
 
                     if (type != connector.attribs.type)
                         type = CutConnectorType::Undef;
@@ -2854,6 +2872,7 @@ void GLGizmoCut3D::init_input_window_data(CutConnectors &connectors)
         m_connector_size                    = 2.f * radius;
         m_connector_size_tolerance          = 2.f * radius_tolerance;
         m_connector_type                    = type;
+        m_connector_angle                   = angle;
         m_connector_style                   = int(style);
         m_connector_shape_id                = int(shape);
     }
@@ -3020,7 +3039,7 @@ void GLGizmoCut3D::toggle_model_objects_visibility()
 {
     bool has_active_volume = false;
     std::vector<std::shared_ptr<SceneRaycasterItem>>* raycasters = m_parent.get_raycasters_for_picking(SceneRaycaster::EType::Volume);
-    for (const auto raycaster : *raycasters)
+    for (const std::shared_ptr<SceneRaycasterItem> &raycaster : *raycasters)
         if (raycaster->is_active()) {
             has_active_volume = true;
             break;
@@ -3106,6 +3125,7 @@ void GLGizmoCut3D::render_connectors()
             pos += 0.05 * m_clp_normal;
 
         const Transform3d view_model_matrix = camera.get_view_matrix() * translation_transform(pos) * m_rotation_m * 
+                                              rotation_transform(-connector.z_angle * Vec3d::UnitZ()) *
                                               scale_transform(Vec3f(connector.radius, connector.radius, height).cast<double>());
 
         render_model(m_shapes[connector.attribs].model, render_color, view_model_matrix);
@@ -3232,6 +3252,31 @@ void update_object_cut_id(CutObjectBase& cut_id, ModelObjectCutAttributes attrib
     }
 }
 
+static void check_objects_after_cut(const ModelObjectPtrs& objects)
+{
+    std::vector<std::string> err_objects_names;
+    for (const ModelObject* object : objects) {
+        std::vector<std::string> connectors_names;
+        connectors_names.reserve(object->volumes.size());
+        for (const ModelVolume* vol : object->volumes)
+            if (vol->cut_info.is_connector)
+                connectors_names.push_back(vol->name);
+        const size_t connectors_count = connectors_names.size();
+        sort_remove_duplicates(connectors_names);
+        if (connectors_count != connectors_names.size())
+            err_objects_names.push_back(object->name);
+    }
+    if (err_objects_names.empty())
+        return;
+
+    wxString names = from_u8(err_objects_names[0]);
+    for (size_t i = 1; i < err_objects_names.size(); i++)
+        names += ", " + from_u8(err_objects_names[i]);
+    WarningDialog(wxGetApp().plater(), format_wxstr("Objects(%1%) have duplicated connectors. "
+                                "Some connectors may be missing in slicing result.\n"
+                                "Please report to PrusaSlicer team in which scenario this issue happened.\n"
+                                "Thank you.", names)).ShowModal();
+}
 void synchronize_model_after_cut(Model& model, const CutObjectBase& cut_id)
 {
     for (ModelObject* obj : model.objects)
@@ -3296,6 +3341,7 @@ void GLGizmoCut3D::perform_cut(const Selection& selection)
         const ModelObjectPtrs& new_objects = cut_by_contour    ? cut.perform_by_contour(m_part_selection.get_cut_parts(), dowels_count):
                                              cut_with_groove   ? cut.perform_with_groove(m_groove, m_rotation_m) :
                                                                  cut.perform_with_plane();
+        check_objects_after_cut(new_objects);
         // save cut_id to post update synchronization
         const CutObjectBase cut_id = cut_mo->cut_id;
 
@@ -3508,6 +3554,7 @@ bool GLGizmoCut3D::add_connector(CutConnectors& connectors, const Vec2d& mouse_p
         connectors.emplace_back(pos, m_rotation_m,
                                 m_connector_size * 0.5f, m_connector_depth_ratio,
                                 m_connector_size_tolerance * 0.5f, m_connector_depth_ratio_tolerance,
+                                m_connector_angle,
                                 CutConnectorAttributes( CutConnectorType(m_connector_type),
                                                         CutConnectorStyle(m_connector_style),
                                                         CutConnectorShape(m_connector_shape_id)));
@@ -3732,6 +3779,7 @@ void GLGizmoCut3D::apply_cut_connectors(ModelObject* mo, const std::string& conn
 
         // Transform the new modifier to be aligned inside the instance
         new_volume->set_transformation(translation_transform(connector.pos) * connector.rotation_m *
+            rotation_transform(-connector.z_angle * Vec3d::UnitZ()) *
             scale_transform(Vec3f(connector.radius, connector.radius, connector.height).cast<double>()));
 
         new_volume->cut_info = { connector.attribs.type, connector.radius_tolerance, connector.height_tolerance };

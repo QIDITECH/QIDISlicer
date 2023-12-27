@@ -17,6 +17,7 @@ struct FillBedTask: public ArrangeTaskBase
 
     std::vector<ArrItem> selected, unselected;
 
+    std::vector<ArrItem> selected_fillers;
     ArrangeSettings settings;
     ExtendedBed bed;
     size_t selected_existing_count = 0;

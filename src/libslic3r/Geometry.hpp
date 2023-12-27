@@ -301,6 +301,13 @@ template<typename T> T angle_to_0_2PI(T angle)
 
     return angle;
 }
+template<typename T> void to_range_pi_pi(T &angle){
+    if (angle > T(PI) || angle <= -T(PI)) {
+        int count = static_cast<int>(std::round(angle / (2 * PI)));
+        angle -= static_cast<T>(count * 2 * PI);
+        assert(angle <= T(PI) && angle > -T(PI));
+    }
+}
 
 void simplify_polygons(const Polygons &polygons, double tolerance, Polygons* retval);
 

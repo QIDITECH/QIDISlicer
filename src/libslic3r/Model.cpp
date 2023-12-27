@@ -14,6 +14,7 @@
 #include "Format/STL.hpp"
 #include "Format/3mf.hpp"
 #include "Format/STEP.hpp"
+#include "Format/SVG.hpp"
 
 #include <float.h>
 
@@ -27,7 +28,7 @@
 
 #include "SVG.hpp"
 #include <Eigen/Dense>
-#include "GCodeWriter.hpp"
+#include "GCode/GCodeWriter.hpp"
 
 namespace Slic3r {
 
@@ -124,8 +125,10 @@ Model Model::read_from_file(const std::string& input_file, DynamicPrintConfig* c
     else if (boost::algorithm::iends_with(input_file, ".3mf") || boost::algorithm::iends_with(input_file, ".zip"))
         //FIXME options & LoadAttribute::CheckVersion ? 
         result = load_3mf(input_file.c_str(), *config, *config_substitutions, &model, false);
+    else if (boost::algorithm::iends_with(input_file, ".svg"))
+        result = load_svg(input_file, model);
     else
-        throw Slic3r::RuntimeError("Unknown file format. Input file must have .stl, .obj, .amf(.xml), .qidi or .step/.stp extension.");
+        throw Slic3r::RuntimeError("Unknown file format. Input file must have .stl, .obj, .step/.stp, .svg, .amf(.xml) or extension .3mf(.zip).");
 
     if (! result)
         throw Slic3r::RuntimeError("Loading of a model file failed.");

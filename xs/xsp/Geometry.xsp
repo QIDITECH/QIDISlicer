@@ -20,14 +20,6 @@ convex_hull(points)
     OUTPUT:
         RETVAL
 
-std::vector<Points::size_type>
-chained_path_from(points, start_from)
-    Points      points
-    Point*      start_from
-    CODE:
-        RETVAL = chain_points(points, start_from);
-    OUTPUT:
-        RETVAL
 
 double
 rad2deg(angle)

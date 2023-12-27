@@ -29,7 +29,7 @@
 
 namespace Slic3r {
 
-class GCode;
+class GCodeGenerator;
 class Layer;
 class ModelObject;
 class Print;
@@ -67,7 +67,7 @@ enum PrintStep : unsigned int {
 
 enum PrintObjectStep : unsigned int {
     posSlice, posPerimeters, posPrepareInfill,
-    posInfill, posIroning, posSupportSpotsSearch, posSupportMaterial, posEstimateCurledExtrusions, posCount,
+    posInfill, posIroning, posSupportSpotsSearch, posSupportMaterial, posEstimateCurledExtrusions, posCalculateOverhangingPerimeters, posCount,
 };
 
 // A PrintRegion object represents a group of volumes to print
@@ -376,6 +376,7 @@ private:
     void generate_support_spots();
     void generate_support_material();
     void estimate_curled_extrusions();
+    void calculate_overhanging_perimeters();
 
     void slice_volumes();
     // Has any support (not counting the raft).
@@ -420,38 +421,7 @@ private:
     FillLightning::GeneratorPtr m_lightning_generator;
 };
 
-struct FakeWipeTower
-{
-    // generate fake extrusion
-    Vec2f pos;
-    float width;
-    float height;
-    float layer_height;
-    float depth;
-    std::vector<std::pair<float, float>> z_and_depth_pairs;
-    float brim_width;
-    float rotation_angle;
-    float cone_angle;
-    Vec2d plate_origin;
 
-    void set_fake_extrusion_data(const Vec2f& p, float w, float h, float lh, float d, const std::vector<std::pair<float, float>>& zad, float bd, float ra, float ca, const Vec2d& o)
-    {
-        pos = p;
-        width = w;
-        height = h;
-        layer_height = lh;
-        depth = d;
-        z_and_depth_pairs = zad;
-        brim_width = bd;
-        rotation_angle = ra;
-        cone_angle = ca;
-        plate_origin = o;
-    }
-
-    void set_pos_and_rotation(const Vec2f& p, float rotation) { pos = p; rotation_angle = rotation; }
-
-    std::vector<ExtrusionPaths> getFakeExtrusionPathsFromWipeTower() const;
-};
 
 struct WipeTowerData
 {
@@ -472,6 +442,12 @@ struct WipeTowerData
     float                                                 brim_width;
     float                                                 height;
 
+    // Data needed to generate fake extrusions for conflict checking.
+    float                                                 width;
+    float                                                 first_layer_height;
+    float                                                 cone_angle;
+    Vec2d                                                 position;
+    float                                                 rotation_angle;
     void clear() {
         priming.reset(nullptr);
         tool_changes.clear();
@@ -479,7 +455,14 @@ struct WipeTowerData
         used_filament.clear();
         number_of_toolchanges = -1;
         depth = 0.f;
+        z_and_depth_pairs.clear();
         brim_width = 0.f;
+        height = 0.f;
+        width = 0.f;
+        first_layer_height = 0.f;
+        cone_angle = 0.f;
+        position = Vec2d::Zero();
+        rotation_angle = 0.f;
     }
 
 private:
@@ -530,6 +513,20 @@ struct PrintStatistics
         filament_stats.clear();
         printing_extruders.clear();
     }
+    static const std::string FilamentUsedG;
+    static const std::string FilamentUsedGMask;
+    static const std::string TotalFilamentUsedG;
+    static const std::string TotalFilamentUsedGMask;
+    static const std::string TotalFilamentUsedGValueMask;
+    static const std::string FilamentUsedCm3;
+    static const std::string FilamentUsedCm3Mask;
+    static const std::string FilamentUsedMm;
+    static const std::string FilamentUsedMmMask;
+    static const std::string FilamentCost;
+    static const std::string FilamentCostMask;
+    static const std::string TotalFilamentCost;
+    static const std::string TotalFilamentCostMask;
+    static const std::string TotalFilamentCostValueMask;
 };
 
 using PrintObjectPtrs          = std::vector<PrintObject*>;
@@ -699,14 +696,13 @@ private:
     Polygons m_sequential_print_clearance_contours;
 
     // To allow GCode to set the Print's GCodeExport step status.
-    friend class GCode;
+    friend class GCodeGenerator;
     // To allow GCodeProcessor to emit warnings.
     friend class GCodeProcessor;
     // Allow PrintObject to access m_mutex and m_cancel_callback.
     friend class PrintObject;
 
     ConflictResultOpt m_conflict_result;
-    FakeWipeTower     m_fake_wipe_tower;
 };
 
 } /* slic3r_Print_hpp_ */

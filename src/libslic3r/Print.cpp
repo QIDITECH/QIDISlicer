@@ -60,8 +60,6 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "autoemit_temperature_commands",
         "avoid_crossing_perimeters",
         "avoid_crossing_perimeters_max_detour",
-        //Y18
-        "bed_exclude_area",
         "bed_shape",
         "bed_temperature",
         "before_layer_gcode",
@@ -123,7 +121,13 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "perimeter_acceleration",
         "post_process",
         "gcode_substitutions",
+        "gcode_binary",
         "printer_notes",
+        "travel_ramping_lift",
+        "travel_initial_part_length",
+        "travel_slope",
+        "travel_max_lift",
+        "travel_lift_before_obstacle",
         "retract_before_travel",
         "retract_before_wipe",
         "retract_layer_change",
@@ -420,13 +424,16 @@ bool Print::sequential_print_horizontal_clearance_valid(const Print& print, Poly
 	        // appropriate object distance. Even if I set this to jtMiter the warning still shows up.
         Geometry::Transformation trafo = model_instance0->get_transformation();
         trafo.set_offset({ 0.0, 0.0, model_instance0->get_offset().z() });
-          it_convex_hull = map_model_object_to_convex_hull.emplace_hint(it_convex_hull, model_object_id,
-              offset(print_object->model_object()->convex_hull_2d(trafo.get_matrix()),
+            Polygon ch2d = print_object->model_object()->convex_hull_2d(trafo.get_matrix());
+            Polygons offs_ch2d = offset(ch2d,
                   // Shrink the extruder_clearance_radius a tiny bit, so that if the object arrangement algorithm placed the objects
                   // exactly by satisfying the extruder_clearance_radius, this test will not trigger collision.
-                  float(scale_(0.5 * print.config().extruder_clearance_radius.value - BuildVolume::BedEpsilon)),
-                  jtRound, scale_(0.1)).front());
+                float(scale_(0.5 * print.config().extruder_clearance_radius.value - BuildVolume::BedEpsilon)), jtRound, scale_(0.1));
+            // for invalid geometries the vector returned by offset() may be empty
+            if (!offs_ch2d.empty())
+                it_convex_hull = map_model_object_to_convex_hull.emplace_hint(it_convex_hull, model_object_id, offs_ch2d.front());
       }
+        if (it_convex_hull != map_model_object_to_convex_hull.end()) {
 	    // Make a copy, so it may be rotated for instances.
 	    Polygon convex_hull0 = it_convex_hull->second;
 		const double z_diff = Geometry::rotation_diff_z(model_instance0->get_matrix(), print_object->instances().front().model_instance->get_matrix());
@@ -452,6 +459,7 @@ bool Print::sequential_print_horizontal_clearance_valid(const Print& print, Poly
             convex_hulls_other.emplace_back(std::move(convex_hull));
 	    }
 	}
+    }
 
     if (!intersecting_idxs.empty()) {
         // use collected indices (inside convex_hulls_other) to update output
@@ -942,8 +950,10 @@ void Print::process()
 
     tbb::parallel_for(tbb::blocked_range<size_t>(0, m_objects.size(), 1), [this](const tbb::blocked_range<size_t> &range) {
         for (size_t idx = range.begin(); idx < range.end(); ++idx) {
-            m_objects[idx]->generate_support_material();
-            m_objects[idx]->estimate_curled_extrusions();
+            PrintObject &obj = *m_objects[idx];
+            obj.generate_support_material();
+            obj.estimate_curled_extrusions();
+            obj.calculate_overhanging_perimeters();
         }
     }, tbb::simple_partitioner());
 
@@ -996,12 +1006,13 @@ void Print::process()
         this->set_done(psSkirtBrim);
     }
 
-    std::optional<const FakeWipeTower*> wipe_tower_opt = {};
     if (this->has_wipe_tower()) {
-        m_fake_wipe_tower.set_pos_and_rotation({ m_config.wipe_tower_x, m_config.wipe_tower_y }, m_config.wipe_tower_rotation_angle);
-        wipe_tower_opt = std::make_optional<const FakeWipeTower*>(&m_fake_wipe_tower);
+        // These values have to be updated here, not during wipe tower generation.
+        // When the wipe tower is moved/rotated, it is not regenerated.
+        m_wipe_tower_data.position = { m_config.wipe_tower_x, m_config.wipe_tower_y };
+        m_wipe_tower_data.rotation_angle = m_config.wipe_tower_rotation_angle;
     }
-    auto conflictRes = ConflictChecker::find_inter_of_lines_in_diff_objs(m_objects, wipe_tower_opt);
+    auto conflictRes = ConflictChecker::find_inter_of_lines_in_diff_objs(objects(), m_wipe_tower_data);
 
     m_conflict_result = conflictRes;
     if (conflictRes.has_value())
@@ -1030,7 +1041,7 @@ std::string Print::export_gcode(const std::string& path_template, GCodeProcessor
     this->set_status(90, message);
 
     // Create GCode on heap, it has quite a lot of data.
-    std::unique_ptr<GCode> gcode(new GCode);
+    std::unique_ptr<GCodeGenerator> gcode(new GCodeGenerator);
     gcode->do_export(this, path.c_str(), result, thumbnail_cb);
 
     if (m_conflict_result.has_value())
@@ -1146,13 +1157,15 @@ void Print::_make_skirt()
         }
         // Extrude the skirt loop.
         ExtrusionLoop eloop(elrSkirt);
-        eloop.paths.emplace_back(ExtrusionPath(
-            ExtrusionPath(
+        eloop.paths.emplace_back(
+            ExtrusionAttributes{
                 ExtrusionRole::Skirt,
-                (float)mm3_per_mm,         // this will be overridden at G-code export time
+                ExtrusionFlow{
+                    float(mm3_per_mm),        // this will be overridden at G-code export time
                 flow.width(),
-				(float)first_layer_height  // this will be overridden at G-code export time
-            )));
+                    float(first_layer_height) // this will be overridden at G-code export time
+                }
+            });
         eloop.paths.back().polyline = loop.split_at_first_point();
         m_skirt.append(eloop);
         if (m_config.min_skirt_length.value > 0) {
@@ -1559,9 +1572,9 @@ void Print::_make_wipe_tower()
 
     m_wipe_tower_data.used_filament = wipe_tower.get_used_filament();
     m_wipe_tower_data.number_of_toolchanges = wipe_tower.get_number_of_toolchanges();
-    const Vec3d origin = Vec3d::Zero();
-    m_fake_wipe_tower.set_fake_extrusion_data(wipe_tower.position(), wipe_tower.width(), wipe_tower.get_wipe_tower_height(), config().first_layer_height, m_wipe_tower_data.depth,
-                                              m_wipe_tower_data.z_and_depth_pairs, m_wipe_tower_data.brim_width, config().wipe_tower_rotation_angle, config().wipe_tower_cone_angle, {scale_(origin.x()), scale_(origin.y())});
+    m_wipe_tower_data.width = wipe_tower.width();
+    m_wipe_tower_data.first_layer_height = config().first_layer_height;
+    m_wipe_tower_data.cone_angle = config().wipe_tower_cone_angle;
 
 }
 
@@ -1578,6 +1591,25 @@ std::string Print::output_filename(const std::string &filename_base) const
     return this->PrintBase::output_filename(m_config.output_filename_format.value, ".gcode", filename_base, &config);
 }
 
+const std::string PrintStatistics::FilamentUsedG     = "filament used [g]";
+const std::string PrintStatistics::FilamentUsedGMask = "; filament used [g] =";
+
+const std::string PrintStatistics::TotalFilamentUsedG          = "total filament used [g]";
+const std::string PrintStatistics::TotalFilamentUsedGMask      = "; total filament used [g] =";
+const std::string PrintStatistics::TotalFilamentUsedGValueMask = "; total filament used [g] = %.2lf\n";
+
+const std::string PrintStatistics::FilamentUsedCm3     = "filament used [cm3]";
+const std::string PrintStatistics::FilamentUsedCm3Mask = "; filament used [cm3] =";
+
+const std::string PrintStatistics::FilamentUsedMm     = "filament used [mm]";
+const std::string PrintStatistics::FilamentUsedMmMask = "; filament used [mm] =";
+
+const std::string PrintStatistics::FilamentCost     = "filament cost";
+const std::string PrintStatistics::FilamentCostMask = "; filament cost =";
+
+const std::string PrintStatistics::TotalFilamentCost          = "total filament cost";
+const std::string PrintStatistics::TotalFilamentCostMask      = "; total filament cost =";
+const std::string PrintStatistics::TotalFilamentCostValueMask = "; total filament cost = %.2lf\n";
 DynamicConfig PrintStatistics::config() const
 {
     DynamicConfig config;
@@ -1631,80 +1663,5 @@ std::string PrintStatistics::finalize_output_path(const std::string &path_in) co
     return final_path;
 }
 
-    std::vector<ExtrusionPaths> FakeWipeTower::getFakeExtrusionPathsFromWipeTower() const
-    {
-        float h = height;
-        float lh = layer_height;
-        int   d = scale_(depth);
-        int   w = scale_(width);
-        int   bd = scale_(brim_width);
-        Point minCorner = { -bd, -bd };
-        Point maxCorner = { minCorner.x() + w + bd, minCorner.y() + d + bd };
-
-        const auto [cone_base_R, cone_scale_x] = WipeTower::get_wipe_tower_cone_base(width, height, depth, cone_angle);
-
-        std::vector<ExtrusionPaths> paths;
-        for (float hh = 0.f; hh < h; hh += lh) {
-            
-            if (hh != 0.f) {
-                // The wipe tower may be getting smaller. Find the depth for this layer.
-                size_t i = 0;
-                for (i=0; i<z_and_depth_pairs.size()-1; ++i)
-                    if (hh >= z_and_depth_pairs[i].first && hh < z_and_depth_pairs[i+1].first)
-                        break;
-                d = scale_(z_and_depth_pairs[i].second);
-                minCorner = {0.f, -d/2 + scale_(z_and_depth_pairs.front().second/2.f)};
-                maxCorner = { minCorner.x() + w, minCorner.y() + d };
-            }
-
-
-            ExtrusionPath path(ExtrusionRole::WipeTower, 0.0, 0.0, lh);
-            path.polyline = { minCorner, {maxCorner.x(), minCorner.y()}, maxCorner, {minCorner.x(), maxCorner.y()}, minCorner };
-            paths.push_back({ path });
-
-            // We added the border, now add several parallel lines so we can detect an object that is fully inside the tower.
-            // For now, simply use fixed spacing of 3mm.
-            for (coord_t y=minCorner.y()+scale_(3.); y<maxCorner.y(); y+=scale_(3.)) {
-                path.polyline = { {minCorner.x(), y}, {maxCorner.x(), y} };
-                paths.back().emplace_back(path);
-            }
-
-            // And of course the stabilization cone and its base...
-            if (cone_base_R > 0.) {
-                path.polyline.clear();
-                double r = cone_base_R * (1 - hh/height);
-                for (double alpha=0; alpha<2.01*M_PI; alpha+=2*M_PI/20.)
-                    path.polyline.points.emplace_back(Point::new_scale(width/2. + r * std::cos(alpha)/cone_scale_x, depth/2. + r * std::sin(alpha)));
-                paths.back().emplace_back(path);
-                if (hh == 0.f) { // Cone brim.
-                    for (float bw=brim_width; bw>0.f; bw-=3.f) {
-                        path.polyline.clear();
-                        for (double alpha=0; alpha<2.01*M_PI; alpha+=2*M_PI/20.) // see load_wipe_tower_preview, where the same is a bit clearer
-                            path.polyline.points.emplace_back(Point::new_scale(
-                                width/2. + cone_base_R * std::cos(alpha)/cone_scale_x * (1. + cone_scale_x*bw/cone_base_R),
-                                depth/2. + cone_base_R * std::sin(alpha) * (1. + bw/cone_base_R))
-                            );
-                        paths.back().emplace_back(path);
-                    }
-                }
-            }
-
-            // Only the first layer has brim.
-            if (hh == 0.f) {
-                minCorner = minCorner + Point(bd, bd);
-                maxCorner = maxCorner - Point(bd, bd);
-            }
-        }
-
-        // Rotate and translate the tower into the final position.
-        for (ExtrusionPaths& ps : paths) {
-            for (ExtrusionPath& p : ps) {
-                p.polyline.rotate(Geometry::deg2rad(rotation_angle));
-                p.polyline.translate(scale_(pos.x()), scale_(pos.y()));
-            }
-        }
-
-        return paths;
-    }
 
 } // namespace Slic3r

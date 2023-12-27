@@ -1006,16 +1006,20 @@ std::vector<std::pair<size_t, bool>> chain_segments_greedy2(SegmentEndPointFunc 
 	return chain_segments_greedy_constrained_reversals2_<PointType, SegmentEndPointFunc, false, decltype(could_reverse_func)>(end_point_func, could_reverse_func, num_segments, start_near);
 }
 
-std::vector<std::pair<size_t, bool>> chain_extrusion_entities(std::vector<ExtrusionEntity*> &entities, const Point *start_near)
+std::vector<std::pair<size_t, bool>> chain_extrusion_entities(const std::vector<ExtrusionEntity*> &entities, const Point *start_near, const bool reversed)
 {
-	auto segment_end_point = [&entities](size_t idx, bool first_point) -> const Point& { return first_point ? entities[idx]->first_point() : entities[idx]->last_point(); };
+	auto segment_end_point = [&entities, reversed](size_t idx, bool first_point) -> const Point& { return first_point == reversed ? entities[idx]->last_point() : entities[idx]->first_point(); };
 	auto could_reverse = [&entities](size_t idx) { const ExtrusionEntity *ee = entities[idx]; return ee->is_loop() || ee->can_reverse(); };
-	std::vector<std::pair<size_t, bool>> out = chain_segments_greedy_constrained_reversals<Point, decltype(segment_end_point), decltype(could_reverse)>(segment_end_point, could_reverse, entities.size(), start_near);
+	std::vector<std::pair<size_t, bool>> out = chain_segments_greedy_constrained_reversals<Point, decltype(segment_end_point), decltype(could_reverse)>(
+		segment_end_point, could_reverse, entities.size(), start_near);
 	for (std::pair<size_t, bool> &segment : out) {
 		ExtrusionEntity *ee = entities[segment.first];
 		if (ee->is_loop())
 			// Ignore reversals for loops, as the start point equals the end point.
 			segment.second = false;
+		else if (reversed)
+			// Input was already reversed.
+			segment.second = ! segment.second;
 		// Is can_reverse() respected by the reversals?
 		assert(ee->can_reverse() || ! segment.second);
 	}
@@ -1041,6 +1045,32 @@ void chain_and_reorder_extrusion_entities(std::vector<ExtrusionEntity*> &entitie
 	reorder_extrusion_entities(entities, chain_extrusion_entities(entities, start_near));
 }
 
+ExtrusionEntityReferences chain_extrusion_references(const std::vector<ExtrusionEntity*> &entities, const Point *start_near, const bool reversed)
+{
+	const std::vector<std::pair<size_t, bool>> chain = chain_extrusion_entities(entities, start_near, reversed);
+	ExtrusionEntityReferences out;
+	out.reserve(chain.size());
+    for (const std::pair<size_t, bool> &idx : chain) {
+		assert(entities[idx.first] != nullptr);
+        out.push_back({ *entities[idx.first], idx.second });
+    }
+    return out;
+}
+
+ExtrusionEntityReferences chain_extrusion_references(const ExtrusionEntityCollection &eec, const Point *start_near, const bool reversed)
+{
+	if (eec.no_sort) {
+		ExtrusionEntityReferences out;
+		out.reserve(eec.entities.size());
+	    for (const ExtrusionEntity *ee : eec.entities) {
+			assert(ee != nullptr);
+			// Never reverse a loop.
+	        out.push_back({ *ee, ! ee->is_loop() && reversed });
+	    }
+		return out;
+	} else
+		return chain_extrusion_references(eec.entities, start_near, reversed);
+}
 std::vector<std::pair<size_t, bool>> chain_extrusion_paths(std::vector<ExtrusionPath> &extrusion_paths, const Point *start_near)
 {
 	auto segment_end_point = [&extrusion_paths](size_t idx, bool first_point) -> const Point& { return first_point ? extrusion_paths[idx].first_point() : extrusion_paths[idx].last_point(); };

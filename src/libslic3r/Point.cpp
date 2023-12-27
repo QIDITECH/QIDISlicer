@@ -47,14 +47,12 @@ Pointf3s transform(const Pointf3s& points, const Transform3d& t)
 
 void Point::rotate(double angle, const Point &center)
 {
-    double cur_x = (double)(*this)(0);
-    double cur_y = (double)(*this)(1);
+    Vec2d  cur = this->cast<double>();
     double s     = ::sin(angle);
     double c     = ::cos(angle);
-    double dx    = cur_x - (double)center(0);
-    double dy    = cur_y - (double)center(1);
-    (*this)(0) = (coord_t)round( (double)center(0) + c * dx - s * dy );
-    (*this)(1) = (coord_t)round( (double)center(1) + c * dy + s * dx );
+    auto   d   = cur - center.cast<double>();
+    this->x() = fast_round_up<coord_t>(center.x() + c * d.x() - s * d.y());
+    this->y() = fast_round_up<coord_t>(center.y() + s * d.x() + c * d.y());
 }
 
 bool has_duplicate_points(Points &&pts)

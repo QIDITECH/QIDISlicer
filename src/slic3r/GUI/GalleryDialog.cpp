@@ -94,10 +94,12 @@ GalleryDialog::GalleryDialog(wxWindow* parent) :
 #endif
 
     wxStdDialogButtonSizer* buttons = this->CreateStdDialogButtonSizer(wxOK | wxCLOSE);
-    m_ok_btn = static_cast<wxButton*>(FindWindowById(wxID_OK, this));
+    wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
+    m_ok_btn = buttons->GetAffirmativeButton();
+    wxGetApp().SetWindowVariantForButton(m_ok_btn);
     m_ok_btn->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& evt) { evt.Enable(!m_selected_items.empty()); });
 
-    static_cast<wxButton*>(FindWindowById(wxID_CLOSE, this))->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ this->EndModal(wxID_CLOSE); });
+    buttons->GetCancelButton()->Bind(wxEVT_BUTTON, [this](wxCommandEvent&){ this->EndModal(wxID_CLOSE); });
     this->SetEscapeId(wxID_CLOSE);
     auto add_btn = [this, buttons]( size_t pos, int& ID, wxString title, wxString tooltip,
                                     void (GalleryDialog::* method)(wxEvent&), 
@@ -105,6 +107,7 @@ GalleryDialog::GalleryDialog(wxWindow* parent) :
         ID = NewControlId();
         wxButton* btn = new wxButton(this, ID, title);
         btn->SetToolTip(tooltip);
+        wxGetApp().SetWindowVariantForButton(btn);
         btn->Bind(wxEVT_UPDATE_UI, [enable_fn](wxUpdateUIEvent& evt) { evt.Enable(enable_fn()); });
         buttons->Insert(pos, btn, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, BORDER_W);
         this->Bind(wxEVT_BUTTON, method, this, ID);
@@ -410,8 +413,7 @@ void GalleryDialog::load_label_icon_list()
     int img_cnt = m_image_list->GetImageCount();
     for (int i = 0; i < img_cnt; i++) {
         m_list_ctrl->InsertItem(i, from_u8(list_items[i].name), i);
-        if (list_items[i].is_system)
-            m_list_ctrl->SetItemFont(i, wxGetApp().bold_font());
+        m_list_ctrl->SetItemData(i, list_items[i].is_system ? 1 : 0);
     }
 }
 
@@ -510,7 +512,7 @@ void GalleryDialog::change_thumbnail()
 void GalleryDialog::select(wxListEvent& event)
 {
     int idx = event.GetIndex();
-    Item item { into_u8(m_list_ctrl->GetItemText(idx)), m_list_ctrl->GetItemFont(idx).GetWeight() == wxFONTWEIGHT_BOLD };
+    Item item { into_u8(m_list_ctrl->GetItemText(idx)), m_list_ctrl->GetItemData(idx) == static_cast<wxUIntPtr>(1)};
 
     m_selected_items.push_back(item);
 }

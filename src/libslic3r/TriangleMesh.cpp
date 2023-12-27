@@ -385,7 +385,7 @@ bool TriangleMesh::has_zero_volume() const
     const Vec3d sz = size();
     const double volume_val = sz.x() * sz.y() * sz.z();
 
-    return is_approx(volume_val, 0.0);
+    return is_approx(volume_val, 0., 0.1);
 }
 
 std::vector<TriangleMesh> TriangleMesh::split() const

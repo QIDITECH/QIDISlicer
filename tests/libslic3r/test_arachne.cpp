@@ -744,3 +744,22 @@ TEST_CASE("Arachne - #10034 - Degenerated Voronoi diagram - That wasn't fixed by
     export_perimeters_to_svg(debug_out_path("arachne-degenerated-diagram-10034-rotation-not-works.svg"), polygons, perimeters, union_ex(wall_tool_paths.getInnerContour()));
 #endif
 }
+TEST_CASE("Arachne - SPE-1837 - No perimeters generated", "[ArachneNoPerimetersGeneratedSPE1837]") {
+    Polygon poly_0 = {
+        Point( 10000000,  10000000),
+        Point(-10000000,  10000000),
+        Point(-10000000, -10000000),
+        Point( 10000000, -10000000)
+    };
+
+    Polygons polygons              = {poly_0};
+    coord_t  ext_perimeter_spacing = 300000;
+    coord_t  perimeter_spacing     = 700000;
+    coord_t  inset_count           = 1;
+
+    Arachne::WallToolPaths wall_tool_paths(polygons, ext_perimeter_spacing, perimeter_spacing, inset_count, 0, 0.2, PrintObjectConfig::defaults(), PrintConfig::defaults());
+    wall_tool_paths.generate();
+    std::vector<Arachne::VariableWidthLines> perimeters = wall_tool_paths.getToolPaths();
+
+    REQUIRE(!perimeters.empty());
+}

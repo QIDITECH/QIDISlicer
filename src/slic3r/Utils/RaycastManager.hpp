@@ -167,6 +167,13 @@ std::optional<RaycastManager::Hit> ray_from_camera(const RaycastManager        &
                                                    const Camera                &camera,
                                                    const RaycastManager::ISkip *skip);
 
+/// <summary>
+/// Create condition to allowe only parts from volumes without one given
+/// </summary>
+/// <param name="volumes">List of allowed volumes included one which is dissalowed and non parts</param>
+/// <param name="disallowed_volume_id">Disallowed volume</param>
+/// <returns>Condition</returns>
+RaycastManager::AllowVolumes create_condition(const ModelVolumePtrs &volumes, const ObjectID &disallowed_volume_id);
 } // namespace Slic3r::GUI
 
 #endif // slic3r_RaycastManager_hpp_

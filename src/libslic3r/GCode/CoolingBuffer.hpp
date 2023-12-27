@@ -7,7 +7,7 @@
 
 namespace Slic3r {
 
-class GCode;
+class GCodeGenerator;
 class Layer;
 struct PerExtruderAdjustments;
 
@@ -22,7 +22,7 @@ struct PerExtruderAdjustments;
 //
 class CoolingBuffer {
 public:
-    CoolingBuffer(GCode &gcodegen);
+    CoolingBuffer(GCodeGenerator &gcodegen);
     void        reset(const Vec3d &position);
     void        set_current_extruder(unsigned int extruder_id) { m_current_extruder = extruder_id; }
     std::string process_layer(std::string &&gcode, size_t layer_id, bool flush);
@@ -31,7 +31,7 @@ public:
 
 private:
 	CoolingBuffer& operator=(const CoolingBuffer&) = delete;
-    std::vector<PerExtruderAdjustments> parse_layer_gcode(const std::string &gcode, std::vector<float> &current_pos) const;
+    std::vector<PerExtruderAdjustments> parse_layer_gcode(const std::string &gcode, std::array<float, 5> &current_pos) const;
     float       calculate_layer_slowdown(std::vector<PerExtruderAdjustments> &per_extruder_adjustments);
     // Apply slow down over G-code lines stored in per_extruder_adjustments, enable fan if needed.
     // Returns the adjusted G-code.
@@ -40,9 +40,11 @@ private:
     // G-code snippet cached for the support layers preceding an object layer.
     std::string                 m_gcode;
     // Internal data.
-    // X,Y,Z,E,F
     std::vector<char>           m_axis;
-    std::vector<float>          m_current_pos;
+    enum AxisIdx : int {
+        X = 0, Y, Z, E, F, I, J, K, R, Count
+    };
+    std::array<float, 5>        m_current_pos;
     // Current known fan speed or -1 if not known yet.
     int                         m_fan_speed;
 //Y12
@@ -54,7 +56,7 @@ private:
     // Highest of m_extruder_ids plus 1.
     unsigned int                m_num_extruders { 0 };
     const std::string           m_toolchange_prefix;
-    // Referencs GCode::m_config, which is FullPrintConfig. While the PrintObjectConfig slice of FullPrintConfig is being modified,
+    // Referencs GCodeGenerator::m_config, which is FullPrintConfig. While the PrintObjectConfig slice of FullPrintConfig is being modified,
     // the PrintConfig slice of FullPrintConfig is constant, thus no thread synchronization is required.
     const PrintConfig          &m_config;
     unsigned int                m_current_extruder;

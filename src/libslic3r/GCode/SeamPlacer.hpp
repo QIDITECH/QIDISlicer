@@ -141,7 +141,7 @@ public:
 
     void init(const Print &print, std::function<void(void)> throw_if_canceled_func);
 
-    void place_seam(const Layer *layer, ExtrusionLoop &loop, bool external_first, const Point &last_pos) const;
+    Point place_seam(const Layer *layer, const ExtrusionLoop &loop, bool external_first, const Point &last_pos) const;
 
 private:
     void gather_seam_candidates(const PrintObject *po, const SeamPlacerImpl::GlobalModelInfo &global_model_info);

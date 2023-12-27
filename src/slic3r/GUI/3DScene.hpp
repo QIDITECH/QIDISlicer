@@ -59,6 +59,10 @@ public:
     static const ColorRGBA SLA_PAD_COLOR;
     static const ColorRGBA NEUTRAL_COLOR;
     static const std::array<ColorRGBA, 4> MODEL_COLOR;
+    static const ColorRGBA NEGATIVE_VOLUME_COLOR;
+    static const ColorRGBA PARAMETER_MODIFIER_COLOR;
+    static const ColorRGBA SUPPORT_BLOCKER_COLOR;
+    static const ColorRGBA SUPPORT_ENFORCER_COLOR;
 
     enum EHoverState : unsigned char
     {

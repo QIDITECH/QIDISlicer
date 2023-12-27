@@ -474,6 +474,8 @@ void ToolOrdering::fill_wipe_tower_partitions(const PrintConfig &config, coordf_
 
 bool ToolOrdering::insert_wipe_tower_extruder()
 {
+    if (!m_print_config_ptr->wipe_tower)
+        return false;
     // In case that wipe_tower_extruder is set to non-zero, we must make sure that the extruder will be in the list.
     bool changed = false;
     if (m_print_config_ptr->wipe_tower_extruder != 0) {
@@ -831,4 +833,18 @@ void WipingExtrusions::ensure_perimeters_infills_order(const Print& print, const
     }
 }
 
+int ToolOrdering::toolchanges_count() const
+{
+    std::vector<unsigned int> tools_in_order;
+    for (const LayerTools& lt : m_layer_tools)
+        tools_in_order.insert(tools_in_order.end(), lt.extruders.begin(), lt.extruders.end());
+    assert(std::find(tools_in_order.begin(), tools_in_order.end(), (unsigned int)(-1)) == tools_in_order.end());
+    for (size_t i=1; i<tools_in_order.size(); ++i)
+        if (tools_in_order[i] == tools_in_order[i-1])
+            tools_in_order[i-1] = (unsigned int)(-1);
+    tools_in_order.erase(std::remove(tools_in_order.begin(), tools_in_order.end(), (unsigned int)(-1)), tools_in_order.end());
+    if (tools_in_order.size() > 1 && tools_in_order.back() == tools_in_order[tools_in_order.size()-2])
+        tools_in_order.pop_back();
+    return std::max(0, int(tools_in_order.size())-1); // 5 tools = 4 toolchanges
+}
 } // namespace Slic3r

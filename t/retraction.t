@@ -24,7 +24,7 @@ use Slic3r::Test qw(_eq);
     
         my $tool = 0;
         my @toolchange_count = (); # track first usages so that we don't expect retract_length_toolchange when extruders are used for the first time
-        my @retracted = (1);  # ignore the first travel move from home to first point
+        my @retracted = (0);
         my @retracted_length = (0);
         my $lifted = 0;
         my $lift_dist = 0; # track lifted distance for toolchanges and extruders with different retract_lift values
@@ -155,7 +155,7 @@ use Slic3r::Test qw(_eq);
         if ($info->{dist_Z} && $retracted) {
             $layer_changes_with_retraction++;
         }
-        if ($info->{dist_Z} && $args->{Z} < $self->Z) {
+        if ($info->{dist_Z} && $args->{Z} < $self->{Z}) {
             $z_restores++;
         }
     });

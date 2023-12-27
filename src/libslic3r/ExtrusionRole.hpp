@@ -82,6 +82,7 @@ struct ExtrusionRole : public ExtrusionRoleModifiers
     bool is_external_perimeter() const { return this->is_perimeter() && this->is_external(); }
     bool is_infill() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Infill); }
     bool is_solid_infill() const { return this->is_infill() && this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Solid); }
+    bool is_sparse_infill() const { return this->is_infill() && ! this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Solid); }
     bool is_external() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::External); }
     bool is_bridge() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Bridge); }
 
@@ -89,6 +90,7 @@ struct ExtrusionRole : public ExtrusionRoleModifiers
     bool is_support_base() const { return this->is_support() && ! this->is_external(); }
     bool is_support_interface() const { return this->is_support() && this->is_external(); }
     bool is_mixed() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Mixed); }
+    bool is_skirt() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Skirt); }
 };
 
 // Special flags describing loop

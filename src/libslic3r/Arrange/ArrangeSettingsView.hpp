@@ -2,8 +2,13 @@
 #ifndef ARRANGESETTINGSVIEW_HPP
 #define ARRANGESETTINGSVIEW_HPP
 
+#include <string_view>
+#include <array>
+
+#include "libslic3r/StaticMap.hpp"
 namespace Slic3r { namespace arr2 {
 
+using namespace std::string_view_literals;
 class ArrangeSettingsView
 {
 public:
@@ -28,6 +33,114 @@ public:
     virtual XLPivots         get_xl_alignment() const      = 0;
     virtual GeometryHandling get_geometry_handling() const = 0;
     virtual ArrangeStrategy  get_arrange_strategy() const  = 0;
+    static constexpr std::string_view get_label(GeometryHandling v)
+    {
+        constexpr auto STR = std::array{
+            "0"sv, // convex
+            "1"sv, // balanced
+            "2"sv, // advanced
+            "-1"sv, // undefined
+        };
+
+        return STR[v];
+    }
+
+    static constexpr std::string_view get_label(ArrangeStrategy v)
+    {
+        constexpr auto STR = std::array{
+            "0"sv, // auto
+            "1"sv, // pulltocenter
+            "-1"sv, // undefined
+        };
+
+        return STR[v];
+    }
+
+    static constexpr std::string_view get_label(XLPivots v)
+    {
+        constexpr auto STR = std::array{
+            "0"sv, // center
+            "1"sv, // rearleft
+            "2"sv, // frontleft
+            "3"sv, // frontright
+            "4"sv, // rearright
+            "5"sv, // random
+            "-1"sv, // undefined
+        };
+
+        return STR[v];
+    }
+
+private:
+
+    template<class EnumType, size_t N>
+    using EnumMap = StaticMap<std::string_view, EnumType, N>;
+
+    template<class EnumType, size_t N>
+    static constexpr std::optional<EnumType> get_enumval(std::string_view str,
+                                                         const EnumMap<EnumType, N> &emap)
+    {
+        std::optional<EnumType> ret;
+
+        if (auto v = query(emap, str); v.has_value()) {
+            ret = *v;
+        }
+
+        return ret;
+    }
+
+public:
+
+    static constexpr std::optional<GeometryHandling> to_geometry_handling(std::string_view str)
+    {
+        return get_enumval(str, GeometryHandlingLabels);
+    }
+
+    static constexpr std::optional<ArrangeStrategy> to_arrange_strategy(std::string_view str)
+    {
+        return get_enumval(str, ArrangeStrategyLabels);
+    }
+
+    static constexpr std::optional<XLPivots> to_xl_pivots(std::string_view str)
+    {
+        return get_enumval(str, XLPivotsLabels);
+    }
+
+private:
+
+    static constexpr const auto GeometryHandlingLabels = make_staticmap<std::string_view, GeometryHandling>({
+        {"convex"sv, ghConvex},
+        {"balanced"sv, ghBalanced},
+        {"advanced"sv, ghAdvanced},
+
+        {"0"sv, ghConvex},
+        {"1"sv, ghBalanced},
+        {"2"sv, ghAdvanced},
+    });
+
+    static constexpr const auto ArrangeStrategyLabels = make_staticmap<std::string_view, ArrangeStrategy>({
+        {"auto"sv, asAuto},
+        {"pulltocenter"sv, asPullToCenter},
+
+        {"0"sv, asAuto},
+        {"1"sv, asPullToCenter}
+    });
+
+    static constexpr const auto XLPivotsLabels = make_staticmap<std::string_view, XLPivots>({
+        {"center"sv,     xlpCenter },
+        {"rearleft"sv,   xlpRearLeft },
+        {"frontleft"sv,  xlpFrontLeft },
+        {"frontright"sv, xlpFrontRight },
+        {"rearright"sv,  xlpRearRight },
+        {"random"sv,     xlpRandom },
+
+        {"0"sv, xlpCenter },
+        {"1"sv, xlpRearLeft },
+        {"2"sv, xlpFrontLeft },
+        {"3"sv, xlpFrontRight },
+        {"4"sv, xlpRearRight },
+        {"5"sv, xlpRandom }
+    });
 };
 
 class ArrangeSettingsDb: public ArrangeSettingsView

@@ -7,7 +7,8 @@
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/Model.hpp"
 #include "libslic3r/GCode/GCodeProcessor.hpp"
-#include "libslic3r/GCodeWriter.hpp"
+#include "libslic3r/GCode/GCodeWriter.hpp"
+#include "libslic3r/GCode/Thumbnails.hpp"
 
 #include "slic3r/Utils/Http.hpp"
 #include "slic3r/Utils/PrintHost.hpp"
@@ -45,9 +46,11 @@
 #include "format.hpp"
 #include "UnsavedChangesDialog.hpp"
 #include "SavePresetDialog.hpp"
+#include "EditGCodeDialog.hpp"
 #include "MsgDialog.hpp"
 #include "Notebook.hpp"
 
+#include "Widgets/CheckBox.hpp"
 #ifdef WIN32
 	#include <CommCtrl.h>
 #endif // WIN32
@@ -61,7 +64,11 @@ Tab::Tab(wxBookCtrlBase* parent, const wxString& title, Preset::Type type) :
     Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_LEFT | wxTAB_TRAVERSAL/*, name*/);
     this->SetFont(Slic3r::GUI::wxGetApp().normal_font());
 
+#ifdef __WXMSW__
     wxGetApp().UpdateDarkUI(this);
+#elif __WXOSX__
+    SetBackgroundColour(parent->GetBackgroundColour());
+#endif
 
     m_compatible_printers.type			= Preset::TYPE_PRINTER;
     m_compatible_printers.key_list		= "compatible_printers";
@@ -146,7 +153,6 @@ void Tab::create_preset_tab()
         }
     });
 
-    auto color = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
 
     //buttons
     m_scaled_buttons.reserve(6);
@@ -188,6 +194,8 @@ void Tab::create_preset_tab()
     // Bitmaps to be shown on the "Undo user changes" button next to each input field.
     add_scaled_bitmap(this, m_bmp_value_revert, "undo");
     add_scaled_bitmap(this, m_bmp_white_bullet, "dot");
+    // Bitmap to be shown on the "edit" button before to each editable input field.
+    add_scaled_bitmap(this, m_bmp_edit_value, "edit");
 
     fill_icon_descriptions();
     set_tooltips_text();
@@ -217,7 +225,7 @@ void Tab::create_preset_tab()
 
     const float scale_factor = em_unit(this)*0.1;// GetContentScaleFactor();
     m_top_hsizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer->Add(m_top_hsizer, 0, wxEXPAND | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 3);
+    sizer->Add(m_top_hsizer, 0, wxEXPAND | wxBOTTOM, 3);
     m_top_hsizer->Add(m_presets_choice, 0, wxLEFT | wxRIGHT | wxTOP | wxALIGN_CENTER_VERTICAL, 3);
     m_top_hsizer->AddSpacer(int(4*scale_factor));
 
@@ -243,7 +251,7 @@ void Tab::create_preset_tab()
     m_h_buttons_sizer->AddSpacer(int(8*scale_factor));
     m_h_buttons_sizer->Add(m_btn_compare_preset, 0, wxALIGN_CENTER_VERTICAL);
 
-    m_top_hsizer->Add(m_h_buttons_sizer, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
+    m_top_hsizer->Add(m_h_buttons_sizer, 1, wxEXPAND);
     m_top_hsizer->AddSpacer(int(16*scale_factor));
     // StretchSpacer has a strange behavior under OSX, so
     // There is used just additional sizer for m_mode_sizer with right alignment
@@ -269,6 +277,9 @@ void Tab::create_preset_tab()
     m_treectrl = new wxTreeCtrl(panel, wxID_ANY, wxDefaultPosition, wxSize(20 * m_em_unit, -1),
         wxTR_NO_BUTTONS | wxTR_HIDE_ROOT | wxTR_SINGLE | wxTR_NO_LINES | wxBORDER_SUNKEN | wxWANTS_CHARS);
     m_treectrl->SetFont(wxGetApp().normal_font());
+#ifdef __linux__
+    m_treectrl->SetBackgroundColour(m_parent->GetBackgroundColour());
+#endif
     m_left_sizer->Add(m_treectrl, 1, wxEXPAND);
     // Index of the last icon inserted into m_treectrl
     m_icon_count = -1;
@@ -399,10 +410,6 @@ Slic3r::GUI::PageShp Tab::add_options_page(const wxString& title, const std::str
     }
     // Initialize the page.
     PageShp page(new Page(m_page_view, title, icon_idx));
-//	page->SetBackgroundStyle(wxBG_STYLE_SYSTEM);
-#ifdef __WINDOWS__
-//	page->SetDoubleBuffered(true);
-#endif //__WINDOWS__
 
     if (!is_extruder_pages)
         m_pages.push_back(page);
@@ -466,6 +473,7 @@ void Tab::OnActivate()
         Refresh(); // Just refresh page, if m_presets_choice is already shown
     else {
         // From the tab creation whole top sizer is hidden to correct update of preset combobox's size
+        // (see https://github.com/prusa3d/PrusaSlicer/issues/10746)
 
         // On first OnActivate call show top sizer
         m_top_hsizer->ShowItems(true);
@@ -600,6 +608,8 @@ void Tab::decorate()
         field->set_undo_tooltip(tt);
         field->set_undo_to_sys_tooltip(sys_tt);
         field->set_label_colour(color);
+        if (field->has_edit_ui())
+            field->set_edit_bitmap(&m_bmp_edit_value);
     }
 
     if (m_active_page)
@@ -933,6 +943,10 @@ void Tab::msw_rescale()
     m_presets_choice->msw_rescale();
     m_treectrl->SetMinSize(wxSize(20 * m_em_unit, -1));
 
+    if (m_compatible_printers.checkbox)
+        CheckBox::Rescale(m_compatible_printers.checkbox);
+    if (m_compatible_prints.checkbox)
+        CheckBox::Rescale(m_compatible_prints.checkbox);
     // rescale options_groups
     if (m_active_page)
         m_active_page->msw_rescale();
@@ -1336,10 +1350,10 @@ void Tab::update_preset_description_line()
                 if (!default_filament_profiles.empty())
                 {
                     description_line += "\n\n\t" + _(L("default filament profile")) + ": \n\t\t";
-                    for (auto& profile : default_filament_profiles) {
+                    for (const std::string& profile : default_filament_profiles) {
                         if (&profile != &*default_filament_profiles.begin())
                             description_line += ", ";
-                        description_line += profile;
+                        description_line += from_u8(profile);
                     }
                 }
                 break;
@@ -1539,14 +1553,15 @@ void TabPrint::build()
         optgroup->append_single_option_line("support_material_synchronize_layers", category_path + "synchronize-with-object-layers");
 
         optgroup = page->new_optgroup(L("Organic supports"));
-        optgroup->append_single_option_line("support_tree_angle", category_path + "tree_angle");
-        optgroup->append_single_option_line("support_tree_angle_slow", category_path + "tree_angle_slow");
-        optgroup->append_single_option_line("support_tree_branch_diameter", category_path + "tree_branch_diameter");
-        optgroup->append_single_option_line("support_tree_branch_diameter_angle", category_path + "tree_branch_diameter_angle");
-        optgroup->append_single_option_line("support_tree_branch_diameter_double_wall", category_path + "tree_branch_diameter_double_wall");
-        optgroup->append_single_option_line("support_tree_tip_diameter", category_path + "tree_tip_diameter");
-        optgroup->append_single_option_line("support_tree_branch_distance", category_path + "tree_branch_distance");
-        optgroup->append_single_option_line("support_tree_top_rate", category_path + "tree_top_rate");
+        const std::string path = "organic-supports_480131#organic-supports-settings";
+        optgroup->append_single_option_line("support_tree_angle", path);
+        optgroup->append_single_option_line("support_tree_angle_slow", path);
+        optgroup->append_single_option_line("support_tree_branch_diameter", path);
+        optgroup->append_single_option_line("support_tree_branch_diameter_angle", path);
+        optgroup->append_single_option_line("support_tree_branch_diameter_double_wall", path);
+        optgroup->append_single_option_line("support_tree_tip_diameter", path);
+        optgroup->append_single_option_line("support_tree_branch_distance", path);
+        optgroup->append_single_option_line("support_tree_top_rate", path);
 
     page = add_options_page(L("Speed"), "time");
         optgroup = page->new_optgroup(L("Speed for print moves"));
@@ -1683,6 +1698,34 @@ void TabPrint::build()
         Option option = optgroup->get_option("output_filename_format");
         option.opt.full_width = true;
         optgroup->append_single_option_line(option);
+        optgroup->append_single_option_line("gcode_binary");
+
+        optgroup->m_on_change = [this](const t_config_option_key& opt_key, boost::any value)
+        {
+            if (opt_key == "gcode_binary") {
+                const bool is_binary = m_config->opt_bool("gcode_binary");
+                std::string output_filename_format = m_config->opt_string("output_filename_format");
+                bool modified = false;
+                if (is_binary && boost::iends_with(output_filename_format, ".gcode")) {
+                    output_filename_format = output_filename_format.substr(0, output_filename_format.length() - 5) + "bgcode";
+                    modified = true;
+                }
+                else if (!is_binary && boost::iends_with(output_filename_format, ".bgcode")) {
+                    output_filename_format = output_filename_format.substr(0, output_filename_format.length() - 6) + "gcode";
+                    modified = true;
+                }
+                if (modified) {
+                    DynamicPrintConfig new_conf = *m_config;
+                    auto off_option = static_cast<ConfigOptionString*>(m_config->option("output_filename_format")->clone());
+                    off_option->value = output_filename_format;
+                    new_conf.set_key_value("output_filename_format", off_option);
+                    load_config(new_conf);
+                }
+            }
+
+            update_dirty();
+            update();
+        };
 
         optgroup = page->new_optgroup(L("Other"));
 
@@ -1844,6 +1887,42 @@ static void validate_custom_gcode_cb(Tab* tab, const wxString& title, const t_co
     tab->on_value_change(opt_key, value);
 }
 
+void Tab::edit_custom_gcode(const t_config_option_key& opt_key)
+{
+    EditGCodeDialog dlg = EditGCodeDialog(this, opt_key, get_custom_gcode(opt_key));
+    if (dlg.ShowModal() == wxID_OK) {
+        set_custom_gcode(opt_key, dlg.get_edited_gcode());
+        update_dirty();
+        update();
+    }
+}
+
+const std::string& Tab::get_custom_gcode(const t_config_option_key& opt_key)
+{
+    return m_config->opt_string(opt_key);
+}
+
+void Tab::set_custom_gcode(const t_config_option_key& opt_key, const std::string& value)
+{
+    DynamicPrintConfig new_conf = *m_config;
+    new_conf.set_key_value(opt_key, new ConfigOptionString(value));
+    load_config(new_conf);
+}
+
+const std::string& TabFilament::get_custom_gcode(const t_config_option_key& opt_key)
+{
+    return m_config->opt_string(opt_key, unsigned(0));
+}
+
+void TabFilament::set_custom_gcode(const t_config_option_key& opt_key, const std::string& value)
+{
+    std::vector<std::string> gcodes = static_cast<const ConfigOptionStrings*>(m_config->option(opt_key))->values;
+    gcodes[0] = value;
+
+    DynamicPrintConfig new_conf = *m_config;
+    new_conf.set_key_value(opt_key, new ConfigOptionStrings(gcodes));
+    load_config(new_conf);
+}
 void TabFilament::create_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& opt_key, int opt_index/* = 0*/)
 {
     Line line {"",""};
@@ -1856,7 +1935,8 @@ void TabFilament::create_line_with_near_label_widget(ConfigOptionsGroupShp optgr
         line = optgroup->create_single_option_line(optgroup->get_option(opt_key));
 
     line.near_label_widget = [this, optgroup_wk = ConfigOptionsGroupWkp(optgroup), opt_key, opt_index](wxWindow* parent) {
-        wxCheckBox* check_box = new wxCheckBox(parent, wxID_ANY, "");
+        wxWindow* check_box = CheckBox::GetNewWin(parent);
+        wxGetApp().UpdateDarkUI(check_box);
 
         check_box->Bind(wxEVT_CHECKBOX, [optgroup_wk, opt_key, opt_index](wxCommandEvent& evt) {
             const bool is_checked = evt.IsChecked();
@@ -1869,7 +1949,7 @@ void TabFilament::create_line_with_near_label_widget(ConfigOptionsGroupShp optgr
                         field->set_na_value();
                 }
             }
-        }, check_box->GetId());
+        });
 
         m_overrides_options[opt_key] = check_box;
         return check_box;
@@ -1885,40 +1965,63 @@ void TabFilament::update_line_with_near_label_widget(ConfigOptionsGroupShp optgr
     m_overrides_options[opt_key]->Enable(is_checked);
 
     is_checked &= !m_config->option(opt_key)->is_nil();
-    m_overrides_options[opt_key]->SetValue(is_checked);
+    CheckBox::SetValue(m_overrides_options[opt_key], is_checked);
 
     Field* field = optgroup->get_fieldc(opt_key, opt_index);
     if (field != nullptr)
         field->toggle(is_checked);
 }
 
-void TabFilament::add_filament_overrides_page()
-{
-    PageShp page = add_options_page(L("Filament Overrides"), "wrench");
-    ConfigOptionsGroupShp optgroup = page->new_optgroup(L("Retraction"));
-
-    const int extruder_idx = 0; // #ys_FIXME
-
-    for (const std::string opt_key : {  "filament_retract_length",
+std::vector<std::pair<std::string, std::vector<std::string>>> option_keys {
+    {"Travel lift", {
                                         "filament_retract_lift",
+        "filament_travel_ramping_lift",
+        "filament_travel_max_lift",
+        "filament_travel_slope",
+        //"filament_travel_lift_before_obstacle",
                                         "filament_retract_lift_above",
-                                        "filament_retract_lift_below",
+        "filament_retract_lift_below"
+    }},
+    {"Retraction", {
+        "filament_retract_length",
                                         "filament_retract_speed",
                                         "filament_deretract_speed",
                                         "filament_retract_restart_extra",
                                         "filament_retract_before_travel",
                                         "filament_retract_layer_change",
                                         "filament_wipe",
-                                        "filament_retract_before_wipe"
-                                     })
-        create_line_with_near_label_widget(optgroup, opt_key, extruder_idx);
+        "filament_retract_before_wipe",
+    }},
+    {"Retraction when tool is disabled", {
+        "filament_retract_length_toolchange",
+        "filament_retract_restart_extra_toolchange"
+    }}
+};
 
-    optgroup = page->new_optgroup(L("Retraction when tool is disabled"));
-    for (const std::string opt_key : {  "filament_retract_length_toolchange",
-                                        "filament_retract_restart_extra_toolchange"
-                                     })
-        create_line_with_near_label_widget(optgroup, opt_key, extruder_idx);
+void TabFilament::add_filament_overrides_page()
+{
+    PageShp page = add_options_page(L("Filament Overrides"), "wrench");
 
+    const int extruder_idx = 0; // #ys_FIXME
+
+    for (const auto&[title, keys] : option_keys) {
+        ConfigOptionsGroupShp optgroup = page->new_optgroup(L(title));
+        for (const std::string& opt_key : keys) {
+        create_line_with_near_label_widget(optgroup, opt_key, extruder_idx);
+        }
+    }
+}
+
+std::optional<ConfigOptionsGroupShp> get_option_group(const Page* page, const std::string& title) {
+    auto og_it = std::find_if(
+        page->m_optgroups.begin(), page->m_optgroups.end(),
+        [&](const ConfigOptionsGroupShp& og) {
+            return og->title == title;
+        }
+    );
+    if (og_it == page->m_optgroups.end())
+        return {};
+    return *og_it;
 }
 
 void TabFilament::update_filament_overrides_page()
@@ -1927,44 +2030,77 @@ void TabFilament::update_filament_overrides_page()
         return;
     Page* page = m_active_page;
 
-    auto og_it = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Retraction"; });
-    if (og_it == page->m_optgroups.end())
-        return;
-    ConfigOptionsGroupShp optgroup = *og_it;
-
-    std::vector<std::string> opt_keys = {   "filament_retract_length",
-                                            "filament_retract_lift",
-                                            "filament_retract_lift_above",
-                                            "filament_retract_lift_below",
-                                            "filament_retract_speed",
-                                            "filament_deretract_speed",
-                                            "filament_retract_restart_extra",
-                                            "filament_retract_before_travel",
-                                            "filament_retract_layer_change",
-                                            "filament_wipe",
-                                            "filament_retract_before_wipe"
-                                        };
 
     const int extruder_idx = 0; // #ys_FIXME
 
-    const bool have_retract_length = m_config->option("filament_retract_length")->is_nil() ||
-                                     m_config->opt_float("filament_retract_length", extruder_idx) > 0;
+    const bool have_retract_length = (
+        m_config->option("filament_retract_length")->is_nil()
+        || m_config->opt_float("filament_retract_length", extruder_idx) > 0
+    );
 
-    for (const std::string& opt_key : opt_keys)
-    {
-        bool is_checked = opt_key=="filament_retract_length" ? true : have_retract_length;
-        update_line_with_near_label_widget(optgroup, opt_key, extruder_idx, is_checked);
+    const bool uses_ramping_lift = (
+        m_config->option("filament_travel_ramping_lift")->is_nil()
+        || m_config->opt_bool("filament_travel_ramping_lift", extruder_idx)
+    );
+
+    const bool is_lifting =  (
+        m_config->option("filament_travel_max_lift")->is_nil()
+        || m_config->opt_float("filament_travel_max_lift", extruder_idx) > 0
+        || m_config->option("filament_retract_lift")->is_nil()
+        || m_config->opt_float("filament_retract_lift", extruder_idx) > 0
+    );
+
+    for (const auto&[title, keys] : option_keys) {
+        std::optional<ConfigOptionsGroupShp> optgroup{get_option_group(page, title)};
+        if (!optgroup) {
+            continue;
+        }
+
+        for (const std::string& opt_key : keys) {
+            bool is_checked{true};
+            if (
+                title == "Retraction"
+                && opt_key != "filament_retract_length"
+                && !have_retract_length
+            ) {
+                is_checked = false;
     }
 
-    og_it = std::find_if(page->m_optgroups.begin(), page->m_optgroups.end(), [](const ConfigOptionsGroupShp og) { return og->title == "Retraction when tool is disabled"; });
-    if (og_it == page->m_optgroups.end())
-        return;
-    optgroup = *og_it;
+            if (
+                title == "Travel lift"
+                && uses_ramping_lift
+                && opt_key == "filament_retract_lift"
+                && !m_config->option("filament_travel_ramping_lift")->is_nil()
+                && m_config->opt_bool("filament_travel_ramping_lift", extruder_idx)
+            ) {
+                is_checked = false;
+            }
 
-    for (const std::string& opt_key : {"filament_retract_length_toolchange", "filament_retract_restart_extra_toolchange"})
-        update_line_with_near_label_widget(optgroup, opt_key, extruder_idx);
+            if (
+                title == "Travel lift"
+                && !is_lifting
+                && (
+                    opt_key == "filament_retract_lift_above"
+                    || opt_key == "filament_retract_lift_below"
+                )
+            ) {
+                is_checked = false;
+            }
 
+            if (
+                title == "Travel lift"
+                && !uses_ramping_lift
+                && opt_key != "filament_travel_ramping_lift"
+                && opt_key != "filament_retract_lift"
+                && opt_key != "filament_retract_lift_above"
+                && opt_key != "filament_retract_lift_below"
+            ) {
+                is_checked = false;
+            }
 
+            update_line_with_near_label_widget(*optgroup, opt_key, extruder_idx, is_checked);
+        }
+    }
 }
 
 void TabFilament::create_extruder_combobox()
@@ -2158,6 +2294,7 @@ void TabFilament::build()
 
         create_line_with_widget(optgroup.get(), "filament_ramming_parameters", "", [this](wxWindow* parent) {
             auto ramming_dialog_btn = new wxButton(parent, wxID_ANY, _(L("Ramming settings"))+dots, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+            wxGetApp().SetWindowVariantForButton(ramming_dialog_btn);
             wxGetApp().UpdateDarkUI(ramming_dialog_btn);
             ramming_dialog_btn->SetFont(Slic3r::GUI::wxGetApp().normal_font());
             ramming_dialog_btn->SetSize(ramming_dialog_btn->GetBestSize());
@@ -2192,6 +2329,7 @@ void TabFilament::build()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("start_filament_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2202,6 +2340,7 @@ void TabFilament::build()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("end_filament_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2349,6 +2488,8 @@ void TabFilament::clear_pages()
 
     m_volumetric_speed_description_line = nullptr;
     m_cooling_description_line = nullptr;
+    for (auto& over_opt : m_overrides_options)
+        over_opt.second = nullptr;
 }
 
 void TabFilament::msw_rescale()
@@ -2362,10 +2503,16 @@ void TabFilament::msw_rescale()
 
 void TabFilament::sys_color_changed()
 {
+    wxGetApp().UpdateDarkUI(m_extruders_cb);
     m_extruders_cb->Clear();
     update_extruder_combobox();
 
     Tab::sys_color_changed();
+    for (const auto& over_opt : m_overrides_options)
+        if (wxWindow* check_box = over_opt.second) {
+            wxGetApp().UpdateDarkUI(check_box);
+            CheckBox::SysColorChanged(check_box);
+        }
 }
 
 void TabFilament::load_current_preset()
@@ -2391,7 +2538,7 @@ void TabFilament::load_current_preset()
             m_extruders_cb->Select(m_active_extruder);
     }
 
-    assert(m_active_extruder >= 0 && m_active_extruder < m_preset_bundle->extruders_filaments.size());
+    assert(m_active_extruder >= 0 && size_t(m_active_extruder) < m_preset_bundle->extruders_filaments.size());
     const std::string& selected_extr_filament_name = m_preset_bundle->extruders_filaments[m_active_extruder].get_selected_preset_name();
     if (selected_extr_filament_name != selected_filament_name) {
         m_presets->select_preset_by_name(selected_extr_filament_name, false);
@@ -2516,10 +2663,6 @@ void TabPrinter::build_fff()
             return 	create_bed_shape_widget(parent);
         });
 
-//Y18
-        Option option = optgroup->get_option("bed_exclude_area");
-        option.opt.full_width = true;
-        optgroup->append_single_option_line(option);
         optgroup->append_single_option_line("max_print_height");
         optgroup->append_single_option_line("z_offset");
 
@@ -2532,7 +2675,7 @@ void TabPrinter::build_fff()
             def.min = 1;
             def.max = 256;
             def.mode = comExpert;
-        option = Option(def, "extruders_count");
+        Option option(def, "extruders_count");
         optgroup->append_single_option_line(option);
         optgroup->append_single_option_line("single_extruder_multi_material");
 
@@ -2606,13 +2749,39 @@ void TabPrinter::build_fff()
         option = optgroup->get_option("thumbnails");
         option.opt.full_width = true;
         optgroup->append_single_option_line(option);
-        optgroup->append_single_option_line("thumbnails_format");
 
         optgroup->append_single_option_line("silent_mode");
         optgroup->append_single_option_line("remaining_times");
 
         optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
             wxTheApp->CallAfter([this, opt_key, value]() {
+                if (opt_key == "thumbnails" && m_config->has("thumbnails_format")) {
+                    // to backward compatibility we need to update "thumbnails_format" from new "thumbnails"
+                    if (const std::string val = boost::any_cast<std::string>(value); !value.empty()) {
+                        auto [thumbnails_list, errors] = GCodeThumbnails::make_and_check_thumbnail_list(val);
+
+                        if (errors != enum_bitmask<ThumbnailError>()) {
+                            // TRN: First argument is parameter name, the second one is the value.
+                            std::string error_str = format(_u8L("Invalid value provided for parameter %1%: %2%"), "thumbnails", val);
+                            error_str += GCodeThumbnails::get_error_string(errors);
+                            InfoDialog(parent(), _L("G-code flavor is switched"), from_u8(error_str)).ShowModal();
+                        }
+
+                        if (!thumbnails_list.empty()) {
+                            GCodeThumbnailsFormat old_format = GCodeThumbnailsFormat(m_config->option("thumbnails_format")->getInt());
+                            GCodeThumbnailsFormat new_format = thumbnails_list.begin()->first;
+                            if (old_format != new_format) {
+                                DynamicPrintConfig new_conf = *m_config;
+
+                                auto* opt = m_config->option("thumbnails_format")->clone();
+                                opt->setInt(int(new_format));
+                                new_conf.set_key_value("thumbnails_format", opt);
+
+                                load_config(new_conf);
+                            }
+                        }
+                    }
+                }
                 if (opt_key == "silent_mode") {
                     bool val = boost::any_cast<bool>(value);
                     if (m_use_silent_mode != val) {
@@ -2682,6 +2851,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("start_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2695,6 +2865,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("end_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2705,6 +2876,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("before_layer_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2715,6 +2887,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("layer_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2725,6 +2898,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("toolchange_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2735,6 +2909,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("between_objects_gcode");
         option.opt.full_width = true;
         option.opt.is_code = true;
@@ -2745,6 +2920,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("color_change_gcode");
         option.opt.is_code = true;
         option.opt.height = gcode_field_height;//150;
@@ -2754,6 +2930,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("pause_print_gcode");
         option.opt.is_code = true;
         option.opt.height = gcode_field_height;//150;
@@ -2763,6 +2940,7 @@ void TabPrinter::build_fff()
         optgroup->m_on_change = [this, &optgroup_title = optgroup->title](const t_config_option_key& opt_key, const boost::any& value) {
             validate_custom_gcode_cb(this, optgroup_title, opt_key, value);
         };
+        optgroup->edit_custom_gcode = [this](const t_config_option_key& opt_key) { edit_custom_gcode(opt_key); };
         option = optgroup->get_option("template_custom_gcode");
         option.opt.is_code = true;
         option.opt.height = gcode_field_height;//150;
@@ -2994,7 +3172,8 @@ const std::vector<std::string> extruder_options = {
     "min_layer_height", "max_layer_height", "extruder_offset",
     "retract_length", "retract_lift", "retract_lift_above", "retract_lift_below",
     "retract_speed", "deretract_speed", "retract_restart_extra", "retract_before_travel",
-    "retract_layer_change", "wipe", "retract_before_wipe",
+    "retract_layer_change", "wipe", "retract_before_wipe", "travel_ramping_lift",
+    "travel_slope", "travel_max_lift", "travel_lift_before_obstacle",
     "retract_length_toolchange", "retract_restart_extra_toolchange",
 };
 
@@ -3156,14 +3335,20 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
         optgroup = page->new_optgroup(L("Position (for multi-extruder printers)"));
         optgroup->append_single_option_line("extruder_offset", "", extruder_idx);
 
-        optgroup = page->new_optgroup(L("Retraction"));
-        optgroup->append_single_option_line("retract_length", "", extruder_idx);
+        optgroup = page->new_optgroup(L("Travel lift"));
         optgroup->append_single_option_line("retract_lift", "", extruder_idx);
-        line = { L("Only lift Z"), "" };
+        optgroup->append_single_option_line("travel_ramping_lift", "", extruder_idx);
+        optgroup->append_single_option_line("travel_max_lift", "", extruder_idx);
+        optgroup->append_single_option_line("travel_slope", "", extruder_idx);
+        //optgroup->append_single_option_line("travel_lift_before_obstacle", "", extruder_idx);
+
+        line = { L("Only lift"), "" };
         line.append_option(optgroup->get_option("retract_lift_above", extruder_idx));
         line.append_option(optgroup->get_option("retract_lift_below", extruder_idx));
         optgroup->append_line(line);
 
+        optgroup = page->new_optgroup(L("Retraction"));
+        optgroup->append_single_option_line("retract_length", "", extruder_idx);
         optgroup->append_single_option_line("retract_speed", "", extruder_idx);
         optgroup->append_single_option_line("deretract_speed", "", extruder_idx);
         optgroup->append_single_option_line("retract_restart_extra", "", extruder_idx);
@@ -3371,26 +3556,32 @@ void TabPrinter::toggle_options()
     {
         size_t i = size_t(val - 1);
         bool have_retract_length = m_config->opt_float("retract_length", i) > 0;
+        const bool ramping_lift = m_config->opt_bool("travel_ramping_lift", i);
+        const bool lifts_z = (ramping_lift && m_config->opt_float("travel_max_lift", i) > 0)
+                          || (! ramping_lift && m_config->opt_float("retract_lift", i) > 0);
 
         // when using firmware retraction, firmware decides retraction length
         bool use_firmware_retraction = m_config->opt_bool("use_firmware_retraction");
         toggle_option("retract_length", !use_firmware_retraction, i);
 
+        toggle_option("retract_lift", ! ramping_lift, i);
+        toggle_option("travel_max_lift", ramping_lift, i);
+        toggle_option("travel_slope", ramping_lift, i);
         // user can customize travel length if we have retraction length or we"re using
         // firmware retraction
         toggle_option("retract_before_travel", have_retract_length || use_firmware_retraction, i);
 
         // user can customize other retraction options if retraction is enabled
         bool retraction = (have_retract_length || use_firmware_retraction);
-        std::vector<std::string> vec = { "retract_lift", "retract_layer_change" };
+        std::vector<std::string> vec = {  };
         for (auto el : vec)
-            toggle_option(el, retraction, i);
+            toggle_option("retract_layer_change", retraction, i);
 
         // retract lift above / below only applies if using retract lift
         vec.resize(0);
         vec = { "retract_lift_above", "retract_lift_below" };
         for (auto el : vec)
-            toggle_option(el, retraction && (m_config->opt_float("retract_lift", i) > 0), i);
+            toggle_option(el, lifts_z, i);
 
         // some options only apply when not using firmware retraction
         vec.resize(0);
@@ -3421,6 +3612,7 @@ void TabPrinter::toggle_options()
             load_config(new_conf);
         }
 
+        //toggle_option("travel_lift_before_obstacle", ramping_lift, i);
         toggle_option("retract_length_toolchange", have_multiple_extruders, i);
 
         bool toolchange_retraction = m_config->opt_float("retract_length_toolchange", i) > 0;
@@ -3617,6 +3809,7 @@ void Tab::rebuild_page_tree()
             continue;
         auto itemId = m_treectrl->AppendItem(rootItem, translate_category(p->title(), m_type), p->iconID());
         m_treectrl->SetItemTextColour(itemId, p->get_item_colour());
+        m_treectrl->SetItemFont(itemId, wxGetApp().normal_font());
         if (translate_category(p->title(), m_type) == selected)
             item = itemId;
     }
@@ -4395,9 +4588,9 @@ void Tab::create_line_with_widget(ConfigOptionsGroup* optgroup, const std::strin
 // Return a callback to create a Tab widget to mark the preferences as compatible / incompatible to the current printer.
 wxSizer* Tab::compatible_widget_create(wxWindow* parent, PresetDependencies &deps)
 {
-    deps.checkbox = new wxCheckBox(parent, wxID_ANY, _(L("All")));
+    deps.checkbox = CheckBox::GetNewWin(parent, _L("All"));
     deps.checkbox->SetFont(Slic3r::GUI::wxGetApp().normal_font());
-    wxGetApp().UpdateDarkUI(deps.checkbox, false, true);
+    wxGetApp().UpdateDarkUI(deps.checkbox);
     deps.btn = new ScalableButton(parent, wxID_ANY, "printer", format_wxstr(" %s %s", _L("Set"), dots),
                                   wxDefaultSize, wxDefaultPosition, wxBU_LEFT | wxBU_EXACTFIT);
     deps.btn->SetFont(Slic3r::GUI::wxGetApp().normal_font());
@@ -4409,11 +4602,12 @@ wxSizer* Tab::compatible_widget_create(wxWindow* parent, PresetDependencies &dep
 
     deps.checkbox->Bind(wxEVT_CHECKBOX, ([this, &deps](wxCommandEvent e)
     {
-        deps.btn->Enable(! deps.checkbox->GetValue());
+        const bool is_checked = CheckBox::GetValue(deps.checkbox);
+        deps.btn->Enable(!is_checked);
         // All printers have been made compatible with this preset.
-        if (deps.checkbox->GetValue())
+        if (is_checked)
             this->load_key_value(deps.key_list, std::vector<std::string> {});
-        this->get_field(deps.key_condition)->toggle(deps.checkbox->GetValue());
+        this->get_field(deps.key_condition)->toggle(is_checked);
         this->update_changed_ui();
     }) );
 
@@ -4456,7 +4650,7 @@ wxSizer* Tab::compatible_widget_create(wxWindow* parent, PresetDependencies &dep
             for (auto idx : selections)
                 value.push_back(presets[idx].ToUTF8().data());
             if (value.empty()) {
-                deps.checkbox->SetValue(1);
+                CheckBox::SetValue(deps.checkbox, true);
                 deps.btn->Disable();
             }
             // All depending_presets have been made compatible with this preset.
@@ -4476,22 +4670,24 @@ void SubstitutionManager::init(DynamicPrintConfig* config, wxWindow* parent, wxF
     m_parent = parent;
     m_grid_sizer = grid_sizer;
     m_em = em_unit(parent);
+    m_substitutions = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
+    m_chb_match_single_lines.clear();
 }
 
-void SubstitutionManager::validate_lenth()
+void SubstitutionManager::validate_length()
 {
-    std::vector<std::string>& substitutions = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
-    if ((substitutions.size() % 4) != 0) {
+    if ((m_substitutions.size() % 4) != 0) {
         WarningDialog(m_parent, "Value of gcode_substitutions parameter will be cut to valid length",
                                 "Invalid length of gcode_substitutions parameter").ShowModal();
-        substitutions.resize(substitutions.size() - (substitutions.size() % 4));
+        m_substitutions.resize(m_substitutions.size() - (m_substitutions.size() % 4));
+        // save changes from m_substitutions to config 
+        m_config->option<ConfigOptionStrings>("gcode_substitutions")->values = m_substitutions;
     }
 }
 
-bool SubstitutionManager::is_compatibile_with_ui()
+bool SubstitutionManager::is_compatible_with_ui()
 {
-    const std::vector<std::string>& substitutions = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
-    if (int(substitutions.size() / 4) != m_grid_sizer->GetEffectiveRowsCount() - 1) {
+    if (int(m_substitutions.size() / 4) != m_grid_sizer->GetEffectiveRowsCount() - 1) {
         ErrorDialog(m_parent, "Invalid compatibility between UI and BE", false).ShowModal();
         return false;
     }
@@ -4500,8 +4696,7 @@ bool SubstitutionManager::is_compatibile_with_ui()
 
 bool SubstitutionManager::is_valid_id(int substitution_id, const wxString& message)
 {
-    const std::vector<std::string>& substitutions = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
-    if (int(substitutions.size() / 4) < substitution_id) {
+    if (int(m_substitutions.size() / 4) < substitution_id) {
         ErrorDialog(m_parent, message, false).ShowModal();
         return false;
     }
@@ -4527,7 +4722,7 @@ void SubstitutionManager::create_legend()
 // delete substitution_id from substitutions
 void SubstitutionManager::delete_substitution(int substitution_id)
 {
-    validate_lenth();
+    validate_length();
     if (!is_valid_id(substitution_id, "Invalid substitution_id to delete"))
         return;
 
@@ -4552,15 +4747,16 @@ void SubstitutionManager::add_substitution( int substitution_id,
     if (substitution_id < 0) {
         if (m_grid_sizer->IsEmpty()) {
             create_legend();
-            substitution_id = 0;
         }
         substitution_id = m_grid_sizer->GetEffectiveRowsCount() - 1;
 
         // create new substitution
         // it have to be added to config too
-        std::vector<std::string>& substitutions = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
         for (size_t i = 0; i < 4; i ++)
-            substitutions.push_back(std::string());
+            m_substitutions.push_back(std::string());
+
+        // save changes from config to m_substitutions
+        m_config->option<ConfigOptionStrings>("gcode_substitutions")->values = m_substitutions;
 
         call_after_layout = true;
     }
@@ -4574,11 +4770,7 @@ void SubstitutionManager::add_substitution( int substitution_id,
 
     auto top_sizer = new wxBoxSizer(wxHORIZONTAL);
     auto add_text_editor = [substitution_id, top_sizer, this](const wxString& value, int opt_pos, int proportion) {
-        auto editor = new wxTextCtrl(m_parent, wxID_ANY, value, wxDefaultPosition, wxSize(15 * m_em, wxDefaultCoord), wxTE_PROCESS_ENTER
-#ifdef _WIN32
-            | wxBORDER_SIMPLE
-#endif
-        );
+        auto editor = new ::TextInput(m_parent, value, "", "", wxDefaultPosition, wxSize(15 * m_em, wxDefaultCoord), wxTE_PROCESS_ENTER);
 
         editor->SetFont(wxGetApp().normal_font());
         wxGetApp().UpdateDarkUI(editor);
@@ -4607,37 +4799,38 @@ void SubstitutionManager::add_substitution( int substitution_id,
     bool whole_word          = strchr(params.c_str(), 'w') != nullptr || strchr(params.c_str(), 'W') != nullptr;
     bool match_single_line   = strchr(params.c_str(), 's') != nullptr || strchr(params.c_str(), 'S') != nullptr;
 
-    auto chb_regexp = new wxCheckBox(m_parent, wxID_ANY, _L("Regular expression"));
-    chb_regexp->SetValue(regexp);
+    auto chb_regexp = CheckBox::GetNewWin(m_parent, _L("Regular expression"));
+    CheckBox::SetValue(chb_regexp, regexp);
     params_sizer->Add(chb_regexp, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, m_em);
 
-    auto chb_case_insensitive = new wxCheckBox(m_parent, wxID_ANY, _L("Case insensitive"));
-    chb_case_insensitive->SetValue(case_insensitive);
+    auto chb_case_insensitive = CheckBox::GetNewWin(m_parent, _L("Case insensitive"));
+    CheckBox::SetValue(chb_case_insensitive, case_insensitive);
     params_sizer->Add(chb_case_insensitive, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT | wxLEFT, m_em);
 
-    auto chb_whole_word = new wxCheckBox(m_parent, wxID_ANY, _L("Whole word"));
-    chb_whole_word->SetValue(whole_word);
+    auto chb_whole_word = CheckBox::GetNewWin(m_parent, _L("Whole word"));
+    CheckBox::SetValue(chb_whole_word, whole_word);
     params_sizer->Add(chb_whole_word, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT | wxLEFT, m_em);
 
-    auto chb_match_single_line = new wxCheckBox(m_parent, wxID_ANY, _L("Match single line"));
-    chb_match_single_line->SetValue(match_single_line);
+    auto chb_match_single_line = CheckBox::GetNewWin(m_parent, _L("Match single line"));
+    CheckBox::SetValue(chb_match_single_line, match_single_line);
     chb_match_single_line->Show(regexp);
+    m_chb_match_single_lines.emplace_back(chb_match_single_line);
     params_sizer->Add(chb_match_single_line, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT | wxLEFT, m_em);
 
-    for (wxCheckBox* chb : std::initializer_list<wxCheckBox*>{ chb_regexp, chb_case_insensitive, chb_whole_word, chb_match_single_line }) {
+    for (wxWindow* chb : std::initializer_list<wxWindow*>{ chb_regexp, chb_case_insensitive, chb_whole_word, chb_match_single_line }) {
         chb->SetFont(wxGetApp().normal_font());
         chb->Bind(wxEVT_CHECKBOX, [this, substitution_id, chb_regexp, chb_case_insensitive, chb_whole_word, chb_match_single_line](wxCommandEvent e) {
             std::string value = std::string();
-            if (chb_regexp->GetValue())
+            if (CheckBox::GetValue(chb_regexp))
                 value += "r";
-            if (chb_case_insensitive->GetValue())
+            if (CheckBox::GetValue(chb_case_insensitive))
                 value += "i";
-            if (chb_whole_word->GetValue())
+            if (CheckBox::GetValue(chb_whole_word))
                 value += "w";
-            if (chb_match_single_line->GetValue())
+            if (CheckBox::GetValue(chb_match_single_line))
                 value += "s";
 
-            chb_match_single_line->Show(chb_regexp->GetValue());
+            chb_match_single_line->Show(CheckBox::GetValue(chb_regexp));
             m_grid_sizer->Layout();
 
             edit_substitution(substitution_id, 2, value);
@@ -4657,16 +4850,34 @@ void SubstitutionManager::add_substitution( int substitution_id,
 
 void SubstitutionManager::update_from_config()
 {
-    if (!m_grid_sizer->IsEmpty())
-        m_grid_sizer->Clear(true);
-
     std::vector<std::string>& subst = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
+    if (m_substitutions == subst && m_grid_sizer->IsShown(1)) {
+        // just update visibility for chb_match_single_lines
+        int subst_id = 0;
+        assert(m_chb_match_single_lines.size() == size_t(subst.size()/4));
+        for (size_t i = 0; i < subst.size(); i += 4) {
+            const std::string& params = subst[i + 2];
+            const bool         regexp = strchr(params.c_str(), 'r') != nullptr || strchr(params.c_str(), 'R') != nullptr;
+            m_chb_match_single_lines[subst_id++]->Show(regexp);
+        }
+
+        // "gcode_substitutions" values didn't changed in config. There is no need to update/recreate controls
+        return;
+    }
+
+    m_substitutions = subst;
+
+    if (!m_grid_sizer->IsEmpty()) {
+        m_grid_sizer->Clear(true);
+        m_chb_match_single_lines.clear();
+    }
+
     if (subst.empty())
         hide_delete_all_btn();
     else
         create_legend();
 
-    validate_lenth();
+    validate_length();
 
     int subst_id = 0;
     for (size_t i = 0; i < subst.size(); i += 4)
@@ -4677,24 +4888,27 @@ void SubstitutionManager::update_from_config()
 
 void SubstitutionManager::delete_all()
 {
+    m_substitutions.clear();
     m_config->option<ConfigOptionStrings>("gcode_substitutions")->values.clear(); 
     call_ui_update();
 
-    if (!m_grid_sizer->IsEmpty())
+    if (!m_grid_sizer->IsEmpty()) {
         m_grid_sizer->Clear(true);
+        m_chb_match_single_lines.clear();
+    }
 
     m_parent->GetParent()->Layout();
 }
 
 void SubstitutionManager::edit_substitution(int substitution_id, int opt_pos, const std::string& value)
 {
-    std::vector<std::string>& substitutions = m_config->option<ConfigOptionStrings>("gcode_substitutions")->values;
-
-    validate_lenth();
-    if(!is_compatibile_with_ui() || !is_valid_id(substitution_id, "Invalid substitution_id to edit"))
+    validate_length();
+    if(!is_compatible_with_ui() || !is_valid_id(substitution_id, "Invalid substitution_id to edit"))
         return;
 
-    substitutions[substitution_id * 4 + opt_pos] = value;
+    m_substitutions[substitution_id * 4 + opt_pos] = value;
+    // save changes from m_substitutions to config 
+    m_config->option<ConfigOptionStrings>("gcode_substitutions")->values = m_substitutions;
 
     call_ui_update();
 }
@@ -4747,6 +4961,7 @@ wxSizer* TabPrint::create_substitutions_widget(wxWindow* parent)
     m_subst_manager.init(m_config, parent, grid_sizer);
     m_subst_manager.set_cb_edited_substitution([this]() {
         update_dirty();
+        Layout();
         wxGetApp().mainframe->on_config_changed(m_config); // invalidate print
     });
     m_subst_manager.set_cb_hide_delete_all_btn([this]() {
@@ -4882,7 +5097,7 @@ void Tab::compatible_widget_reload(PresetDependencies &deps)
 
     bool has_any = ! m_config->option<ConfigOptionStrings>(deps.key_list)->values.empty();
     has_any ? deps.btn->Enable() : deps.btn->Disable();
-    deps.checkbox->SetValue(! has_any);
+    CheckBox::SetValue(deps.checkbox, !has_any);
 
     field->toggle(! has_any);
 }
@@ -4911,6 +5126,9 @@ void Tab::fill_icon_descriptions()
         "the current option group.\n"
         "Click the BACK ARROW icon to reset all settings for the current option group to "
         "the last saved preset."));
+    m_icon_descriptions.emplace_back(&m_bmp_edit_value, L("EDIT VALUE"),
+        // TRN Description for "EDIT VALUE" in the Help dialog (the icon is currently used only to edit custom gcodes).
+        L("clicking this icon opens a dialog allowing to edit this value."));
 }
 
 void Tab::set_tooltips_text()

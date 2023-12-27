@@ -60,8 +60,8 @@ if (SLIC3R_GUI)
         message(STATUS "wx-config path: ${wxWidgets_CONFIG_EXECUTABLE}")
     endif()
 
-    find_package(JPEG QUIET)
-    find_package(TIFF QUIET)
+    find_package(JPEG MODULE QUIET)
+    find_package(TIFF MODULE QUIET) # Tiff exported config is broken for static build
     find_package(NanoSVG REQUIRED)
 
     string(REGEX MATCH "wxpng" WX_PNG_BUILTIN ${wxWidgets_LIBRARIES})

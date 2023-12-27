@@ -2,15 +2,10 @@
 #define slic3r_GUI_Label_hpp_
 
 #include <wx/stattext.h>
+#include <wx/dcclient.h>
 
-#define LB_HYPERLINK 0x0020
-#define LB_PROPAGATE_MOUSE_EVENT 0x0040
+#define LB_HYPERLINK 0x0001
 
-//B35
-#if defined __linux__
-#include <wx/settings.h>
-#include "wx/dcclient.h"
-#endif
 
 class Label : public wxStaticText
 {
@@ -19,11 +14,9 @@ public:
 
 	Label(wxWindow *parent, wxFont const &font, wxString const &text = {}, long style = 0);
 
-    void SetLabel(const wxString& label) override;
 
     void SetWindowStyleFlag(long style) override;
 
-	void Wrap(int width);
 
 private:
     wxFont font;
@@ -38,7 +31,6 @@ public:
 	static wxFont Head_14;
 	static wxFont Head_13;
 	static wxFont Head_12;
-	static wxFont Head_11;
     static wxFont Head_10;
 
 	static wxFont Body_16;

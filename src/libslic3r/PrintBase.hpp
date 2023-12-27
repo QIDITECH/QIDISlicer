@@ -548,7 +548,7 @@ protected:
     // To be called by this->output_filename() with the format string pulled from the configuration layer.
     std::string            output_filename(const std::string &format, const std::string &default_ext, const std::string &filename_base, const DynamicConfig *config_override = nullptr) const;
     // Update "scale", "input_filename", "input_filename_base" placeholders from the current printable ModelObjects.
-    void                   update_object_placeholders(DynamicConfig &config, const std::string &default_ext) const;
+    void                   update_object_placeholders(DynamicConfig &config, const std::string &default_output_ext) const;
 
 	Model                                   m_model;
 	DynamicPrintConfig						m_full_print_config;

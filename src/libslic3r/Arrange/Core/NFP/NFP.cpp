@@ -129,7 +129,7 @@ Polygon ifp_convex_convex(const Polygon &fixed, const Polygon &movable)
     // the zero area polygon formed by the edge. The union of all these sub-nfps
     // will contain a hole that is the actual ifp.
     auto lrange = line_range(fixed);
-    for (const Line &l : lrange) { // Older mac compilers generate warnging if line_range is called in-place
+    for (const Line l : lrange) { // Older mac compilers generate warnging if line_range is called in-place
         Polygon fixed = {l.a, l.b};
         subnfps.emplace_back(nfp_convex_convex_legacy(fixed, movable));
     }

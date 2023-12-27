@@ -455,6 +455,7 @@ std::vector<bool> select_patches(const ProjectionDistances &best_distances,
                                  const SurfacePatches      &patches,
 
                                  const ExPolygons       &shapes,
+                                 const BoundingBox         &shapes_bb,
                                  const ExPolygonsIndices &s2i,
                                  const VCutAOIs         &cutAOIs,
                                  const CutMeshes        &meshes,
@@ -601,8 +602,7 @@ SurfaceCut Slic3r::cut_surface(const ExPolygons &shapes,
     // Use only outline points
     // for each point select best projection
     priv::ProjectionDistances best_projection = priv::choose_best_distance(distances, shapes, start, s2i, patches);
-    std::vector<bool> use_patch = priv::select_patches(best_projection, patches,
-        shapes, s2i,model_cuts, cgal_models, projection);
+    std::vector<bool> use_patch = priv::select_patches(best_projection, patches, shapes, shapes_bb, s2i, model_cuts, cgal_models, projection);
     SurfaceCut result = merge_patches(patches, use_patch);
     //*/
 
@@ -1913,6 +1913,26 @@ uint32_t priv::find_closest_point_index(const Point            &p,
                                         const std::vector<bool> &mask)
 {    
     SearchData sd = create_search_data(shapes, mask);
+    if (sd.tree.nodes().size() == 0){
+        // no lines in expolygon, check whether exist point to start
+        double closest_square_distance = INFINITY;
+        uint32_t closest_id = -1; 
+        for (uint32_t i = 0; i < mask.size(); i++) 
+            if (mask[i]){
+                ExPolygonsIndex ei = s2i.cvt(i);
+                const Point& s_p = ei.is_contour()? 
+                    shapes[ei.expolygons_index].contour[ei.point_index]:
+                shapes[ei.expolygons_index].holes[ei.hole_index()][ei.point_index];
+                double square_distance = (p - s_p).cast<double>().squaredNorm();
+                if (closest_id >= mask.size() || 
+                    closest_square_distance > square_distance) {
+                    closest_id = i;
+                    closest_square_distance = square_distance;
+                }
+            }
+        assert(closest_id < mask.size());
+        return closest_id;
+    }
     size_t line_idx = std::numeric_limits<size_t>::max();
     Vec2d  hit_point;
     Vec2d  p_d = p.cast<double>();
@@ -2218,6 +2238,10 @@ priv::ProjectionDistances priv::choose_best_distance(
 
     // Select point from shapes(text contour) which is closest to center (all in 2d)
     uint32_t unfinished_index = find_closest_point_index(start, shapes, s2i, mask_distances);
+    assert(unfinished_index < s2i.get_count());
+    if (unfinished_index >= s2i.get_count())
+        // no point to select
+        return result;
     
 #ifdef DEBUG_OUTPUT_DIR
     Connections connections;
@@ -3196,13 +3220,15 @@ std::vector<bool> priv::select_patches(const ProjectionDistances &best_distances
                                        const SurfacePatches      &patches,
 
                                        const ExPolygons       &shapes,
+                                       const BoundingBox         &shapes_bb,
                                        const ExPolygonsIndices &s2i,
                                        const VCutAOIs         &cutAOIs,
                                        const CutMeshes        &meshes,
                                        const Project          &projection)
 {
     // extension to cover numerical mistake made by back projection patch from 3d to 2d
-    const float extend_delta = 5.f / Emboss::SHAPE_SCALE; // [Font points scaled by Emboss::SHAPE_SCALE]
+    Point s = shapes_bb.size();
+    const float extend_delta = (s.x() + s.y())/ float(2 * 100);
         
     // vector of patches for shape
     std::vector<std::vector<uint32_t>> used_shapes_patches(shapes.size());    

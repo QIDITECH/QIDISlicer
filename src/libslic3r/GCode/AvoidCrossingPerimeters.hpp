@@ -8,7 +8,7 @@
 namespace Slic3r {
 
 // Forward declarations.
-class GCode;
+class GCodeGenerator;
 class Layer;
 class Point;
 
@@ -25,13 +25,13 @@ public:
 
     void        init_layer(const Layer &layer);
 
-    Polyline    travel_to(const GCode& gcodegen, const Point& point)
+    Polyline    travel_to(const GCodeGenerator &gcodegen, const Point& point)
     {
         bool could_be_wipe_disabled;
         return this->travel_to(gcodegen, point, &could_be_wipe_disabled);
     }
 
-    Polyline    travel_to(const GCode& gcodegen, const Point& point, bool* could_be_wipe_disabled);
+    Polyline    travel_to(const GCodeGenerator &gcodegen, const Point& point, bool* could_be_wipe_disabled);
 
     struct Boundary {
         // Collection of boundaries used for detection of crossing perimeters for travels

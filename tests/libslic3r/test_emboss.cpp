@@ -195,15 +195,17 @@ TEST_CASE("Visualize glyph from font", "[Emboss]")
 #endif // VISUALIZE
 
 #include "test_utils.hpp"
-#include "nanosvg/nanosvg.h"    // load SVG file
-#include "libslic3r/NSVGUtils.hpp"
+#include <nanosvg/nanosvg.h>    // load SVG file
+#include <libslic3r/NSVGUtils.hpp>
+#include <libslic3r/IntersectionPoints.hpp>
 ExPolygons heal_and_check(const Polygons &polygons)
 {
-    Pointfs intersections_prev = intersection_points(polygons);
+    IntersectionsLines intersections_prev = get_intersections(polygons);
     Points  polygons_points    = to_points(polygons);
     Points  duplicits_prev     = collect_duplicates(polygons_points);
 
-    ExPolygons shape = Emboss::heal_shape(polygons);
+    auto [shape, success] = Emboss::heal_polygons(polygons);
+    CHECK(success);
 
     // Is default shape for unhealabled shape?
     bool is_default_shape = 
@@ -213,7 +215,7 @@ ExPolygons heal_and_check(const Polygons &polygons)
         shape.front().holes.front().points.size() == 4 ;
     CHECK(!is_default_shape);
 
-    Pointfs intersections = intersection_points(shape);
+    IntersectionsLines intersections = get_intersections(shape);
     Points  shape_points  = to_points(shape);
     Points  duplicits     = collect_duplicates(shape_points);
     //{
@@ -244,7 +246,9 @@ void scale(Polygons &polygons, double multiplicator) {
 Polygons load_polygons(const std::string &svg_file) {
     std::string file_path = TEST_DATA_DIR PATH_SEPARATOR + svg_file;
     NSVGimage *image = nsvgParseFromFile(file_path.c_str(), "px", 96.0f);
-    Polygons polygons = NSVGUtils::to_polygons(image);
+    NSVGLineParams param{1000};
+    param.scale = 10.;
+    Polygons polygons = to_polygons(*image, param);
     nsvgDelete(image);
     return polygons;
 }
@@ -258,7 +262,8 @@ TEST_CASE("Heal of 'i' in ALIENATO.TTF", "[Emboss]")
     auto a = heal_and_check(polygons);
 
     Polygons scaled_shape = polygons; // copy
-    scale(scaled_shape, 1 / Emboss::SHAPE_SCALE);
+    double text_shape_scale = 0.001; // Emboss.cpp --> SHAPE_SCALE
+    scale(scaled_shape, 1 / text_shape_scale);
     auto b = heal_and_check(scaled_shape);
 
     // different scale
@@ -282,12 +287,37 @@ TEST_CASE("Heal of 'm' in Allura_Script.ttf", "[Emboss]")
     auto a = heal_and_check(polygons);
 }
 
+#include "libslic3r/NSVGUtils.hpp"
+TEST_CASE("Heal of svg contour overlap", "[Emboss]") {
+
+    std::string svg_file = "contour_neighbor.svg";
+    auto image = nsvgParseFromFile(TEST_DATA_DIR PATH_SEPARATOR + svg_file, "mm");
+    NSVGLineParams param(1e10);
+    ExPolygonsWithIds shapes = create_shape_with_ids(*image, param);
+    Polygons polygons;
+    for (ExPolygonsWithId &shape : shapes)
+        polygons.push_back(shape.expoly.front().contour);
+    auto a = heal_and_check(polygons);
+}
+
+// Input contour is extracted from case above "contour_neighbor.svg" with trouble shooted scale
+TEST_CASE("Heal of overlaping contour", "[Emboss]"){
+    // Extracted from svg:
+    Points contour{{2228926, 1543620}, {745002, 2065101},   {745002, 2065094},   {744990, 2065094},   {684487, 1466338},
+                   {510999, 908378},   {236555, 403250},    {-126813, -37014},   {-567074, -400382},  {-1072201, -674822},
+                   {-567074, -400378}, {-126813, -37010},   {236555, 403250},    {510999, 908382},    {684487, 1466346},
+                   {744990, 2065105},  {-2219648, 2073234}, {-2228926, -908814}, {-1646879, -2073235}};
+    ExPolygons shapes = {ExPolygon{contour}};
+    CHECK(Emboss::heal_expolygons(shapes));
+}
 TEST_CASE("Heal of points close to line", "[Emboss]")
 {
     std::string file_name = "points_close_to_line.svg";
     std::string file_path = TEST_DATA_DIR PATH_SEPARATOR + file_name;
     NSVGimage *image = nsvgParseFromFile(file_path.c_str(), "px", 96.0f);
-    Polygons polygons = NSVGUtils::to_polygons(image);
+    NSVGLineParams param{1000};
+    param.scale = 1.;
+    Polygons polygons = to_polygons(*image, param);
     nsvgDelete(image);
     REQUIRE(polygons.size() == 1);
     Polygon polygon = polygons.front();
@@ -309,16 +339,19 @@ The other kids at school nicknamed him Ix,\n\
 which in the language of Betelgeuse Five translates as\t\n\
 \"boy who is not able satisfactorily to explain what a Hrung is,\n\
 nor why it should choose to collapse on Betelgeuse Seven\".";
-    float line_height = 10.f, depth = 2.f;
+    float line_height = 10.f;
 
     auto font = Emboss::create_font_file(font_path.c_str());
     REQUIRE(font != nullptr);
 
     Emboss::FontFileWithCache ffwc(std::move(font));
-    FontProp fp{line_height, depth};
-    ExPolygons shapes = Emboss::text2shapes(ffwc, text.c_str(), fp);
+    FontProp fp{line_height};
+
+    auto was_canceled = []() { return false; };
+    ExPolygons shapes = Emboss::text2shapes(ffwc, text.c_str(), fp, was_canceled);
     REQUIRE(!shapes.empty());
 
+    float depth = 2.f;  
     Emboss::ProjectZ projection(depth);
     indexed_triangle_set its = Emboss::polygons2model(shapes, projection);
     CHECK(!its.indices.empty());
@@ -468,7 +501,8 @@ TEST_CASE("Cut surface", "[]")
 
     Transform3d tr = Transform3d::Identity();
     tr.translate(Vec3d(0., 0., -z_depth));
-    tr.scale(Emboss::SHAPE_SCALE);
+    double text_shape_scale = 0.001; // Emboss.cpp --> SHAPE_SCALE
+    tr.scale(text_shape_scale);
     Emboss::OrthoProject cut_projection(tr, Vec3d(0., 0., z_depth));
 
     auto object = its_make_cube(782 - 49 + 50, 724 + 10 + 50, 5);
@@ -491,7 +525,7 @@ TEST_CASE("Cut surface", "[]")
 #include <sstream>
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
-TEST_CASE("UndoRedo serialization", "[Emboss]")
+TEST_CASE("UndoRedo TextConfiguration serialization", "[Emboss]")
 {
     TextConfiguration tc;
     tc.text = "Dovede-li se člověk zasmát sám sobě, nevyjde ze smíchu po celý život.";
@@ -500,11 +534,12 @@ TEST_CASE("UndoRedo serialization", "[Emboss]")
     es.path       = "Simply the best";
     es.type       = EmbossStyle::Type::file_path;
     FontProp &fp  = es.prop;
-    fp.angle      = 100.;
-    fp.distance   = 10.;
-    fp.char_gap   = 1;
-    fp.use_surface = true;
-    tc.fix_3mf_tr = Transform3d::Identity();
+    fp.char_gap  = 3;
+    fp.line_gap  = 7;
+    fp.boldness  = 2.3f;
+    fp.skew      = 4.5f;
+    fp.collection_number = 13;
+    fp.size_in_mm= 6.7f;
 
     std::stringstream ss; // any stream can be used
     {
@@ -520,7 +555,45 @@ TEST_CASE("UndoRedo serialization", "[Emboss]")
     }
     CHECK(tc.style == tc_loaded.style);
     CHECK(tc.text == tc_loaded.text);
-    CHECK(tc.fix_3mf_tr.has_value() == tc_loaded.fix_3mf_tr.has_value());
+}
+
+#include "libslic3r/EmbossShape.hpp"
+TEST_CASE("UndoRedo EmbossShape serialization", "[Emboss]")
+{
+    EmbossShape emboss;
+    emboss.shapes_with_ids = {{0, {{{0, 0}, {10, 0}, {10, 10}, {0, 10}}, {{5, 5}, {6, 5}, {6, 6}, {5, 6}}}}};
+    emboss.scale = 2.;
+    emboss.projection.depth       = 5.;
+    emboss.projection.use_surface = true;
+    emboss.fix_3mf_tr  = Transform3d::Identity();
+    emboss.svg_file = EmbossShape::SvgFile{};
+    emboss.svg_file->path = "Everything starts somewhere, though many physicists disagree.\
+ But people have always been dimly aware of the problem with the start of things.\
+ They wonder how the snowplough driver gets to work,\
+ or how the makers of dictionaries look up the spelling of words.";
+    emboss.svg_file->path_in_3mf = "Všechno někde začíná, i když mnoho fyziků nesouhlasí.\
+ Ale lidé si vždy jen matně uvědomovali problém se začátkem věcí.\
+ Zajímalo je, jak se řidič sněžného pluhu dostane do práce\
+ nebo jak tvůrci slovníků vyhledávají pravopis slov.";
+    emboss.svg_file->file_data = std::make_unique<std::string>("cite: Terry Pratchett");
+
+    std::stringstream ss; // any stream can be used
+    {
+        cereal::BinaryOutputArchive oarchive(ss); // Create an output archive
+        oarchive(emboss);
+    } // archive goes out of scope, ensuring all contents are flushed
+
+    EmbossShape emboss_loaded;
+    {
+        cereal::BinaryInputArchive iarchive(ss); // Create an input archive
+        iarchive(emboss_loaded);
+    }
+    CHECK(emboss.shapes_with_ids.front().expoly == emboss_loaded.shapes_with_ids.front().expoly);
+    CHECK(emboss.scale == emboss_loaded.scale);
+    CHECK(emboss.projection.depth == emboss_loaded.projection.depth);
+    CHECK(emboss.projection.use_surface == emboss_loaded.projection.use_surface);
+    CHECK(emboss.svg_file->path == emboss_loaded.svg_file->path);
+    CHECK(emboss.svg_file->path_in_3mf == emboss_loaded.svg_file->path_in_3mf);
 }
 
 
@@ -780,7 +853,7 @@ using MyMesh = Slic3r::MeshBoolean::cgal2::CGALMesh;
 
 // Second Idea
 // Store original its inside of text configuration[optional]
-// Cause problem with next editation of object -> cut, simplify, Netfabb, Hollow, ...(transform original vertices)
+// Cause problem with next editation of object -> cut, simplify, repair by WinSDK, Hollow, ...(transform original vertices)
 TEST_CASE("Emboss extrude cut", "[Emboss-Cut]")
 {
     std::string font_path = get_font_filepath();

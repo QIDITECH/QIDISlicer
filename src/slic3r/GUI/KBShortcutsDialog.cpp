@@ -46,7 +46,8 @@ KBShortcutsDialog::KBShortcutsDialog()
     }
 
     wxStdDialogButtonSizer* buttons = this->CreateStdDialogButtonSizer(wxOK);
-    wxGetApp().UpdateDarkUI(static_cast<wxButton*>(this->FindWindowById(wxID_OK, this)));
+    wxGetApp().SetWindowVariantForButton(buttons->GetAffirmativeButton());
+    wxGetApp().UpdateDarkUI(buttons->GetAffirmativeButton());
     this->SetEscapeId(wxID_OK);
     main_sizer->Add(buttons, 0, wxEXPAND | wxALL, 5);
 

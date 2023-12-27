@@ -14,6 +14,7 @@ class Shader;
 class Model;
 class ModelObject;
 class ModelVolume;
+class ObjectID;
 class GLVolume;
 class GLArrow;
 class GLCurvedArrow;
@@ -110,6 +111,7 @@ private:
         ObjectIdxsToInstanceIdxsMap content;
         // List of ids of the volumes which are sinking when starting dragging
         std::vector<unsigned int> sinking_volumes;
+        Vec3d rotation_pivot;
     };
 
     // Volumes owned by GLCanvas3D.
@@ -146,6 +148,7 @@ private:
     // and transform to place and orient it in world coordinates
     std::optional<std::pair<BoundingBoxf3, Transform3d>> m_bounding_box_in_current_reference_system;
 
+    std::optional<std::pair<Vec3d, double>> m_bounding_sphere;
 #if ENABLE_RENDER_SELECTION_CENTER
     GLModel m_vbo_sphere;
 #endif // ENABLE_RENDER_SELECTION_CENTER
@@ -291,6 +294,8 @@ public:
     // Returns the screen space bounding box
     BoundingBoxf get_screen_space_bounding_box();
 
+    // Returns the bounding sphere: first = center, second = radius
+    const std::pair<Vec3d, double> get_bounding_sphere() const;
     void setup_cache();
 
     void translate(const Vec3d& displacement, TransformationType transformation_type);
@@ -356,6 +361,7 @@ private:
         m_full_unscaled_instance_bounding_box.reset(); m_full_scaled_instance_bounding_box.reset();
         m_full_unscaled_instance_local_bounding_box.reset();
         m_bounding_box_in_current_reference_system.reset();
+        m_bounding_sphere.reset();
     }
     void render_synchronized_volumes();
     void render_bounding_box(const BoundingBoxf3& box, const Transform3d& trafo, const ColorRGB& color);
@@ -395,6 +401,8 @@ private:
 ModelVolume *get_selected_volume(const Selection &selection);
 const GLVolume *get_selected_gl_volume(const Selection &selection);
 
+ModelVolume    *get_selected_volume   (const ObjectID &volume_id, const Selection &selection);
+ModelVolume    *get_volume            (const ObjectID &volume_id, const Selection &selection);
 } // namespace GUI
 } // namespace Slic3r
 

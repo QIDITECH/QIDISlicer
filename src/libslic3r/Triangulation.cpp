@@ -61,7 +61,7 @@ inline bool has_self_intersection(
     lines.reserve(constrained_half_edges.size());
     for (const auto &he : constrained_half_edges)
         lines.emplace_back(points[he.first], points[he.second]);
-    return !intersection_points(lines).empty();
+    return !get_intersections(lines).empty();
 }
 
 } // namespace priv

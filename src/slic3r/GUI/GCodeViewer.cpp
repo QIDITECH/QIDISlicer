@@ -301,7 +301,7 @@ void GCodeViewer::SequentialView::Marker::init()
 void GCodeViewer::SequentialView::Marker::set_world_position(const Vec3f& position)
 {    
     m_world_position = position;
-    m_world_transform = (Geometry::translation_transform((position + m_z_offset * Vec3f::UnitZ()).cast<double>()) *
+    m_world_transform = (Geometry::translation_transform((position + m_model_z_offset * Vec3f::UnitZ()).cast<double>()) *
       Geometry::translation_transform(m_model.get_bounding_box().size().z() * Vec3d::UnitZ()) * Geometry::rotation_transform({ M_PI, 0.0, 0.0 })).cast<float>();
 }
 
@@ -395,39 +395,15 @@ void GCodeViewer::SequentialView::Marker::render(EViewType &view_type)
     ImGui::PopStyleVar();
 }
 
-void GCodeViewer::SequentialView::GCodeWindow::load_gcode(const std::string& filename, const std::vector<size_t>& lines_ends)
-{
-    assert(! m_file.is_open());
-    if (m_file.is_open())
-        return;
-
-    m_filename   = filename;
-    m_lines_ends = lines_ends;
-
-    m_selected_line_id = 0;
-    m_last_lines_size = 0;
-
-    try
+void GCodeViewer::SequentialView::GCodeWindow::load_gcode(const GCodeProcessorResult& gcode_result)
     {
-        m_file.open(boost::filesystem::path(m_filename));
-    }
-    catch (...)
-    {
-        BOOST_LOG_TRIVIAL(error) << "Unable to map file " << m_filename << ". Cannot show G-code window.";
-        reset();
-    }
+    m_filename = gcode_result.filename;
+    m_is_binary_file = gcode_result.is_binary_file;
+    m_lines_ends = gcode_result.lines_ends;
 }
 
-void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, uint64_t curr_line_id) const
+void GCodeViewer::SequentialView::GCodeWindow::add_gcode_line_to_lines_cache(const std::string& src)
 {
-    auto update_lines = [this](uint64_t start_id, uint64_t end_id) {
-        std::vector<Line> ret;
-        ret.reserve(end_id - start_id + 1);
-        for (uint64_t id = start_id; id <= end_id; ++id) {
-            // read line from file
-            const size_t start = id == 1 ? 0 : m_lines_ends[id - 2];
-            const size_t len   = m_lines_ends[id - 1] - start;
-            std::string gline(m_file.data() + start, len);
 
             std::string command;
             std::string parameters;
@@ -435,7 +411,7 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
 
             // extract comment
             std::vector<std::string> tokens;
-            boost::split(tokens, gline, boost::is_any_of(";"), boost::token_compress_on);
+    boost::split(tokens, src, boost::is_any_of(";"), boost::token_compress_on);
             command = tokens.front();
             if (tokens.size() > 1)
                 comment = ";" + tokens.back();
@@ -450,9 +426,124 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
                     }
                 }
             }
-            ret.push_back({ command, parameters, comment });
+    m_lines_cache.push_back({ command, parameters, comment });
+}
+
+void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, size_t curr_line_id)
+{
+    auto update_lines_ascii = [this]() {
+        m_lines_cache.clear();
+        m_lines_cache.reserve(m_cache_range.size());
+        const std::vector<size_t>& lines_ends = m_lines_ends.front();
+        FILE* file = boost::nowide::fopen(m_filename.c_str(), "rb");
+        if (file != nullptr) {
+            for (size_t id = *m_cache_range.min; id <= *m_cache_range.max; ++id) {
+                assert(id > 0);
+                // read line from file
+                const size_t begin = id == 1 ? 0 : lines_ends[id - 2];
+                const size_t len = lines_ends[id - 1] - begin;
+                std::string gline(len, '\0');
+                fseek(file, begin, SEEK_SET);
+                const size_t rsize = fread((void*)gline.data(), 1, len, file);
+                if (ferror(file) || rsize != len) {
+                    m_lines_cache.clear();
+                    break;
+                }
+
+                add_gcode_line_to_lines_cache(gline);
+            }
+            fclose(file);
         }
-        return ret;
+    };
+
+    auto update_lines_binary = [this]() {
+        m_lines_cache.clear();
+        m_lines_cache.reserve(m_cache_range.size());
+
+        size_t cumulative_lines_count = 0;
+        std::vector<size_t> cumulative_lines_counts;
+        cumulative_lines_counts.reserve(m_lines_ends.size());
+        for (size_t i = 0; i < m_lines_ends.size(); ++i) {
+            cumulative_lines_count += m_lines_ends[i].size();
+            cumulative_lines_counts.emplace_back(cumulative_lines_count);
+        }
+
+        size_t first_block_id = 0;
+        for (size_t i = 0; i < cumulative_lines_counts.size(); ++i) {
+            if (*m_cache_range.min <= cumulative_lines_counts[i]) {
+                first_block_id = i;
+                break;
+            }
+        }
+        size_t last_block_id = 0;
+        for (size_t i = 0; i < cumulative_lines_counts.size(); ++i) {
+            if (*m_cache_range.max <= cumulative_lines_counts[i]) {
+                last_block_id = i;
+                break;
+            }
+        }
+        assert(last_block_id >= first_block_id);
+
+        FilePtr file(boost::nowide::fopen(m_filename.c_str(), "rb"));
+        if (file.f != nullptr) {
+            fseek(file.f, 0, SEEK_END);
+            const long file_size = ftell(file.f);
+            rewind(file.f);
+
+            // read file header
+            using namespace bgcode::core;
+            using namespace bgcode::binarize;
+            FileHeader file_header;
+            EResult res = read_header(*file.f, file_header, nullptr);
+            if (res == EResult::Success) {
+                // search first GCode block
+                BlockHeader block_header;
+                res = read_next_block_header(*file.f, file_header, block_header, EBlockType::GCode, nullptr, 0);
+                if (res == EResult::Success) {
+                    for (size_t i = 0; i < first_block_id; ++i) {
+                        skip_block(*file.f, file_header, block_header);
+                        res = read_next_block_header(*file.f, file_header, block_header, nullptr, 0);
+                        if (res != EResult::Success || block_header.type != (uint16_t)EBlockType::GCode) {
+                            m_lines_cache.clear();
+                            return;
+                        }
+                    }
+
+                    for (size_t i = first_block_id; i <= last_block_id; ++i) {
+                        GCodeBlock block;
+                        res = block.read_data(*file.f, file_header, block_header);
+                        if (res != EResult::Success) {
+                            m_lines_cache.clear();
+                            return;
+                        }
+
+                        const size_t ref_id = (i == 0) ? 0 : i - 1;
+                        const size_t first_line_id = (i == 0) ? *m_cache_range.min :
+                            (*m_cache_range.min > cumulative_lines_counts[ref_id]) ? *m_cache_range.min - cumulative_lines_counts[ref_id] : 1;
+                        const size_t last_line_id = (*m_cache_range.max <= cumulative_lines_counts[i]) ?
+                            (i == 0) ? *m_cache_range.max : *m_cache_range.max - cumulative_lines_counts[ref_id] : m_lines_ends[i].size();
+                        assert(last_line_id >= first_line_id);
+
+                        for (size_t j = first_line_id; j <= last_line_id; ++j) {
+                            const size_t begin = (j == 1) ? 0 : m_lines_ends[i][j - 2];
+                            const size_t end = m_lines_ends[i][j - 1];
+                            std::string gline;
+                            gline.insert(gline.end(), block.raw_data.begin() + begin, block.raw_data.begin() + end);
+                            add_gcode_line_to_lines_cache(gline);
+                        }
+
+                        if (ftell(file.f) == file_size)
+                            break;
+
+                        res = read_next_block_header(*file.f, file_header, block_header, nullptr, 0);
+                        if (res != EResult::Success || block_header.type != (uint16_t)EBlockType::GCode) {
+                            m_lines_cache.clear();
+                            return;
+                        }
+                    }
+                }
+        }
+        }
     };
     //B18
     static const ImVec4 LINE_NUMBER_COLOR    = ImGuiWrapper::COL_BLUE_LIGHT;
@@ -471,37 +562,45 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
     // number of visible lines
     const float text_height = ImGui::CalcTextSize("0").y;
     const ImGuiStyle& style = ImGui::GetStyle();
-    const uint64_t lines_count = static_cast<uint64_t>((wnd_height - 2.0f * style.WindowPadding.y + style.ItemSpacing.y) / (text_height + style.ItemSpacing.y));
+    const size_t visible_lines_count = static_cast<size_t>((wnd_height - 2.0f * style.WindowPadding.y + style.ItemSpacing.y) / (text_height + style.ItemSpacing.y));
 
-    if (lines_count == 0)
+    if (visible_lines_count == 0)
         return;
 
+    if (m_lines_ends.empty() || m_lines_ends.front().empty())
+        return;
+
+    auto resize_range = [&](Range& range, size_t lines_count) {
+        const size_t half_lines_count = lines_count / 2;
+        range.min = (curr_line_id > half_lines_count) ? curr_line_id - half_lines_count : 1;
+        range.max = *range.min + lines_count - 1;
+        size_t lines_ends_count = 0;
+        for (const auto& le : m_lines_ends) {
+            lines_ends_count += le.size();
+        }
+        if (*range.max >= lines_ends_count) {
+            range.max = lines_ends_count - 1;
+            range.min = *range.max - lines_count + 1;
+        }
+    };
     // visible range
-    const uint64_t half_lines_count = lines_count / 2;
-    uint64_t start_id = (curr_line_id >= half_lines_count) ? curr_line_id - half_lines_count : 0;
-    uint64_t end_id = start_id + lines_count - 1;
-    if (end_id >= static_cast<uint64_t>(m_lines_ends.size())) {
-        end_id = static_cast<uint64_t>(m_lines_ends.size()) - 1;
-        start_id = end_id - lines_count + 1;
+    Range visible_range;
+    resize_range(visible_range, visible_lines_count);
+
+    // update cache if needed
+    if (m_cache_range.empty() || !m_cache_range.contains(visible_range)) {
+        resize_range(m_cache_range, 4 * visible_range.size());
+        if (m_is_binary_file)
+            update_lines_binary();
+        else
+            update_lines_ascii();
     }
 
-    // updates list of lines to show, if needed
-    if (m_selected_line_id != curr_line_id || m_last_lines_size != end_id - start_id + 1) {
-        try
-        {
-            *const_cast<std::vector<Line>*>(&m_lines) = update_lines(start_id, end_id);
-        }
-        catch (...)
-        {
-            BOOST_LOG_TRIVIAL(error) << "Error while loading from file " << m_filename << ". Cannot show G-code window.";
+    if (m_lines_cache.empty())
             return;
-        }
-        *const_cast<uint64_t*>(&m_selected_line_id) = curr_line_id;
-        *const_cast<size_t*>(&m_last_lines_size) = m_lines.size();
-    }
 
     // line number's column width
-    const float id_width = ImGui::CalcTextSize(std::to_string(end_id).c_str()).x;
+    const float id_width = ImGui::CalcTextSize(std::to_string(*visible_range.max).c_str()).x;
 
     ImGuiWrapper& imgui = *wxGetApp().imgui();
 
@@ -521,14 +620,10 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
         current_length += out_text.length();
 
         ImGui::SameLine(0.0f, spacing);
-        ImGui::PushStyleColor(ImGuiCol_Text, color);
-        imgui.text(out_text);
-        ImGui::PopStyleColor();
+        imgui.text_colored(color, out_text);
         if (reduced) {
             ImGui::SameLine(0.0f, 0.0f);
-            ImGui::PushStyleColor(ImGuiCol_Text, ELLIPSIS_COLOR);
-            imgui.text("...");
-            ImGui::PopStyleColor();
+            imgui.text_colored(ELLIPSIS_COLOR, "...");
         }
 
         return reduced;
@@ -537,16 +632,17 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
     imgui.set_next_window_pos(0.0f, top, ImGuiCond_Always, 0.0f, 0.0f);
     imgui.set_next_window_size(0.0f, wnd_height, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::SetNextWindowBgAlpha(0.8f);
+    ImGui::SetNextWindowBgAlpha(0.6f);
     imgui.begin(std::string("G-code"), ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove);
    
     // center the text in the window by pushing down the first line
-    const float f_lines_count = static_cast<float>(lines_count);
+    const float f_lines_count = static_cast<float>(visible_lines_count);
     ImGui::SetCursorPosY(0.5f * (wnd_height - f_lines_count * text_height - (f_lines_count - 1.0f) * style.ItemSpacing.y));
 
     // render text lines
-    for (uint64_t id = start_id; id <= end_id; ++id) {
-        const Line& line = m_lines[id - start_id];
+    size_t max_line_length = 0;
+    for (size_t id = *visible_range.min; id <= *visible_range.max; ++id) {
+        const Line& line = m_lines_cache[id - *m_cache_range.min];
 
         // rect around the current selected line
         if (id == curr_line_id) {
@@ -574,16 +670,16 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, u
         if (!stop_adding && !line.comment.empty())
             // render comment
             stop_adding = add_item_to_line(line.comment, COMMENT_COLOR, line.command.empty() ? -1.0f : 0.0f, line_length);
+        max_line_length = std::max(max_line_length, line_length);
     }
 
     imgui.end();
     ImGui::PopStyleVar();
-}
-
-void GCodeViewer::SequentialView::GCodeWindow::stop_mapping_file()
-{
-    if (m_file.is_open())
-        m_file.close();
+    // request an extra frame if window's width changed
+    if (m_max_line_length != max_line_length) {
+        m_max_line_length = max_line_length;
+        imgui.set_requires_extra_frame();
+    }
 }
 //B43
 void GCodeViewer::SequentialView::render(float legend_height, EViewType &view_type)
@@ -768,12 +864,13 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
     //B43
     m_gcode_result = &gcode_result;
 
-    m_sequential_view.gcode_window.load_gcode(gcode_result.filename, gcode_result.lines_ends);
+    m_sequential_view.gcode_window.load_gcode(gcode_result);
 
     if (wxGetApp().is_gcode_viewer())
         m_custom_gcode_per_print_z = gcode_result.custom_gcode_per_print_z;
 
     m_max_print_height = gcode_result.max_print_height;
+    m_z_offset = gcode_result.z_offset;
 
     load_toolpaths(gcode_result);
     load_wipetower_shell(print);
@@ -933,6 +1030,7 @@ void GCodeViewer::reset()
     m_paths_bounding_box.reset();
     m_max_bounding_box.reset();
     m_max_print_height = 0.0f;
+    m_z_offset = 0.0f;
     m_tool_colors = std::vector<ColorRGBA>();
     m_extruders_count = 0;
     m_extruder_ids = std::vector<unsigned char>();
@@ -975,6 +1073,7 @@ void GCodeViewer::render()
         if (m_sequential_view.current.last != m_sequential_view.endpoints.last) {
             m_sequential_view.marker.set_world_position(m_sequential_view.current_position);
             m_sequential_view.marker.set_world_offset(m_sequential_view.current_offset);
+            m_sequential_view.marker.set_z_offset(m_z_offset);
             //B43
             m_sequential_view.render(legend_height, m_view_type);
         }
@@ -2211,20 +2310,21 @@ void GCodeViewer::load_toolpaths(const GCodeProcessorResult& gcode_result)
         if (move.type == EMoveType::Seam)
             ++seams_count;
 
-        size_t move_id = i - seams_count;
+        const size_t move_id = i - seams_count;
 
         if (move.type == EMoveType::Extrude) {
-            if (!move.internal_only) {
-                // layers zs
+            // layers zs/ranges
                 const double* const last_z = m_layers.empty() ? nullptr : &m_layers.get_zs().back();
                 const double z = static_cast<double>(move.position.z());
-                if (last_z == nullptr || z < *last_z - EPSILON || *last_z + EPSILON < z) {
+            if (move.extrusion_role != GCodeExtrusionRole::Custom &&
+                (last_z == nullptr || z < *last_z - EPSILON || *last_z + EPSILON < z)) {
+                // start a new layer
                     const size_t start_it = (m_layers.empty() && first_travel_s_id != 0) ? first_travel_s_id : last_travel_s_id;
                     m_layers.append(z, { start_it, move_id });
                 }
-                else
+            else if (!m_layers.empty() && !move.internal_only)
+                // update last layer
                     m_layers.get_ranges().back().last = move_id;
-            }
             // extruder ids
             m_extruder_ids.emplace_back(move.extruder_id);
             // roles
@@ -2287,9 +2387,18 @@ void GCodeViewer::load_shells(const Print& print)
         return;
 
     // adds objects' volumes 
-    int object_id = 0;
     for (const PrintObject* obj : print.objects()) {
         const ModelObject* model_obj = obj->model_object();
+        int object_id = -1;
+        const ModelObjectPtrs model_objects = wxGetApp().plater()->model().objects;
+        for (int i = 0; i < static_cast<int>(model_objects.size()); ++i) {
+            if (model_obj->id() == model_objects[i]->id()) {
+                object_id = i;
+                break;
+            }
+        }
+        if (object_id == -1)
+            continue;
 
         std::vector<int> instance_ids(model_obj->instances.size());
         for (int i = 0; i < (int)model_obj->instances.size(); ++i) {
@@ -2309,7 +2418,6 @@ void GCodeViewer::load_shells(const Print& print)
             }
         }
 
-        ++object_id;
     }
 
     wxGetApp().plater()->get_current_canvas3D()->check_volumes_outside_state(m_shells.volumes);
@@ -2411,6 +2519,7 @@ void GCodeViewer::refresh_render_paths(bool keep_sequential_current_first, bool 
         case EViewType::Temperature:    { color = m_extrusions.ranges.temperature.get_color_at(path.temperature); break; }
         case EViewType::LayerTimeLinear:
         case EViewType::LayerTimeLogarithmic: {
+        if (!m_layers_times.empty() && m_layers.size() == m_layers_times.front().size()) {
             const Path::Sub_Path& sub_path = path.sub_paths.front();
             double z = static_cast<double>(sub_path.first.position.z());
             const std::vector<double>& zs = m_layers.get_zs();
@@ -2424,6 +2533,7 @@ void GCodeViewer::refresh_render_paths(bool keep_sequential_current_first, bool 
                         break;
                     }
                 }
+            }
             }
             break;
         }
@@ -2489,8 +2599,11 @@ void GCodeViewer::refresh_render_paths(bool keep_sequential_current_first, bool 
         const size_t min_s_id = m_layers.get_range_at(min_id).first;
         const size_t max_s_id = m_layers.get_range_at(max_id).last;
 
-        return (min_s_id <= path.sub_paths.front().first.s_id && path.sub_paths.front().first.s_id <= max_s_id) ||
-            (min_s_id <= path.sub_paths.back().last.s_id && path.sub_paths.back().last.s_id <= max_s_id);
+        const bool top_layer_shown = max_id == m_layers.size() - 1;
+
+        return (min_s_id <= path.sub_paths.front().first.s_id && path.sub_paths.front().first.s_id <= max_s_id) || // the leading vertex is contained
+               (min_s_id <= path.sub_paths.back().last.s_id && path.sub_paths.back().last.s_id <= max_s_id) ||     // the trailing vertex is contained
+               (top_layer_shown && max_s_id < path.sub_paths.front().first.s_id); // the leading vertex is above the top layer and the top layer is shown
     };
 
 #if ENABLE_GCODE_VIEWER_STATISTICS
@@ -2539,11 +2652,9 @@ void GCodeViewer::refresh_render_paths(bool keep_sequential_current_first, bool 
             for (size_t i = 0; i < buffer.paths.size(); ++i) {
                 const Path& path = buffer.paths[i];
                 if (path.type == EMoveType::Travel) {
-                    if (path.sub_paths.front().first.s_id > m_layers_z_range[0]) {
                         if (!is_travel_in_layers_range(i, m_layers_z_range[0], m_layers_z_range[1]))
                             continue;
                     }
-                }
                 else if (!is_in_layers_range(path, m_layers_z_range[0], m_layers_z_range[1]))
                     continue;
 
@@ -3329,7 +3440,7 @@ void GCodeViewer::render_legend(float& legend_height)
 
     imgui.set_next_window_pos(0.0f, 0.0f, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::SetNextWindowBgAlpha(0.8f);
+    ImGui::SetNextWindowBgAlpha(0.6f);
     const float max_height = 0.75f * static_cast<float>(cnv_size.get_height());
     const float child_height = 0.3333f * max_height;
     ImGui::SetNextWindowSizeConstraints({ 0.0f, 0.0f }, { -1.0f, max_height });
@@ -3697,17 +3808,25 @@ void GCodeViewer::render_legend(float& legend_height)
 
     ImGui::PushStyleColor(ImGuiCol_FrameBg, { 0.1f, 0.1f, 0.1f, 0.8f });
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, { 0.2f, 0.2f, 0.2f, 0.8f });
-    imgui.combo(std::string(), { _u8L("Feature type"),
-                      _u8L("Height (mm)"),
-                      _u8L("Width (mm)"),
-                      _u8L("Speed (mm/s)"),
-                      _u8L("Fan speed (%)"),
-                      _u8L("Temperature (°C)"),
-                      _u8L("Volumetric flow rate (mm³/s)"),
-                      _u8L("Layer time (linear)"),
-                      _u8L("Layer time (logarithmic)"),
-                      _u8L("Tool"),
-                      _u8L("Color Print") }, view_type, ImGuiComboFlags_HeightLargest, 0.0f, -1.0f);
+    std::vector<std::string> view_options;
+    std::vector<int> view_options_id;
+    if (!m_layers_times.empty() && m_layers.size() == m_layers_times.front().size()) {
+        view_options = { _u8L("Feature type"), _u8L("Height (mm)"), _u8L("Width (mm)"), _u8L("Speed (mm/s)"), _u8L("Fan speed (%)"),
+                         _u8L("Temperature (°C)"), _u8L("Volumetric flow rate (mm³/s)"), _u8L("Layer time (linear)"), _u8L("Layer time (logarithmic)"),
+                         _u8L("Tool"), _u8L("Color Print") };
+        view_options_id = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    }
+    else {
+        view_options = { _u8L("Feature type"), _u8L("Height (mm)"), _u8L("Width (mm)"), _u8L("Speed (mm/s)"), _u8L("Fan speed (%)"),
+                         _u8L("Temperature (°C)"), _u8L("Volumetric flow rate (mm³/s)"), _u8L("Tool"), _u8L("Color Print") };
+        view_options_id = { 0, 1, 2, 3, 4, 5, 6, 9, 10 };
+        if (view_type == 7 || view_type == 8)
+            view_type = 0;
+    }
+    auto view_type_it = std::find(view_options_id.begin(), view_options_id.end(), view_type);
+    int view_type_id = (view_type_it == view_options_id.end()) ? 0 : std::distance(view_options_id.begin(), view_type_it);
+    if (imgui.combo(std::string(), view_options, view_type_id, ImGuiComboFlags_HeightLargest, 0.0f, -1.0f))
+        view_type = view_options_id[view_type_id];
     ImGui::PopStyleColor(2);
    
     if (old_view_type != view_type) {

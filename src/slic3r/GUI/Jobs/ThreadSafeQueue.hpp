@@ -114,7 +114,8 @@ public:
     void clear()
     {
         std::lock_guard lk{m_mutex};
-        while (!m_queue.empty()) m_queue.pop();
+        while (!m_queue.empty())
+            m_queue.pop();
     }
 };
 

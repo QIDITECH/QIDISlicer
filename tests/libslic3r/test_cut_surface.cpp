@@ -23,7 +23,8 @@ TEST_CASE("Cut character from surface", "[]")
 
     Transform3d tr = Transform3d::Identity();
     tr.translate(Vec3d(0., 0., -z_depth));
-    tr.scale(Emboss::SHAPE_SCALE);
+    double text_shape_scale = 0.001; // Emboss.cpp --> SHAPE_SCALE
+    tr.scale(text_shape_scale);
     Emboss::OrthoProject cut_projection(tr, Vec3d(0., 0., z_depth));
 
     auto object = its_make_cube(782 - 49 + 50, 724 + 10 + 50, 5);
@@ -158,7 +159,7 @@ TEST_CASE("CutSurface in 3mf", "[Emboss]")
 
     FontProp fp = tc.style.prop;
     ExPolygons shapes = Emboss::text2shapes(ff, tc.text.c_str(), fp);
-    double shape_scale = Emboss::get_shape_scale(fp, *ff.font_file);
+    double shape_scale = Emboss::get_text_shape_scale(fp, *ff.font_file);
 
     Emboss::OrthoProject projection = create_projection_for_cut(
         cut_projection_tr, shape_scale, get_extents(shapes), z_range);

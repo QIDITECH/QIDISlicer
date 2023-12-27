@@ -31,7 +31,7 @@ public:
 
     void SetBorderColorNormal(wxColor const &color);
 
-    void SetBackgroundColor(StateColor const &color);
+    virtual void SetBackgroundColor(StateColor const &color);
 
     void SetBackgroundColorNormal(wxColor const &color);
 
@@ -40,7 +40,6 @@ public:
     static wxColor GetParentBackgroundColor(wxWindow * parent);
 
 protected:
-    void eraseEvent(wxEraseEvent& evt);
 
     void paintEvent(wxPaintEvent& evt);
 
@@ -48,7 +47,6 @@ protected:
 
     virtual void doRender(wxDC& dc);
 
-protected:
     double radius;
     int border_width = 1;
     StateHandler state_handler;

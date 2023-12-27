@@ -8,10 +8,11 @@ class TextInput : public wxNavigationEnabled<StaticBox>
 {
 
     wxSize labelSize;
-    ScalableBitmap icon;
+    wxBitmapBundle icon;
+    ScalableBitmap drop_down_icon;
     StateColor     label_color;
     StateColor     text_color;
-    wxTextCtrl * text_ctrl;
+    wxTextCtrl*    text_ctrl{nullptr};
 
     static const int TextInputWidth = 200;
     static const int TextInputHeight = 50;
@@ -36,34 +37,44 @@ public:
               const wxSize & size  = wxDefaultSize,
               long           style = 0);
 
-    void SetCornerRadius(double radius);
+    void SetLabel(const wxString& label) wxOVERRIDE;
 
-    void SetLabel(const wxString& label);
-
-    void SetIcon(const wxBitmap &icon);
+    void SetIcon(const wxBitmapBundle& icon);
 
     void SetLabelColor(StateColor const &color);
 
+    void SetBGColor(StateColor const &color);
     void SetTextColor(StateColor const &color);
 
+    void SetCtrlSize(wxSize const& size);
     virtual void Rescale();
 
+    bool SetFont(const wxFont &font) override;
     virtual bool Enable(bool enable = true) override;
 
     virtual void SetMinSize(const wxSize& size) override;
 
+    bool SetBackgroundColour(const wxColour &colour) override;
+
+    bool SetForegroundColour(const wxColour &colour) override;
     wxTextCtrl *GetTextCtrl() { return text_ctrl; }
 
     wxTextCtrl const *GetTextCtrl() const { return text_ctrl; }
 
+    void SetValue(const wxString& value);
+
+    wxString GetValue();
+
+    void SetSelection(long from, long to);
 protected:
     virtual void OnEdit() {}
 
-    virtual void DoSetSize(
-        int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO);
+    void DoSetSize(int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO) wxOVERRIDE;
 
     void DoSetToolTipText(wxString const &tip) override;
 
+    StateColor GetTextColor()   const { return text_color; }
+    StateColor GetBorderColor() const { return border_color; }
 private:
     void paintEvent(wxPaintEvent& evt);
 

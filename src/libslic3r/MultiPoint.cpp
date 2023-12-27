@@ -103,99 +103,6 @@ bool MultiPoint::remove_duplicate_points()
     return false;
 }
 
-Points MultiPoint::douglas_peucker(const Points &pts, const double tolerance)
-{
-    Points result_pts;
-	auto tolerance_sq = int64_t(sqr(tolerance));
-    if (! pts.empty()) {
-        const Point  *anchor      = &pts.front();
-        size_t        anchor_idx  = 0;
-        const Point  *floater     = &pts.back();
-        size_t        floater_idx = pts.size() - 1;
-        result_pts.reserve(pts.size());
-        result_pts.emplace_back(*anchor);
-        if (anchor_idx != floater_idx) {
-            assert(pts.size() > 1);
-            std::vector<size_t> dpStack;
-            dpStack.reserve(pts.size());
-            dpStack.emplace_back(floater_idx);
-            for (;;) {
-                int64_t max_dist_sq  = 0;
-                size_t  furthest_idx = anchor_idx;
-                // find point furthest from line seg created by (anchor, floater) and note it
-                {
-                    const Point   a = *anchor;
-                    const Point   f = *floater;
-                    const Vec2i64 v = (f - a).cast<int64_t>();
-                    if (const int64_t l2 = v.squaredNorm(); l2 == 0) {
-                        for (size_t i = anchor_idx + 1; i < floater_idx; ++ i)
-                            if (int64_t dist_sq = (pts[i] - a).cast<int64_t>().squaredNorm(); dist_sq > max_dist_sq) {
-                                max_dist_sq  = dist_sq;
-                                furthest_idx = i;
-                            }
-                    } else {
-                        const double dl2 = double(l2);
-                        const Vec2d  dv  = v.cast<double>();
-                        for (size_t i = anchor_idx + 1; i < floater_idx; ++ i) {
-                            const Point   p  = pts[i];
-                            const Vec2i64 va = (p  - a).template cast<int64_t>();
-                            const int64_t t  = va.dot(v);
-                            int64_t dist_sq;
-                            if (t <= 0) {
-                                dist_sq = va.squaredNorm();
-                            } else if (t >= l2) {
-                                dist_sq = (p - f).cast<int64_t>().squaredNorm();
-                            } else {
-                                const Vec2i64 w = ((double(t) / dl2) * dv).cast<int64_t>();
-                                dist_sq = (w - va).squaredNorm();
-                            }
-                            if (dist_sq > max_dist_sq) {
-                                max_dist_sq  = dist_sq;
-                                furthest_idx = i;
-                            }
-                        }                        
-                    }
-                }
-                // remove point if less than tolerance
-                if (max_dist_sq <= tolerance_sq) {
-                    result_pts.emplace_back(*floater);
-                    anchor_idx = floater_idx;
-                    anchor     = floater;
-                    assert(dpStack.back() == floater_idx);
-                    dpStack.pop_back();
-                    if (dpStack.empty())
-                        break;
-                    floater_idx = dpStack.back();
-                } else {
-                    floater_idx = furthest_idx;
-                    dpStack.emplace_back(floater_idx);
-                }
-                floater = &pts[floater_idx];
-            }
-        }
-        assert(result_pts.front() == pts.front());
-        assert(result_pts.back()  == pts.back());
-
-#if 0
-        {
-            static int iRun = 0;
-			BoundingBox bbox(pts);
-			BoundingBox bbox2(result_pts);
-			bbox.merge(bbox2);
-            SVG svg(debug_out_path("douglas_peucker_%d.svg", iRun ++).c_str(), bbox);
-            if (pts.front() == pts.back())
-                svg.draw(Polygon(pts), "black");
-            else
-                svg.draw(Polyline(pts), "black");
-            if (result_pts.front() == result_pts.back())
-                svg.draw(Polygon(result_pts), "green", scale_(0.1));
-            else
-                svg.draw(Polyline(result_pts), "green", scale_(0.1));
-        }
-#endif
-    }
-    return result_pts;
-}
 
 // Visivalingam simplification algorithm https://github.com/slic3r/Slic3r/pull/3825
 // thanks to @fuchstraumer
@@ -219,7 +126,7 @@ struct vis_node{
     // other node if it's area is less than the other node's area
     bool operator<(const vis_node& other) { return (this->area < other.area); }
 };
-Points MultiPoint::visivalingam(const Points& pts, const double& tolerance)
+Points MultiPoint::visivalingam(const Points &pts, const double tolerance)
 {
     // Make sure there's enough points in "pts" to bother with simplification.
     assert(pts.size() >= 2);

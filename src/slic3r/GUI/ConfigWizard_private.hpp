@@ -27,6 +27,7 @@
 #include "SavePresetDialog.hpp"
 #include "wxExtensions.hpp"
 
+#include "Widgets/SpinInput.hpp"
 
 namespace fs = boost::filesystem;
 
@@ -291,6 +292,7 @@ struct PageMaterials: ConfigWizardPage
 
     PageMaterials(ConfigWizard *parent, Materials *materials, wxString title, wxString shortname, wxString list1name);
 
+    void check_and_update_presets(bool force_reload_presets = false);
     void reload_presets();
 	void update_lists(int sel_type, int sel_vendor, int last_selected_printer = -1);
 	void on_material_highlighted(int sel_material);
@@ -316,8 +318,8 @@ struct Materials
     Technology technology;
     // use vector for the presets to purpose of save of presets sorting in the bundle
     std::vector<const Preset*> presets;
-    // String is alias of material, size_t number of compatible counters 
-    std::vector<std::pair<std::string, size_t>> compatibility_counter;
+    // String is alias of material, set is set of compatible printers
+    std::map<std::string, std::set<const Preset*>> compatibility_counter;
     std::set<std::string> types;
     std::set<const Preset*> printers;
 
@@ -351,7 +353,7 @@ struct Materials
     size_t get_printer_counter(const Preset* preset) {
         for (auto it : compatibility_counter) {
             if (it.first == preset->alias)
-                return it.second;
+                return it.second.size();
         }
         return 0;
     }
@@ -506,8 +508,8 @@ struct PageDiameters: ConfigWizardPage
 
 struct PageTemperatures: ConfigWizardPage
 {
-    wxSpinCtrlDouble *spin_extr;
-    wxSpinCtrlDouble *spin_bed;
+    ::SpinInputDouble *spin_extr;
+    ::SpinInputDouble *spin_bed;
 
     PageTemperatures(ConfigWizard *parent);
     virtual void apply_custom_config(DynamicPrintConfig &config);
@@ -576,7 +578,7 @@ wxDEFINE_EVENT(EVT_INDEX_PAGE, wxCommandEvent);
 
 // ConfigWizard private data
 
-typedef std::map<std::string, std::set<std::string>> PresetAliases;
+typedef std::map<std::string, std::set<const Preset*>> PresetAliases;
 
 struct ConfigWizard::priv
 {
@@ -589,14 +591,14 @@ struct ConfigWizard::priv
                                   // PrinterPickers state.
     Materials filaments;          // Holds available filament presets and their types & vendors
     Materials sla_materials;      // Ditto for SLA materials
-    PresetAliases aliases_fff;    // Map of aliase to preset names
-    PresetAliases aliases_sla;    // Map of aliase to preset names
+    PresetAliases aliases_fff;    // Map of alias to material presets
+    PresetAliases aliases_sla;    // Map of alias to material presets
     std::unique_ptr<DynamicPrintConfig> custom_config;           // Backing for custom printer definition
     bool any_fff_selected;        // Used to decide whether to display Filaments page
     bool any_sla_selected;        // Used to decide whether to display SLA Materials page
     bool custom_printer_selected { false }; // New custom printer is requested
     bool custom_printer_in_bundle { false }; // Older custom printer already exists when wizard starts
-    // Set to true if there are none FFF printers on the main FFF page. If true, only SLA printers are shown (not even custum printers)
+    // Set to true if there are none FFF printers on the main FFF page. If true, only SLA printers are shown (not even custom printers)
     bool only_sla_mode { false };
     bool template_profile_selected { false }; // This bool has one purpose - to tell that template profile should be installed if its not (because it cannot be added to appconfig)
 

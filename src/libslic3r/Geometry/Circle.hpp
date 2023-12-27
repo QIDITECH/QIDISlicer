@@ -9,10 +9,17 @@ namespace Slic3r { namespace Geometry {
 
 // https://en.wikipedia.org/wiki/Circumscribed_circle
 // Circumcenter coordinates, Cartesian coordinates
-template<typename Vector>
-Vector circle_center(const Vector &a, const Vector &bsrc, const Vector &csrc, typename Vector::Scalar epsilon)
+// In case the three points are collinear, returns their centroid.
+template<typename Derived, typename Derived2, typename Derived3>
+Eigen::Matrix<typename Derived::Scalar, 2, 1, Eigen::DontAlign> circle_center(const Derived &a, const Derived2 &bsrc, const Derived3 &csrc, typename Derived::Scalar epsilon)
 {
-    using Scalar = typename Vector::Scalar;
+    static_assert(Derived ::IsVectorAtCompileTime && int(Derived ::SizeAtCompileTime) == 2, "circle_center(): 1st point is not a 2D vector");
+    static_assert(Derived2::IsVectorAtCompileTime && int(Derived2::SizeAtCompileTime) == 2, "circle_center(): 2nd point is not a 2D vector");
+    static_assert(Derived3::IsVectorAtCompileTime && int(Derived3::SizeAtCompileTime) == 2, "circle_center(): 3rd point is not a 2D vector");
+    static_assert(std::is_same<typename Derived::Scalar, typename Derived2::Scalar>::value && std::is_same<typename Derived::Scalar, typename Derived3::Scalar>::value, 
+        "circle_center(): All three points must be of the same type.");
+    using Scalar = typename Derived::Scalar;
+    using Vector = Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign>;
     Vector b  = bsrc - a;
     Vector c  = csrc - a;
 	Scalar lb = b.squaredNorm();
@@ -30,6 +37,31 @@ Vector circle_center(const Vector &a, const Vector &bsrc, const Vector &csrc, ty
     }
 }
 
+// https://en.wikipedia.org/wiki/Circumscribed_circle
+// Circumcenter coordinates, Cartesian coordinates
+// Returns no value if the three points are collinear.
+template<typename Derived, typename Derived2, typename Derived3>
+std::optional<Eigen::Matrix<typename Derived::Scalar, 2, 1, Eigen::DontAlign>> try_circle_center(const Derived &a, const Derived2 &bsrc, const Derived3 &csrc, typename Derived::Scalar epsilon)
+{
+    static_assert(Derived ::IsVectorAtCompileTime && int(Derived ::SizeAtCompileTime) == 2, "try_circle_center(): 1st point is not a 2D vector");
+    static_assert(Derived2::IsVectorAtCompileTime && int(Derived2::SizeAtCompileTime) == 2, "try_circle_center(): 2nd point is not a 2D vector");
+    static_assert(Derived3::IsVectorAtCompileTime && int(Derived3::SizeAtCompileTime) == 2, "try_circle_center(): 3rd point is not a 2D vector");
+    static_assert(std::is_same<typename Derived::Scalar, typename Derived2::Scalar>::value && std::is_same<typename Derived::Scalar, typename Derived3::Scalar>::value, 
+        "try_circle_center(): All three points must be of the same type.");
+    using Scalar = typename Derived::Scalar;
+    using Vector = Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign>;
+    Vector b  = bsrc - a;
+    Vector c  = csrc - a;
+    Scalar lb = b.squaredNorm();
+    Scalar lc = c.squaredNorm();
+    if (Scalar d = b.x() * c.y() - b.y() * c.x(); std::abs(d) < epsilon) {
+        // The three points are collinear.
+        return {};
+    } else {
+        Vector v = lc * b - lb * c;
+        return std::make_optional<Vector>(a + Vector(- v.y(), v.x()) / (2 * d));
+    }
+}
 // 2D circle defined by its center and squared radius
 template<typename Vector>
 struct CircleSq {
@@ -65,7 +97,7 @@ struct Circle {
     Vector center;
     Scalar radius;
 
-    Circle() {}
+    Circle() = default;
     Circle(const Vector &center, const Scalar radius) : center(center), radius(radius) {}
     Circle(const Vector &a, const Vector &b) : center(Scalar(0.5) * (a + b)) { radius = (a - center).norm(); }
     Circle(const Vector &a, const Vector &b, const Vector &c, const Scalar epsilon) { *this = CircleSq(a, b, c, epsilon); }
@@ -104,6 +136,17 @@ Circled circle_taubin_newton(const Vec2ds& input, size_t cycles = 20);
 // Find circle using RANSAC randomized algorithm.
 Circled circle_ransac(const Vec2ds& input, size_t iterations = 20, double* min_error = nullptr);
 
+// Linear Least squares fitting.
+// Be careful! The linear least squares fitting is strongly biased towards small circles,
+// thus the method is only recommended for circles or arches with large arc angle.
+// Also it is strongly recommended to center the input at an expected circle (or arc) center
+// to minimize the small circle bias!
+    // Linear Least squares fitting with SVD. Most accurate, but slowest.
+    Circled circle_linear_least_squares_svd(const Vec2ds &input);
+    // Linear Least squares fitting with QR decomposition. Medium accuracy, medium speed.
+    Circled circle_linear_least_squares_qr(const Vec2ds &input);
+    // Linear Least squares fitting solving normal equations. Low accuracy, high speed.
+    Circled circle_linear_least_squares_normal(const Vec2ds &input);
 // Randomized algorithm by Emo Welzl, working with squared radii for efficiency. The returned circle radius is inflated by epsilon.
 template<typename Vector, typename Points>
 CircleSq<Vector> smallest_enclosing_circle2_welzl(const Points &points, const typename Vector::Scalar epsilon)

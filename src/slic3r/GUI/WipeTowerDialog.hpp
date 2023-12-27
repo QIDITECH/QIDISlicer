@@ -8,6 +8,7 @@
 #include <wx/msgdlg.h>
 
 #include "RammingChart.hpp"
+#include "Widgets/SpinInput.hpp"
 
 
 class RammingPanel : public wxPanel {
@@ -18,10 +19,10 @@ public:
 
 private:
     Chart* m_chart = nullptr;
-    wxSpinCtrl* m_widget_volume = nullptr;
-    wxSpinCtrl* m_widget_ramming_line_width_multiplicator = nullptr;
-    wxSpinCtrl* m_widget_ramming_step_multiplicator = nullptr;
-    wxSpinCtrlDouble* m_widget_time = nullptr;
+    ::SpinInput* m_widget_volume = nullptr;
+    ::SpinInput* m_widget_ramming_line_width_multiplicator = nullptr;
+    ::SpinInput* m_widget_ramming_step_multiplicator = nullptr;
+    ::SpinInputDouble* m_widget_time = nullptr;
     int m_ramming_step_multiplicator;
     int m_ramming_line_width_multiplicator;
       
@@ -56,8 +57,8 @@ private:
     void fill_in_matrix();
     bool advanced_matches_simple();
         
-    std::vector<wxSpinCtrl*> m_old;
-    std::vector<wxSpinCtrl*> m_new;
+    std::vector<::SpinInput*> m_old;
+    std::vector<::SpinInput*> m_new;
     std::vector<std::vector<wxTextCtrl*>> edit_boxes;
     std::vector<wxColour> m_colours;
     unsigned int m_number_of_extruders  = 0;

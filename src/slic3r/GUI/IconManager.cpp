@@ -1,6 +1,20 @@
 #include "IconManager.hpp"
+#include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
+#include <numeric>
 #include <boost/log/trivial.hpp>
+#include <boost/nowide/cstdio.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/algorithm/string.hpp>
+#include "nanosvg/nanosvg.h"
+#include "nanosvg/nanosvgrast.h"
+#include "libslic3r/Utils.hpp" // ScopeGuard   
+
+#include "3DScene.hpp" // glsafe
+#include "GL/glew.h"
+
+#define STB_RECT_PACK_IMPLEMENTATION
+#include "imgui/imstb_rectpack.h" // distribute rectangles
 
 using namespace Slic3r::GUI;
 
@@ -14,16 +28,195 @@ static void draw_transparent_icon(const IconManager::Icon &icon); // only help f
 IconManager::~IconManager() {
 	priv::clear(m_icons);
 	// release opengl texture is made in ~GLTexture()
+    if (m_id != 0)
+        glsafe(::glDeleteTextures(1, &m_id));
 }
 
-std::vector<IconManager::Icons> IconManager::init(const InitTypes &input) 
+namespace {
+NSVGimage *parse_file(const char * filepath) {
+    FILE *fp = boost::nowide::fopen(filepath, "rb");
+    assert(fp != nullptr);
+    if (fp == nullptr)
+        return nullptr;
+
+    Slic3r::ScopeGuard sg([fp]() { fclose(fp); });
+
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    // Note: +1 is for null termination
+    auto data_ptr = std::make_unique<char[]>(size+1);
+    data_ptr[size] = '\0'; // Must be null terminated.
+
+    size_t readed_size = fread(data_ptr.get(), 1, size, fp);
+    assert(readed_size == size);
+    if (readed_size != size)
+        return nullptr;
+
+    return nsvgParse(data_ptr.get(), "px", 96.0f);
+}
+
+void subdata(unsigned char *data, size_t data_stride, const std::vector<unsigned char> &data2, size_t data2_row) {
+    assert(data_stride >= data2_row);
+    for (size_t data2_offset = 0, data_offset = 0; 
+        data2_offset < data2.size();
+        data2_offset += data2_row, data_offset += data_stride)   
+        ::memcpy((void *)(data + data_offset), (const void *)(data2.data() + data2_offset), data2_row);
+}
+}
+
+IconManager::Icons IconManager::init(const InitTypes &input) 
 {
-    BOOST_LOG_TRIVIAL(error) << "Not implemented yet";
+    assert(!input.empty());
+    if (input.empty())
+        return {};
+
+    // TODO: remove in future
+    if (m_id != 0) {
+        glsafe(::glDeleteTextures(1, &m_id));
+        m_id = 0;
+    }
+
+    int total_surface = 0;
+    for (const InitType &i : input)
+        total_surface += i.size.x * i.size.y;
+    const int surface_sqrt = (int)sqrt((float)total_surface) + 1;
+
+    // Start packing
+    // Pack our extra data rectangles first, so it will be on the upper-left corner of our texture (UV will have small values).
+    const int TEX_HEIGHT_MAX = 1024 * 32;
+    int width = (surface_sqrt >= 4096 * 0.7f) ? 4096 : (surface_sqrt >= 2048 * 0.7f) ? 2048 : (surface_sqrt >= 1024 * 0.7f) ? 1024 : 512;
+
+    int num_nodes = width;
+    std::vector<stbrp_node> nodes(num_nodes);
+    stbrp_context context;
+    stbrp_init_target(&context, width, TEX_HEIGHT_MAX, nodes.data(), num_nodes);
+
+    ImVector<stbrp_rect> pack_rects;
+    pack_rects.resize(input.size());
+    memset(pack_rects.Data, 0, (size_t) pack_rects.size_in_bytes());
+    for (size_t i = 0; i < input.size(); i++) {
+        const ImVec2 &size = input[i].size;
+        assert(size.x > 1);
+        assert(size.y > 1);
+        pack_rects[i].w = size.x;
+        pack_rects[i].h = size.y;
+    }
+    int pack_rects_res = stbrp_pack_rects(&context, &pack_rects[0], pack_rects.Size);
+    assert(pack_rects_res == 1);
+    if (pack_rects_res != 1)
+        return {};
+
+    ImVec2 tex_size(width, width);
+    for (const stbrp_rect &rect : pack_rects) {
+        float x = rect.x + rect.w;
+        float y = rect.y + rect.h;
+        if(x > tex_size.x) tex_size.x = x;
+        if(y > tex_size.y) tex_size.y = y;
+    }
+    
+    Icons result(input.size());
+    for (int i = 0; i < pack_rects.Size; i++) {
+        const stbrp_rect &rect = pack_rects[i];
+        assert(rect.was_packed);
+        if (!rect.was_packed)
+            return {};
+
+        ImVec2 tl(rect.x / tex_size.x, rect.y / tex_size.y);
+        ImVec2 br((rect.x + rect.w) / tex_size.x, (rect.y + rect.h) / tex_size.y);
+
+        assert(input[i].size.x == rect.w);
+        assert(input[i].size.y == rect.h);
+        Icon icon = {input[i].size, tl, br};
+        result[i] = std::make_shared<Icon>(std::move(icon));
+    }
+        
+    NSVGrasterizer *rast = nsvgCreateRasterizer();
+    assert(rast != nullptr);
+    if (rast == nullptr)
+        return {};
+    ScopeGuard sg_rast([rast]() { ::nsvgDeleteRasterizer(rast); });
+
+    int channels = 4;
+    int n_pixels = tex_size.x * tex_size.y;
+    // store data for whole texture
+    std::vector<unsigned char> data(n_pixels * channels, {0});
+
+    // initialize original index locations
+    std::vector<size_t> idx(input.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    // Group same filename by sort inputs
+    // sort indexes based on comparing values in input
+    std::sort(idx.begin(), idx.end(), [&input](size_t i1, size_t i2) { return input[i1].filepath < input[i2].filepath; });
+    for (size_t j: idx) {
+        const InitType &i = input[j];
+        if (i.filepath.empty())
+            continue; // no file path only reservation of space for texture
+        assert(boost::filesystem::exists(i.filepath));
+        if (!boost::filesystem::exists(i.filepath))
+            continue;
+        assert(boost::algorithm::iends_with(i.filepath, ".svg"));
+        if (!boost::algorithm::iends_with(i.filepath, ".svg"))
+            continue;
+
+        NSVGimage *image = parse_file(i.filepath.c_str());
+        assert(image != nullptr);
+        if (image == nullptr)
     return {};
+        ScopeGuard sg_image([image]() { ::nsvgDelete(image); });
+
+        float svg_scale = i.size.y / image->height;
+        // scale should be same in both directions
+        assert(is_approx(svg_scale, i.size.y / image->width));
+                
+        const stbrp_rect &rect = pack_rects[j];
+        int n_pixels = rect.w * rect.h;
+        std::vector<unsigned char> icon_data(n_pixels * channels, {0});
+        ::nsvgRasterize(rast, image, 0, 0, svg_scale, icon_data.data(), i.size.x, i.size.y, i.size.x * channels);
+        
+        // makes white or gray only data in icon
+        if (i.type == RasterType::white_only_data || 
+            i.type == RasterType::gray_only_data) {
+            unsigned char value = (i.type == RasterType::white_only_data) ? 255 : 127;
+            for (size_t k = 0; k < icon_data.size(); k += channels)
+                if (icon_data[k] != 0 || icon_data[k + 1] != 0 || icon_data[k + 2] != 0) {
+                    icon_data[k]     = value;
+                    icon_data[k + 1] = value;
+                    icon_data[k + 2] = value;
+                }
+        }
+
+        int start_offset = (rect.y*tex_size.x + rect.x) * channels;
+        int data_stride = tex_size.x * channels;
+        subdata(data.data() + start_offset, data_stride, icon_data, rect.w * channels);
+    }
+
+    if (m_id != 0) 
+        glsafe(::glDeleteTextures(1, &m_id));
+
+    glsafe(::glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+    glsafe(::glGenTextures(1, &m_id));
+    glsafe(::glBindTexture(GL_TEXTURE_2D, (GLuint) m_id));
+    glsafe(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    glsafe(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0));
+    glsafe(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    glsafe(::glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei) tex_size.x, (GLsizei) tex_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE,  (const void*) data.data()));    
+
+    // bind no texture
+    glsafe(::glBindTexture(GL_TEXTURE_2D, 0));
+
+    for (const auto &i : result)
+        i->tex_id = m_id;
+    return result;
 }
 
 std::vector<IconManager::Icons> IconManager::init(const std::vector<std::string> &file_paths, const ImVec2 &size, RasterType type)
 {
+    assert(!file_paths.empty());
+    assert(size.x >= 1);
+    assert(size.x < 256*16);
     // TODO: remove in future
     if (!m_icons.empty()) {
         // not first initialization

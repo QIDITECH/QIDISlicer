@@ -485,8 +485,7 @@ static inline void fill_expolygon_generate_paths(
     extrusion_entities_append_paths(
         dst,
         std::move(polylines),
-        role,
-        flow.mm3_per_mm(), flow.width(), flow.height());
+        { role, flow });
 }
 
 static inline void fill_expolygons_generate_paths(
@@ -644,7 +643,7 @@ static inline void tree_supports_generate_paths(
                 ExPolygons level2 = offset2_ex({ expoly }, -1.5 * flow.scaled_width(), 0.5 * flow.scaled_width());
                 if (level2.size() == 1) {
                     Polylines polylines;
-                    extrusion_entities_append_paths(eec->entities, draw_perimeters(expoly, clip_length), ExtrusionRole::SupportMaterial, flow.mm3_per_mm(), flow.width(), flow.height(),
+                    extrusion_entities_append_paths(eec->entities, draw_perimeters(expoly, clip_length), { ExtrusionRole::SupportMaterial, flow },
                         // Disable reversal of the path, always start with the anchor, always print CCW.
                         false);
                     expoly = level2.front();
@@ -750,7 +749,7 @@ static inline void tree_supports_generate_paths(
         }
 
         ExtrusionEntitiesPtr &out = eec ? eec->entities : dst;
-        extrusion_entities_append_paths(out, std::move(polylines), ExtrusionRole::SupportMaterial, flow.mm3_per_mm(), flow.width(), flow.height(), 
+        extrusion_entities_append_paths(out, std::move(polylines), { ExtrusionRole::SupportMaterial, flow },
             // Disable reversal of the path, always start with the anchor, always print CCW.
             false);
         if (eec) {
@@ -794,7 +793,7 @@ static inline void fill_expolygons_with_sheath_generate_paths(
             eec->no_sort = true;
         }
         ExtrusionEntitiesPtr &out = no_sort ? eec->entities : dst;
-        extrusion_entities_append_paths(out, draw_perimeters(expoly, clip_length), ExtrusionRole::SupportMaterial, flow.mm3_per_mm(), flow.width(), flow.height());
+        extrusion_entities_append_paths(out, draw_perimeters(expoly, clip_length), { ExtrusionRole::SupportMaterial, flow });
         // Fill in the rest.
         fill_expolygons_generate_paths(out, offset_ex(expoly, float(-0.4 * spacing)), filler, fill_params, density, role, flow);
         if (no_sort && ! eec->empty())
@@ -1106,7 +1105,7 @@ void LoopInterfaceProcessor::generate(SupportGeneratorLayerExtruded &top_contact
     extrusion_entities_append_paths(
         top_contact_layer.extrusions,
         std::move(loop_lines),
-        ExtrusionRole::SupportMaterialInterface, flow.mm3_per_mm(), flow.width(), flow.height());
+        { ExtrusionRole::SupportMaterialInterface, flow });
 }
 
 #ifdef SLIC3R_DEBUG
@@ -1148,24 +1147,20 @@ static void modulate_extrusion_by_overlapping_layers(
     ExtrusionPath *extrusion_path_template = dynamic_cast<ExtrusionPath*>(extrusions_in_out.front());
     assert(extrusion_path_template != nullptr);
     ExtrusionRole extrusion_role  = extrusion_path_template->role();
-    float         extrusion_width = extrusion_path_template->width;
+    float         extrusion_width = extrusion_path_template->width();
 
     struct ExtrusionPathFragment
     {
-        ExtrusionPathFragment() : mm3_per_mm(-1), width(-1), height(-1) {};
-        ExtrusionPathFragment(double mm3_per_mm, float width, float height) : mm3_per_mm(mm3_per_mm), width(width), height(height) {};
+        ExtrusionFlow   flow;
 
         Polylines       polylines;
-        double          mm3_per_mm;
-        float           width;
-        float           height;
     };
 
     // Split the extrusions by the overlapping layers, reduce their extrusion rate.
     // The last path_fragment is from this_layer.
     std::vector<ExtrusionPathFragment> path_fragments(
         n_overlapping_layers + 1, 
-        ExtrusionPathFragment(extrusion_path_template->mm3_per_mm, extrusion_path_template->width, extrusion_path_template->height));
+        ExtrusionPathFragment{ extrusion_path_template->attributes() });
     // Don't use it, it will be released.
     extrusion_path_template = nullptr;
 
@@ -1242,8 +1237,8 @@ static void modulate_extrusion_by_overlapping_layers(
         path_fragments.back().polylines = diff_pl(path_fragments.back().polylines, polygons_trimming);
         // Adjust the extrusion parameters for a reduced layer height and a non-bridging flow (nozzle_dmr = -1, does not matter).
         assert(this_layer.print_z > overlapping_layer.print_z);
-        frag.height = float(this_layer.print_z - overlapping_layer.print_z);
-        frag.mm3_per_mm = Flow(frag.width, frag.height, -1.f).mm3_per_mm();
+        frag.flow.height = float(this_layer.print_z - overlapping_layer.print_z);
+        frag.flow.mm3_per_mm = Flow(frag.flow.width, frag.flow.height, -1.f).mm3_per_mm();
 #ifdef SLIC3R_DEBUG
         svg.draw(frag.polylines, dbg_index_to_color(i_overlapping_layer), scale_(0.1));
 #endif /* SLIC3R_DEBUG */
@@ -1326,15 +1321,14 @@ static void modulate_extrusion_by_overlapping_layers(
             ExtrusionPath         *path = multipath.paths.empty() ? nullptr : &multipath.paths.back();
             if (path != nullptr) {
                 // Verify whether the path is compatible with the current fragment.
-                assert(this_layer.layer_type == SupporLayerType::BottomContact || path->height != frag.height || path->mm3_per_mm != frag.mm3_per_mm);
-                if (path->height != frag.height || path->mm3_per_mm != frag.mm3_per_mm) {
+                assert(this_layer.layer_type == SupporLayerType::BottomContact || path->height() != frag.flow.height || path->mm3_per_mm() != frag.flow.mm3_per_mm);
+                if (path->height() != frag.flow.height || path->mm3_per_mm() != frag.flow.mm3_per_mm)
                     path = nullptr;
-                }
                 // Merging with the previous path. This can only happen if the current layer was reduced by a base layer, which was split into a base and interface layer.
             }
             if (path == nullptr) {
                 // Allocate a new path.
-                multipath.paths.push_back(ExtrusionPath(extrusion_role, frag.mm3_per_mm, frag.width, frag.height));
+                multipath.paths.emplace_back(ExtrusionAttributes{ extrusion_role, frag.flow });
                 path = &multipath.paths.back();
             }
             // The Clipper library may flip the order of the clipped polylines arbitrarily.
@@ -1369,8 +1363,8 @@ static void modulate_extrusion_by_overlapping_layers(
     }
     // If there are any non-consumed fragments, add them separately.
     //FIXME this shall not happen, if the Clipper works as expected and all paths split to fragments could be re-connected.
-    for (auto it_fragment = path_fragments.begin(); it_fragment != path_fragments.end(); ++ it_fragment)
-        extrusion_entities_append_paths(extrusions_in_out, std::move(it_fragment->polylines), extrusion_role, it_fragment->mm3_per_mm, it_fragment->width, it_fragment->height);
+    for (ExtrusionPathFragment &fragment : path_fragments)
+        extrusion_entities_append_paths(extrusions_in_out, std::move(fragment.polylines), { extrusion_role, fragment.flow });
 }
 
 // Support layer that is covered by some form of dense interface.
@@ -1732,7 +1726,8 @@ void generate_support_toolpaths(
                         // Filler and its parameters
                         filler, float(density),
                         // Extrusion parameters
-                        ExtrusionRole::SupportMaterialInterface, interface_flow);
+                        interface_as_base ? ExtrusionRole::SupportMaterial : ExtrusionRole::SupportMaterialInterface,
+                        interface_flow);
                 }
             };
             const bool top_interfaces = config.support_material_interface_layers.value != 0;

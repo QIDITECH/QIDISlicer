@@ -435,6 +435,7 @@ void PresetComboBox::update_from_bundle()
 void PresetComboBox::msw_rescale()
 {
     m_em_unit = em_unit(this);
+    ::ComboBox::Rescale();
 }
 
 void PresetComboBox::sys_color_changed()
@@ -788,7 +789,7 @@ void PlaterPresetComboBox::show_edit_menu()
             [this](wxCommandEvent&) { this->change_extruder_color(); }, "funnel", menu, []() { return true; }, wxGetApp().plater());
 #endif //__linux__
         append_menu_item(menu, wxID_ANY, _L("Show/Hide template presets"), "",
-            [this](wxCommandEvent&) { wxGetApp().open_preferences("no_templates", "General"); }, "spool", menu, []() { return true; }, wxGetApp().plater());
+            [](wxCommandEvent&) { wxGetApp().open_preferences("no_templates", "General"); }, "spool", menu, []() { return true; }, wxGetApp().plater());
 
         wxGetApp().plater()->PopupMenu(menu);
         return;

@@ -6,6 +6,7 @@ add_executable(${_TEST_NAME}_tests
 	test_aabbindirect.cpp
 	test_kdtreeindirect.cpp
 	test_arachne.cpp
+	test_arc_welder.cpp
 	test_clipper_offset.cpp
 	test_clipper_utils.cpp
 	test_color.cpp
@@ -38,8 +39,10 @@ add_executable(${_TEST_NAME}_tests
     test_astar.cpp
     test_anyptr.cpp
     test_jump_point_search.cpp
-    ../data/qidiparts.cpp
-    ../data/qidiparts.hpp
+    test_support_spots_generator.cpp
+    ../data/prusaparts.cpp
+    ../data/prusaparts.hpp
+     test_static_map.cpp
 	)
 
 if (TARGET OpenVDB::openvdb)

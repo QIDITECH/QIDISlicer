@@ -203,7 +203,7 @@ void change_opt_value(DynamicPrintConfig& config, const t_config_option_key& opt
 			}
 			break;
 		case coPoints:{
-			if (opt_key == "bed_shape" || opt_key == "bed_exclude_area" || opt_key == "thumbnails") {
+			if (opt_key == "bed_shape") {
 				config.option<ConfigOptionPoints>(opt_key)->values = boost::any_cast<std::vector<Vec2d>>(value);
 				break;
 			}
@@ -338,7 +338,7 @@ void show_substitutions_info(const PresetsConfigSubstitutions& presets_config_su
 	};
 
 	for (const PresetConfigSubstitutions& substitution : presets_config_substitutions) {
-		changes += "\n\n" + format_wxstr("%1% : %2%", preset_type_name(substitution.preset_type), bold_string(substitution.preset_name));
+		changes += "\n\n" + format_wxstr("%1% : %2%", preset_type_name(substitution.preset_type), bold_string(from_u8(substitution.preset_name)));
 		if (!substitution.preset_file.empty())
 			changes += format_wxstr(" (%1%)", substitution.preset_file);
 

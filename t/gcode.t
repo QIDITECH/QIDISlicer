@@ -1,4 +1,4 @@
-use Test::More tests => 23;
+use Test::More tests => 22;
 use strict;
 use warnings;
 
@@ -185,13 +185,14 @@ use Slic3r::Test;
     }
 }
 
-{
-    my $config = Slic3r::Config::new_from_defaults;
-    $config->set('start_gcode', 'START:[input_filename]');
-    my $print = Slic3r::Test::init_print('20mm_cube', config => $config);
-    my $gcode = Slic3r::Test::gcode($print);
-    like $gcode, qr/START:20mm_cube/, '[input_filename] is also available in custom G-code';
-}
+#{
+# [input_filename] placeholder was removed in 0cbbe96.
+#    my $config = Slic3r::Config::new_from_defaults;
+#    $config->set('start_gcode', 'START:[input_filename]');
+#    my $print = Slic3r::Test::init_print('20mm_cube', config => $config);
+#    my $gcode = Slic3r::Test::gcode($print);
+#    like $gcode, qr/START:20mm_cube/, '[input_filename] is also available in custom G-code';
+#}
 
 # The current Spiral Vase slicing code removes the holes and all but the largest contours from each slice,
 # therefore the following test is no more valid.

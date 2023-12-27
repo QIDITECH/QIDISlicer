@@ -85,6 +85,7 @@ class ObjectDataViewModelNode
     std::string                     m_action_icon_name = "";
     ModelVolumeType                 m_volume_type{ -1 };
     bool                            m_is_text_volume{ false };
+    bool                            m_is_svg_volume{false};
     InfoItemType                    m_info_item_type {InfoItemType::Undef};
 
 public:
@@ -103,6 +104,7 @@ public:
                             const wxString& sub_obj_name,
                             Slic3r::ModelVolumeType type,
                             const bool is_text_volume,
+                            const bool is_svg_volume,
                             const wxString& extruder,
                             const int idx = -1 );
 
@@ -238,6 +240,7 @@ public:
     bool        update_settings_digest(const std::vector<std::string>& categories);
     int         volume_type() const { return int(m_volume_type); }
     bool        is_text_volume() const { return m_is_text_volume; }
+    bool        is_svg_volume() const { return m_is_svg_volume; }
     void        sys_color_changed();
 
 #ifndef NDEBUG
@@ -265,6 +268,7 @@ class ObjectDataViewModel :public wxDataViewModel
     std::vector<ObjectDataViewModelNode*>       m_objects;
     std::vector<wxBitmapBundle*>                m_volume_bmps;
     std::vector<wxBitmapBundle*>                m_text_volume_bmps;
+    std::vector<wxBitmapBundle *>               m_svg_volume_bmps;
     std::map<InfoItemType, wxBitmapBundle*>     m_info_bmps;
     wxBitmapBundle                              m_empty_bmp;
     wxBitmapBundle                              m_warning_bmp;
@@ -286,6 +290,7 @@ public:
                                     const int volume_idx,
                                     const Slic3r::ModelVolumeType volume_type,
                                     const bool is_text_volume,
+                                    const bool is_svg_volume,
                                     const std::string& warning_icon_name,
                                     const wxString& extruder);
     wxDataViewItem AddSettingsChild(const wxDataViewItem &parent_item);

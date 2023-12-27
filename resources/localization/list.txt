@@ -33,6 +33,7 @@ src/slic3r/GUI/DesktopIntegrationDialog.cpp
 src/slic3r/GUI/DoubleSlider.cpp
 src/slic3r/GUI/Downloader.cpp
 src/slic3r/GUI/DownloaderFileGet.cpp
+src/slic3r/GUI/EditGCodeDialog.cpp
 src/slic3r/GUI/ExtraRenderers.cpp
 src/slic3r/GUI/ExtruderSequenceDialog.cpp
 src/slic3r/GUI/Field.cpp
@@ -43,7 +44,6 @@ src/slic3r/GUI/GCodeViewer.cpp
 src/slic3r/GUI/Gizmos/GLGizmoCut.cpp
 src/slic3r/GUI/Gizmos/GLGizmoCut.hpp
 src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp
-src/slic3r/GUI/Gizmos/GLGizmoEmboss.hpp
 src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp
 src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.hpp
 src/slic3r/GUI/Gizmos/GLGizmoFlatten.cpp
@@ -61,6 +61,7 @@ src/slic3r/GUI/Gizmos/GLGizmoSimplify.cpp
 src/slic3r/GUI/Gizmos/GLGizmoSimplify.hpp
 src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.hpp
 src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp
+src/slic3r/GUI/Gizmos/GLGizmoSVG.cpp
 src/slic3r/GUI/Gizmos/GLGizmosManager.cpp
 src/slic3r/GUI/GLCanvas3D.cpp
 src/slic3r/GUI/GUI.cpp
@@ -110,6 +111,7 @@ src/slic3r/GUI/Tab.cpp
 src/slic3r/GUI/Tab.hpp
 src/slic3r/GUI/UnsavedChangesDialog.cpp
 src/slic3r/GUI/UpdateDialogs.cpp
+src/slic3r/GUI/WifiConfigDialog.cpp
 src/slic3r/GUI/WipeTowerDialog.cpp
 src/slic3r/GUI/wxExtensions.cpp
 src/slic3r/Utils/AppUpdater.cpp

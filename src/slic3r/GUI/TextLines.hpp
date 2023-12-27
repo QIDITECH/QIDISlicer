@@ -32,7 +32,7 @@ public:
     void reset() { m_model.reset(); m_lines.clear(); }
     const Slic3r::Emboss::TextLines &get_lines() const { return m_lines; }
 
-    static double calc_line_height(const Slic3r::Emboss::FontFile& ff, const FontProp& fp); // return lineheight in mm
+    static double calc_line_height_in_mm(const Slic3r::Emboss::FontFile& ff, const FontProp& fp); // return lineheight in mm
 private:
     Slic3r::Emboss::TextLines m_lines;
 

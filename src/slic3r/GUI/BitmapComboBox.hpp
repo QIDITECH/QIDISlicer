@@ -4,6 +4,7 @@
 #include <wx/bmpcbox.h>
 #include <wx/gdicmn.h>
 
+#include "Widgets/ComboBox.hpp"
 #include "GUI_Utils.hpp"
 
 // ---------------------------------
@@ -13,7 +14,8 @@ namespace Slic3r {
 namespace GUI {
 
 // BitmapComboBox used to presets list on Sidebar and Tabs
-class BitmapComboBox : public wxBitmapComboBox
+//class BitmapComboBox : public wxBitmapComboBox
+class BitmapComboBox : public ::ComboBox
 {
 public:
 BitmapComboBox(wxWindow* parent,
@@ -24,6 +26,7 @@ BitmapComboBox(wxWindow* parent,
     int n = 0,
     const wxString choices[] = NULL,
     long style = 0);
+#if 0
 ~BitmapComboBox();
 
 #ifdef _WIN32
@@ -36,7 +39,7 @@ BitmapComboBox(wxWindow* parent,
 
 protected:
 
-#ifdef _WIN32
+//#ifdef _WIN32
 bool MSWOnDraw(WXDRAWITEMSTRUCT* item) override;
 void DrawBackground_(wxDC& dc, const wxRect& rect, int WXUNUSED(item), int flags) const;
 public:

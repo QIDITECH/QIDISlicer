@@ -578,9 +578,8 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 		        	flow_width      = new_flow.width();
 		        }
 		        // Save into layer.
-				ExtrusionEntityCollection* eec = nullptr;
+                ExtrusionEntityCollection *eec        = new ExtrusionEntityCollection();
 				auto fill_begin = uint32_t(layerm.fills().size());
-		        layerm.m_fills.entities.push_back(eec = new ExtrusionEntityCollection());
 		        // Only concentric fills are not sorted.
 		        eec->no_sort = f->no_sort();
                 if (params.use_arachne) {
@@ -597,12 +596,18 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                         }
                     }
 
+                    if (!eec->empty())
+                        layerm.m_fills.entities.push_back(eec);
+                    else
+                        delete eec;
                     thick_polylines.clear();
                 } else {
                     extrusion_entities_append_paths(
                         eec->entities, std::move(polylines),
-                        surface_fill.params.extrusion_role,
-                        flow_mm3_per_mm, float(flow_width), surface_fill.params.flow.height());
+						ExtrusionAttributes{ surface_fill.params.extrusion_role,
+							ExtrusionFlow{ flow_mm3_per_mm, float(flow_width), surface_fill.params.flow.height() } 
+						});
+                    layerm.m_fills.entities.push_back(eec);
                 }
                 insert_fills_into_islands(*this, uint32_t(surface_fill.region_id), fill_begin, uint32_t(layerm.fills().size()));
 		    }
@@ -947,8 +952,9 @@ void Layer::make_ironing()
 				eec->no_sort = true;
 		        extrusion_entities_append_paths(
 		            eec->entities, std::move(polylines),
-					ExtrusionRole::Ironing,
-		            flow_mm3_per_mm, extrusion_width, float(extrusion_height));
+					ExtrusionAttributes{ ExtrusionRole::Ironing,
+						ExtrusionFlow{ flow_mm3_per_mm, extrusion_width, float(extrusion_height) }
+					});
 				insert_fills_into_islands(*this, ironing_params.region_id, fill_begin, uint32_t(ironing_params.layerm->fills().size()));
 		    }
 		}

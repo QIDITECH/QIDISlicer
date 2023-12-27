@@ -24,7 +24,7 @@ public:
     // os specific load of wxFont
     static std::unique_ptr<Slic3r::Emboss::FontFile> create_font_file(const wxFont &font);
 
-    static EmbossStyle::Type get_actual_type();
+    static EmbossStyle::Type get_current_type();
     static EmbossStyle create_emboss_style(const wxFont &font, const std::string& name = "");
 
     static std::string get_human_readable_name(const wxFont &font);

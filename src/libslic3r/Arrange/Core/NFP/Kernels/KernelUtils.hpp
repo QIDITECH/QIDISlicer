@@ -24,6 +24,7 @@ bool find_initial_position(Itm &itm,
     {
         if (all_items_range(packing_context).empty()) {
             auto rotations = allowed_rotations(itm);
+            set_rotation(itm, 0.);
             auto chull     = envelope_convex_hull(itm);
 
             for (double rot : rotations) {

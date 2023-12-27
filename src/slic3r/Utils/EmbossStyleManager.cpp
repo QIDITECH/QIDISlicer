@@ -1,26 +1,23 @@
 #include "EmbossStyleManager.hpp"
+#include <optional>
 #include <GL/glew.h> // Imgui texture
 #include <imgui/imgui_internal.h> // ImTextCharFromUtf8
-#include "WxFontUtils.hpp"
-#include "libslic3r/Utils.hpp" // ScopeGuard
+#include <libslic3r/AppConfig.hpp>
+#include <libslic3r/Utils.hpp> // ScopeGuard
 
+#include "WxFontUtils.hpp"
 #include "slic3r/GUI/3DScene.hpp" // ::glsafe
 #include "slic3r/GUI/Jobs/CreateFontStyleImagesJob.hpp"
 #include "slic3r/GUI/ImGuiWrapper.hpp" // check of font ranges
 
-#include "slic3r/Utils/EmbossStylesSerializable.hpp"
 
 using namespace Slic3r;
 using namespace Slic3r::Emboss;
 using namespace Slic3r::GUI::Emboss;
 
-StyleManager::StyleManager(const ImWchar *language_glyph_range, std::function<EmbossStyles()> create_default_styles)
-    : m_imgui_init_glyph_range(language_glyph_range)
-    , m_create_default_styles(create_default_styles)
-    , m_exist_style_images(false)
-    , m_temp_style_images(nullptr)
-    , m_app_config(nullptr)
-    , m_last_style_index(std::numeric_limits<size_t>::max())
+StyleManager::StyleManager(const ImWchar *language_glyph_range, const std::function<EmbossStyles()>& create_default_styles)
+    : m_create_default_styles(create_default_styles)
+    , m_imgui_init_glyph_range(language_glyph_range)
 {}
 
 StyleManager::~StyleManager() { 
@@ -28,53 +25,65 @@ StyleManager::~StyleManager() {
     free_style_images();
 }
 
+/// <summary>
+/// For store/load emboss style to/from AppConfig
+/// </summary>
+namespace {
+void                    store_style_index(AppConfig &cfg, size_t index);
+::std::optional<size_t> load_style_index(const AppConfig &cfg);
+
+StyleManager::Styles load_styles(const AppConfig &cfg);
+void store_styles(AppConfig &cfg, const StyleManager::Styles &styles);
+void make_unique_name(const StyleManager::Styles &styles, std::string &name);
+} // namespace
 void StyleManager::init(AppConfig *app_config)
 {
+    assert(app_config != nullptr);
     m_app_config = app_config;
-    EmbossStyles styles = (app_config != nullptr) ? 
-        EmbossStylesSerializable::load_styles(*app_config) : 
-        EmbossStyles{};
-    if (styles.empty()) 
-        styles = m_create_default_styles();
+    m_styles = ::load_styles(*app_config);
+
+    if (m_styles.empty()) {
+        // No styles loaded from ini file so use default
+        EmbossStyles styles = m_create_default_styles();
     for (EmbossStyle &style : styles) {
-        make_unique_name(style.name);
-        m_style_items.push_back({style});
+            ::make_unique_name(m_styles, style.name);
+            m_styles.push_back({style});
+        }
     }
 
     std::optional<size_t> active_index_opt = (app_config != nullptr) ? 
-        EmbossStylesSerializable::load_style_index(*app_config) : 
+        ::load_style_index(*app_config) : 
         std::optional<size_t>{};
 
     size_t active_index = 0;
     if (active_index_opt.has_value()) active_index = *active_index_opt;    
-    if (active_index >= m_style_items.size()) active_index = 0;
+    if (active_index >= m_styles.size()) active_index = 0;
     
     // find valid font item
     if (load_style(active_index))
         return; // style is loaded
 
     // Try to fix that style can't be loaded
-    m_style_items.erase(m_style_items.begin() + active_index);
+    m_styles.erase(m_styles.begin() + active_index);
 
     load_valid_style();
 }
 
-bool StyleManager::store_styles_to_app_config(bool use_modification,
-                                                    bool store_active_index)
+bool StyleManager::store_styles_to_app_config(bool use_modification, bool store_active_index)
 {
     assert(m_app_config != nullptr);
     if (m_app_config == nullptr) return false;
     if (use_modification) {
         if (exist_stored_style()) {
             // update stored item
-            m_style_items[m_style_cache.style_index].style = m_style_cache.style;
+            m_styles[m_style_cache.style_index] = m_style_cache.style;
         } else {
             // add new into stored list
             EmbossStyle &style = m_style_cache.style;
-            make_unique_name(style.name);
+            ::make_unique_name(m_styles, style.name);
             m_style_cache.truncated_name.clear();
-            m_style_cache.style_index = m_style_items.size();
-            m_style_items.push_back({style});
+            m_style_cache.style_index = m_styles.size();
+            m_styles.push_back({style});
         }
         m_style_cache.stored_wx_font = m_style_cache.wx_font;
     }
@@ -84,30 +93,27 @@ bool StyleManager::store_styles_to_app_config(bool use_modification,
         size_t style_index = exist_stored_style() ?
                                  m_style_cache.style_index :
                                  m_last_style_index;
-        EmbossStylesSerializable::store_style_index(*m_app_config, style_index);
+        store_style_index(*m_app_config, style_index);
     }
 
-    EmbossStyles styles;
-    styles.reserve(m_style_items.size());
-    for (const Item &item : m_style_items) styles.push_back(item.style);
-    EmbossStylesSerializable::store_styles(*m_app_config, styles);
+    store_styles(*m_app_config, m_styles);
     return true;
 }
 
 void StyleManager::add_style(const std::string &name) {
     EmbossStyle& style = m_style_cache.style;
     style.name = name;
-    make_unique_name(style.name);
-    m_style_cache.style_index = m_style_items.size();
+    ::make_unique_name(m_styles, style.name);
+    m_style_cache.style_index = m_styles.size();
     m_style_cache.stored_wx_font = m_style_cache.wx_font;
     m_style_cache.truncated_name.clear();
-    m_style_items.push_back({style});
+    m_styles.push_back({style});
 }
 
 void StyleManager::swap(size_t i1, size_t i2) {
-    if (i1 >= m_style_items.size() || 
-        i2 >= m_style_items.size()) return;
-    std::swap(m_style_items[i1], m_style_items[i2]);
+    if (i1 >= m_styles.size() || 
+        i2 >= m_styles.size()) return;
+    std::swap(m_styles[i1], m_styles[i2]);
     // fix selected index
     if (!exist_stored_style()) return;
     if (m_style_cache.style_index == i1) {
@@ -131,7 +137,7 @@ void StyleManager::discard_style_changes() {
 }
 
 void StyleManager::erase(size_t index) {
-    if (index >= m_style_items.size()) return;
+    if (index >= m_styles.size()) return;
 
     // fix selected index
     if (exist_stored_style()) {
@@ -140,15 +146,15 @@ void StyleManager::erase(size_t index) {
         else if (index == i) i = std::numeric_limits<size_t>::max();
     }
 
-    m_style_items.erase(m_style_items.begin() + index);
+    m_styles.erase(m_styles.begin() + index);
 }
 
 void StyleManager::rename(const std::string& name) {
     m_style_cache.style.name = name;
     m_style_cache.truncated_name.clear();
     if (exist_stored_style()) { 
-        Item &it = m_style_items[m_style_cache.style_index];
-        it.style.name = name;
+        Style &it = m_styles[m_style_cache.style_index];
+        it.name = name;
         it.truncated_name.clear();
     }
 }
@@ -156,28 +162,28 @@ void StyleManager::rename(const std::string& name) {
 void StyleManager::load_valid_style()
 {
     // iterate over all known styles
-    while (!m_style_items.empty()) {
+    while (!m_styles.empty()) {
         if (load_style(0))
             return;
         // can't load so erase it from list
-        m_style_items.erase(m_style_items.begin());
+        m_styles.erase(m_styles.begin());
     }
 
     // no one style is loadable
     // set up default font list
     EmbossStyles def_style = m_create_default_styles();
     for (EmbossStyle &style : def_style) {
-        make_unique_name(style.name);
-        m_style_items.push_back({std::move(style)});
+        ::make_unique_name(m_styles, style.name);
+        m_styles.push_back({std::move(style)});
     }
 
     // iterate over default styles
     // There have to be option to use build in font
-    while (!m_style_items.empty()) {
+    while (!m_styles.empty()) {
         if (load_style(0))
             return;
         // can't load so erase it from list
-        m_style_items.erase(m_style_items.begin());
+        m_styles.erase(m_styles.begin());
     }
 
     // This OS doesn't have TTF as default font,
@@ -187,15 +193,15 @@ void StyleManager::load_valid_style()
 
 bool StyleManager::load_style(size_t style_index)
 {
-    if (style_index >= m_style_items.size()) return false;
-    if (!load_style(m_style_items[style_index].style)) return false;
+    if (style_index >= m_styles.size()) return false;
+    if (!load_style(m_styles[style_index])) return false;
     m_style_cache.style_index    = style_index;
     m_style_cache.stored_wx_font = m_style_cache.wx_font; // copy
     m_last_style_index           = style_index;
     return true;
 }
 
-bool StyleManager::load_style(const EmbossStyle &style) {
+bool StyleManager::load_style(const Style &style) {
     if (style.type == EmbossStyle::Type::file_path) {
         std::unique_ptr<FontFile> font_ptr =
             create_font_file(style.path.c_str());
@@ -208,13 +214,13 @@ bool StyleManager::load_style(const EmbossStyle &style) {
         m_style_cache.stored_wx_font = {};
         return true;
     }
-    if (style.type != WxFontUtils::get_actual_type()) return false;
+    if (style.type != WxFontUtils::get_current_type()) return false;
     std::optional<wxFont> wx_font_opt = WxFontUtils::load_wxFont(style.path);
     if (!wx_font_opt.has_value()) return false;
     return load_style(style, *wx_font_opt);
 }
 
-bool StyleManager::load_style(const EmbossStyle &style, const wxFont &font)
+bool StyleManager::load_style(const Style &style, const wxFont &font)
 {
     m_style_cache.style = style; // copy
 
@@ -265,12 +271,18 @@ bool StyleManager::is_font_changed() const
     return is_bold != is_stored_bold;
 }
 
+bool StyleManager::is_unique_style_name(const std::string &name) const {
+    for (const StyleManager::Style &style : m_styles)
+        if (style.name == name)
+            return false;
+    return true;
+}
 bool StyleManager::is_active_font() { return m_style_cache.font_file.has_value(); }
 
-const EmbossStyle* StyleManager::get_stored_style() const
+const StyleManager::Style *StyleManager::get_stored_style() const
 {
-    if (m_style_cache.style_index >= m_style_items.size()) return nullptr;
-    return &m_style_items[m_style_cache.style_index].style;
+    if (m_style_cache.style_index >= m_styles.size()) return nullptr;
+    return &m_styles[m_style_cache.style_index];
 }
 
 void StyleManager::clear_glyphs_cache()
@@ -282,24 +294,6 @@ void StyleManager::clear_glyphs_cache()
 
 void StyleManager::clear_imgui_font() { m_style_cache.atlas.Clear(); }
 
-#include "slic3r/GUI/TextLines.hpp"
-double StyleManager::get_line_height()
-{
-    assert(is_active_font());
-    if (!is_active_font())
-        return -1;
-    const auto &ffc = get_font_file_with_cache();
-    assert(ffc.has_value());
-    if (!ffc.has_value())
-        return -1;
-    const auto &ff_ptr = ffc.font_file;
-    assert(ff_ptr != nullptr);
-    if (ff_ptr == nullptr)
-        return -1;
-    const FontProp &fp = get_font_prop();
-    const FontFile &ff = *ff_ptr;
-    return TextLinesModel::calc_line_height(ff, fp);
-}
 
 ImFont *StyleManager::get_imgui_font()
 {
@@ -317,44 +311,12 @@ ImFont *StyleManager::get_imgui_font()
     return font;
 }
 
-const std::vector<StyleManager::Item> &StyleManager::get_styles() const{ return m_style_items; }
-
-void StyleManager::make_unique_name(std::string &name)
-{
-    auto is_unique = [&](const std::string &name) -> bool {
-        for (const Item &it : m_style_items)
-            if (it.style.name == name) return false;
-        return true;
-    };
-
-    // Style name can't be empty so default name is set
-    if (name.empty()) name = "Text style";
-
-    // When name is already unique, nothing need to be changed
-    if (is_unique(name)) return;
-
-    // when there is previous version of style name only find number
-    const char *prefix = " (";
-    const char  suffix  = ')';
-    auto pos = name.find_last_of(prefix);
-    if (name.c_str()[name.size() - 1] == suffix && 
-        pos != std::string::npos) {
-        // short name by ord number
-        name = name.substr(0, pos);
-    }
-
-    int order = 1; // start with value 2 to represents same font name
-    std::string new_name;
-    do {
-        new_name = name + prefix + std::to_string(++order) + suffix;
-    } while (!is_unique(new_name));
-    name = new_name;
-}
+const StyleManager::Styles &StyleManager::get_styles() const{ return m_styles; }
 
 void StyleManager::init_trunc_names(float max_width) { 
-    for (auto &s : m_style_items)
+    for (auto &s : m_styles)
         if (s.truncated_name.empty()) {
-            std::string name = s.style.name;
+            std::string name = s.name;
             ImGuiWrapper::escape_double_hash(name);
             s.truncated_name = ImGuiWrapper::trunc(name, max_width);
         }
@@ -387,9 +349,9 @@ void StyleManager::init_style_images(const Vec2i &max_size,
                 StyleImagesData::Item &style = m_temp_style_images->styles[index];
 
                 // find style in font list and copy to it
-                for (auto &it : m_style_items) {
-                    if (it.style.name != style.text ||
-                        !(it.style.prop == style.prop))
+                for (auto &it : m_styles) {
+                    if (it.name != style.text ||
+                        !(it.prop == style.prop))
                         continue;
                     it.image = image;
                     break;
@@ -406,9 +368,8 @@ void StyleManager::init_style_images(const Vec2i &max_size,
     // create job for init images
     m_temp_style_images = std::make_shared<StyleImagesData::StyleImages>();
     StyleImagesData::Items styles;
-    styles.reserve(m_style_items.size());
-    for (const Item &item : m_style_items) {
-        const EmbossStyle &style = item.style;
+    styles.reserve(m_styles.size());
+    for (const Style &style : m_styles) {
         std::optional<wxFont> wx_font_opt = WxFontUtils::load_wxFont(style.path);
         if (!wx_font_opt.has_value()) continue;
         std::unique_ptr<FontFile> font_file =
@@ -435,7 +396,7 @@ void StyleManager::init_style_images(const Vec2i &max_size,
 void StyleManager::free_style_images() {
     if (!m_exist_style_images) return;
     GLuint tex_id = 0;
-    for (Item &it : m_style_items) {
+    for (Style &it : m_styles) {
         if (tex_id == 0 && it.image.has_value())
             tex_id = (GLuint)(intptr_t) it.image->texture_id;
         it.image.reset();
@@ -547,10 +508,278 @@ bool StyleManager::set_wx_font(const wxFont &wx_font, std::unique_ptr<FontFile> 
         FontFileWithCache(std::move(font_file));
 
     EmbossStyle &style = m_style_cache.style;
-    style.type = WxFontUtils::get_actual_type();
+    style.type = WxFontUtils::get_current_type();
     // update string path
     style.path = WxFontUtils::store_wxFont(wx_font);
     WxFontUtils::update_property(style.prop, wx_font);
     clear_imgui_font();
     return true;
 }
+
+#include <libslic3r/AppConfig.hpp>
+#include "WxFontUtils.hpp"
+#include "fast_float/fast_float.h"
+
+// StylesSerializable
+namespace {
+
+using namespace Slic3r;
+using namespace Slic3r::GUI;
+using Section = std::map<std::string,std::string>;
+
+const std::string APP_CONFIG_FONT_NAME        = "name";
+const std::string APP_CONFIG_FONT_DESCRIPTOR  = "descriptor";
+const std::string APP_CONFIG_FONT_LINE_HEIGHT = "line_height";
+const std::string APP_CONFIG_FONT_DEPTH       = "depth";
+const std::string APP_CONFIG_FONT_USE_SURFACE = "use_surface";
+const std::string APP_CONFIG_FONT_BOLDNESS    = "boldness";
+const std::string APP_CONFIG_FONT_SKEW        = "skew";
+const std::string APP_CONFIG_FONT_DISTANCE    = "distance";
+const std::string APP_CONFIG_FONT_ANGLE       = "angle";
+const std::string APP_CONFIG_FONT_COLLECTION  = "collection";
+const std::string APP_CONFIG_FONT_CHAR_GAP    = "char_gap";
+const std::string APP_CONFIG_FONT_LINE_GAP    = "line_gap";
+
+const std::string APP_CONFIG_ACTIVE_FONT = "active_font";
+
+std::string create_section_name(unsigned index)
+{
+    return AppConfig::SECTION_EMBOSS_STYLE + ':' + std::to_string(index);
+}
+
+// check only existence of flag
+bool read(const Section &section, const std::string &key, bool &value)
+{
+    auto item = section.find(key);
+    if (item == section.end())
+        return false;
+
+    value = true;
+    return true;
+}
+
+bool read(const Section &section, const std::string &key, float &value)
+{
+    auto item = section.find(key);
+    if (item == section.end())
+        return false;
+    const std::string &data = item->second;
+    if (data.empty())
+        return false;
+    float value_;
+    fast_float::from_chars(data.c_str(), data.c_str() + data.length(), value_);
+    // read only non zero value
+    if (fabs(value_) <= std::numeric_limits<float>::epsilon())
+        return false;
+
+    value = value_;
+    return true;
+}
+
+bool read(const Section &section, const std::string &key, std::optional<int> &value)
+{
+    auto item = section.find(key);
+    if (item == section.end())
+        return false;
+    const std::string &data = item->second;
+    if (data.empty())
+        return false;
+    int value_ = std::atoi(data.c_str());
+    if (value_ == 0)
+        return false;
+
+    value = value_;
+    return true;
+}
+
+bool read(const Section &section, const std::string &key, std::optional<unsigned int> &value)
+{
+    auto item = section.find(key);
+    if (item == section.end())
+        return false;
+    const std::string &data = item->second;
+    if (data.empty())
+        return false;
+    int value_ = std::atoi(data.c_str());
+    if (value_ <= 0)
+        return false;
+
+    value = static_cast<unsigned int>(value_);
+    return true;
+}
+
+bool read(const Section &section, const std::string &key, std::optional<float> &value)
+{
+    auto item = section.find(key);
+    if (item == section.end())
+        return false;
+    const std::string &data = item->second;
+    if (data.empty())
+        return false;
+    float value_;
+    fast_float::from_chars(data.c_str(), data.c_str() + data.length(), value_);
+    // read only non zero value
+    if (fabs(value_) <= std::numeric_limits<float>::epsilon())
+        return false;
+
+    value = value_;
+    return true;
+}
+
+std::optional<StyleManager::Style> load_style(const Section &app_cfg_section)
+{
+    auto path_it = app_cfg_section.find(APP_CONFIG_FONT_DESCRIPTOR);
+    if (path_it == app_cfg_section.end())
+        return {};
+        
+    StyleManager::Style s;
+    EmbossProjection& ep = s.projection;
+    FontProp& fp = s.prop;
+    
+    s.path = path_it->second;
+    s.type = WxFontUtils::get_current_type();
+    auto name_it = app_cfg_section.find(APP_CONFIG_FONT_NAME);
+    const std::string  default_name = "font_name";
+    s.name = (name_it == app_cfg_section.end()) ? default_name : name_it->second;
+
+    read(app_cfg_section, APP_CONFIG_FONT_LINE_HEIGHT, fp.size_in_mm);
+    float depth = 1.;
+    read(app_cfg_section, APP_CONFIG_FONT_DEPTH, depth);
+    ep.depth = depth;
+    read(app_cfg_section, APP_CONFIG_FONT_USE_SURFACE, ep.use_surface);
+    read(app_cfg_section, APP_CONFIG_FONT_BOLDNESS, fp.boldness);
+    read(app_cfg_section, APP_CONFIG_FONT_SKEW, fp.skew);
+    read(app_cfg_section, APP_CONFIG_FONT_DISTANCE, s.distance);
+    read(app_cfg_section, APP_CONFIG_FONT_ANGLE, s.angle);
+    read(app_cfg_section, APP_CONFIG_FONT_COLLECTION, fp.collection_number);
+    read(app_cfg_section, APP_CONFIG_FONT_CHAR_GAP, fp.char_gap);
+    read(app_cfg_section, APP_CONFIG_FONT_LINE_GAP, fp.line_gap);
+    return s;
+}
+
+void store_style(AppConfig &cfg, const StyleManager::Style &s, unsigned index)
+{
+    const EmbossProjection &ep = s.projection;
+    Section data;
+    data[APP_CONFIG_FONT_NAME]        = s.name;
+    data[APP_CONFIG_FONT_DESCRIPTOR]  = s.path;
+    const FontProp &fp                = s.prop;
+    data[APP_CONFIG_FONT_LINE_HEIGHT] = std::to_string(fp.size_in_mm);
+    data[APP_CONFIG_FONT_DEPTH]       = std::to_string(ep.depth);
+    if (ep.use_surface)
+        data[APP_CONFIG_FONT_USE_SURFACE] = "true";
+    if (fp.boldness.has_value())
+        data[APP_CONFIG_FONT_BOLDNESS] = std::to_string(*fp.boldness);
+    if (fp.skew.has_value())
+        data[APP_CONFIG_FONT_SKEW] = std::to_string(*fp.skew);
+    if (s.distance.has_value())
+        data[APP_CONFIG_FONT_DISTANCE] = std::to_string(*s.distance);
+    if (s.angle.has_value())
+        data[APP_CONFIG_FONT_ANGLE] = std::to_string(*s.angle);
+    if (fp.collection_number.has_value())
+        data[APP_CONFIG_FONT_COLLECTION] = std::to_string(*fp.collection_number);
+    if (fp.char_gap.has_value())
+        data[APP_CONFIG_FONT_CHAR_GAP] = std::to_string(*fp.char_gap);
+    if (fp.line_gap.has_value())
+        data[APP_CONFIG_FONT_LINE_GAP] = std::to_string(*fp.line_gap);
+    cfg.set_section(create_section_name(index), std::move(data));
+}
+
+void store_style_index(AppConfig &cfg, size_t index)
+{
+    // store actual font index
+    // active font first index is +1 to correspond with section name
+    Section data;
+    data[APP_CONFIG_ACTIVE_FONT] = std::to_string(index);
+    cfg.set_section(AppConfig::SECTION_EMBOSS_STYLE, std::move(data));
+}
+
+std::optional<size_t> load_style_index(const AppConfig &cfg)
+{
+    if (!cfg.has_section(AppConfig::SECTION_EMBOSS_STYLE))
+        return {};
+
+    auto section = cfg.get_section(AppConfig::SECTION_EMBOSS_STYLE);
+    auto it      = section.find(APP_CONFIG_ACTIVE_FONT);
+    if (it == section.end())
+        return {};
+
+    size_t active_font = static_cast<size_t>(std::atoi(it->second.c_str()));
+    // order in config starts with number 1
+    return active_font - 1;
+}
+
+::StyleManager::Styles load_styles(const AppConfig &cfg)
+{
+    StyleManager::Styles result;
+    // human readable index inside of config starts from 1 !!
+    unsigned    index        = 1;
+    std::string section_name = create_section_name(index);
+    while (cfg.has_section(section_name)) {
+        std::optional<StyleManager::Style> style_opt = load_style(cfg.get_section(section_name));
+        if (style_opt.has_value()) {
+            make_unique_name(result, style_opt->name);
+            result.emplace_back(*style_opt);
+        }
+
+        section_name = create_section_name(++index);
+    }
+    return result;
+}
+
+void store_styles(AppConfig &cfg, const StyleManager::Styles &styles)
+{
+    EmbossStyle::Type current_type = WxFontUtils::get_current_type();
+    // store styles
+    unsigned index = 1;
+    for (const StyleManager::Style &style : styles) {
+        // skip file paths + fonts from other OS(loaded from .3mf)
+        assert(style.type == current_type);
+        if (style.type != current_type)
+            continue;
+        store_style(cfg, style, index);
+        ++index;
+    }
+
+    // remove rest of font sections (after deletation)
+    std::string section_name = create_section_name(index);
+    while (cfg.has_section(section_name)) {
+        cfg.clear_section(section_name);
+        section_name = create_section_name(index);
+        ++index;
+    }
+}
+
+void make_unique_name(const StyleManager::Styles& styles, std::string &name)
+{
+    auto is_unique = [&styles](const std::string &name){
+        for (const StyleManager::Style &it : styles)
+            if (it.name == name) return false;
+        return true;
+    };
+
+    // Style name can't be empty so default name is set
+    if (name.empty()) name = "Text style";
+
+    // When name is already unique, nothing need to be changed
+    if (is_unique(name)) return;
+
+    // when there is previous version of style name only find number
+    const char *prefix = " (";
+    const char  suffix  = ')';
+    auto pos = name.find_last_of(prefix);
+    if (name.c_str()[name.size() - 1] == suffix && 
+        pos != std::string::npos) {
+        // short name by ord number
+        name = name.substr(0, pos);
+    }
+
+    int order = 1; // start with value 2 to represents same font name
+    std::string new_name;
+    do {
+        new_name = name + prefix + std::to_string(++order) + suffix;
+    } while (!is_unique(new_name));
+    name = new_name;
+}
+
+} // namespace

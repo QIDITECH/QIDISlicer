@@ -1643,6 +1643,7 @@ namespace client
 
             // Check whether the table X values are sorted.
             double x = expr_x.as_d();
+            assert(! std::isnan(x));
             bool   evaluated = false;
             for (size_t i = 1; i < table.table.size(); ++i) {
                 double x0 = table.table[i - 1].x;
@@ -2098,7 +2099,7 @@ namespace client
             multiplicative_expression.name("multiplicative_expression");
 
             assignment_statement =
-                variable_reference(_r1)[_a = _1] >> '=' > 
+                (variable_reference(_r1)[_a = _1] >> '=') > 
                 (       // Consumes also '(' conditional_expression ')', that means enclosing an expression into braces makes it a single value vector initializer.
                          initializer_list(_r1)[px::bind(&MyContext::vector_variable_assign_initializer_list, _r1, _a, _1)]
                         // Process it before conditional_expression, as conditional_expression requires a vector reference to be augmented with an index.

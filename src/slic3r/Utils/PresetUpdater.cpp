@@ -84,6 +84,7 @@ std::string escape_string_url(const std::string& unescaped)
 	return ret_val;
 }
 }
+wxDEFINE_EVENT(EVT_CONFIG_UPDATER_SYNC_DONE, wxCommandEvent);
 struct Update
 {
 	fs::path source;
@@ -94,15 +95,17 @@ struct Update
 	std::string changelog_url;
 
 	bool forced_update;
+	std::vector<std::string> new_printers;
 
 	Update() {}
-	Update(fs::path &&source, fs::path &&target, const Version &version, std::string vendor, std::string changelog_url, bool forced = false)
+	Update(fs::path &&source, fs::path &&target, const Version &version, std::string vendor, std::string changelog_url, bool forced = false, std::vector<std::string> new_printers = {})
 		: source(std::move(source))
 		, target(std::move(target))
 		, version(version)
 		, vendor(std::move(vendor))
 		, changelog_url(std::move(changelog_url))
 		, forced_update(forced)
+		, new_printers(std::move(new_printers))
 	{}
 
 	void install() const
@@ -897,13 +900,16 @@ Updates PresetUpdater::priv::get_config_updates(const Semver &old_slic3r_version
 		if (fs::exists(path_in_cache)) {
 			try {
 				VendorProfile new_vp = VendorProfile::from_ini(path_in_cache, true);
+				VendorProfile old_vp = VendorProfile::from_ini(bundle_path, true);
 				if (new_vp.config_version == recommended->config_version) {
 					// The config bundle from the cache directory matches the recommended version of the index from the cache directory.
 					// This is the newest known recommended config. Use it.
 					if (!PresetUtils::vendor_profile_has_all_resources(new_vp)) {
 						BOOST_LOG_TRIVIAL(warning) << "Some resources are missing for update of vedor " << new_vp.id;
 					}
-					new_update = Update(std::move(path_in_cache), std::move(bundle_path), *recommended, vp.name, vp.changelog_url, current_not_supported);
+					std::vector<std::string> new_printers;
+					PresetUtils::compare_vendor_profile_printers(old_vp, new_vp, new_printers);
+					new_update = Update(std::move(path_in_cache), std::move(bundle_path), *recommended, vp.name, vp.changelog_url, current_not_supported, std::move(new_printers));
 					// and install the config index from the cache into vendor's directory.
 					bundle_path_idx_to_install = idx.path();
 					found = true;
@@ -1117,7 +1123,7 @@ PresetUpdater::~PresetUpdater()
 	}
 }
 
-void PresetUpdater::sync(const PresetBundle *preset_bundle)
+void PresetUpdater::sync(const PresetBundle *preset_bundle, wxEvtHandler* evt_handler)
 {
 	p->set_download_prefs(GUI::wxGetApp().app_config);
 	if (!p->enabled_version_check && !p->enabled_config_update) { return; }
@@ -1128,9 +1134,11 @@ void PresetUpdater::sync(const PresetBundle *preset_bundle)
 	VendorMap vendors = preset_bundle->vendors;
 	std::string index_archive_url = GUI::wxGetApp().app_config->index_archive_url();
 
-    p->thread = std::thread([this, vendors, index_archive_url]() {
+    p->thread = std::thread([this, vendors, index_archive_url, evt_handler]() {
 		this->p->prune_tmps();
 		this->p->sync_config(std::move(vendors), index_archive_url);
+		wxCommandEvent* evt = new wxCommandEvent(EVT_CONFIG_UPDATER_SYNC_DONE);
+		evt_handler->QueueEvent(evt);
     });
 }
 
@@ -1249,7 +1257,13 @@ PresetUpdater::UpdateResult PresetUpdater::config_update(const Semver& old_slic3
 			std::vector<GUI::MsgUpdateForced::Update> updates_msg;
 			for (const auto& update : updates.updates) {
 				std::string changelog_url = update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
-				updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url));
+				std::string printers;
+				for (size_t i = 0; i < update.new_printers.size(); i++) {
+					if (i > 0)
+						printers += ", ";
+					printers += update.new_printers[i];
+				}
+				updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url), std::move(printers));
 			}
 
 			GUI::MsgUpdateForced dlg(updates_msg);
@@ -1271,16 +1285,28 @@ PresetUpdater::UpdateResult PresetUpdater::config_update(const Semver& old_slic3
 		// regular update
 		if (params == UpdateParams::SHOW_NOTIFICATION) {
 			p->set_waiting_updates(updates);
-			GUI::wxGetApp().plater()->get_notification_manager()->push_notification(GUI::NotificationType::PresetUpdateAvailable);
+			bool new_printer = false;
+			for (const Update& updt : updates.updates) {
+				if(updt.new_printers.size() > 0) {
+					new_printer = true;
+					break;
+				}
+			}
+			GUI::wxGetApp().plater()->get_notification_manager()->push_notification(new_printer? GUI::NotificationType::PresetUpdateAvailableNewPrinter : GUI::NotificationType::PresetUpdateAvailable);
 		}
 		else {
 			BOOST_LOG_TRIVIAL(info) << format("Update of %1% bundles available. Asking for confirmation ...", p->waiting_updates.updates.size());
 
 			std::vector<GUI::MsgUpdateConfig::Update> updates_msg;
 			for (const auto& update : updates.updates) {
-				//B27
-				std::string changelog_url = std::string();//update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
-				updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url));
+				std::string changelog_url = update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
+				std::string printers;
+				for (size_t i = 0; i < update.new_printers.size(); i++) {
+					if (i > 0)
+						printers += ", ";
+					printers += update.new_printers[i];
+				}
+				updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url), std::move(printers));
 			}
 
 			GUI::MsgUpdateConfig dlg(updates_msg, params == UpdateParams::FORCED_BEFORE_WIZARD);
@@ -1423,8 +1449,14 @@ void PresetUpdater::on_update_notification_confirm()
 
 	std::vector<GUI::MsgUpdateConfig::Update> updates_msg;
 	for (const auto& update : p->waiting_updates.updates) {
-		std::string changelog_url = std::string();//update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
-		updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url));
+		std::string changelog_url = update.version.config_version.prerelease() == nullptr ? update.changelog_url : std::string();
+		std::string printers;
+		for (size_t i = 0; i < update.new_printers.size(); i++) {
+			if (i > 0)
+				printers += ", ";
+			printers += update.new_printers[i];
+		}
+		updates_msg.emplace_back(update.vendor, update.version.config_version, update.version.comment, std::move(changelog_url), std::move(printers));
 	}
 
 	GUI::MsgUpdateConfig dlg(updates_msg);

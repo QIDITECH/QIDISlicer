@@ -70,10 +70,10 @@ public:
     /// Initialize raster texture on GPU with given images
     /// NOTE: Have to be called after OpenGL initialization
     /// </summary>
-    /// <param name="input">Define files and its </param>
+    /// <param name="input">Define files and its size with rasterization</param>
     /// <returns>Rasterized icons stored on GPU,
     /// Same size and order as input, each item of vector is set of texture in order by RasterType</returns>
-    VIcons init(const InitTypes &input);
+    Icons init(const InitTypes &input);
 
     /// <summary>
     /// Initialize multiple icons with same settings for size and type
@@ -96,6 +96,7 @@ public:
 private:        
     // keep data stored on GPU
     GLTexture m_icons_texture;
+    unsigned int m_id{ 0 };
     Icons m_icons;
 };
 

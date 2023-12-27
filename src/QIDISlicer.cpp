@@ -2,8 +2,12 @@
     // Why?
     #define _WIN32_WINNT 0x0502
     // The standard Windows includes.
+    #ifndef WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
+    #endif // WIN32_LEAN_AND_MEAN
+    #ifndef NOMINMAX
     #define NOMINMAX
+    #endif // NOMINMAX
     #include <Windows.h>
     #include <wchar.h>
     #ifdef SLIC3R_GUI
@@ -272,6 +276,20 @@ int CLI::run(int argc, char **argv)
         }
     }
 
+    if (!start_gui) {
+        const auto* post_process = m_print_config.opt<ConfigOptionStrings>("post_process");
+        if (post_process != nullptr && !post_process->values.empty()) {
+            boost::nowide::cout << "\nA post-processing script has been detected in the config data:\n\n";
+            for (const auto& s : post_process->values) {
+                boost::nowide::cout << "> " << s << "\n";
+            }
+            boost::nowide::cout << "\nContinue(Y/N) ? ";
+            char in;
+            boost::nowide::cin >> in;
+            if (in != 'Y' && in != 'y')
+                return 0;
+        }
+    }
     // Apply command line options to a more specific DynamicPrintConfig which provides normalize()
     // (command line options override --load files)
     m_print_config.apply(m_extra_config, true);

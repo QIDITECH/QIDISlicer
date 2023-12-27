@@ -33,7 +33,7 @@ public:
 	std::string get_host() const override { return host; }
    
 private:
-	enum class ConnectionType { rrf, dsf, error };
+	enum class ConnectionType { rrf, dsf, error }; // rrf = RepRapFirmware, dsf = DuetSoftwareFramework
 	std::string host;
 	std::string password;
 

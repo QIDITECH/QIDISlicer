@@ -1,11 +1,13 @@
 #include "StaticBox.hpp"
 #include "../GUI.hpp"
 #include <wx/dcgraph.h>
+#include <wx/dcbuffer.h>
+
+#include "DropDown.hpp"
+#include "UIColors.hpp"
 
 BEGIN_EVENT_TABLE(StaticBox, wxWindow)
 
-// catch paint events
-//EVT_ERASE_BACKGROUND(StaticBox::eraseEvent)
 EVT_PAINT(StaticBox::paintEvent)
 
 END_EVENT_TABLE()
@@ -20,9 +22,15 @@ StaticBox::StaticBox()
     : state_handler(this)
     , radius(8)
 {
-    border_color = StateColor(
-        std::make_pair(0xF0F0F1, (int) StateColor::Disabled), 
-        std::make_pair(0x303A3C, (int) StateColor::Normal));
+    border_color = StateColor(std::make_pair(clr_border_disabled,   (int) StateColor::Disabled),
+#ifndef __WXMSW__
+                              std::make_pair(clr_border_normal,     (int) StateColor::Focused),
+#endif
+                              std::make_pair(clr_border_hovered,    (int) StateColor::Hovered),
+                              std::make_pair(clr_border_normal,     (int) StateColor::Normal));
+#ifndef __WXMSW__
+    border_color.setTakeFocusedAsHovered(false);
+#endif
 }
 
 StaticBox::StaticBox(wxWindow* parent,
@@ -41,7 +49,8 @@ bool StaticBox::Create(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
     wxWindow::Create(parent, id, pos, size, style);
     state_handler.attach({&border_color, &background_color, &background_color2});
     state_handler.update_binds();
-    SetBackgroundColour(GetParentBackgroundColor(parent));
+//    SetBackgroundColour(GetParentBackgroundColor(parent));
+//    SetForegroundColour(parent->GetParent()->GetForegroundColour());
     return true;
 }
 
@@ -109,21 +118,11 @@ wxColor StaticBox::GetParentBackgroundColor(wxWindow* parent)
     return *wxWHITE;
 }
 
-void StaticBox::eraseEvent(wxEraseEvent& evt)
-{
-    // for transparent background, but not work
-#ifdef __WXMSW__
-    wxDC *dc = evt.GetDC();
-    wxSize size = GetSize();
-    wxClientDC dc2(GetParent());
-    dc->Blit({0, 0}, size, &dc2, GetPosition());
-#endif
-}
 
 void StaticBox::paintEvent(wxPaintEvent& evt)
 {
     // depending on your system you may need to look at double-buffered dcs
-    wxPaintDC dc(this);
+    wxBufferedPaintDC dc(this);//wxPaintDC dc(this);
     render(dc);
 }
 
@@ -134,31 +133,7 @@ void StaticBox::paintEvent(wxPaintEvent& evt)
  */
 void StaticBox::render(wxDC& dc)
 {
-#ifdef __WXMSW__
-    if (radius == 0) {
-        doRender(dc);
-        return;
-    }
-
-	wxSize size = GetSize();
-    if (size.x <= 0 || size.y <= 0)
-        return;
-    wxMemoryDC memdc;
-    wxBitmap bmp(size.x, size.y);
-    memdc.SelectObject(bmp);
-    //memdc.Blit({0, 0}, size, &dc, {0, 0});
-    memdc.SetBackground(wxBrush(GetBackgroundColour()));
-    memdc.Clear();
-    {
-        wxGCDC dc2(memdc);
-        doRender(dc2);
-    }
-
-    memdc.SelectObject(wxNullBitmap);
-	dc.DrawBitmap(bmp, 0, 0);
-#else
     doRender(dc);
-#endif
 }
 
 void StaticBox::doRender(wxDC& dc)
@@ -168,37 +143,53 @@ void StaticBox::doRender(wxDC& dc)
     if (background_color2.count() == 0) {
         if ((border_width && border_color.count() > 0) || background_color.count() > 0) {
             wxRect rc(0, 0, size.x, size.y);
-            if (border_width && border_color.count() > 0) {
-                if (dc.GetContentScaleFactor() == 1.0) {
-                    int d  = floor(border_width / 2.0);
-                    int d2 = floor(border_width - 1);
-                    rc.x += d;
-                    rc.width -= d2;
-                    rc.y += d;
-                    rc.height -= d2;
-                } else {
-                    int d  = 1;
-                    rc.x += d;
-                    rc.width -= d;
-                    rc.y += d;
-                    rc.height -= d;
-                }
-                dc.SetPen(wxPen(border_color.colorForStates(states), border_width));
-            } else {
-                dc.SetPen(wxPen(background_color.colorForStates(states)));
+#ifdef __WXOSX__
+            // On Retina displays all controls are cut on 1px
+            if (dc.GetContentScaleFactor() > 1.)
+                rc.Deflate(1, 1);
+#endif //__WXOSX__
+
+            if (radius > 0.) {
+#if 0
+                DropDown::SetTransparentBG(dc, this);
+#else
+#ifdef __WXMSW__
+                wxColour bg_clr = GetParentBackgroundColor(m_parent);
+                dc.SetBrush(wxBrush(bg_clr));
+                dc.SetPen(wxPen(bg_clr));
+                dc.DrawRectangle(rc);
+#endif
+#endif
             }
+
             if (background_color.count() > 0)
                 dc.SetBrush(wxBrush(background_color.colorForStates(states)));
             else
                 dc.SetBrush(wxBrush(GetBackgroundColour()));
-            if (radius == 0) {
-                dc.DrawRectangle(rc);
+            if (border_width && border_color.count() > 0) {
+#ifdef __WXOSX__
+                const double bw = (double)border_width;
+#else
+                const double bw = dc.GetContentScaleFactor() * (double)border_width;
+#endif //__WXOSX__
+                {
+                    int d  = floor(bw / 2.0);
+                    int d2 = floor(bw - 1);
+                    rc.x += d;
+                    rc.width -= d2;
+                    rc.y += d;
+                    rc.height -= d2;
+                }
+                dc.SetPen(wxPen(border_color.colorForStates(states), bw));
+            } else {
+                dc.SetPen(wxPen(background_color.colorForStates(states)));
             }
-            else {
+            if (radius == 0.)
+                dc.DrawRectangle(rc);
+            else
                 dc.DrawRoundedRectangle(rc, radius - border_width);
             }
         }
-    }
     else {
         wxColor start = background_color.colorForStates(states);
         wxColor stop = background_color2.colorForStates(states);

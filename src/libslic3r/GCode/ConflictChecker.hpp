@@ -1,10 +1,7 @@
 #ifndef slic3r_ConflictChecker_hpp_
 #define slic3r_ConflictChecker_hpp_
 
-#include "../Utils.hpp"
-#include "../Model.hpp"
-#include "../Print.hpp"
-#include "../Layer.hpp"
+#include "libslic3r/Print.hpp"
 
 #include <queue>
 #include <vector>
@@ -43,7 +40,7 @@ public:
     void raise()
     {
         if (valid()) {
-            if (_piles[_curPileIdx].empty() == false) { _curHeight += _piles[_curPileIdx].front().height; }
+            if (_piles[_curPileIdx].empty() == false) { _curHeight += _piles[_curPileIdx].front().height(); }
             _curPileIdx++;
         }
     }
@@ -119,7 +116,7 @@ using ConflictObjName = std::optional<std::pair<std::string, std::string>>;
 
 struct ConflictChecker
 {
-    static ConflictResultOpt  find_inter_of_lines_in_diff_objs(PrintObjectPtrs objs, std::optional<const FakeWipeTower *> wtdptr);
+    static ConflictResultOpt  find_inter_of_lines_in_diff_objs(SpanOfConstPtrs<PrintObject> objs, const WipeTowerData& wtd);
     static ConflictComputeOpt find_inter_of_lines(const LineWithIDs &lines);
     static ConflictComputeOpt line_intersect(const LineWithID &l1, const LineWithID &l2);
 };

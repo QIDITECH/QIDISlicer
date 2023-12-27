@@ -41,19 +41,6 @@ public:
         PrinterVariant(const std::string &name) : name(name) {}
         std::string                 name;
     };
-    //B19
-    struct PrinterEmail
-    {
-        PrinterEmail() {}
-        PrinterEmail(const std::string &name) : name(name) {}
-        std::string name;
-    };
-    struct PrinterSkype
-    {
-        PrinterSkype() {}
-        PrinterSkype(const std::string &name) : name(name) {}
-        std::string name;
-    };
 
     struct PrinterModel {
         PrinterModel() {}
@@ -62,9 +49,6 @@ public:
         PrinterTechnology           technology;
         std::string                 family;
         std::vector<PrinterVariant> variants;
-        //B19
-        std::vector<PrinterEmail>   emails;
-        std::vector<PrinterSkype>   skypes;
         std::vector<std::string>	default_materials;
         // Vendor & Printer Model specific print bed model & texture.
         std::string 			 	bed_model;
@@ -77,23 +61,7 @@ public:
                     return &v;
             return nullptr;
         }
-        //B19
-        PrinterEmail*       email(const std::string &name) {
-            for (auto &v : this->emails)
-                if (v.name == name)
-                    return &v;
-            return nullptr;
-        }
-        PrinterSkype*       skype(const std::string &name) {
-            for (auto &v : this->skypes)
-                if (v.name == name)
-                    return &v;
-            return nullptr;
-        }
-        //B19
         const PrinterVariant* variant(const std::string &name) const { return const_cast<PrinterModel*>(this)->variant(name); }
-        const PrinterEmail* email(const std::string &name) const { return const_cast<PrinterModel*>(this)->email(name); }
-        const PrinterSkype* skype(const std::string &name) const { return const_cast<PrinterModel*>(this)->skype(name); }
     };
     std::vector<PrinterModel>          models;
 
@@ -109,10 +77,7 @@ public:
     // If `load_all` is false, only the header with basic info (name, version, URLs) is loaded.
     static VendorProfile from_ini(const boost::filesystem::path &path, bool load_all=true);
     static VendorProfile from_ini(const boost::property_tree::ptree &tree, const boost::filesystem::path &path, bool load_all=true);
-    //B19
     size_t      num_variants() const { size_t n = 0; for (auto &model : models) n += model.variants.size(); return n; }
-    size_t      num_emails() const { size_t n = 0; for (auto &model : models) n += model.emails.size(); return n; }
-    size_t      num_skypes() const { size_t n = 0; for (auto &model : models) n += model.skypes.size(); return n; }
     std::vector<std::string> families() const;
 
     bool        operator< (const VendorProfile &rhs) const { return this->id <  rhs.id; }
@@ -308,6 +273,20 @@ struct PresetConfigSubstitutions {
     ConfigSubstitutions                     substitutions;
 };
 
+// This struct is used to get an information about loaded external preset
+struct ExternalPreset
+{
+    Preset* preset          { nullptr };
+    bool    is_modified     { false };
+    bool    is_installed    { false };
+
+    ExternalPreset(Preset* preset, bool modified, bool installed = false)
+    : preset(preset)
+    , is_modified(modified)
+    , is_installed(installed) {}
+
+    virtual ~ExternalPreset() = default;
+};
 // Substitutions having been performed during parsing a set of configuration files, for example when starting up
 // QIDISlicer and reading the user Print / Filament / Printer profiles.
 using PresetsConfigSubstitutions = std::vector<PresetConfigSubstitutions>;
@@ -359,7 +338,7 @@ public:
         // Select a profile only if it was modified.
         OnlyIfModified,
     };
-    std::pair<Preset*, bool> load_external_preset(
+    ExternalPreset load_external_preset(
         // Path to the profile source file (a G-code, an AMF or 3MF file, a config file)
         const std::string           &path,
         // Name of the profile, derived from the source file name.
@@ -640,10 +619,7 @@ public:
 		PresetCollection(type, keys, defaults, default_name) {}
 
     const Preset&   default_preset_for(const DynamicPrintConfig &config) const override;
-    //B19
     const Preset*   find_system_preset_by_model_and_variant(const std::string &model_id, const std::string &variant) const;
-    const Preset*   find_system_preset_by_model_and_email(const std::string &model_id, const std::string &email) const;
-    const Preset*   find_system_preset_by_model_and_skype(const std::string &model_id, const std::string &skype) const;
 
     bool            only_default_printers() const;
 private:
@@ -660,6 +636,7 @@ namespace PresetUtils {
     std::string system_printer_bed_model(const Preset& preset);
     std::string system_printer_bed_texture(const Preset& preset);
     bool        vendor_profile_has_all_resources(const VendorProfile& vp);
+    bool        compare_vendor_profile_printers(const VendorProfile& vp_old, const VendorProfile& vp_new, std::vector<std::string>& new_printers);
 } // namespace PresetUtils
 
 
@@ -741,7 +718,7 @@ protected:
 class PhysicalPrinterCollection
 {
 public:
-    PhysicalPrinterCollection(const std::vector<std::string>& keys);
+    PhysicalPrinterCollection(const std::vector<std::string>& keys, PresetBundle* preset_bundle);
 
     typedef std::deque<PhysicalPrinter>::iterator Iterator;
     typedef std::deque<PhysicalPrinter>::const_iterator ConstIterator;
@@ -862,6 +839,7 @@ private:
 
     // Path to the directory to store the config files into.
     std::string                 m_dir_path;
+    const PresetBundle*         m_preset_bundle_owner{ nullptr };
 };
 
 

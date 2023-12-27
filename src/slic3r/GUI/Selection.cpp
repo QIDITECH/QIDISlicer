@@ -25,6 +25,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/log/trivial.hpp>
 
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Min_sphere_of_spheres_d.h>
+#include <CGAL/Min_sphere_of_points_d_traits_3.h>
+
 //B18
 static const Slic3r::ColorRGBA UNIFORM_SCALE_COLOR     = Slic3r::ColorRGBA::WHITE();
 static const Slic3r::ColorRGBA SOLID_PLANE_COLOR       = Slic3r::ColorRGBA::WHITE();
@@ -903,6 +907,40 @@ BoundingBoxf Selection::get_screen_space_bounding_box()
     return ss_box;
 }
 
+const std::pair<Vec3d, double> Selection::get_bounding_sphere() const
+{
+    if (!m_bounding_sphere.has_value()) {
+        std::optional<std::pair<Vec3d, double>>* sphere = const_cast<std::optional<std::pair<Vec3d, double>>*>(&m_bounding_sphere);
+        *sphere = { Vec3d::Zero(), 0.0 };
+
+        using K = CGAL::Simple_cartesian<float>;
+        using Traits = CGAL::Min_sphere_of_points_d_traits_3<K, float>;
+        using Min_sphere = CGAL::Min_sphere_of_spheres_d<Traits>;
+        using Point = K::Point_3;
+
+        std::vector<Point> points;
+        if (m_valid) {
+            for (unsigned int i : m_list) {
+                const GLVolume& volume = *(*m_volumes)[i];
+                const TriangleMesh* hull = volume.convex_hull();
+                const indexed_triangle_set& its = (hull != nullptr) ?
+                    hull->its : m_model->objects[volume.object_idx()]->volumes[volume.volume_idx()]->mesh().its;
+                const Transform3d& matrix = volume.world_matrix();
+                for (const Vec3f& v : its.vertices) {
+                    const Vec3d vv = matrix * v.cast<double>();
+                    points.push_back(Point(vv.x(), vv.y(), vv.z()));
+                }
+            }
+
+            Min_sphere ms(points.begin(), points.end());
+            const float* center_x = ms.center_cartesian_begin();
+            (*sphere)->first = { *center_x, *(center_x + 1), *(center_x + 2) };
+            (*sphere)->second = ms.radius();
+        }
+    }
+
+    return *m_bounding_sphere;
+}
 void Selection::setup_cache()
 {
     if (!m_valid)
@@ -968,6 +1006,7 @@ void Selection::rotate(const Vec3d& rotation, TransformationType transformation_
 
     assert(transformation_type.relative() || (transformation_type.absolute() && transformation_type.local()));
 
+    bool requires_general_synchronization = false;
     for (unsigned int i : m_list) {
         Transform3d rotation_matrix = Geometry::rotation_transform(rotation);
         GLVolume& v = *(*m_volumes)[i];
@@ -990,15 +1029,28 @@ void Selection::rotate(const Vec3d& rotation, TransformationType transformation_
                 rotation_matrix = inst_matrix_no_offset.inverse() * inst_rotation_matrix * rotation_matrix * inst_rotation_matrix.inverse() * inst_matrix_no_offset;
 
                 // rotate around selection center
-                const Vec3d inst_pivot = inst_trafo.get_matrix_no_offset().inverse() * (m_cache.dragging_center - inst_trafo.get_offset());
+                const Vec3d inst_pivot = inst_trafo.get_matrix_no_offset().inverse() * (m_cache.rotation_pivot - inst_trafo.get_offset());
                 rotation_matrix = Geometry::translation_transform(inst_pivot) * rotation_matrix * Geometry::translation_transform(-inst_pivot);
+                // Detects if the rotation is equivalent to a world rotation around the Z axis
+                // If not, force for a full synchronization of unselected instances
+                if (!requires_general_synchronization) {
+                    const Geometry::Transformation& vol_trafo = volume_data.get_volume_transform();
+                    const Transform3d old_world_rotation_matrix = (inst_trafo * vol_trafo).get_rotation_matrix();
+                    const Transform3d new_world_rotation_matrix = (inst_trafo * Geometry::Transformation(rotation_matrix) * vol_trafo).get_rotation_matrix();
+                    if (std::abs((old_world_rotation_matrix * Vec3d::UnitX()).z() - (new_world_rotation_matrix * Vec3d::UnitX()).z()) > EPSILON)
+                        requires_general_synchronization = true;
+                    else if (std::abs((old_world_rotation_matrix * Vec3d::UnitY()).z() - (new_world_rotation_matrix * Vec3d::UnitY()).z()) > EPSILON)
+                        requires_general_synchronization = true;
+                    else if (std::abs((old_world_rotation_matrix * Vec3d::UnitZ()).z() - (new_world_rotation_matrix * Vec3d::UnitZ()).z()) > EPSILON)
+                        requires_general_synchronization = true;
+                }
             }
-            transform_instance_relative(v, volume_data, transformation_type, rotation_matrix, m_cache.dragging_center);
+            transform_instance_relative(v, volume_data, transformation_type, rotation_matrix, m_cache.rotation_pivot);
         }
         else {
             if (!is_single_volume_or_modifier()) {
                 assert(transformation_type.world());
-                transform_volume_relative(v, volume_data, transformation_type, rotation_matrix, m_cache.dragging_center);
+                transform_volume_relative(v, volume_data, transformation_type, rotation_matrix, m_cache.rotation_pivot);
             }
             else {
                 if (transformation_type.instance()) {
@@ -1024,7 +1076,7 @@ void Selection::rotate(const Vec3d& rotation, TransformationType transformation_
                             vol_rotation_matrix.inverse() * inst_scale_matrix * vol_matrix_no_offset;
                     }
                 }
-                transform_volume_relative(v, volume_data, transformation_type, rotation_matrix, m_cache.dragging_center);
+                transform_volume_relative(v, volume_data, transformation_type, rotation_matrix, m_cache.rotation_pivot);
             }
         }
     }
@@ -1033,7 +1085,11 @@ void Selection::rotate(const Vec3d& rotation, TransformationType transformation_
     if (m_mode == Instance) {
         int rot_axis_max = 0;
         rotation.cwiseAbs().maxCoeff(&rot_axis_max);
-        synchronize_unselected_instances((rot_axis_max == 2) ? SyncRotationType::NONE : SyncRotationType::GENERAL);
+        const SyncRotationType type = (transformation_type.instance() && requires_general_synchronization) ||
+                                      (!transformation_type.instance() && rot_axis_max != 2) ||
+                                      rotation.isApprox(Vec3d::Zero()) ?
+            SyncRotationType::GENERAL : SyncRotationType::NONE;
+        synchronize_unselected_instances(type);
     }
     else if (m_mode == Volume)
         synchronize_unselected_volumes();
@@ -1547,10 +1603,7 @@ void Selection::erase()
         ensure_not_below_bed();
     }
 
-    GLCanvas3D* canvas = wxGetApp().plater()->canvas3D();
-    canvas->set_sequential_clearance_as_evaluating();
-    canvas->set_as_dirty();
-    canvas->request_extra_frame();
+    wxGetApp().plater()->canvas3D()->set_sequential_clearance_as_evaluating();
 }
 
 void Selection::render(float scale_factor)
@@ -2036,6 +2089,7 @@ void Selection::set_caches()
             m_cache.sinking_volumes.push_back(i);
     }
     m_cache.dragging_center = get_bounding_box().center();
+    m_cache.rotation_pivot = get_bounding_sphere().first;
 }
 
 void Selection::do_add_volume(unsigned int volume_idx)
@@ -2989,5 +3043,29 @@ const GLVolume *get_selected_gl_volume(const Selection &selection)
     return selection.get_volume(volume_idx);
 }
 
+ModelVolume *get_selected_volume(const ObjectID &volume_id, const Selection &selection) {
+    const Selection::IndicesList &volume_ids = selection.get_volume_idxs();
+    const ModelObjectPtrs &model_objects     = selection.get_model()->objects;
+    for (auto id : volume_ids) {
+        const GLVolume *selected_volume = selection.get_volume(id);
+        const GLVolume::CompositeID &cid = selected_volume->composite_id;
+        ModelObject *obj    = model_objects[cid.object_id];
+        ModelVolume *volume = obj->volumes[cid.volume_id];
+        if (volume_id == volume->id())
+            return volume;
+    }
+    return nullptr;
+}
+
+ModelVolume *get_volume(const ObjectID &volume_id, const Selection &selection) {
+    const ModelObjectPtrs &objects = selection.get_model()->objects;
+    for (const ModelObject *object : objects) {
+        for (ModelVolume *volume : object->volumes) {
+            if (volume->id() == volume_id)
+                return volume;
+        }        
+    }
+    return nullptr;
+}
 } // namespace GUI
 } // namespace Slic3r
