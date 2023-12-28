@@ -1670,6 +1670,7 @@ void TabPrint::build()
         optgroup->append_single_option_line("slicing_mode");
         optgroup->append_single_option_line("resolution");
         optgroup->append_single_option_line("gcode_resolution");
+        optgroup->append_single_option_line("arc_fitting");
         //w12
         //optgroup->append_single_option_line("xy_size_compensation");
         optgroup->append_single_option_line("xy_hole_compensation");
@@ -3248,7 +3249,7 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
 
             return sizer;
         };
-        line = optgroup->create_single_option_line("extruder_colour", "", extruder_idx);
+        Line line = optgroup->create_single_option_line("extruder_colour", "", extruder_idx);
         line.append_widget(reset_to_filament_color);
         optgroup->append_line(line);
 
