@@ -1698,34 +1698,8 @@ void TabPrint::build()
         Option option = optgroup->get_option("output_filename_format");
         option.opt.full_width = true;
         optgroup->append_single_option_line(option);
-        optgroup->append_single_option_line("gcode_binary");
 
-        optgroup->m_on_change = [this](const t_config_option_key& opt_key, boost::any value)
-        {
-            if (opt_key == "gcode_binary") {
-                const bool is_binary = m_config->opt_bool("gcode_binary");
-                std::string output_filename_format = m_config->opt_string("output_filename_format");
-                bool modified = false;
-                if (is_binary && boost::iends_with(output_filename_format, ".gcode")) {
-                    output_filename_format = output_filename_format.substr(0, output_filename_format.length() - 5) + "bgcode";
-                    modified = true;
-                }
-                else if (!is_binary && boost::iends_with(output_filename_format, ".bgcode")) {
-                    output_filename_format = output_filename_format.substr(0, output_filename_format.length() - 6) + "gcode";
-                    modified = true;
-                }
-                if (modified) {
-                    DynamicPrintConfig new_conf = *m_config;
-                    auto off_option = static_cast<ConfigOptionString*>(m_config->option("output_filename_format")->clone());
-                    off_option->value = output_filename_format;
-                    new_conf.set_key_value("output_filename_format", off_option);
-                    load_config(new_conf);
-                }
-            }
 
-            update_dirty();
-            update();
-        };
 
         optgroup = page->new_optgroup(L("Other"));
 
@@ -2752,6 +2726,7 @@ void TabPrinter::build_fff()
 
         optgroup->append_single_option_line("silent_mode");
         optgroup->append_single_option_line("remaining_times");
+        optgroup->append_single_option_line("binary_gcode");
 
         optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
             wxTheApp->CallAfter([this, opt_key, value]() {

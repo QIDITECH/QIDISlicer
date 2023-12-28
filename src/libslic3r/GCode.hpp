@@ -351,7 +351,11 @@ private:
         const coordf_t print_z,
         const std::string& comment
     );
-    std::string     change_layer(coordf_t previous_layer_z, coordf_t print_z);
+    std::string change_layer(
+        coordf_t previous_layer_z,
+        coordf_t print_z,
+        const bool spiral_vase_enabled
+    );
     std::string     extrude_entity(const ExtrusionEntityReference &entity, const GCode::SmoothPathCache &smooth_path_cache, const std::string_view description, double speed = -1.);
     std::string     extrude_loop(const ExtrusionLoop &loop, const GCode::SmoothPathCache &smooth_path_cache, const std::string_view description, double speed = -1.);
     std::string     extrude_skirt(const ExtrusionLoop &loop_src, const ExtrusionFlow &extrusion_flow_override,

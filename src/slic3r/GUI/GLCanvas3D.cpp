@@ -2023,7 +2023,7 @@ void GLCanvas3D::render()
     }
 
 #if ENABLE_BINARIZED_GCODE_DEBUG_WINDOW
-    if (wxGetApp().plater()->is_view3D_shown() && current_printer_technology() != ptSLA && fff_print()->config().gcode_binary)
+    if (wxGetApp().plater()->is_view3D_shown() && current_printer_technology() != ptSLA && fff_print()->config().binary_gcode)
         show_binary_gcode_debug_window();
 #endif // ENABLE_BINARIZED_GCODE_DEBUG_WINDOW
     std::string tooltip;

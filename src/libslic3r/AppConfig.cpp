@@ -130,6 +130,8 @@ void AppConfig::set_defaults()
         if (get("auto_toolbar_size").empty())
             set("auto_toolbar_size", "100");
  
+        if (get("use_binary_gcode_when_supported").empty())
+            set("use_binary_gcode_when_supported", "1");
        if (get("notify_release").empty())
            set("notify_release", "all"); // or "none" or "release"
 
@@ -746,25 +748,7 @@ bool AppConfig::update_skein_dir(const std::string &dir)
         return false; // do not save "shapes gallery" directory
     return this->set("recent", "skein_directory", dir);
 }
-/*
-std::string AppConfig::get_last_output_dir(const std::string &alt) const
-{
-	
-    const auto it = m_storage.find("");
-    if (it != m_storage.end()) {
-        const auto it2 = it->second.find("last_output_path");
-        const auto it3 = it->second.find("remember_output_path");
-        if (it2 != it->second.end() && it3 != it->second.end() && ! it2->second.empty() && it3->second == "1")
-            return it2->second;
-    }
-    return alt;
-}
 
-void AppConfig::update_last_output_dir(const std::string &dir)
-{
-    this->set("", "last_output_path", dir);
-}
-*/
 std::string AppConfig::get_last_output_dir(const std::string& alt, const bool removable) const
 {
 	std::string s1 = (removable ? "last_output_path_removable" : "last_output_path");

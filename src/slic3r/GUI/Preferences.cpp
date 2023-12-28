@@ -616,6 +616,10 @@ void PreferencesDialog::build()
 		};
 
 
+		append_bool_option(m_optgroup_other, "use_binary_gcode_when_supported", L("Use binary G-code when the printer supports it"),
+                    L("If the 'Supports binary G-code' option is enabled in Printer Settings, "
+                      "checking this option will result in the export of G-code in binary format."),
+                    app_config->get_bool("use_binary_gcode_when_supported"));
 		append_bool_option(m_optgroup_other, "suppress_hyperlinks",
 			L("Suppress to open hyperlink in browser"),
 			L("If enabled, QIDISlicer will not open a hyperlinks in your browser."),

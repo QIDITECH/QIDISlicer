@@ -264,6 +264,13 @@ ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, const std::funct
 {
     create(m_content, 84);
 }
+HtmlCapableRichMessageDialog::HtmlCapableRichMessageDialog(wxWindow                                       *parent,
+                                                           const wxString                                 &msg,
+                                                           const wxString                                 &caption,
+                                                           long                                           style,
+                                                           const std::function<void(const std::string &)> &on_link_clicked)
+    : RichMessageDialogBase(parent, HtmlContent{msg, false, true, on_link_clicked}, caption, style)
+{}
 // WarningDialog
 
 WarningDialog::WarningDialog(wxWindow *parent,
@@ -289,19 +296,29 @@ MessageDialog::MessageDialog(wxWindow* parent,
     add_msg_content(this, content_sizer, HtmlContent{ get_wraped_wxString(message) });
     finalize();
 }
+#endif
 
 
-// RichMessageDialog
+// RichMessageDialogBase
 
-RichMessageDialog::RichMessageDialog(wxWindow* parent,
+RichMessageDialogBase::RichMessageDialogBase(wxWindow* parent,
     const wxString& message,
     const wxString& caption/* = wxEmptyString*/,
     long style/* = wxOK*/)
+    : RichMessageDialogBase(parent, HtmlContent{get_wraped_wxString(message)}, caption, style)
+{}
+
+RichMessageDialogBase::RichMessageDialogBase(wxWindow* parent, const HtmlContent& content, const wxString& caption, long style)
     : MsgDialog(parent, caption.IsEmpty() ? wxString::Format(_L("%s info"), SLIC3R_APP_NAME) : caption, wxEmptyString, style)
 {
-    add_msg_content(this, content_sizer, HtmlContent{ get_wraped_wxString(message) });
+    m_content = content; // We need a copy for the on_link_clicked lambda.
+    add_msg_content(this, content_sizer, m_content);
 
+#ifdef _WIN32 // See comment in the header where m_checkBox is defined.
     m_checkBox = new ::CheckBox(this, m_checkBoxText);
+#else
+    m_checkBox = new wxCheckBox(this, wxID_ANY, m_checkBoxText);
+#endif
     wxGetApp().UpdateDarkUI(m_checkBox);
     m_checkBox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) { m_checkBoxValue = m_checkBox->GetValue(); });
 
@@ -310,7 +327,7 @@ RichMessageDialog::RichMessageDialog(wxWindow* parent,
     finalize();
 }
 
-int RichMessageDialog::ShowModal()
+int RichMessageDialogBase::ShowModal()
 {
     if (m_checkBoxText.IsEmpty())
         m_checkBox->Hide();
@@ -322,7 +339,6 @@ int RichMessageDialog::ShowModal()
 
     return wxDialog::ShowModal();
 }
-#endif
 
 // InfoDialog
 

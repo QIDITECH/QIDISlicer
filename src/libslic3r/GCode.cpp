@@ -753,6 +753,7 @@ namespace DoExport {
 	            print_statistics.total_used_filament += used_filament;
 	            print_statistics.total_extruded_volume += extruded_volume;
 	            print_statistics.total_wipe_tower_filament += has_wipe_tower ? used_filament - extruder.used_filament() : 0.;
+                print_statistics.total_wipe_tower_filament_weight += has_wipe_tower ? (extruded_volume - extruder.extruded_volume()) * extruder.filament_density() * 0.001 : 0.;
 	            print_statistics.total_wipe_tower_cost += has_wipe_tower ? (extruded_volume - extruder.extruded_volume())* extruder.filament_density() * 0.001 * extruder.filament_cost() * 0.001 : 0.;
 	        }
             if (!export_binary_data) {
@@ -843,7 +844,7 @@ static inline GCode::SmoothPathCache smooth_path_interpolate_global(const Print&
 
 void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGeneratorCallback thumbnail_cb)
 {
-    const bool export_to_binary_gcode = print.full_print_config().option<ConfigOptionBool>("gcode_binary")->value;
+    const bool export_to_binary_gcode = print.full_print_config().option<ConfigOptionBool>("binary_gcode")->value;
     // if exporting gcode in binary format: 
     // we generate here the data to be passed to the post-processor, who is responsible to export them to file 
     // 1) generate the thumbnails
@@ -1404,6 +1405,7 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
     file.write("\n");
         file.write_format(PrintStatistics::TotalFilamentUsedGValueMask.c_str(), print.m_print_statistics.total_weight);
         file.write_format(PrintStatistics::TotalFilamentCostValueMask.c_str(), print.m_print_statistics.total_cost);
+        file.write_format(PrintStatistics::TotalFilamentUsedWipeTowerValueMask.c_str(), print.m_print_statistics.total_wipe_tower_filament_weight);
     if (print.m_print_statistics.total_toolchanges > 0)
     	file.write_format("; total toolchanges = %i\n", print.m_print_statistics.total_toolchanges);
     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
@@ -2192,7 +2194,7 @@ LayerResult GCodeGenerator::process_layer(
             print.config().before_layer_gcode.value, m_writer.extruder()->id(), &config)
             + "\n";
     }
-    gcode += this->change_layer(previous_layer_z, print_z);  // this will increase m_layer_index
+    gcode += this->change_layer(previous_layer_z, print_z, result.spiral_vase_enable);  // this will increase m_layer_index
     m_layer = &layer;
     if (this->line_distancer_is_required(layer_tools.extruders) && this->m_layer != nullptr && this->m_layer->lower_layer != nullptr) {
         this->m_previous_layer_distancer = GCode::Impl::get_expolygons_distancer(m_layer->lower_layer->lslices);
@@ -2704,7 +2706,11 @@ Polygon Bed::get_inner_offset(const std::vector<Vec2d>& shape, const double padd
     transform(begin(shape), end(shape), back_inserter(shape_scaled), [](const Vec2d& point){
         return scaled(point);
     });
-    return shrink({Polygon{shape_scaled}}, scaled(padding)).front();
+    Polygons inner_offset{shrink({Polygon{shape_scaled}}, scaled(padding))};
+    if (inner_offset.empty()) {
+        return Polygon{};
+    }
+    return inner_offset.front();
 }
     }
 
@@ -2724,21 +2730,18 @@ std::optional<std::string> GCodeGenerator::get_helical_layer_change_gcode(
 
     const Point n_gon_start_point{this->last_pos()};
 
-    static GCode::Impl::Bed bed{
+    GCode::Impl::Bed bed{
         this->m_config.bed_shape.values,
-        circle_radius
+        circle_radius * 2
     };
     if (!bed.contains_within_padding(this->point_to_gcode(n_gon_start_point))) {
         return std::nullopt;
     }
 
-    const Point n_gon_centeroid{
-        n_gon_start_point
-        + scaled(Vec2d{
-            (bed.centroid - unscaled(n_gon_start_point)).normalized()
-            * circle_radius
-        })
-    };
+    const Vec2crd n_gon_vector{scaled(Vec2d{
+        (bed.centroid - this->point_to_gcode(n_gon_start_point)).normalized() * circle_radius
+    })};
+    const Point n_gon_centeroid{n_gon_start_point + n_gon_vector};
 
     const Polygon n_gon{GCode::Impl::generate_regular_polygon(
         n_gon_centeroid,
@@ -2763,8 +2766,11 @@ std::optional<std::string> GCodeGenerator::get_helical_layer_change_gcode(
 }
 
 // called by GCodeGenerator::process_layer()
-std::string GCodeGenerator::change_layer(coordf_t previous_layer_z, coordf_t print_z)
-{
+std::string GCodeGenerator::change_layer(
+    coordf_t previous_layer_z,
+    coordf_t print_z,
+    const bool spiral_vase_enabled
+) {
     std::string gcode;
     if (m_layer_count > 0)
         // Increment a progress bar indicator.
@@ -2775,14 +2781,16 @@ std::string GCodeGenerator::change_layer(coordf_t previous_layer_z, coordf_t pri
 
     const std::string comment{"move to next layer (" + std::to_string(m_layer_index) + ")"};
 
-    bool helical_layer_change{
-        (!this->m_spiral_vase || !this->m_spiral_vase->is_enabled())
+    bool do_helical_layer_change{
+        !spiral_vase_enabled
         && print_z > previous_layer_z
+        && EXTRUDER_CONFIG(retract_layer_change)
+        && EXTRUDER_CONFIG(retract_length) > 0
         && EXTRUDER_CONFIG(travel_ramping_lift)
         && EXTRUDER_CONFIG(travel_slope) > 0 && EXTRUDER_CONFIG(travel_slope) < 90
     };
     const std::optional<std::string> helix_gcode{
-        helical_layer_change ?
+        do_helical_layer_change ?
         this->get_helical_layer_change_gcode(
             m_config.z_offset.value + previous_layer_z,
             m_config.z_offset.value + print_z,

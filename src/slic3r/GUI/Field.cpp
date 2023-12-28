@@ -198,9 +198,10 @@ wxString Field::get_tooltip_text(const wxString& default_string)
         opt_id += "]";
     }
 
+    bool newline_after_name = boost::iends_with(opt_id, "_gcode") && opt_id != "binary_gcode";
 	return from_u8(m_opt.tooltip) + "\n" + _L("default value") + "\t: " +
-        (boost::iends_with(opt_id, "_gcode") ? "\n" : "") + default_string +
-        (boost::iends_with(opt_id, "_gcode") ? "" : "\n") +
+        (newline_after_name ? "\n" : "") + default_string +
+        (newline_after_name ? "" : "\n") +
         _L("parameter name") + "\t: " + opt_id;
 }
 

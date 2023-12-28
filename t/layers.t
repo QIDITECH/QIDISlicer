@@ -62,7 +62,7 @@ use Slic3r::Test qw(_eq);
 {
     my $config = Slic3r::Config->new;
     $config->set('fill_density', 0);  # just for making the test faster
-    $config->set('gcode_binary', 0);  
+    $config->set('binary_gcode', 0);  
     my $print = Slic3r::Test::init_print('20mm_cube', config => $config, scale => 2);
     
     my @z = ();
