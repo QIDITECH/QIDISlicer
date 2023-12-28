@@ -3249,7 +3249,7 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
 
             return sizer;
         };
-        Line line = optgroup->create_single_option_line("extruder_colour", "", extruder_idx);
+        line = optgroup->create_single_option_line("extruder_colour", "", extruder_idx);
         line.append_widget(reset_to_filament_color);
         optgroup->append_line(line);
 
