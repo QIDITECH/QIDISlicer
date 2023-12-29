@@ -60,6 +60,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "autoemit_temperature_commands",
         "avoid_crossing_perimeters",
         "avoid_crossing_perimeters_max_detour",
+        //Y20
+        "bed_exclude_area",
         "bed_shape",
         "bed_temperature",
         "before_layer_gcode",

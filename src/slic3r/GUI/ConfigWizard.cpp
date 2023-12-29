@@ -1828,6 +1828,8 @@ PageBedShape::PageBedShape(ConfigWizard *parent)
     append_text(_L("Set the shape of your printer's bed."));
 
     shape_panel->build_panel(*wizard_p()->custom_config->option<ConfigOptionPoints>("bed_shape"),
+        //Y20
+        *wizard_p()->custom_config->option<ConfigOptionPoints>("bed_exclude_area"),
         *wizard_p()->custom_config->option<ConfigOptionString>("bed_custom_texture"),
         *wizard_p()->custom_config->option<ConfigOptionString>("bed_custom_model"));
 
@@ -1837,9 +1839,13 @@ PageBedShape::PageBedShape(ConfigWizard *parent)
 void PageBedShape::apply_custom_config(DynamicPrintConfig &config)
 {
     const std::vector<Vec2d>& points = shape_panel->get_shape();
+    //Y20
+    const std::vector<Vec2d>& exclude_area = shape_panel->get_exclude_area();
     const std::string& custom_texture = shape_panel->get_custom_texture();
     const std::string& custom_model = shape_panel->get_custom_model();
     config.set_key_value("bed_shape", new ConfigOptionPoints(points));
+    //Y20
+    config.set_key_value("bed_exclude_area", new ConfigOptionPoints(exclude_area));
     config.set_key_value("bed_custom_texture", new ConfigOptionString(custom_texture));
     config.set_key_value("bed_custom_model", new ConfigOptionString(custom_model));
 }
@@ -3310,7 +3316,8 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
 
     p->load_vendors();
     p->custom_config.reset(DynamicPrintConfig::new_from_defaults_keys({
-        "gcode_flavor", "bed_shape", "bed_custom_texture", "bed_custom_model", "nozzle_diameter", "filament_diameter", "temperature", "bed_temperature",
+//Y20
+        "gcode_flavor", "bed_shape", "bed_exclude_area", "bed_custom_texture", "bed_custom_model", "nozzle_diameter", "filament_diameter", "temperature", "bed_temperature",
     }));
 
     p->index = new ConfigWizardIndex(this);

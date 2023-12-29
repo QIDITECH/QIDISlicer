@@ -32,11 +32,11 @@ namespace Slic3r {
 namespace GUI {
 
 
-static const char* URL_CHANGELOG = "https://files.qidi3d.com/?latest=slicer-stable&lng=%1%";
+static const char* URL_CHANGELOG = "https://github.com/QIDITECH/QIDISlicer/releases/tag/V%1%";
 static const char* URL_DOWNLOAD = "https://www.qidi3d.com/slicerweb&lng=%1%";
-static const char* URL_DEV = "https://github.com/qidi3d/QIDISlicer/releases/tag/version_%1%";
+static const char* URL_DEV = "https://github.com/QIDITECH/QIDISlicer/releases/tag/version_%1%";
 
-static const std::string CONFIG_UPDATE_WIKI_URL("https://github.com/qidi3d/QIDISlicer/wiki/Slic3r-PE-1.40-configuration-update");
+static const std::string CONFIG_UPDATE_WIKI_URL("https://github.com/QIDITECH/QIDISlicer");
 
 
 // MsgUpdateSlic3r
@@ -478,15 +478,15 @@ MsgDataLegacy::MsgDataLegacy() :
 	text->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 	content_sizer->Add(text);
 	content_sizer->AddSpacer(VERT_SPACING);
-
-	auto *text2 = new wxStaticText(this, wxID_ANY, _(L("For more information please visit our wiki page:")));
-	static const wxString url("https://github.com/qidi3d/QIDISlicer/wiki/Slic3r-PE-1.40-configuration-update");
+//Y19
+	//auto *text2 = new wxStaticText(this, wxID_ANY, _(L("For more information please visit our wiki page:")));
+	//static const wxString url("https://github.com/QIDITECH/QIDISlicer");
 	// The wiki page name is intentionally not localized:
 	// TRN %s = QIDISlicer
-	auto *link = new wxHyperlinkCtrl(this, wxID_ANY, format_wxstr(_L("%s 1.40 configuration update"), SLIC3R_APP_NAME), CONFIG_UPDATE_WIKI_URL);
-	content_sizer->Add(text2);
-	content_sizer->Add(link);
-	content_sizer->AddSpacer(VERT_SPACING);
+	//auto *link = new wxHyperlinkCtrl(this, wxID_ANY, format_wxstr(_L("%s configuration update"), SLIC3R_APP_NAME), CONFIG_UPDATE_WIKI_URL);
+	//content_sizer->Add(text2);
+	//content_sizer->Add(link);
+	//content_sizer->AddSpacer(VERT_SPACING);
 
 	finalize();
 }

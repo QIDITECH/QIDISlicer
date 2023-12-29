@@ -34,11 +34,11 @@ WifiConfigDialog::WifiConfigDialog(wxWindow* parent, std::string& file_path, Rem
     panel->SetSizer(vsizer);
 
     // TRN Wifi config dialog explanation line 1.
-    wxStaticText* explain_label1 = new wxStaticText(panel, wxID_ANY, _L("Generate a file to be loaded by a Prusa printer to configure its Wi-Fi connection."));
+    wxStaticText* explain_label1 = new wxStaticText(panel, wxID_ANY, _L("Generate a file to be loaded by a printer to configure its Wi-Fi connection."));
     // TRN Wifi config dialog explanation line 2.
     wxStaticText* explain_label2 = new wxStaticText(panel, wxID_ANY, GUI::format_wxstr(_L("Write this file on the USB flash drive. Its name will be %1%."), WIFI_CONFIGFILE_NAME));
     // TRN Wifi config dialog explanation line 3.
-    wxStaticText* explain_label3 = new wxStaticText(panel, wxID_ANY, _L("Your Prusa printer should load this file automatically."));
+    wxStaticText* explain_label3 = new wxStaticText(panel, wxID_ANY, _L("Your printer should load this file automatically."));
     // TRN Wifi config dialog explanation line 4.
     wxStaticText* explain_label4 = new wxStaticText(panel, wxID_ANY, _L("Note: This file will contain the SSID and password in plain text."));
 
