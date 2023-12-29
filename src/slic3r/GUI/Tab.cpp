@@ -3163,14 +3163,6 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
 
         auto optgroup = page->new_optgroup(L("Size"));
         optgroup->append_single_option_line("nozzle_diameter", "", extruder_idx);
-//Y11
-        wxString description_line_text = _L("If you want to use other size nozzles, you need to modify the extrusion width and pressure advance.");
-        Line line = { "", "" };
-        line.full_width = 1;
-        line.widget = [this, description_line_text](wxWindow* parent) {
-            return description_line_widget(parent, &m_nozzle_diameter_description_line, description_line_text);
-        };
-        optgroup->append_line(line);
 
         optgroup->m_on_change = [this, extruder_idx](const t_config_option_key&opt_key, boost::any value)
         {
@@ -3249,7 +3241,7 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
 
             return sizer;
         };
-        line = optgroup->create_single_option_line("extruder_colour", "", extruder_idx);
+        Line line = optgroup->create_single_option_line("extruder_colour", "", extruder_idx);
         line.append_widget(reset_to_filament_color);
         optgroup->append_line(line);
 

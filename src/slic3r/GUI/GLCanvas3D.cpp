@@ -4913,9 +4913,8 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
 
     const ModelObjectPtrs &model_objects     = GUI::wxGetApp().model().objects;
     std::vector<ColorRGBA> extruders_colors  = get_extruders_colors();
-
+//Y18
     if (thumbnail_params.transparent_background)
-        //Y18
         glsafe(::glClearColor(1.0f, 1.0f, 1.0f, 1.0f));
 
     glsafe(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -4947,7 +4946,9 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
         }
         else {
             shader->set_uniform("emission_factor", 0.0f);
-            vol->model.set_color((vol->printable && !vol->is_outside) ? vol->color : ColorRGBA::GRAY());
+//Y18
+            vol->model.set_color((vol->printable && !vol->is_outside) ? ColorRGBA { 0.2f, 0.6f, 1.0f, 1.0f } : ColorRGBA::GRAY());
+            //vol->model.set_color((vol->printable && !vol->is_outside) ? vol->color : ColorRGBA::GRAY());
         }
         // the volume may have been deactivated by an active gizmo
         const bool is_active = vol->is_active;
@@ -4979,9 +4980,9 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
         vol->is_active = is_active;
     }
     glsafe(::glDisable(GL_DEPTH_TEST));
-
-    if (thumbnail_params.show_bed)
-        _render_bed(view_matrix, projection_matrix, !camera.is_looking_downward());
+//Y18
+//    if (thumbnail_params.show_bed)
+//        _render_bed(view_matrix, projection_matrix, !camera.is_looking_downward());
 
     // restore background color
     if (thumbnail_params.transparent_background)
