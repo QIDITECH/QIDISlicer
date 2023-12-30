@@ -1204,7 +1204,11 @@ static wxString get_string_value(std::string opt_key, const DynamicPrintConfig& 
             return shape.get_full_name_with_params();
         }
         //Y20
-        if (opt_key == "bed_exclude_area") {
+        if (opt_key == "bed_exclude_area_0") {
+            BedShape shape(*config.option<ConfigOptionPoints>(opt_key));
+            return shape.get_full_name_with_params();
+        }
+        if (opt_key == "bed_exclude_area_1") {
             BedShape shape(*config.option<ConfigOptionPoints>(opt_key));
             return shape.get_full_name_with_params();
         }

@@ -61,7 +61,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "avoid_crossing_perimeters",
         "avoid_crossing_perimeters_max_detour",
         //Y20
-        "bed_exclude_area",
+        "bed_exclude_area_0",
+        "bed_exclude_area_1",
         "bed_shape",
         "bed_temperature",
         "before_layer_gcode",

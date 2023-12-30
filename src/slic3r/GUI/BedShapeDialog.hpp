@@ -63,19 +63,21 @@ class BedShapePanel : public wxPanel
     std::vector<Vec2d> m_shape;
     std::vector<Vec2d> m_loaded_shape;
     //Y20
-    std::vector<Vec2d> m_exclude_area;
+    std::vector<Vec2d> m_exclude_area_0;
+    std::vector<Vec2d> m_exclude_area_1;
     std::string        m_custom_texture;
     std::string        m_custom_model;
 
 public:
     BedShapePanel(wxWindow* parent) : wxPanel(parent, wxID_ANY), m_custom_texture(NONE), m_custom_model(NONE) {}
 //Y20
-    void build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
+    void build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
 
     // Returns the resulting bed shape polygon. This value will be stored to the ini file.
     const std::vector<Vec2d>& get_shape() const { return m_shape; }
     //Y20
-    const std::vector<Vec2d>& get_exclude_area() const { return m_exclude_area; }
+    const std::vector<Vec2d>& get_exclude_area_0() const { return m_exclude_area_0; }
+    const std::vector<Vec2d>& get_exclude_area_1() const { return m_exclude_area_1; }
     const std::string& get_custom_texture() const { return (m_custom_texture != NONE) ? m_custom_texture : EMPTY_STRING; }
     const std::string& get_custom_model() const { return (m_custom_model != NONE) ? m_custom_model : EMPTY_STRING; }
 
@@ -83,15 +85,17 @@ private:
     ConfigOptionsGroupShp	init_shape_options_page(const wxString& title);
     void	    activate_options_page(ConfigOptionsGroupShp options_group);
 //Y20
-    wxPanel*    init_exclude_panel();
-    ConfigOptionsGroupShp exclude_optgroup;
+    wxSizer*    init_exclude_sizer();
+    ConfigOptionsGroupShp exclude_optgroup_0;
+    ConfigOptionsGroupShp exclude_optgroup_1;
     wxPanel*    init_texture_panel();
     wxPanel*    init_model_panel();
     void		set_shape(const ConfigOptionPoints& points);
 //Y20
-    void		set_exclude_area(const ConfigOptionPoints& points);
+    void		set_exclude_area(const ConfigOptionPoints& points_0, const ConfigOptionPoints& points_1);
     void		update_preview();
 	void		update_shape();
+    const std::vector<Vec2d>&		update_exclude_area(ConfigOptionsGroupShp options_group);
 	void		load_stl();
     void		load_texture();
     void		load_model();
@@ -108,11 +112,12 @@ class BedShapeDialog : public DPIDialog
 public:
 	BedShapeDialog(wxWindow* parent);
 //Y20
-    void build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
+    void build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
 
     const std::vector<Vec2d>& get_shape() const { return m_panel->get_shape(); }
 //Y20
-    const std::vector<Vec2d>& get_exclude_area() const { return m_panel->get_exclude_area(); }
+    const std::vector<Vec2d>& get_exclude_area_0() const { return m_panel->get_exclude_area_0(); }
+    const std::vector<Vec2d>& get_exclude_area_1() const { return m_panel->get_exclude_area_1(); }
     const std::string& get_custom_texture() const { return m_panel->get_custom_texture(); }
     const std::string& get_custom_model() const { return m_panel->get_custom_model(); }
 

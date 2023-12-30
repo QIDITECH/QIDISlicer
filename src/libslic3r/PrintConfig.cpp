@@ -272,8 +272,13 @@ void PrintConfigDef::init_common_params()
     def->set_default_value(new ConfigOptionPoints{ Vec2d(0, 0), Vec2d(200, 0), Vec2d(200, 200), Vec2d(0, 200) });
 
     //Y20
-    def = this->add("bed_exclude_area", coPoints);
-    def->label = L("Bed exclude area");
+    def = this->add("bed_exclude_area_0", coPoints);
+    def->label = L("Bed exclude area 1");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionPoints{ Vec2d(0, 0) });
+
+    def = this->add("bed_exclude_area_1", coPoints);
+    def->label = L("Bed exclude area 2");
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionPoints{ Vec2d(0, 0) });
 

@@ -1829,7 +1829,8 @@ PageBedShape::PageBedShape(ConfigWizard *parent)
 
     shape_panel->build_panel(*wizard_p()->custom_config->option<ConfigOptionPoints>("bed_shape"),
         //Y20
-        *wizard_p()->custom_config->option<ConfigOptionPoints>("bed_exclude_area"),
+        *wizard_p()->custom_config->option<ConfigOptionPoints>("bed_exclude_area_0"),
+        *wizard_p()->custom_config->option<ConfigOptionPoints>("bed_exclude_area_1"),
         *wizard_p()->custom_config->option<ConfigOptionString>("bed_custom_texture"),
         *wizard_p()->custom_config->option<ConfigOptionString>("bed_custom_model"));
 
@@ -1840,12 +1841,14 @@ void PageBedShape::apply_custom_config(DynamicPrintConfig &config)
 {
     const std::vector<Vec2d>& points = shape_panel->get_shape();
     //Y20
-    const std::vector<Vec2d>& exclude_area = shape_panel->get_exclude_area();
+    const std::vector<Vec2d>& exclude_area_0 = shape_panel->get_exclude_area_0();
+    const std::vector<Vec2d>& exclude_area_1 = shape_panel->get_exclude_area_1();
     const std::string& custom_texture = shape_panel->get_custom_texture();
     const std::string& custom_model = shape_panel->get_custom_model();
     config.set_key_value("bed_shape", new ConfigOptionPoints(points));
     //Y20
-    config.set_key_value("bed_exclude_area", new ConfigOptionPoints(exclude_area));
+    config.set_key_value("bed_exclude_area_0", new ConfigOptionPoints(exclude_area_0));
+    config.set_key_value("bed_exclude_area_1", new ConfigOptionPoints(exclude_area_1));
     config.set_key_value("bed_custom_texture", new ConfigOptionString(custom_texture));
     config.set_key_value("bed_custom_model", new ConfigOptionString(custom_model));
 }
@@ -3317,7 +3320,7 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
     p->load_vendors();
     p->custom_config.reset(DynamicPrintConfig::new_from_defaults_keys({
 //Y20
-        "gcode_flavor", "bed_shape", "bed_exclude_area", "bed_custom_texture", "bed_custom_model", "nozzle_diameter", "filament_diameter", "temperature", "bed_temperature",
+        "gcode_flavor", "bed_shape", "bed_exclude_area_0", "bed_exclude_area_1", "bed_custom_texture", "bed_custom_model", "nozzle_diameter", "filament_diameter", "temperature", "bed_temperature",
     }));
 
     p->index = new ConfigWizardIndex(this);

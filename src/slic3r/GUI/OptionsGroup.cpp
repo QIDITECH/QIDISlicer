@@ -954,7 +954,7 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 		break;
 	case coPoints:
 //Y20
-		if (opt_key == "bed_shape" || opt_key == "bed_exclude_area")
+		if (opt_key == "bed_shape" || opt_key == "bed_exclude_area_0" || opt_key == "bed_exclude_area_1")
 			ret = config.option<ConfigOptionPoints>(opt_key)->values;
 		else
 			ret = config.option<ConfigOptionPoints>(opt_key)->get_at(idx);

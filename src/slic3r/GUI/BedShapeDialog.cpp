@@ -159,13 +159,13 @@ void BedShape::apply_exclude_values(ConfigOptionsGroupShp optgroup)
 BedShapeDialog::BedShapeDialog(wxWindow* parent) : DPIDialog(parent, wxID_ANY, _(L("Bed Shape")),
         wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {}
 //Y20
-void BedShapeDialog::build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
+void BedShapeDialog::build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
 {
     SetFont(wxGetApp().normal_font());
 
 	m_panel = new BedShapePanel(this);
     //Y20
-    m_panel->build_panel(default_pt, exclude_area, custom_texture, custom_model);
+    m_panel->build_panel(default_pt, exclude_area_0, exclude_area_1, custom_texture, custom_model);
 
 	auto main_sizer = new wxBoxSizer(wxVERTICAL);
 	main_sizer->Add(m_panel, 1, wxEXPAND);
@@ -204,12 +204,13 @@ void BedShapeDialog::on_dpi_changed(const wxRect &suggested_rect)
 const std::string BedShapePanel::NONE = "None";
 const std::string BedShapePanel::EMPTY_STRING = "";
 //Y20
-void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
+void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
 {
     wxGetApp().UpdateDarkUI(this);
     m_shape = default_pt.values;
     //Y20
-    m_exclude_area = exclude_area.values;
+    m_exclude_area_0 = exclude_area_0.values;
+    m_exclude_area_1 = exclude_area_1.values;
     m_custom_texture = custom_texture.value.empty() ? NONE : custom_texture.value;
     m_custom_model = custom_model.value.empty() ? NONE : custom_model.value;
 
@@ -255,7 +256,7 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
     activate_options_page(optgroup);
 
 //Y20
-    wxPanel* exclude_panel = init_exclude_panel();
+    wxSizer* exclude_panel = init_exclude_sizer();
     wxPanel* texture_panel = init_texture_panel();
     wxPanel* model_panel = init_model_panel();
 
@@ -263,6 +264,7 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
 
 	// right pane with preview canvas
 	m_canvas = new Bed_2D(this);
+    m_canvas->SetMinSize({ FromDIP(400), FromDIP(400) });
     m_canvas->Bind(wxEVT_PAINT, [this](wxPaintEvent& e) { m_canvas->repaint(m_shape); });
     m_canvas->Bind(wxEVT_SIZE, [this](wxSizeEvent& e) { m_canvas->Refresh(); });
 
@@ -270,8 +272,8 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
     left_sizer->Add(sbsizer, 0, wxEXPAND);
 //Y20
     left_sizer->Add(exclude_panel, 0, wxEXPAND);
-    left_sizer->Add(texture_panel, 1, wxEXPAND);
-    left_sizer->Add(model_panel, 1, wxEXPAND);
+    left_sizer->Add(texture_panel, 0, wxEXPAND);
+    left_sizer->Add(model_panel, 0, wxEXPAND);
 
     wxSizer* top_sizer = new wxBoxSizer(wxHORIZONTAL);
     top_sizer->Add(left_sizer, 0, wxEXPAND | wxLEFT | wxTOP | wxBOTTOM, 10);
@@ -281,7 +283,7 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
 
 	set_shape(default_pt);
     //Y20
-    set_exclude_area(exclude_area);
+    set_exclude_area(exclude_area_0, exclude_area_1);
 	update_preview();
 }
 
@@ -311,25 +313,38 @@ void BedShapePanel::activate_options_page(ConfigOptionsGroupShp options_group)
 }
 
 //Y20
-wxPanel* BedShapePanel::init_exclude_panel()
+wxSizer* BedShapePanel::init_exclude_sizer()
 {
-    wxPanel* panel = new wxPanel(this);
-    wxGetApp().UpdateDarkUI(panel, true);
-    exclude_optgroup = std::make_shared<ConfigOptionsGroup>(panel, _L("Exclude area"));
+    wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-    exclude_optgroup->label_width = 10;
-    exclude_optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    wxPanel* panel_0 = new wxPanel(this);
+    wxGetApp().UpdateDarkUI(panel_0, true);
+    exclude_optgroup_0 = std::make_shared<ConfigOptionsGroup>(panel_0, _L("Exclude area 1"));
+    exclude_optgroup_0->label_width = 10;
+    exclude_optgroup_0->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
         update_shape();
     };
+    BedShape::append_option_line(exclude_optgroup_0, BedShape::Parameter::ExcludeMax);
+    BedShape::append_option_line(exclude_optgroup_0, BedShape::Parameter::ExcludeMin);
+    exclude_optgroup_0->activate();
+    panel_0->SetSizerAndFit(exclude_optgroup_0->sizer);
 
-    BedShape::append_option_line(exclude_optgroup, BedShape::Parameter::ExcludeMax);
-    BedShape::append_option_line(exclude_optgroup, BedShape::Parameter::ExcludeMin);
+    wxPanel* panel_1 = new wxPanel(this);
+    wxGetApp().UpdateDarkUI(panel_1, true);
+    exclude_optgroup_1 = std::make_shared<ConfigOptionsGroup>(panel_1, _L("Exclude area 2"));
+    exclude_optgroup_1->label_width = 10;
+    exclude_optgroup_1->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+        update_shape();
+    };
+    BedShape::append_option_line(exclude_optgroup_1, BedShape::Parameter::ExcludeMax);
+    BedShape::append_option_line(exclude_optgroup_1, BedShape::Parameter::ExcludeMin);
+    exclude_optgroup_1->activate();
+    panel_1->SetSizerAndFit(exclude_optgroup_1->sizer);
 
-    exclude_optgroup->activate();
+    sizer->Add(panel_0, 1, wxEXPAND);
+    sizer->Add(panel_1, 1, wxEXPAND);
 
-    panel->SetSizerAndFit(exclude_optgroup->sizer);
-
-    return panel;
+    return sizer;
 }
 
 wxPanel* BedShapePanel::init_texture_panel()
@@ -497,10 +512,14 @@ void BedShapePanel::set_shape(const ConfigOptionPoints& points)
     update_shape();
 }
 //Y20
-void BedShapePanel::set_exclude_area(const ConfigOptionPoints& points)
+void BedShapePanel::set_exclude_area(const ConfigOptionPoints& points_0, const ConfigOptionPoints& points_1)
 {
-    BedShape exclude(points);
-    exclude.apply_exclude_values(exclude_optgroup);
+    BedShape exclude_0(points_0);
+    exclude_0.apply_exclude_values(exclude_optgroup_0);
+
+    BedShape exclude_1(points_1);
+    exclude_1.apply_exclude_values(exclude_optgroup_1);
+
     update_shape();
 }
 
@@ -575,41 +594,37 @@ void BedShapePanel::update_shape()
     }
 
 //Y20
+    m_exclude_area_0 = update_exclude_area(exclude_optgroup_0);
+    m_exclude_area_1 = update_exclude_area(exclude_optgroup_1);
+
+    update_preview();
+}
+
+//Y20
+const std::vector<Vec2d>&  BedShapePanel::update_exclude_area(ConfigOptionsGroupShp options_group)
+{
     Vec2d exclude_max(Vec2d::Zero());
     Vec2d exclude_min(Vec2d::Zero());
+    std::vector<Vec2d> e_area = {Vec2d(0, 0)};
 
-    try { exclude_max = boost::any_cast<Vec2d>(exclude_optgroup->get_value("exclude_area_max")); }
-    catch (const std::exception& /* e */) { return; }
+    try { exclude_max = boost::any_cast<Vec2d>(options_group->get_value("exclude_area_max")); }
+    catch (const std::exception & /* e */) { return e_area; }
 
-    try { exclude_min = boost::any_cast<Vec2d>(exclude_optgroup->get_value("exclude_area_min")); }
-    catch (const std::exception & /* e */)  { return; }
+    try { exclude_min = boost::any_cast<Vec2d>(options_group->get_value("exclude_area_min")); }
+    catch (const std::exception & /* e */)  { return e_area; }
     
     auto e_x = exclude_max(0);
     auto e_y = exclude_max(1);
-    // empty strings or '-' or other things
-    //if (e_x == 0 || e_y == 0)	return;
-    //double e_x0 = 0.0;
-    //double e_y0 = 0.0;
-    //double e_x1 = e_x;
-    //double e_y1 = e_y;
 
     auto e_dx = exclude_min(0);
     auto e_dy = exclude_min(1);
 
-    //e_x0 -= e_dx;
-    //e_x1 -= e_dx;
-    //e_y0 -= e_dy;
-    //e_y1 -= e_dy;
-    //m_exclude_area = { Vec2d(e_x0, e_y0),
-    //                   Vec2d(e_x1, e_y0),
-    //                   Vec2d(e_x1, e_y1),
-    //                   Vec2d(e_x0, e_y1) };
-    m_exclude_area = { Vec2d(e_dx, e_dy),
-                       Vec2d(e_x, e_dy),
-                       Vec2d(e_x, e_y),
-                       Vec2d(e_dx, e_y) };
+    e_area = { Vec2d(e_dx, e_dy),
+               Vec2d(e_x, e_dy),
+               Vec2d(e_x, e_y),
+               Vec2d(e_dx, e_y) };
 
-    update_preview();
+    return e_area;
 }
 
 // Loads an stl file, projects it to the XY plane and calculates a polygon.
