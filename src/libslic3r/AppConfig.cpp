@@ -131,7 +131,7 @@ void AppConfig::set_defaults()
             set("auto_toolbar_size", "100");
  
         if (get("use_binary_gcode_when_supported").empty())
-            set("use_binary_gcode_when_supported", "1");
+            set("use_binary_gcode_when_supported", "0");
        if (get("notify_release").empty())
            set("notify_release", "all"); // or "none" or "release"
 

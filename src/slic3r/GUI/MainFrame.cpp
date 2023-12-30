@@ -1244,7 +1244,7 @@ static wxMenu* generate_help_menu()
     //B6
     append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("%s &Website"), SLIC3R_APP_NAME),
         wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
-        [](wxCommandEvent&) { wxGetApp().open_web_page_localized("https://www.qidi3d.com"); });
+        [](wxCommandEvent&) { wxLaunchDefaultBrowser("https://www.qidi3d.com", 0); });
     // TRN Item from "Help" menu
     //append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("&Quick Start"), SLIC3R_APP_NAME),
     //    wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),

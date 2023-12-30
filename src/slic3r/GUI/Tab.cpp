@@ -1767,7 +1767,8 @@ void TabPrint::update_description_lines()
         if (m_post_process_explanation) {
             m_post_process_explanation->SetText(
                 _L("Post processing scripts shall modify G-code file in place."));
-            m_post_process_explanation->SetPathEnd("post-processing-scripts_283913");
+//Y
+            //m_post_process_explanation->SetPathEnd("post-processing-scripts_283913");
         }
         // upadte G-code substitutions from the current configuration
         {
