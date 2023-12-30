@@ -62,9 +62,6 @@ struct SurfaceFillParams
 
 	// Index of this entry in a linear vector.
     size_t 			idx = 0;
-	//w14
-    double  perimeter_extrusion_width = 0;
-    double          infill_overlap            = 0;
 
 
 	bool operator<(const SurfaceFillParams &rhs) const {
@@ -552,9 +549,6 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.resolution        = resolution;
         params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring;
         params.layer_height      = layerm.layer()->height;
-		//w14
-        const PrintRegionConfig &getregion = layerm.region().config();
-        params.perimeter_extrusion_width                          = float(getregion.perimeter_extrusion_width);
 
         for (ExPolygon &expoly : surface_fill.expolygons) {
 			// Spacing is modified by the filler to indicate adjustments. Reset it for each expolygon.
@@ -566,11 +560,9 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                 if (params.use_arachne) {
 					//w14
                     if (surface_fill.surface.surface_type == stInternalSolid) {
-                        getregion.infill_overlap.percent ?
-                            params.temp_set = params.perimeter_extrusion_width *getregion.infill_overlap.value / 100 :
-                            params.temp_set = float(getregion.infill_overlap.value);
-
-						f->overlap = params.temp_set * (-1);
+                        layerm.region().config().infill_overlap.percent ?
+                            f->overlap      = layerm.region().config().perimeter_extrusion_width * layerm.region().config().infill_overlap.value / 100 *(-1):
+                            f->overlap = float(layerm.region().config().infill_overlap.value);
                     }
                     thick_polylines = f->fill_surface_arachne(&surface_fill.surface, params);
                     f->overlap      = 0;

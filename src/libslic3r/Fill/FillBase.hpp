@@ -63,11 +63,6 @@ struct FillParams
     bool        use_arachne     { false };
     // Layer height for Concentric infill with Arachne.
     coordf_t    layer_height    { 0.f };
-    //w14
-    double   perimeter_extrusion_width{0};
-    double      infill_overlap {0};
-    double      castifop{0};
-    float     temp_set;
 };
 static_assert(IsTriviallyCopyable<FillParams>::value, "FillParams class is not POD (and it should be - see constructor).");
 
