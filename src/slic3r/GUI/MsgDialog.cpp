@@ -70,8 +70,9 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
     main_sizer->Add(topsizer, 1, wxEXPAND);
     main_sizer->Add(new StaticLine(this), 0, wxEXPAND | wxLEFT | wxRIGHT, HORIZ_SPACING);
     main_sizer->Add(btn_sizer, 0, wxALL | wxEXPAND, VERT_SPACING);
-    if (style & wxOK)
-        add_button(wxID_OK, true);
+    //B50
+    // if (style & wxOK)
+    //     add_button(wxID_OK, true);
     if (title != "App Update available") {
         apply_style(style);
     }

@@ -1,8 +1,9 @@
 #ifndef slic3r_UI_Colors_hpp_
 #define slic3r_UI_Colors_hpp_
 
+//B48
 static const int clr_border_normal      = 0x646464;//0xDBDBDB;
-static const int clr_border_hovered     = 0xED6B21;//0x00AE42;
+static const int clr_border_hovered     = 0x4479FB;//0x00AE42;
 static const int clr_border_disabled    = 0x646464;//0xDBDBDB;
 
 static const int clr_background_normal_light    = 0xFFFFFF;

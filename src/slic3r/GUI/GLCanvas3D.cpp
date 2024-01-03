@@ -7862,6 +7862,7 @@ void GLCanvas3D::GizmoHighlighter::blink()
         invalidate();
 }
 
+//B48
 #if ENABLE_BINARIZED_GCODE_DEBUG_WINDOW
 void GLCanvas3D::show_binary_gcode_debug_window()
 {
@@ -7875,7 +7876,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "File metadata compression");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "File metadata compression");
         ImGui::TableSetColumnIndex(1);
         std::vector<std::string> options = { "None", "Deflate", "heatshrink 11,4", "heatshrink 12,4" };
         int option_id = (int)binarizer_config.compression.file_metadata;
@@ -7884,7 +7885,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "Printer metadata compression");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "Printer metadata compression");
         ImGui::TableSetColumnIndex(1);
         option_id = (int)binarizer_config.compression.printer_metadata;
         if (imgui.combo(std::string("##printer_metadata_compression"), options, option_id, ImGuiComboFlags_HeightLargest, 0.0f, 175.0f))
@@ -7892,7 +7893,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "Print metadata compression");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "Print metadata compression");
         ImGui::TableSetColumnIndex(1);
         option_id = (int)binarizer_config.compression.print_metadata;
         if (imgui.combo(std::string("##print_metadata_compression"), options, option_id, ImGuiComboFlags_HeightLargest, 0.0f, 175.0f))
@@ -7900,7 +7901,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "Slicer metadata compression");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "Slicer metadata compression");
         ImGui::TableSetColumnIndex(1);
         option_id = (int)binarizer_config.compression.slicer_metadata;
         if (imgui.combo(std::string("##slicer_metadata_compression"), options, option_id, ImGuiComboFlags_HeightLargest, 0.0f, 175.0f))
@@ -7908,7 +7909,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "GCode compression");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "GCode compression");
         ImGui::TableSetColumnIndex(1);
         option_id = (int)binarizer_config.compression.gcode;
         if (imgui.combo(std::string("##gcode_compression"), options, option_id, ImGuiComboFlags_HeightLargest, 0.0f, 175.0f))
@@ -7916,7 +7917,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "GCode encoding");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "GCode encoding");
         ImGui::TableSetColumnIndex(1);
         options = { "None", "MeatPack", "MeatPack Comments" };
         option_id = (int)binarizer_config.gcode_encoding;
@@ -7925,7 +7926,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "Metadata encoding");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "Metadata encoding");
         ImGui::TableSetColumnIndex(1);
         options = { "INI" };
         option_id = (int)binarizer_config.metadata_encoding;
@@ -7934,7 +7935,7 @@ void GLCanvas3D::show_binary_gcode_debug_window()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        imgui.text_colored(ImGuiWrapper::COL_ORANGE_LIGHT, "Checksum type");
+        imgui.text_colored(ImGuiWrapper::COL_BLUE_LIGHT, "Checksum type");
         ImGui::TableSetColumnIndex(1);
         options = { "None", "CRC32" };
         option_id = (int)binarizer_config.checksum;

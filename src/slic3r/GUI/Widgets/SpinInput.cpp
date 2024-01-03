@@ -387,11 +387,14 @@ void SpinInput::onTextLostFocus(wxEvent &event)
     event.Skip();
 }
 
+//B49
 void SpinInput::onTextEnter(wxCommandEvent &event)
 {
     long value;
-    if (!text_ctrl->GetValue().ToLong(&value))
+    if (!text_ctrl->GetValue().ToLong(&value)) {
         value = val;
+        text_ctrl->SetValue(wxString::FromDouble(value));
+    }
 
     if (value != val) {
         SetValue(value);
@@ -584,12 +587,16 @@ void SpinInputDouble::onTextLostFocus(wxEvent &event)
     event.Skip();
 }
 
+//B49
 void SpinInputDouble::onTextEnter(wxCommandEvent &event)
 {
     double value;
-    if (!text_ctrl->GetValue().ToDouble(&value))
+    if (!text_ctrl->GetValue().ToDouble(&value)) {
         val = value;
+        wxString str_val = wxString::FromDouble(value, digits);
+        text_ctrl->SetValue(str_val);
 
+    }
     if (!Slic3r::is_approx(value, val)) {
         SetValue(value);
         sendSpinEvent();

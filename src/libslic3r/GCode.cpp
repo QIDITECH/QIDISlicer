@@ -1329,12 +1329,12 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
     // Write end commands to file.
     file.write(this->retract_and_wipe());
 
-    ////B38
-    //{
-    //    std::string gcode;
-    //    m_writer.add_object_change_labels(gcode);
-    //    file.write(gcode);
-    //}
+    //B38 //B46
+    {
+        std::string gcode;
+        m_writer.add_object_change_labels(gcode);
+        file.write(gcode);
+    }
 
 
     file.write(m_writer.set_fan(0));
@@ -2374,24 +2374,25 @@ void GCodeGenerator::process_layer_single_object(
                 m_avoid_crossing_perimeters.use_external_mp_once();
             m_last_obj_copy = this_object_copy;
             this->set_origin(unscale(offset));
+            // gcode += m_label_objects.start_object(print_instance.print_object.instances()[print_instance.instance_id],
+            //                                       GCode::LabelObjects::IncludeName::No);
             if ((this->config().gcode_label_objects) != LabelObjectsStyle::Disabled ) {
                 for (const PrintObject *po : print_object.print()->objects())
                     if (po == &print_object)
                         break;
                     else
                         ++ object_id;
-                //B38 //B41
-                if (this->config().gcode_flavor == gcfKlipper) {
+                //B38 //B41 //B46
                     const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+                if ((this->config().gcode_label_objects) == LabelObjectsStyle::Octoprint)
+                    gcode += std::string("; printing object ") + label.name + "\n";
+                else if ((this->config().gcode_label_objects) == LabelObjectsStyle::Firmware) {
+                    if (this->config().gcode_flavor == gcfKlipper) {
                     m_writer.set_object_start_str(std::string("EXCLUDE_OBJECT_START NAME=") + label.name + "\n");
                 } else if (this->config().gcode_flavor == gcfMarlinFirmware || this->config().gcode_flavor == gcfMarlinLegacy ||
                            this->config().gcode_flavor == gcfRepRapFirmware) {
-                    const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
                     gcode += std::string("M486 S") + std::to_string(label.unique_id) + "\n";
                 } 
-                else {
-                    const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
-                    gcode += std::string("; printing object ") + label.name + "\n";
                 }
             }
         }
@@ -2573,21 +2574,22 @@ void GCodeGenerator::process_layer_single_object(
         }
 
     if (!first && ((this->config().gcode_label_objects) != LabelObjectsStyle::Disabled)) {
-        //B38 //B41
+        //B38 //B41  //B46
+        const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
+
+        if ((this->config().gcode_label_objects) == LabelObjectsStyle::Octoprint)
+            gcode += std::string("; stop printing object ") + label.name + "\n";
+        else if ((this->config().gcode_label_objects) == LabelObjectsStyle::Firmware) {
         if (this->config().gcode_flavor == gcfKlipper) {
             if (!m_writer.is_object_start_str_empty()) {
                 m_writer.set_object_start_str("");
             } else {
-                const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
                 m_writer.set_object_end_str(std::string("EXCLUDE_OBJECT_END NAME=") + label.name + "\n");
             }
         } else if (this->config().gcode_flavor == gcfMarlinFirmware || this->config().gcode_flavor == gcfMarlinLegacy ||
                    this->config().gcode_flavor == gcfRepRapFirmware) {
             gcode += std::string("M486 S-1\n");
         } 
-        else {
-            const LabelData &label = m_label_data.at(&print_instance.print_object.instances()[print_instance.instance_id]);
-            gcode += std::string("; stop printing object ") + label.name + "\n";
         }
     }
         
@@ -2723,8 +2725,6 @@ std::optional<std::string> GCodeGenerator::get_helical_layer_change_gcode(
     if (!this->last_pos_defined()) {
         return std::nullopt;
     }
-    //B38
-    //m_writer.add_object_change_labels(gcode);
     const double circle_radius{2};
     const unsigned n_gon_points_count{16};
 
@@ -2781,6 +2781,8 @@ std::string GCodeGenerator::change_layer(
 
     const std::string comment{"move to next layer (" + std::to_string(m_layer_index) + ")"};
 
+    //B38 //B46
+    m_writer.add_object_change_labels(gcode);
     bool do_helical_layer_change{
         !spiral_vase_enabled
         && print_z > previous_layer_z
@@ -3080,7 +3082,8 @@ std::string GCodeGenerator::_extrude(
         gcode += this->travel_to(path.front().point, path_attr.role, comment);
     }
 
-    //B38
+    //B38 //B46
+    m_writer.add_object_change_labels(gcode);
 
     // compensate retraction
     gcode += this->unretract();
@@ -3661,6 +3664,8 @@ std::string GCodeGenerator::travel_to(const Point &point, ExtrusionRole role, st
         m_wipe.reset_path();
     }
 
+    //B38 //B46
+    m_writer.add_object_change_labels(wipe_retract_gcode);
     this->m_avoid_crossing_perimeters.reset_once_modifiers();
 
     const unsigned extruder_id = this->m_writer.extruder()->id();

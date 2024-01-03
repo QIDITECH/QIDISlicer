@@ -1643,7 +1643,7 @@ PageReloadFromDisk::PageReloadFromDisk(ConfigWizard* parent)
 PageFilesAssociation::PageFilesAssociation(ConfigWizard* parent)
     : ConfigWizardPage(parent, _L("Files association"), _L("Files association"))
 {
-//Y
+//Y //B47
     cb_3mf = new wxCheckBox(this, wxID_ANY, _L("Associate .3mf files to QIDISlicer"));
     cb_stl = new wxCheckBox(this, wxID_ANY, _L("Associate .stl files to QIDISlicer"));
     cb_step = new wxCheckBox(this, wxID_ANY, _L("Associate .step/.stp files to QIDISlicer"));
@@ -1651,6 +1651,7 @@ PageFilesAssociation::PageFilesAssociation(ConfigWizard* parent)
 
     append(cb_3mf);
     append(cb_stl);
+    append(cb_step);
     //    append(cb_gcode);
 }
 #endif // _WIN32
