@@ -1,4 +1,7 @@
-<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="1" y="1" width="16" height="16" rx="1" fill="#4db6ac"/>
-<path d="M4.35537 8.5374L8.30284 11.9361C8.71855 12.294 9.34501 12.2502 9.70687 11.838L14.8175 6.01521" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="18px" height="18px" viewBox="0 0 18 18" enable-background="new 0 0 18 18" xml:space="preserve">
+<path fill="#4479FB" d="M16,17H2c-0.5,0-1-0.4-1-1V2c0-0.5,0.4-1,1-1h14c0.5,0,1,0.4,1,1v14C17,16.6,16.6,17,16,17z"/>
+<path fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" d="M4.4,8.5l4,3.4c0.4,0.4,1,0.3,1.4-0.1L14.8,6"/>
 </svg>
