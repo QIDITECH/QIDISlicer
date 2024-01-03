@@ -340,6 +340,7 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
                 continue;
             } else if (narrow_expolygons_index.size() == expolygons_size) {
                 // w11
+				// w14
                 surface_fills[i].params.pattern = ipConcentricInternal;
             } else {
                 params         = surface_fills[i].params;
@@ -547,6 +548,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.anchor_length     = surface_fill.params.anchor_length;
         params.anchor_length_max = surface_fill.params.anchor_length_max;
         params.resolution        = resolution;
+		//w14
         params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentricInternal) || surface_fill.params.pattern == ipEnsuring;
         params.layer_height      = layerm.layer()->height;
 
@@ -568,8 +570,18 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                         f->overlap = 0;
                     thick_polylines = f->fill_surface_arachne(&surface_fill.surface, params);
                 }
-                else
-				    polylines = f->fill_surface(&surface_fill.surface, params);
+				//w14
+				else {
+                    if (surface_fill.params.pattern == ipConcentricInternal) {
+                        layerm.region().config().infill_overlap.percent ?
+                            f->overlap = layerm.region().config().perimeter_extrusion_width *
+                                         layerm.region().config().infill_overlap.value / 100 * (-1) :
+                            f->overlap = float(layerm.region().config().infill_overlap.value);
+
+                    } else
+                        f->overlap = 0;
+                    polylines = f->fill_surface(&surface_fill.surface, params);
+                }
 			} catch (InfillFailedException &) {
 			}
             if (!polylines.empty() || !thick_polylines.empty()) {
@@ -698,6 +710,7 @@ Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Oc
         case ipHilbertCurve:
         case ipArchimedeanChords:
         case ipOctagramSpiral:
+		//w14
         case ipConcentricInternal: break;
         }
 
