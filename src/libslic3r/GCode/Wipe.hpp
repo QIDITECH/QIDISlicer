@@ -49,7 +49,7 @@ public:
 
     // Reduce feedrate a bit; travel speed is often too high to move on existing material.
     // Too fast = ripping of existing material; too slow = short wipe path, thus more blob.
-    static double   calc_wipe_speed(const GCodeConfig &config) { return config.travel_speed.value * 0.8; }
+    static double   calc_wipe_speed(const GCodeConfig &config) { return config.wipe_distance.get_at(0)/(config.retract_length.get_at(0)/config.retract_speed.get_at(0)); }
     // Reduce retraction length a bit to avoid effective retraction speed to be greater than the configured one
     // due to rounding (TODO: test and/or better math for this).
     static double   calc_xy_to_e_ratio(const GCodeConfig &config, unsigned int extruder_id) 

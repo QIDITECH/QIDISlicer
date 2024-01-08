@@ -157,7 +157,9 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "use_relative_e_distances",
         "use_volumetric_e",
         "variable_layer_height",
-        "wipe"
+        "wipe",
+        //w15
+        "wipe_distance"
     };
 
     static std::unordered_set<std::string> steps_ignore;

@@ -2394,6 +2394,14 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionPercents { 0. });
 
+    def = this->add("wipe_distance", coFloats);
+    def->label = L("Wipe Distance");
+    def->tooltip = L("Discribe how long the nozzle will move along the last path when retracting.");
+    def->sidetext = L("mm");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloats{2.});
+
+
     def = this->add("retract_layer_change", coBools);
     def->label = L("Retract on layer change");
     def->tooltip = L("This flag enforces a retraction whenever a Z move is done.");
@@ -3592,6 +3600,8 @@ void PrintConfigDef::init_fff_params()
         "retract_length", "retract_lift", "retract_lift_above", "retract_lift_below", "retract_speed",
         "travel_max_lift",
         "deretract_speed", "retract_restart_extra", "retract_before_travel", "retract_length_toolchange", "retract_restart_extra_toolchange",
+        //w15
+        "wipe_distance",
         //B34
         "filament_diameter",
         "extrusion_multiplier",
@@ -3638,7 +3648,9 @@ void PrintConfigDef::init_extruder_option_keys()
         //B34
         "filament_diameter",
         "extrusion_multiplier",
-        "default_filament_profile"
+        "default_filament_profile",
+        //w15
+        "wipe_distance"
     };
 
     m_extruder_retract_keys = {
@@ -3661,7 +3673,8 @@ void PrintConfigDef::init_extruder_option_keys()
         "travel_max_lift",
         "travel_ramping_lift",
         "travel_slope",
-        "wipe"
+        "wipe",
+        "wipe_distance"
     };
     assert(std::is_sorted(m_extruder_retract_keys.begin(), m_extruder_retract_keys.end()));
 }

@@ -1967,6 +1967,8 @@ std::vector<std::pair<std::string, std::vector<std::string>>> option_keys {
                                         "filament_retract_layer_change",
                                         "filament_wipe",
         "filament_retract_before_wipe",
+        //w15
+        "filament_wipe_distance",
     }},
     {"Retraction when tool is disabled", {
         "filament_retract_length_toolchange",
@@ -3152,6 +3154,8 @@ const std::vector<std::string> extruder_options = {
     "retract_layer_change", "wipe", "retract_before_wipe", "travel_ramping_lift",
     "travel_slope", "travel_max_lift", "travel_lift_before_obstacle",
     "retract_length_toolchange", "retract_restart_extra_toolchange",
+    //w15
+    "wipe_distance",
 };
 
 void TabPrinter::build_extruder_pages(size_t n_before_extruders)
@@ -3325,6 +3329,8 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
         optgroup->append_single_option_line("retract_layer_change", "", extruder_idx);
         optgroup->append_single_option_line("wipe", "", extruder_idx);
         optgroup->append_single_option_line("retract_before_wipe", "", extruder_idx);
+        //w15
+        optgroup->append_single_option_line("wipe_distance", "", extruder_idx);
 
         optgroup = page->new_optgroup(L("Retraction when tool is disabled (advanced settings for multi-extruder setups)"));
         optgroup->append_single_option_line("retract_length_toolchange", "", extruder_idx);
@@ -3554,12 +3560,14 @@ void TabPrinter::toggle_options()
 
         // some options only apply when not using firmware retraction
         vec.resize(0);
-        vec = { "retract_speed", "deretract_speed", "retract_before_wipe", "retract_restart_extra", "wipe" };
+        //w15
+        vec = {"retract_speed", "deretract_speed", "retract_before_wipe", "retract_restart_extra", "wipe", "wipe_distance"};
         for (auto el : vec)
             toggle_option(el, retraction && !use_firmware_retraction, i);
 
         bool wipe = m_config->opt_bool("wipe", i);
         toggle_option("retract_before_wipe", wipe, i);
+        toggle_option("wipd_distance", wipe, i);
 
         if (use_firmware_retraction && wipe) {
             //wxMessageDialog dialog(parent(),
