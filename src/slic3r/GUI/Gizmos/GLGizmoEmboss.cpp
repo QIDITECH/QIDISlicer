@@ -313,6 +313,23 @@ GLGizmoEmboss::GLGizmoEmboss(GLCanvas3D &parent)
     // paste HEX unicode into notepad move cursor after unicode press [alt] + [x]
 }
 
+//B34
+void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos, std::string str)
+{
+
+    if (!init_create(volume_type))
+    return ;
+
+    // NOTE: change style manager - be carefull with order changes
+    m_style_manager.get_font_prop().size_in_mm = 7;
+
+    DataBasePtr base = create_emboss_data_base(str, m_style_manager, m_text_lines, m_parent.get_selection(), volume_type, m_job_cancel);
+    CreateVolumeParams input = create_input(m_parent, m_style_manager.get_style(), m_raycast_manager, volume_type);
+
+    start_create_volume_without_position(input, std::move(base));
+
+
+}
 
 bool GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d& mouse_pos)
 {

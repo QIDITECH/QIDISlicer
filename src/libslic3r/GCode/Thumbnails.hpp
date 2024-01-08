@@ -13,6 +13,8 @@
 #include <boost/beast/core/detail/base64.hpp>
 
 #include "../libslic3r/enum_bitmask.hpp"
+//B3
+#include "DataType.h"
 
 namespace Slic3r {
     enum class ThumbnailError : int { InvalidVal, OutOfRange, InvalidExt };
@@ -21,6 +23,30 @@ namespace Slic3r {
 }
 
 
+//B3
+typedef struct
+{
+    U16 colo16;
+    U8  A0;
+    U8  A1;
+    U8  A2;
+    U8  res0;
+    U16 res1;
+    U32 qty;
+} U16HEAD;
+typedef struct
+{
+    U8  encodever;
+    U8  res0;
+    U16 oncelistqty;
+    U32 PicW;
+    U32 PicH;
+    U32 mark;
+    U32 ListDataSize;
+    U32 ColorDataSize;
+    U32 res1;
+    U32 res2;
+} ColPicHead3;
 
 namespace Slic3r::GCodeThumbnails {
 
@@ -43,23 +69,46 @@ std::pair<GCodeThumbnailDefinitionsList, ThumbnailErrors> make_and_check_thumbna
 std::string get_error_string(const ThumbnailErrors& errors);
 
 
+//B3
+std::string compress_qidi_thumbnail(const ThumbnailData &data, GCodeThumbnailsFormat format);
+int         ColPic_EncodeStr(U16 *fromcolor16, int picw, int pich, U8 *outputdata, int outputmaxtsize, int colorsmax);
 template<typename WriteToOutput, typename ThrowIfCanceledCallback>
 inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb, const std::vector<std::pair<GCodeThumbnailsFormat, Vec2d>>& thumbnails_list, WriteToOutput output, ThrowIfCanceledCallback throw_if_canceled)
 {
     // Write thumbnails using base64 encoding
     if (thumbnail_cb != nullptr) {
+        //B3
+        int count = 0;
         for (const auto& [format, size] : thumbnails_list) {
         static constexpr const size_t max_row_length = 78;
-            ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{ {size}, true, true, true, true });
+        ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{{size}, true, false, false, true});
         for (const ThumbnailData& data : thumbnails)
             if (data.is_valid()) {
+                switch (format) {
+                case GCodeThumbnailsFormat::QIDI: {
+                    auto compressed = compress_qidi_thumbnail(data, format);
+
+                    if (count == 0) {
+                        output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
+                        count++;
+                        break;
+                    } else {
+                        output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
+                        count++;
+                        break;
+                    }
+                }
+                default: {
                     auto compressed = compress_thumbnail(data, format);
                     if (compressed->data && compressed->size) {
                         std::string encoded;
                         encoded.resize(boost::beast::detail::base64::encoded_size(compressed->size));
-                        encoded.resize(boost::beast::detail::base64::encode((void*)encoded.data(), (const void*)compressed->data, compressed->size));
+                        encoded.resize(boost::beast::detail::base64::encode((void *) encoded.data(), (const void *) compressed->data,
+                                                                            compressed->size));
 
-                        output((boost::format("\n;\n; %s begin %dx%d %d\n") % compressed->tag() % data.width % data.height % encoded.size()).str().c_str());
+                        output((boost::format("\n;\n; %s begin %dx%d %d\n") % compressed->tag() % data.width % data.height % encoded.size())
+                                   .str()
+                                   .c_str());
 
                         while (encoded.size() > max_row_length) {
                             output((boost::format("; %s\n") % encoded.substr(0, max_row_length)).str().c_str());
@@ -71,8 +120,10 @@ inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb,
 
                         output((boost::format("; %s end\n;\n") % compressed->tag()).str().c_str());
 
+                    }
                 }
 
+                }
                 throw_if_canceled();
             }
     }

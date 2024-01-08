@@ -831,12 +831,13 @@ void GUI_App::post_init()
             // preset_updater->sync downloads profile updates on background so it must begin after config wizard finished.
             bool cw_showed = this->config_wizard_startup();
             this->preset_updater->sync(preset_bundle, this);
-            if (! cw_showed) {
-                // The CallAfter is needed as well, without it, GL extensions did not show.
-                // Also, we only want to show this when the wizard does not, so the new user
-                // sees something else than "we want something" on the first start.
-                show_send_system_info_dialog_if_needed();   
-            }  
+            //B52
+            //if (! cw_showed) {
+            //    // The CallAfter is needed as well, without it, GL extensions did not show.
+            //    // Also, we only want to show this when the wizard does not, so the new user
+            //    // sees something else than "we want something" on the first start.
+            //    show_send_system_info_dialog_if_needed();   
+            //}  
             // app version check is asynchronous and triggers blocking dialog window, better call it last
             this->app_version_check(false);
         });

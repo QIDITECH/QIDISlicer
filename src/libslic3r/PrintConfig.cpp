@@ -213,8 +213,10 @@ static const t_config_enum_values s_keys_map_LabelObjectsStyle = {
     { "octoprint", int(LabelObjectsStyle::Octoprint) },
     { "firmware",  int(LabelObjectsStyle::Firmware)  }
 };
+//B3
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(LabelObjectsStyle)
 static const t_config_enum_values s_keys_map_GCodeThumbnailsFormat = {
+    { "QIDI", int(GCodeThumbnailsFormat::QIDI)},
     { "PNG", int(GCodeThumbnailsFormat::PNG) },
     { "JPG", int(GCodeThumbnailsFormat::JPG) },
     { "QOI", int(GCodeThumbnailsFormat::QOI) }
@@ -312,12 +314,13 @@ void PrintConfigDef::init_common_params()
     def->gui_type = ConfigOptionDef::GUIType::one_string;
     def->set_default_value(new ConfigOptionString());
 
+    //B3
     def = this->add("thumbnails_format", coEnum);
     def->label = L("Format of G-code thumbnails");
     def->tooltip = L("Format of G-code thumbnails: PNG for best quality, JPG for smallest size, QOI for low memory firmware");
     def->mode = comExpert;
-    def->set_enum<GCodeThumbnailsFormat>({"PNG", "JPG", "QOI" });
-    def->set_default_value(new ConfigOptionEnum<GCodeThumbnailsFormat>(GCodeThumbnailsFormat::PNG));
+    def->set_enum<GCodeThumbnailsFormat>({"QIDI", "PNG", "JPG", "QOI"});
+    def->set_default_value(new ConfigOptionEnum<GCodeThumbnailsFormat>(GCodeThumbnailsFormat::QIDI));
 
     def = this->add("layer_height", coFloat);
     def->label = L("Layer height");

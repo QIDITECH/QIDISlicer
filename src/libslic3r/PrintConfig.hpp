@@ -141,9 +141,8 @@ enum class PerimeterGeneratorType
     // "A framework for adaptive width control of dense contour-parallel toolpaths in fused deposition modeling" ported from Cura.
     Arachne
 };
-enum class GCodeThumbnailsFormat {
-    PNG, JPG, QOI
-};
+//B3
+enum class GCodeThumbnailsFormat { QIDI,PNG, JPG, QOI };
 
 #define CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(NAME) \
     template<> const t_config_enum_names& ConfigOptionEnum<NAME>::get_enum_names(); \

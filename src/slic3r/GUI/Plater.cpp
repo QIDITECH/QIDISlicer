@@ -5582,6 +5582,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     const double e_per_mm = line_flow.mm3_per_mm() / filament_area * print_flow_ratio;
 
     // Position aided model
+    wxGetApp().plater()->get_camera().select_view("top");
     sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
     sidebar().obj_manipul()->set_uniform_scaling(false);
     sidebar().obj_manipul()->on_change("size", 1, count * step_spacing + pa_line_width);
@@ -5693,6 +5694,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     double retract_speed  = double(printer_config->opt_float("retract_speed", 0)) * 60;
 
     // Position aided model
+    wxGetApp().plater()->get_camera().select_view("top");
     sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 31);
     sidebar().obj_manipul()->set_uniform_scaling(false);
     sidebar().obj_manipul()->on_change("size", 1, pa_wall_width + line_spacing);
@@ -5706,6 +5708,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
         num_str += "\n" + double_to_str(StartPA + (1 + i * 2) * PAStep);
     }
 
+    num_str += "\n\n";
     if (count % 2 == 0)
         add_num_text(num_str, Vec2d(plate_center.x() - 31, plate_center.y() + pa_wall_length / 4));
     else
@@ -5872,7 +5875,7 @@ void Plater::add_num_text(std::string num, Vec2d posotion)
     if (volume_type == ModelVolumeType::INVALID)
         volume_type = ModelVolumeType::MODEL_PART;
 
-    // emboss->create_volume(volume_type, posotion, num);
+     emboss->create_volume(volume_type, posotion, num);
 }
 
 
