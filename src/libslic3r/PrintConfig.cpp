@@ -2455,7 +2455,7 @@ void PrintConfigDef::init_fff_params()
 
     def = this->add("travel_lift_before_obstacle", coBools);
     def->label = L("Steeper ramp before obstacles");
-    def->tooltip = L("If enabled, PrusaSlicer detects obstacles along the travel path and makes the slope steeper "
+    def->tooltip = L("If enabled, QIDISlicer detects obstacles along the travel path and makes the slope steeper "
                      "in case an obstacle might be hit during the initial phase of the travel.");
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBools{false});
@@ -4544,7 +4544,6 @@ void PrintConfigDef::handle_legacy(t_config_option_key &opt_key, std::string &va
         value = value == "1" ? "enabled" : "disabled";
     } else if (opt_key == "gcode_label_objects" && (value == "1" || value == "0")) {
         // gcode_label_objects used to be a bool (the behavior was nothing or "octoprint"), it is
-        // and enum since PrusaSlicer 2.6.2.
         value = value == "1" ? "octoprint" : "disabled";
     } else if (opt_key == "octoprint_host") {
         opt_key = "print_host";
@@ -5274,12 +5273,12 @@ ReadWriteSlicingStatesConfigDef::ReadWriteSlicingStatesConfigDef()
     def = this->add("position", coFloats);
     def->label = L("Position");
     def->tooltip = L("Position of the extruder at the beginning of the custom G-code block. If the custom G-code travels somewhere else, "
-                     "it should write to this variable so PrusaSlicer knows where it travels from when it gets control back.");
+                     "it should write to this variable so QIDISlicer knows where it travels from when it gets control back.");
 
     def = this->add("e_retracted", coFloats);
     def->label = L("Retraction");
     def->tooltip = L("Retraction state at the beginning of the custom G-code block. If the custom G-code moves the extruder axis, "
-                     "it should write to this variable so PrusaSlicer deretracts correctly when it gets control back.");
+                     "it should write to this variable so QIDISlicer deretracts correctly when it gets control back.");
 
     def = this->add("e_restart_extra", coFloats);
     def->label = L("Extra deretraction");
@@ -5611,7 +5610,7 @@ std::string get_sla_suptree_prefix(const DynamicPrintConfig &config)
 
 static bool is_XL_printer(const std::string& printer_notes)
 {
-    return boost::algorithm::contains(printer_notes, "PRINTER_VENDOR_PRUSA3D")
+    return boost::algorithm::contains(printer_notes, "PRINTER_VENDOR_QIDI3D")
         && boost::algorithm::contains(printer_notes, "PRINTER_MODEL_XL");
 }
 

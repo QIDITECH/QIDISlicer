@@ -19,7 +19,7 @@
 
 
 #include "libslic3r/GCode.hpp"
-#include "libslic3r/Gcode/GCodeWriter.hpp"
+// #include "libslic3r/Gcode/GCodeWriter.hpp"
 #include "libslic3r/PrintConfig.hpp"
 
 class wxButton;

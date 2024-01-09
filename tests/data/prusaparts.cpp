@@ -1,6 +1,6 @@
 #include "prusaparts.hpp"
 
-const TestData PRUSA_PART_POLYGONS =
+const TestData QIDI_PART_POLYGONS =
 {
     {
         {-5000000, 8954050},
@@ -594,7 +594,7 @@ const TestData PRUSA_PART_POLYGONS =
     },
 };
 
-const TestData PRUSA_STEGOSAUR_POLYGONS =
+const TestData QIDI_STEGOSAUR_POLYGONS =
 {
     {
         {113210205, 107034095},
@@ -2540,7 +2540,7 @@ struct MyPoly {
     operator ExPolygon () { return poly; }
 };
 
-const TestDataEx PRUSA_PART_POLYGONS_EX = {
+const TestDataEx QIDI_PART_POLYGONS_EX = {
     ExPolygons{
         // "x-carriage.stl":
         MyPoly{{

@@ -13,8 +13,8 @@
                 "SLIC3R_ENC_CHECK": false,
                 "SLIC3R_PCH": true,
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build-default/dist",
-                "PrusaSlicer_DEPS_PRESET": "default",
-                "PrusaSlicer_DEPS_OUTPUT_QUIET": false
+                "QIDISlicer_DEPS_PRESET": "default",
+                "QIDISlicer_DEPS_OUTPUT_QUIET": false
             }
         },
         {

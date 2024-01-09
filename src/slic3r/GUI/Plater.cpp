@@ -2300,7 +2300,7 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
 		    notification_manager->device_ejected();
 	    });
         this->q->Bind(EVT_REMOVABLE_DRIVE_ADDED, [this](wxCommandEvent& evt) {
-            if (!fs::exists(fs::path(evt.GetString().utf8_string()) / "prusa_printer_settings.ini"))
+            if (!fs::exists(fs::path(evt.GetString().utf8_string()) / "qidi_printer_settings.ini"))
                 return;
             if (evt.GetInt() == 0) { // not at startup, show dialog
                     wxGetApp().open_wifi_config_dialog(false, evt.GetString());
@@ -2484,8 +2484,8 @@ void Plater::notify_about_installed_presets()
 
     // show notification about temporarily installed presets
     if (!names.empty()) {
-        std::string notif_text = into_u8(_L_PLURAL("The preset below was temporarily installed on the active instance of PrusaSlicer",
-            "The presets below were temporarily installed on the active instance of PrusaSlicer", names.size())) + ":";
+        std::string notif_text = into_u8(_L_PLURAL("The preset below was temporarily installed on the active instance of QIDISlicer",
+            "The presets below were temporarily installed on the active instance of QIDISlicer", names.size())) + ":";
         for (const std::string& name : names)
             notif_text += "\n - " + name;
         get_notification_manager()->push_notification(NotificationType::CustomNotification,

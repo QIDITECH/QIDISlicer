@@ -7,8 +7,8 @@
 using TestData = std::vector<Slic3r::Polygon>;
 using TestDataEx = std::vector<Slic3r::ExPolygons>;
 
-extern const TestData PRUSA_PART_POLYGONS;
-extern const TestData PRUSA_STEGOSAUR_POLYGONS;
-extern const TestDataEx PRUSA_PART_POLYGONS_EX;
+extern const TestData QIDI_PART_POLYGONS;
+extern const TestData QIDI_STEGOSAUR_POLYGONS;
+extern const TestDataEx QIDI_PART_POLYGONS_EX;
 
 #endif // PRUSAPARTS_H

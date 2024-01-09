@@ -55,7 +55,7 @@ EditGCodeDialog::EditGCodeDialog(wxWindow* parent, const std::string& key, const
     const auto text_clr_str = encode_color(ColorRGB(text_clr.Red(), text_clr.Green(), text_clr.Blue()));
 
     //TRN this word-combination is a part of phraze "For more information about placeholders and its use visit our help page"
-    const wxString link = format_wxstr("<a href = \"%1%\">%2%</a>", "help.prusa3d.com/article/macros_1775", _L("help page"));
+    const wxString link = format_wxstr("<a href = \"%1%\">%2%</a>", "help.qidi3d.com/article/macros_1775", _L("help page"));
 
     // TRN ConfigWizard : Downloader : %1% = "help page"
     const wxString main_text = format_wxstr(_L("For more information about placeholders and its use visit our %1%."), link);

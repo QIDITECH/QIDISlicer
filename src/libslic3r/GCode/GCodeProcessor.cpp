@@ -1237,7 +1237,7 @@ void GCodeProcessor::process_binary_file(const std::string& filename, std::funct
     for (const auto& [key, value] : slicer_metadata_block.raw_data) {
         str += key + " = " + value + "\n";
     }
-    // Silently substitute unknown values by new ones for loading configurations from PrusaSlicer's own G-code.
+    // Silently substitute unknown values by new ones for loading configurations from QIDISlicer's own G-code.
     // Showing substitution log or errors may make sense, but we are not really reading many values from the G-code config,
     // thus a probability of incorrect substitution is low and the G-code viewer is a consumer-only anyways.
     config.load_from_ini_string(str, ForwardCompatibilitySubstitutionRule::EnableSilent);

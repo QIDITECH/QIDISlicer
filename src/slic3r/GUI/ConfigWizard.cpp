@@ -1489,7 +1489,7 @@ PageDownloader::PageDownloader(ConfigWizard* parent)
 
         const wxString link = format_wxstr("<a href = \"%1%\">%1%</a>", "printables.com");
 
-        // TRN ConfigWizard : Downloader : %1% = "printables.com", %2% = "PrusaSlicer"
+        // TRN ConfigWizard : Downloader : %1% = "printables.com", %2% = "QIDISlicer"
         const wxString main_text = format_wxstr(_L("If enabled, you will be able to open models from the %1% "
                                                    "online database with a single click (using a %2% logo button)."
         ), link, SLIC3R_APP_NAME);

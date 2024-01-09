@@ -4808,7 +4808,7 @@ void stk500v2_jtag3_initpgm(PROGRAMMER * pgm)
 void stk500v2_set_upload_size(PROGRAMMER * pgm, int size)
 {
 	unsigned char buf[16];
-	buf[0] = CMD_SET_UPLOAD_SIZE_PRUSA3D;
+	buf[0] = CMD_SET_UPLOAD_SIZE_QIDI3D;
 	buf[1] = size & 0xff;
 	buf[2] = size >> 8;
 	buf[3] = size >> 16;

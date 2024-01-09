@@ -1,4 +1,4 @@
-THIS IS A PRUSA3D BRANCH, WORKING AROUND A SPECIFIC PROBLEM 
+THIS IS A QIDI3D BRANCH, WORKING AROUND A SPECIFIC PROBLEM 
 IN THE EARLY I3 MK2 USB COMMUNICATION CHIPS.
 
 Some of the early QIDI3D i3 MK2 printers were shipped with a buggy
@@ -12,7 +12,7 @@ https://github.com/arduino/Arduino-stk500v2-bootloader
 
 The avrdude binary modified by QIDI3D could replace the avrdude bianary
 of arduino to program the RAMBo board. In that case the modified binary
-is identified by a "-prusa3d" suffix to the version information.
+is identified by a "-qidi3d" suffix to the version information.
 
 -------------------------------------------------------------------
 

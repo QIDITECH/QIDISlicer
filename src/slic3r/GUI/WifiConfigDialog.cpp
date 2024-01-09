@@ -20,7 +20,7 @@
 namespace Slic3r {
 namespace GUI {
 
-const char* WIFI_CONFIGFILE_NAME = "prusa_printer_settings.ini";
+const char* WIFI_CONFIGFILE_NAME = "qidi_printer_settings.ini";
 
 WifiConfigDialog::WifiConfigDialog(wxWindow* parent, std::string& file_path, RemovableDriveManager* removable_manager, const wxString& preffered_drive)
     // TRN: This is the dialog title.

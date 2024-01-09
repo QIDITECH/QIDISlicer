@@ -93,7 +93,7 @@
 
 // *****************[ STK QIDI3D specific command constants ]*****************
 
-#define CMD_SET_UPLOAD_SIZE_PRUSA3D         0x71
+#define CMD_SET_UPLOAD_SIZE_QIDI3D         0x71
 
 
 // *** AVR32 JTAG Programming command ***

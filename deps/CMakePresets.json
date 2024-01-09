@@ -24,7 +24,7 @@
             "inherits": "default",
             "binaryDir": "${sourceDir}/build-no-occt",
             "cacheVariables": {
-                "PrusaSlicer_deps_PACKAGE_EXCLUDES": "OCCT"
+                "QIDISlicer_deps_PACKAGE_EXCLUDES": "OCCT"
             }
         },
         {

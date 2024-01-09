@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=QIDI GCode viewer
-Exec=prusa-slicer --gcodeviewer %F
+Exec=qidi-slicer --gcodeviewer %F
 Icon=QIDISlicer-gcodeviewer
 Terminal=false
 Type=Application

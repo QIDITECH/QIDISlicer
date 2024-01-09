@@ -56,4 +56,4 @@
 #define ENABLE_BINARIZED_GCODE_DEBUG_WINDOW 0
 
 
-#endif // _prusaslicer_technologies_h_
+#endif // _qidislicer_technologies_h_
