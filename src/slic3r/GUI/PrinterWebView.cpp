@@ -586,7 +586,7 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event) {
             //if (!note_string.IsEmpty())
             //    msg += note_string + "\n";
             
-            #if defined(__WIN32__) || defined(__WXMAC__)
+            #if defined(__WIN32__)
                 msg += format_wxstr(_L("Are you sure you want to delete \"%1%\" printer?"), (button->getLabel()));
             #else
                 msg += _L("Are you sure you want to delete ") + (button->getLabel()) + _L("printer?");
