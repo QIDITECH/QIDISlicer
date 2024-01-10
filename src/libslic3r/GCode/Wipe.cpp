@@ -92,7 +92,10 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             }
         };
         const double xy_to_e    = this->calc_xy_to_e_ratio(gcodegen.writer().config, extruder.id());
-        auto         wipe_linear = [&gcode, &gcodegen, &retract_length, xy_to_e](const Vec2d &prev_quantized, Vec2d &p) {
+        //w15
+        const double wipe_dist_max    = gcodegen.writer().config.wipe_distance.get_at(extruder.id());
+        double       wipe_dist    = 0;
+        auto wipe_linear = [&gcode, &gcodegen, &retract_length, xy_to_e, wipe_dist_max, &wipe_dist,extruder](const Vec2d &prev_quantized, Vec2d &p) {
             Vec2d  p_quantized = GCodeFormatter::quantize(p);
             if (p_quantized == prev_quantized) {
                 p = p_quantized;
@@ -100,7 +103,8 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             }
             double segment_length = (p_quantized - prev_quantized).norm();
             // Quantize E axis as it is to be extruded as a whole segment.
-            double dE = GCodeFormatter::quantize_e(xy_to_e * segment_length);
+            // w15
+            double dE        = gcodegen.writer().config.retract_length.get_at(extruder.id()) * segment_length / wipe_dist_max;
             bool   done = false;
             if (dE > retract_length - EPSILON) {
                 if (dE > retract_length + EPSILON)
@@ -112,11 +116,19 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
                 done = true;
             } else
                 p = p_quantized;
+            //w15
+            wipe_dist += segment_length;
+            if (wipe_dist >= wipe_dist_max) {
+                Vec2d direction = (p - prev_quantized).normalized();
+                p               = prev_quantized + direction * abs(wipe_dist - segment_length - wipe_dist_max);
+                dE = retract_length;
+            }
             gcode += gcodegen.writer().extrude_to_xy(p, -dE, wipe_retract_comment);
             retract_length -= dE;
             return done;
         };
-        auto         wipe_arc = [&gcode, &gcodegen, &retract_length, xy_to_e, &wipe_linear](
+        //w15
+        auto         wipe_arc = [&gcode, &gcodegen, &retract_length, xy_to_e, &wipe_linear,wipe_dist_max,&wipe_dist,extruder](
             const Vec2d &prev_quantized, Vec2d &p, double radius_in, const bool ccw) {
             Vec2d  p_quantized = GCodeFormatter::quantize(p);
             if (p_quantized == prev_quantized) {
@@ -140,7 +152,8 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
                     center = Geometry::ArcWelder::arc_center(prev_quantized.cast<double>(), p.cast<double>(), double(radius), ccw);
                     angle = Geometry::ArcWelder::arc_angle(prev_quantized.cast<double>(), p.cast<double>(), double(radius));
                     segment_length = angle * std::abs(radius);
-                    dE = xy_to_e * segment_length;
+                    //w15
+                    dE = gcodegen.writer().config.retract_length.get_at(extruder.id())* segment_length / wipe_dist_max ; 
                     p = GCodeFormatter::quantize(
                             Vec2d(center + Eigen::Rotation2D((ccw ? angle : -angle) * (retract_length / dE)) * (prev_quantized - center)));
                 } else
@@ -161,6 +174,13 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
                     p, ij, ccw, -dE, wipe_retract_comment);
             }
             retract_length -= dE;
+            //w15
+            //return done;
+            wipe_dist += segment_length;
+            if (wipe_dist >= wipe_dist_max) {
+                Vec2d direction = (p - prev_quantized).normalized();
+                p = prev_quantized + direction * abs(wipe_dist - segment_length - wipe_dist_max);
+            }
             return done;
         };
         // Start with the current position, which may be different from the wipe path start in case of loop clipping.
@@ -179,6 +199,9 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             for (; it != end && ! done; ++ it) {
                 p = gcodegen.point_to_gcode(it->point + m_offset);
                 if (p != prev) {
+                    //w15
+                    if (wipe_dist >= wipe_dist_max)
+                        break;
                     start_wipe();
                     if (it->linear() ?
                         wipe_linear(prev, p) :
