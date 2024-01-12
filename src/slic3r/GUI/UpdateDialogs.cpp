@@ -328,8 +328,8 @@ MsgUpdateConfig::MsgUpdateConfig(const std::vector<Update> &updates, bool force_
 			// auto changelog_url = (boost::format(update.changelog_url) % lang_code).str();
 			//B51
 			auto changelog_url = "";
-			line->AddSpacer(3*VERT_SPACING);
-			line->Add(new wxHyperlinkCtrl(this, wxID_ANY, _(L("Open changelog page")), changelog_url));
+			//line->AddSpacer(3*VERT_SPACING);
+			//line->Add(new wxHyperlinkCtrl(this, wxID_ANY, _(L("Open changelog page")), changelog_url));
 			versions->Add(line);
 			versions->AddSpacer(1); // empty value for the correct alignment inside a GridSizer
 		}

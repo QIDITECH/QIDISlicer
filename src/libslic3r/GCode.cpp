@@ -993,6 +993,7 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
     // Write information on the generator.
     file.write_format("; %s\n\n", Slic3r::header_slic3r_generated().c_str());
 
+
     if (! export_to_binary_gcode) {
         // if exporting gcode in ascii format, generate the thumbnails here
         auto [thumbnails, errors] = GCodeThumbnails::make_and_check_thumbnail_list(print.full_print_config());
@@ -1409,6 +1410,23 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
     if (print.m_print_statistics.total_toolchanges > 0)
     	file.write_format("; total toolchanges = %i\n", print.m_print_statistics.total_toolchanges);
     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
+
+    //B3
+    if (!export_to_binary_gcode) {
+        // if exporting gcode in ascii format, generate the thumbnails here
+        auto [thumbnails, errors] = GCodeThumbnails::make_and_check_thumbnail_list(print.full_print_config());
+        if (errors != enum_bitmask<ThumbnailError>()) {
+            std::string error_str = format("Invalid thumbnails value:");
+            error_str += GCodeThumbnails::get_error_string(errors);
+            throw Slic3r::ExportError(error_str);
+        }
+        if (!thumbnails.empty())
+            GCodeThumbnails::export_qidi_thumbnails_to_file(
+                thumbnail_cb, thumbnails, [&file](const char *sz) { file.write(sz); }, [&print]() { print.throw_if_canceled(); });
+    }
+
+    file.write("\n");
+
     // Append full config, delimited by two 'phony' configuration keys qidislicer_config = begin and qidislicer_config = end.
     // The delimiters are structured as configuration key / value pairs to be parsable by older versions of QIDISlicer G-code viewer.
       {

@@ -86,17 +86,18 @@ inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb,
             if (data.is_valid()) {
                 switch (format) {
                 case GCodeThumbnailsFormat::QIDI: {
-                    auto compressed = compress_qidi_thumbnail(data, format);
+                    //auto compressed = compress_qidi_thumbnail(data, format);
 
-                    if (count == 0) {
-                        output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
-                        count++;
-                        break;
-                    } else {
-                        output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
-                        count++;
-                        break;
-                    }
+                    //if (count == 0) {
+                    //    output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
+                    //    count++;
+                    //    break;
+                    //} else {
+                    //    output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
+                    //    count++;
+                    //    break;
+                    //}
+                    break;
                 }
                 default: {
                     auto compressed = compress_thumbnail(data, format);
@@ -129,6 +130,67 @@ inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb,
     }
 }
 }
+//B3
+template<typename WriteToOutput, typename ThrowIfCanceledCallback>
+inline void export_qidi_thumbnails_to_file(ThumbnailsGeneratorCallback &                               thumbnail_cb,
+                                      const std::vector<std::pair<GCodeThumbnailsFormat, Vec2d>> &thumbnails_list,
+                                      WriteToOutput                                               output,
+                                      ThrowIfCanceledCallback                                     throw_if_canceled)
+{
+    // Write thumbnails using base64 encoding
+    if (thumbnail_cb != nullptr) {
+        //B3
+        int count = 0;
+        for (const auto &[format, size] : thumbnails_list) {
+            static constexpr const size_t max_row_length = 78;
+            ThumbnailsList                thumbnails     = thumbnail_cb(ThumbnailsParams{{size}, true, false, false, true});
+            for (const ThumbnailData &data : thumbnails)
+                if (data.is_valid()) {
+                    switch (format) {
+                    case GCodeThumbnailsFormat::QIDI: {
+                        auto compressed = compress_qidi_thumbnail(data, format);
+
+                        if (count == 0) {
+                            output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
+                            count++;
+                            break;
+                        } else {
+                            output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
+                            count++;
+                            break;
+                        }
+                    }
+                    default: {
+                        //auto compressed = compress_thumbnail(data, format);
+                        //if (compressed->data && compressed->size) {
+                        //    std::string encoded;
+                        //    encoded.resize(boost::beast::detail::base64::encoded_size(compressed->size));
+                        //    encoded.resize(boost::beast::detail::base64::encode((void *) encoded.data(), (const void *) compressed->data,
+                        //                                                        compressed->size));
+
+                        //    output((boost::format("\n;\n; %s begin %dx%d %d\n") % compressed->tag() % data.width % data.height %
+                        //            encoded.size())
+                        //               .str()
+                        //               .c_str());
+
+                        //    while (encoded.size() > max_row_length) {
+                        //        output((boost::format("; %s\n") % encoded.substr(0, max_row_length)).str().c_str());
+                        //        encoded = encoded.substr(max_row_length);
+                        //    }
+
+                        //    if (encoded.size() > 0)
+                        //        output((boost::format("; %s\n") % encoded).str().c_str());
+
+                        //    output((boost::format("; %s end\n;\n") % compressed->tag()).str().c_str());
+                        //}
+                    }
+                    }
+                    throw_if_canceled();
+                }
+        }
+    }
+}
+
 
 template<typename ThrowIfCanceledCallback>
 inline void generate_binary_thumbnails(ThumbnailsGeneratorCallback& thumbnail_cb, std::vector<bgcode::binarize::ThumbnailBlock>& out_thumbnails,
