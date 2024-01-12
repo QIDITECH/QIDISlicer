@@ -104,7 +104,7 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             double segment_length = (p_quantized - prev_quantized).norm();
             // Quantize E axis as it is to be extruded as a whole segment.
             // w15
-            double dE        = gcodegen.writer().config.retract_length.get_at(extruder.id()) * segment_length / wipe_dist_max;
+            double dE   = retract_length * segment_length / wipe_dist_max;
             bool   done = false;
             if (dE > retract_length - EPSILON) {
                 if (dE > retract_length + EPSILON)
@@ -144,7 +144,13 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             float  angle  = Geometry::ArcWelder::arc_angle(prev_quantized.cast<double>(), p_quantized.cast<double>(), double(radius));
             assert(angle > 0);
             double segment_length = angle * std::abs(radius);
+            wipe_dist += segment_length;
+            if (wipe_dist > wipe_dist_max) {
+                angle = angle * (wipe_dist_max - wipe_dist + segment_length) / segment_length;
+                segment_length = wipe_dist_max - wipe_dist + segment_length;
+            }
             double dE = GCodeFormatter::quantize_e(xy_to_e * segment_length);
+            dE        = retract_length * segment_length / wipe_dist_max;
             bool   done = false;
             if (dE > retract_length - EPSILON) {
                 if (dE > retract_length + EPSILON) {
@@ -153,12 +159,12 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
                     angle = Geometry::ArcWelder::arc_angle(prev_quantized.cast<double>(), p.cast<double>(), double(radius));
                     segment_length = angle * std::abs(radius);
                     //w15
-                    dE = gcodegen.writer().config.retract_length.get_at(extruder.id())* segment_length / wipe_dist_max ; 
+                    dE = retract_length* segment_length / wipe_dist_max ; 
                     p = GCodeFormatter::quantize(
                             Vec2d(center + Eigen::Rotation2D((ccw ? angle : -angle) * (retract_length / dE)) * (prev_quantized - center)));
                 } else
                     p = p_quantized;
-                dE   = retract_length;
+                //dE   = retract_length;
                 done = true;
             } else
                 p = p_quantized;
@@ -174,13 +180,7 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
                     p, ij, ccw, -dE, wipe_retract_comment);
             }
             retract_length -= dE;
-            //w15
-            //return done;
-            wipe_dist += segment_length;
-            if (wipe_dist >= wipe_dist_max) {
-                Vec2d direction = (p - prev_quantized).normalized();
-                p = prev_quantized + direction * abs(wipe_dist - segment_length - wipe_dist_max);
-            }
+            
             return done;
         };
         // Start with the current position, which may be different from the wipe path start in case of loop clipping.
