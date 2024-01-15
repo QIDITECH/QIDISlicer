@@ -1044,9 +1044,10 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
     }
     print.throw_if_canceled();
     }
+    //B41
     // adds tags for time estimators
-    if (print.config().remaining_times.value)
-        file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::First_Line_M73_Placeholder).c_str());
+    // if (print.config().remaining_times.value)
+    //     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::First_Line_M73_Placeholder).c_str());
 
     // Starting now, the G-code find / replace post-processor will be enabled.
     file.find_replace_enable();
@@ -1123,7 +1124,8 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
 
     // Label all objects so printer knows about them since the start.
     m_label_objects.init(print);
-    file.write(m_label_objects.all_objects_header());
+    //B41
+    // file.write(m_label_objects.all_objects_header());
     // Update output variables after the extruders were initialized.
     m_placeholder_parser_integration.init(m_writer);
     // Let the start-up script prime the 1st printing tool.
