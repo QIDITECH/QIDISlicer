@@ -2533,6 +2533,15 @@ void PrintConfigDef::init_fff_params()
     def->mode = comSimple;
     def->set_default_value(new ConfigOptionEnum<SeamPosition>(spAligned));
 
+//Y21
+    def = this->add("seam_gap", coPercent);
+    def->label = L("Seam gap");
+    def->tooltip = L("In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\n" "This amount as a percentage of the current extruder diameter. The default value for this parameter is 15");
+    def->sidetext = L("%");
+    def->min = 0;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionPercent(15));
+
     def = this->add("staggered_inner_seams", coBool);
     def->label = L("Staggered inner seams");
     // TRN PrintSettings: "Staggered inner seams"
