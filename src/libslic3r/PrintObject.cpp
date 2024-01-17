@@ -864,10 +864,14 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "wall_transition_angle"
             || opt_key == "wall_distribution_count"
             || opt_key == "min_feature_size"
-            || opt_key == "min_bead_width") {
+            || opt_key == "min_bead_width"
+            //w15
+            || opt_key == "top_one_wall_type"){
             steps.emplace_back(posSlice);
         } else if (
                opt_key == "seam_position"
+            //Y21
+            || opt_key == "seam_gap"
             || opt_key == "seam_preferred_direction"
             || opt_key == "seam_preferred_direction_jitter"
             || opt_key == "support_material_speed"
