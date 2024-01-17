@@ -2862,8 +2862,7 @@ std::string GCodeGenerator::extrude_loop(const ExtrusionLoop &loop_src, const GC
     // if polyline was shorter than the clipping distance we'd get a null polyline, so
     // we discard it in that case.
     if (m_enable_loop_clipping)
-    //Y21
-        clip_end(smooth_path, scaled<double>(EXTRUDER_CONFIG(nozzle_diameter)) * (m_config.seam_gap.value / 100), scaled<double>(min_gcode_segment_length));
+        clip_end(smooth_path, scaled<double>(EXTRUDER_CONFIG(nozzle_diameter)) * LOOP_CLIPPING_LENGTH_OVER_NOZZLE_DIAMETER, scaled<double>(min_gcode_segment_length));
 
     if (smooth_path.empty())
         return {};

@@ -473,10 +473,6 @@ static std::vector<std::string> s_Preset_print_options {
     ,"first_layer_infill_speed"
     //w11
     ,"detect_narrow_internal_solid_infill"
-    //Y21
-    ,"seam_gap"
-    //w16
-    , "top_one_wall_type"
 };
 
 static std::vector<std::string> s_Preset_filament_options {
