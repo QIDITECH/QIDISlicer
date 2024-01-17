@@ -144,6 +144,9 @@ enum class PerimeterGeneratorType
 //B3
 enum class GCodeThumbnailsFormat { QIDI,PNG, JPG, QOI };
 
+//w16
+enum class TopOneWallType { None, Alltop, Onlytopmost };
+
 #define CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(NAME) \
     template<> const t_config_enum_names& ConfigOptionEnum<NAME>::get_enum_names(); \
     template<> const t_config_enum_values& ConfigOptionEnum<NAME>::get_enum_values();
@@ -587,6 +590,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                wipe_into_objects))
     //w11
     ((ConfigOptionBool,                detect_narrow_internal_solid_infill))
+    //w16
+    ((ConfigOptionEnum<TopOneWallType>, top_one_wall_type))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(
