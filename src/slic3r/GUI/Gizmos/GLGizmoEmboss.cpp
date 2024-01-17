@@ -321,7 +321,13 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mous
     return ;
 
     // NOTE: change style manager - be carefull with order changes
+    #if defined(__linux__)
+        m_style_manager.get_font_prop().size_in_mm = 8;
+    #elif defined(__APPLE__)
+        m_style_manager.get_font_prop().size_in_mm = 9.2;
+    #else
     m_style_manager.get_font_prop().size_in_mm = 7;
+    #endif
 
     DataBasePtr base = create_emboss_data_base(str, m_style_manager, m_text_lines, m_parent.get_selection(), volume_type, m_job_cancel);
     CreateVolumeParams input = create_input(m_parent, m_style_manager.get_style(), m_raycast_manager, volume_type);

@@ -5555,7 +5555,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     DynamicPrintConfig  new_config;
 
     //B34 Get parameter
-    double       start_x = plate_center.x() - 40;
+    double       start_x = plate_center.x() - 38;
     double       start_y = plate_center.y() - count * step_spacing / 2;
     const double speed_fast = 7200;
     const double speed_slow = 1200;
@@ -5582,9 +5582,11 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     const double e_per_mm = line_flow.mm3_per_mm() / filament_area * print_flow_ratio;
 
     // Position aided model
+    select_all();
     wxGetApp().plater()->get_camera().select_view("top");
     sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 50);
     sidebar().obj_manipul()->set_uniform_scaling(false);
+    sidebar().obj_manipul()->on_change("size", 0, 25);
     sidebar().obj_manipul()->on_change("size", 1, count * step_spacing + pa_line_width);
     sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
     sidebar().obj_manipul()->set_uniform_scaling(true);
@@ -5676,7 +5678,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     const double step_spacing = 4.62;
     double       line_spacing = pa_line_width - pa_layer_height * (1 - M_PI / 4);
     double       line_spacing_xy = line_spacing * 1.4142;
-    const double pa_wall_length = 42 - line_spacing;
+    const double pa_wall_length = 38 - line_spacing;
     int max_count = int((plate_center.y() * 2 - pa_wall_length / 2) / step_spacing) - 4;
     if (count > max_count) {
         count = max_count;
@@ -5694,9 +5696,11 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     double retract_speed  = double(printer_config->opt_float("retract_speed", 0)) * 60;
 
     // Position aided model
+    select_all();
     wxGetApp().plater()->get_camera().select_view("top");
     sidebar().obj_manipul()->on_change("position", 0, plate_center.x() - 31);
     sidebar().obj_manipul()->set_uniform_scaling(false);
+    sidebar().obj_manipul()->on_change("size", 0, 25);
     sidebar().obj_manipul()->on_change("size", 1, pa_wall_width + line_spacing);
     double pa_first_layer_height = print_config->get_abs_value("first_layer_height");
     sidebar().obj_manipul()->on_change("size", 2, pa_first_layer_height);
@@ -5796,6 +5800,7 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     }
 
     // Scale model height
+    select_all();
     sidebar().obj_manipul()->set_uniform_scaling(false);
     sidebar().obj_manipul()->on_change("size", 2, (count + 1) * 5);
     sidebar().obj_manipul()->set_uniform_scaling(true);
