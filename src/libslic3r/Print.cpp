@@ -142,6 +142,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "retract_restart_extra",
         "retract_restart_extra_toolchange",
         "retract_speed",
+        //Y21
+        "seam_gap",
         "single_extruder_multi_material_priming",
         "slowdown_below_layer_time",
         "solid_infill_acceleration",
