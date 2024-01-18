@@ -145,7 +145,7 @@ enum class PerimeterGeneratorType
 enum class GCodeThumbnailsFormat { QIDI,PNG, JPG, QOI };
 
 //w16
-enum class TopOneWallType { None, Alltop, Onlytopmost };
+enum class TopOneWallType { Disable, Alltop, Onlytopmost };
 
 #define CONFIG_OPTION_ENUM_DECLARE_STATIC_MAPS(NAME) \
     template<> const t_config_enum_names& ConfigOptionEnum<NAME>::get_enum_names(); \

@@ -1784,7 +1784,7 @@ void PerimeterGenerator::process_classic(
     //w16
     ExPolygons fill_clip;
     ExPolygons top_fills;
-    if (loop_number > 0 && params.object_config.top_one_wall_type != TopOneWallType::None && upper_slices == nullptr)
+    if (loop_number > 0 && params.object_config.top_one_wall_type != TopOneWallType::Disable && upper_slices == nullptr)
         loop_number = 0;
     if (loop_number >= 0) {
         // In case no perimeters are to be generated, loop_number will equal to -1.
