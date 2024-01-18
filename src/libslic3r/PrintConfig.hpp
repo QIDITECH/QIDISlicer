@@ -592,6 +592,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                detect_narrow_internal_solid_infill))
     //w16
     ((ConfigOptionEnum<TopOneWallType>, top_one_wall_type))
+    //w17
+    ((ConfigOptionPercent,            top_area_threshold))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(

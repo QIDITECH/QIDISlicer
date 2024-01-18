@@ -3550,6 +3550,16 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<TopOneWallType>(TopOneWallType::Alltop));
 
+    //w17
+    def           = this->add("top_area_threshold", coPercent);
+    def->label    = L("Top area threshold");
+    def->tooltip  = L("This factor affects the acreage of top area. The small the number the big the top area.");
+    def->sidetext = L("%");
+    def->min      = 0;
+    def->max      = 500;
+    def->mode     = comAdvanced;
+    def->set_default_value(new ConfigOptionPercent(100));
+
     def = this->add("wall_transition_length", coFloatOrPercent);
     def->label = L("Perimeter transition length");
     def->category = L("Advanced");

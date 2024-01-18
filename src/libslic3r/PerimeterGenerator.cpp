@@ -1302,9 +1302,14 @@ void PerimeterGenerator::process_arachne(
         out_loops.append(extrusion_coll);
 
     ExPolygons    infill_contour = union_ex(wallToolPaths.getInnerContour());
+    //w17
     const coord_t spacing        = (perimeters.size() == 1) ? ext_perimeter_spacing2 : perimeter_spacing;
     if (offset_ex(infill_contour, -float(spacing / 2.)).empty())
         infill_contour.clear(); // Infill region is too small, so let's filter it out.
+    coord_t perimeter_width       = params.perimeter_flow.scaled_width();
+    double min_width_top_surface = (params.object_config.top_area_threshold / 100) *
+                                   std::max(double(ext_perimeter_spacing / 4 + 10), double(perimeter_width / 4));
+    infill_contour = offset2_ex(infill_contour, -min_width_top_surface, min_width_top_surface + perimeter_width);
 
     // create one more offset to be used as boundary for fill
     // we offset by half the perimeter spacing (to get to the actual infill boundary)
@@ -1440,7 +1445,8 @@ void PerimeterGenerator::process_with_one_wall_arachne(
                                                std::max(ext_perimeter_spacing, perimeter_width));
             infill_contour         = diff_ex(infill_contour, bridge_area);
         }
-        double min_width_top_surface = std::max(double(ext_perimeter_spacing / 4 + 10), double(perimeter_width / 4));
+        //w17
+        double min_width_top_surface = (params.object_config.top_area_threshold / 100) * std::max(double(ext_perimeter_spacing / 4 + 10), double(perimeter_width / 4));
         infill_contour = offset2_ex(infill_contour, -min_width_top_surface, min_width_top_surface + perimeter_width);
 
         ExPolygons surface_not_export_to_top = diff_ex(the_layer_surface, infill_contour);
@@ -1891,7 +1897,8 @@ void PerimeterGenerator::process_classic(
                         0.9 * (params.config.perimeters.value <= 1 ? 0. : (perimeter_spacing * (params.config.perimeters.value - 1))));
                 else
                     offset_top_surface = 0;
-                double min_width_top_surface = (100) *
+                //w17
+                double min_width_top_surface = (params.object_config.top_area_threshold/100 ) *
                                                std::max(double(ext_perimeter_spacing / 2 + 10), 1.0 * (double(perimeter_width)));
                 BoundingBox last_box = get_extents(last);
                 last_box.offset(SCALED_EPSILON);

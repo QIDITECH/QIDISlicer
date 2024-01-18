@@ -865,8 +865,10 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "wall_distribution_count"
             || opt_key == "min_feature_size"
             || opt_key == "min_bead_width"
-            //w15
-            || opt_key == "top_one_wall_type"){
+            //w16
+            || opt_key == "top_one_wall_type"
+            //w17
+            || opt_key == "top_area_threshold") {
             steps.emplace_back(posSlice);
         } else if (
                opt_key == "seam_position"
