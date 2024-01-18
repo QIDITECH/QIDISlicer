@@ -3548,7 +3548,7 @@ void PrintConfigDef::init_fff_params()
         { "Only_top_most", L("Only top most") }
     });
     def->mode = comAdvanced;
-    def->set_default_value(new ConfigOptionEnum<TopOneWallType>(TopOneWallType::Disable));
+    def->set_default_value(new ConfigOptionEnum<TopOneWallType>(TopOneWallType::Alltop));
 
     def = this->add("wall_transition_length", coFloatOrPercent);
     def->label = L("Perimeter transition length");
