@@ -237,9 +237,9 @@ static t_config_enum_values s_keys_map_PerimeterGeneratorType {
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(PerimeterGeneratorType)
 
 //w16
-static t_config_enum_values s_keys_map_TopOneWallType{{"Disable", int(TopOneWallType::Disable)},
+static t_config_enum_values s_keys_map_TopOneWallType{{"disable", int(TopOneWallType::Disable)},
                                                       {"all_top", int(TopOneWallType::Alltop)},
-                                                      {"Only_top_most", int(TopOneWallType::Onlytopmost)}};
+                                                      {"only_top_most", int(TopOneWallType::Onlytopmost)}};
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(TopOneWallType)
 
 static void assign_printer_technology_to_unknown(t_optiondef_map &options, PrinterTechnology printer_technology)
@@ -3543,9 +3543,9 @@ void PrintConfigDef::init_fff_params()
     def->category = L("Layers and Perimeters");
     def->tooltip = L("Use only one wall on flat top surface, to give more space to the top infill pattern. Could be applyed on topmost surface or all top surface.");
     def->set_enum<TopOneWallType>({
-        { "Disable", L("Disable") },
+        { "disable", L("Disable") },
         { "all_top", L("All top") },
-        { "Only_top_most", L("Only top most") }
+        { "only_top_most", L("Only top most") }
     });
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<TopOneWallType>(TopOneWallType::Alltop));
