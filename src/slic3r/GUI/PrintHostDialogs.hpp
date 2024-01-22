@@ -23,6 +23,15 @@ namespace Slic3r {
 
 namespace GUI {
 
+//B53
+struct PhysicalPrinterPresetData
+{
+    wxString lower_name; // just for sorting
+    wxString name;       // preset_name
+    wxString fullname;   // full name
+    bool     selected;   // is selected
+    int      checkboxId;
+};
 class PrintHostSendDialog : public GUI::MsgDialog
 {
 public:
@@ -31,6 +40,9 @@ public:
     PrintHostPostUploadAction post_action() const;
     std::string group() const;
     std::string storage() const;
+    //B53
+    std::vector<PhysicalPrinterPresetData> pppd() { return m_presetData; }
+    std::vector<bool>                      checkbox_states() { return m_checkbox_states; }
 
     virtual void EndModal(int ret) override;
 private:
@@ -41,6 +53,9 @@ private:
     wxString    m_valid_suffix;
     wxString    m_preselected_storage;
     wxArrayString m_paths;
+    //B53
+    std::vector<PhysicalPrinterPresetData> m_presetData;
+    std::vector<bool>                      m_checkbox_states;
 };
 
 

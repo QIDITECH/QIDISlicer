@@ -59,6 +59,44 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     content_sizer->Add(txt_filename, 0, wxEXPAND);
     content_sizer->Add(label_dir_hint);
     content_sizer->AddSpacer(VERT_SPACING);
+    //B53
+    wxBoxSizer *                           checkbox_sizer = new wxBoxSizer(wxVERTICAL);
+    PresetBundle &                         preset_bundle  = *wxGetApp().preset_bundle;
+    const PhysicalPrinterCollection &      ph_printers    = preset_bundle.physical_printers;
+    std::vector<PhysicalPrinterPresetData> preset_data;
+    for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
+        for (const std::string &preset_name : it->get_preset_names()) {
+            Preset *preset = wxGetApp().preset_bundle->printers.find_preset(preset_name);
+            if (preset != nullptr) {
+                preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
+                                       wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name)});
+            }
+        }
+    }
+    m_presetData = preset_data;
+    for (const PhysicalPrinterPresetData &data : preset_data) {
+        wxCheckBox *checkbox = new wxCheckBox(this, wxID_ANY, _L(data.fullname));
+        checkbox->SetValue(data.selected);
+        checkbox_sizer->Add(checkbox, 0, wxEXPAND | wxALL, 5);
+    }
+
+    wxCheckBox *select_all_checkbox = new wxCheckBox(this, wxID_ANY, "Select All");
+
+    checkbox_sizer->Add(select_all_checkbox, 0, wxEXPAND | wxALL, 5);
+
+    select_all_checkbox->Bind(wxEVT_CHECKBOX, [checkbox_sizer](wxCommandEvent &event) {
+        bool selectAll = event.IsChecked();
+
+        for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+            if (checkbox) {
+                checkbox->SetValue(selectAll);
+            }
+        }
+    });
+
+
+    content_sizer->Add(checkbox_sizer);
     
     if (combo_groups != nullptr) {
         // Repetier specific: Show a selection of file groups.
@@ -109,9 +147,19 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
         return true;
     };
 
+    //B53
     auto* btn_ok = add_button(wxID_OK, true, _L("Upload"));
-    btn_ok->Bind(wxEVT_BUTTON, [this, validate_path](wxCommandEvent&) {
+    btn_ok->Bind(wxEVT_BUTTON, [this, validate_path, checkbox_sizer](wxCommandEvent &) {
         if (validate_path(txt_filename->GetValue())) {
+            std::vector<bool> checkbox_states;
+
+            for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
+                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+                if (checkbox) {
+                    checkbox_states.push_back(checkbox->GetValue());
+                }
+            }
+            m_checkbox_states  = checkbox_states;
             post_upload_action = PrintHostPostUploadAction::None;
             EndDialog(wxID_OK);
         }
@@ -128,10 +176,20 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
             });
     }
 
+    //B53
     if (post_actions.has(PrintHostPostUploadAction::StartPrint)) {
         auto* btn_print = add_button(wxID_YES, false, _L("Upload and Print"));
-        btn_print->Bind(wxEVT_BUTTON, [this, validate_path](wxCommandEvent&) {
+        btn_print->Bind(wxEVT_BUTTON, [this, validate_path, checkbox_sizer](wxCommandEvent &) {
             if (validate_path(txt_filename->GetValue())) {
+                std::vector<bool> checkbox_states;
+
+                for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
+                    wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+                    if (checkbox) {
+                        checkbox_states.push_back(checkbox->GetValue());
+                    }
+                }
+                m_checkbox_states  = checkbox_states;
                 post_upload_action = PrintHostPostUploadAction::StartPrint;
                 EndDialog(wxID_OK);
             }

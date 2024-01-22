@@ -7825,19 +7825,47 @@ void Plater::send_gcode()
                 wxGetApp().preset_bundle->printers.get_edited_preset().config.opt_string("printer_notes"));
         }
 
+        //B53
+        auto pppd = dlg.pppd();
+        auto checkbox_states = dlg.checkbox_states();
+        for (int i = 0; i < pppd.size(); i++) {
+            if (checkbox_states[i]) {
+                PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
+                auto          m_collection  = &preset_bundle.printers;
+                auto          preset_data   = pppd[i];
+
+                Preset *preset = m_collection->find_preset((preset_data.name).ToStdString());
+                if (!preset || !preset->is_visible)
+                    continue;
+                wxStringTokenizer tokenizer((preset_data.fullname), "*");
+
+                std::string tem_name = (into_u8(tokenizer.GetNextToken().Trim().mb_str()));
+                auto *      printer  = preset_bundle.physical_printers.find_printer(tem_name);
+
+                if (printer == nullptr)
+                    return;
+                DynamicPrintConfig *cfg_t = &(printer->config);
+
+                PrintHostJob upload_job(cfg_t);
+                if (upload_job.empty())
+                    return;
         upload_job.upload_data.upload_path = dlg.filename();
         upload_job.upload_data.post_action = dlg.post_action();
         upload_job.upload_data.group       = dlg.group();
         upload_job.upload_data.storage     = dlg.storage();
 
         // Show "Is printer clean" dialog for PrusaConnect - Upload and print.
-        if (std::string(upload_job.printhost->get_name()) == "PrusaConnect" && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
-            GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"), _L("Upload and Print"), wxOK | wxCANCEL);
+                if (std::string(upload_job.printhost->get_name()) == "PrusaConnect" &&
+                    upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+                    GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"),
+                                           _L("Upload and Print"), wxOK | wxCANCEL);
             if (dlg.ShowModal() != wxID_OK)
                 return;
         }
 
         p->export_gcode(fs::path(), false, std::move(upload_job));
+    }
+}
     }
 }
 
