@@ -62,6 +62,19 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     //B53
     wxBoxSizer *                           checkbox_sizer = new wxBoxSizer(wxVERTICAL);
     PresetBundle &                         preset_bundle  = *wxGetApp().preset_bundle;
+
+    wxButton* select_all_btn = new wxButton(this, wxID_ANY, _L("Select All"));
+    wxGetApp().SetWindowVariantForButton(select_all_btn);
+    checkbox_sizer->Add(select_all_btn, 0, wxEXPAND | wxALL, 5);
+    select_all_btn->Bind(wxEVT_BUTTON, [checkbox_sizer](wxCommandEvent &event) {
+        for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+            if (checkbox) {
+                checkbox->SetValue(true);
+            }
+        }
+    });
+
     const PhysicalPrinterCollection &      ph_printers    = preset_bundle.physical_printers;
     std::vector<PhysicalPrinterPresetData> preset_data;
     for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
@@ -79,22 +92,6 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
         checkbox->SetValue(data.selected);
         checkbox_sizer->Add(checkbox, 0, wxEXPAND | wxALL, 5);
     }
-
-    wxCheckBox *select_all_checkbox = new wxCheckBox(this, wxID_ANY, "Select All");
-
-    checkbox_sizer->Add(select_all_checkbox, 0, wxEXPAND | wxALL, 5);
-
-    select_all_checkbox->Bind(wxEVT_CHECKBOX, [checkbox_sizer](wxCommandEvent &event) {
-        bool selectAll = event.IsChecked();
-
-        for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
-            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
-            if (checkbox) {
-                checkbox->SetValue(selectAll);
-            }
-        }
-    });
-
 
     content_sizer->Add(checkbox_sizer);
     
