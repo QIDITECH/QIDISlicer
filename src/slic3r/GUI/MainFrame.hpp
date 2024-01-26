@@ -217,6 +217,7 @@ public:
     FRF_Calibration_Dlg *m_frf_calib_dlg{nullptr};
     //B34
     PA_Calibration_Dlg *m_pa_calib_dlg{nullptr};
+    MVS_Calibration_Dlg *m_mvs_calib_dlg{nullptr};
     //B4
     wxString              tem_host;
     PrinterWebView *      m_printer_view{nullptr};

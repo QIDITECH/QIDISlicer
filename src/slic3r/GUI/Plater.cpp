@@ -5543,7 +5543,7 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     // Check step count
     double      step_spacing = 4.62;
     const Vec2d plate_center = build_volume().bed_center();
-    int         count        = int((EndPA - StartPA) / PAStep);
+    int         count        = int((EndPA - StartPA) / PAStep + 0.0001);
     int         max_count    = int(plate_center.y() / step_spacing * 2) - 4;
     if (count > max_count) {
         count = max_count;
@@ -5650,7 +5650,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
 
     // Check step count
     const Vec2d plate_center = build_volume().bed_center();
-    int   count              = int((EndPA - StartPA) / PAStep);
+    int   count              = int((EndPA - StartPA) / PAStep + 0.0001);
 
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
 
@@ -5793,8 +5793,8 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     auto                pa_end_gcode     = printer_config->opt_string("before_layer_gcode");
 
     // Check step count
-    double      count        = floor((EndPA - StartPA) / PAStep);
-    double      max_count    = floor(max_print_height/5) - 1;
+    double      count        = floor((EndPA - StartPA) / PAStep + 0.0001);
+    double      max_count    = floor(max_print_height/5 + 0.0001) - 1;
     if (count > max_count) {
         count = max_count;
     }
@@ -5812,6 +5812,92 @@ void Plater::calib_pa_tower(const double StartPA, double EndPA, double PAStep)
     new_config.set_key_value("before_layer_gcode", new ConfigOptionString(pa_end_gcode));
     //tab_print->load_config(new_config);
     tab_printer->load_config(new_config);
+
+    std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
+    get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);
+}
+//Y22
+void Plater::calib_max_volumetric_speed(const double StartVS, double EndVS, double VSStep)
+{
+    new_project();
+    wxGetApp().mainframe->select_tab(size_t(0));
+
+    std::vector<fs::path> model_path;
+    model_path.emplace_back(Slic3r::resources_dir() + "/calib/VolumetricSpeed/volumetric_speed.stl");
+    load_files(model_path, true, false, false);
+    p->set_project_filename("Max Volumetric Speed");
+
+    DynamicPrintConfig *printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+    double nozzle_diameter = double(printer_config->opt_float("nozzle_diameter", 0));
+    double vs_layer_height = nozzle_diameter * 0.8;
+    double vs_external_perimeter_extrusion_width = nozzle_diameter * 1.75;
+    auto max_print_height = build_volume().max_print_height();
+
+    float res = float(vs_layer_height * (vs_external_perimeter_extrusion_width - vs_layer_height * (1. - 0.25 * PI)));
+    float start_speed = StartVS / res;
+    float end_speed = EndVS / res;
+    float step_speed = VSStep / res;
+
+    double      count        = floor((EndVS - StartVS) / VSStep + 1.0001);
+    double      max_count    = floor(max_print_height / vs_layer_height + 0.0001);
+    if (count > max_count) {
+        count = max_count;
+    }
+
+    DynamicPrintConfig new_config;
+    new_config.set_key_value("max_layer_height", new ConfigOptionFloats{vs_layer_height});
+    new_config.set_key_value("layer_height", new ConfigOptionFloat(vs_layer_height));
+    new_config.set_key_value("first_layer_height", new ConfigOptionFloatOrPercent(vs_layer_height, false));
+    new_config.set_key_value("perimeters", new ConfigOptionInt(1));
+    new_config.set_key_value("top_solid_layers", new ConfigOptionInt(0));
+    new_config.set_key_value("bottom_solid_layers", new ConfigOptionInt(0));
+    new_config.set_key_value("fill_density", new ConfigOptionPercent(0));
+    new_config.set_key_value("brim_width", new ConfigOptionFloat(5));
+    new_config.set_key_value("brim_separation", new ConfigOptionFloat(0));
+    new_config.set_key_value("first_layer_speed", new ConfigOptionFloatOrPercent(start_speed, false));
+    new_config.set_key_value("external_perimeter_extrusion_width", new ConfigOptionFloatOrPercent(vs_external_perimeter_extrusion_width, false));
+    new_config.set_key_value("first_layer_extrusion_width", new ConfigOptionFloatOrPercent(vs_external_perimeter_extrusion_width, false));
+    new_config.set_key_value("extrusion_multiplier", new ConfigOptionFloats{1});
+
+    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
+    Tab *tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
+    Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+    tab_print->load_config(new_config);
+    tab_filament->load_config(new_config);
+    tab_printer->load_config(new_config);
+
+    select_all();
+    sidebar().obj_manipul()->set_uniform_scaling(false);
+    sidebar().obj_manipul()->on_change("size", 2, count * vs_layer_height);
+    sidebar().obj_manipul()->set_uniform_scaling(true);
+
+    sidebar().obj_list()->layers_editing();
+
+    const int obj_idx = sidebar().obj_list()->get_selected_obj_idx();
+    auto& ranges = sidebar().obj_list()->object(obj_idx)->layer_config_ranges;
+    const auto layers_item = sidebar().obj_list()->GetSelection();
+
+    const t_layer_height_range default_range = {0.0, 2.0};
+    const t_layer_height_range first_range = {vs_layer_height, vs_layer_height * 2};
+    wxDataViewItem layer_item = sidebar().obj_list()->GetModel()->GetItemByLayerRange(obj_idx, default_range);
+    ModelConfig& model_config = sidebar().obj_list()->get_item_config(layer_item);
+    model_config.set_key_value("external_perimeter_speed", new ConfigOptionFloatOrPercent(start_speed + step_speed, false));
+    sidebar().obj_list()->show_settings(sidebar().obj_list()->add_settings_item(layer_item, &model_config.get()));
+    sidebar().obj_list()->edit_layer_range(default_range, first_range, true);
+
+    for (int n = 2; n < count; n++) {
+        const t_layer_height_range new_range = {2.0 * n, 2.0 * (n + 1)};
+        ranges[new_range].assign_config(sidebar().obj_list()->get_default_layer_config(obj_idx));
+        sidebar().obj_list()->add_layer_item(new_range, layers_item);
+
+        wxDataViewItem layer_item = sidebar().obj_list()->GetModel()->GetItemByLayerRange(obj_idx, new_range);
+        ModelConfig& model_config = sidebar().obj_list()->get_item_config(layer_item);
+        model_config.set_key_value("external_perimeter_speed", new ConfigOptionFloatOrPercent(start_speed + step_speed * n, false));
+        sidebar().obj_list()->show_settings(sidebar().obj_list()->add_settings_item(layer_item, &model_config.get()));
+
+        const t_layer_height_range range = {vs_layer_height * n, vs_layer_height * (n + 1)};
+        sidebar().obj_list()->edit_layer_range(new_range, range, true);
+    }
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
     get_notification_manager()->push_notification(NotificationType::CustomNotification, NotificationManager::NotificationLevel::PrintInfoNotificationLevel, message);

@@ -1655,6 +1655,14 @@ void MainFrame::init_menubar_as_editor()
                 m_pa_calib_dlg->ShowModal();
             },
             "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
+
+        append_menu_item(calibrationMenu, wxID_ANY, _L("Max Volumetric Speed"), _L("Max Volumetric Speed"),
+            [this](wxCommandEvent &) {
+                if (!m_mvs_calib_dlg)
+                    m_mvs_calib_dlg = new MVS_Calibration_Dlg((wxWindow *) this, wxID_ANY, m_plater);
+                m_mvs_calib_dlg->ShowModal();
+            },
+            "", nullptr, [this]() { return m_plater->is_view3D_shown(); }, this);
     }
 
     // menubar

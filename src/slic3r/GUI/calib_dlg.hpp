@@ -51,6 +51,23 @@ protected:
     Plater*      m_plater;
 };
 
+class MVS_Calibration_Dlg : public DPIDialog
+{
+public:
+    MVS_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* plater);
+    ~MVS_Calibration_Dlg();
+    void on_dpi_changed(const wxRect& suggested_rect) override;
+
+protected:
+    virtual void on_start(wxCommandEvent& event);
+
+    wxTextCtrl*  m_tcStartVS;
+    wxTextCtrl*  m_tcEndVS;
+    wxTextCtrl*  m_tcVSStep;
+    wxButton*    m_btnStart;
+    Plater*      m_plater;
+};
+
 }} // namespace Slic3r::GUI
 
 #endif
