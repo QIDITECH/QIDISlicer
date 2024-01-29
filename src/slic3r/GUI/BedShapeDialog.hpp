@@ -95,7 +95,7 @@ private:
     void		set_exclude_area(const ConfigOptionPoints& points_0, const ConfigOptionPoints& points_1);
     void		update_preview();
 	void		update_shape();
-    const std::vector<Vec2d>&		update_exclude_area(ConfigOptionsGroupShp options_group);
+    const std::vector<Vec2d>		update_exclude_area(ConfigOptionsGroupShp options_group);
 	void		load_stl();
     void		load_texture();
     void		load_model();

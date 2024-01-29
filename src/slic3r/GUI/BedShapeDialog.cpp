@@ -601,7 +601,7 @@ void BedShapePanel::update_shape()
 }
 
 //Y20
-const std::vector<Vec2d>&  BedShapePanel::update_exclude_area(ConfigOptionsGroupShp options_group)
+const std::vector<Vec2d>  BedShapePanel::update_exclude_area(ConfigOptionsGroupShp options_group)
 {
     Vec2d exclude_max(Vec2d::Zero());
     Vec2d exclude_min(Vec2d::Zero());
