@@ -329,6 +329,9 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mous
     m_style_manager.get_font_prop().size_in_mm = 7;
     #endif
 
+    DynamicPrintConfig *print_config    = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
+    m_style_manager.get_style().projection.depth = print_config->get_abs_value("layer_height");
+
     DataBasePtr base = create_emboss_data_base(str, m_style_manager, m_text_lines, m_parent.get_selection(), volume_type, m_job_cancel);
     CreateVolumeParams input = create_input(m_parent, m_style_manager.get_style(), m_raycast_manager, volume_type);
 
