@@ -1501,6 +1501,7 @@ bool GLCanvas3D::check_volumes_outside_state(GLVolumeCollection& volumes, ModelI
     const Slic3r::BuildVolume& build_volume = m_bed.build_volume();
 
     const std::vector<unsigned int> volumes_idxs = volumes_to_process_idxs();
+    //B52
     for (unsigned int vol_idx : volumes_idxs) {
         GLVolume* volume = volumes.volumes[vol_idx];
         if (!volume->is_modifier && (volume->shader_outside_printer_detection_enabled || (!volume->is_wipe_tower && volume->composite_id.volume_id >= 0))) {
@@ -1518,6 +1519,7 @@ bool GLCanvas3D::check_volumes_outside_state(GLVolumeCollection& volumes, ModelI
                 //FIXME doing test on convex hull until we learn to do test on non-convex polygons efficiently.
                 case BuildVolume::Type::Custom:
                     state = build_volume.object_state(volume_convex_mesh(*volume).its, volume->world_matrix().cast<float>(), volume_sinking(*volume));
+                    // state = build_volume.volume_state_bbox(volume_bbox(*volume));
                     break;
                 default:
                     // Ignore, don't produce any collision.

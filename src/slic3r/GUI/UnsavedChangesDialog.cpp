@@ -1199,17 +1199,14 @@ static wxString get_string_value(std::string opt_key, const DynamicPrintConfig& 
         return opt.has_value() ? _(from_u8(*opt)) : _L("Undef");
     }
     case coPoints: {
+        //B52
         if (opt_key == "bed_shape") {
-            BedShape shape(*config.option<ConfigOptionPoints>(opt_key));
+            BedShape shape(*config.option<ConfigOptionPoints>(opt_key), *config.option<ConfigOptionPoints>("bed_exclude_area"));
             return shape.get_full_name_with_params();
         }
-        //Y20
-        if (opt_key == "bed_exclude_area_0") {
-            BedShape shape(*config.option<ConfigOptionPoints>(opt_key));
-            return shape.get_full_name_with_params();
-        }
-        if (opt_key == "bed_exclude_area_1") {
-            BedShape shape(*config.option<ConfigOptionPoints>(opt_key));
+        //Y20 //B52
+        if (opt_key == "bed_exclude_area") {
+            BedShape shape(*config.option<ConfigOptionPoints>("bed_shape") ,* config.option<ConfigOptionPoints>(opt_key));
             return shape.get_full_name_with_params();
         }
 

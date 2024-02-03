@@ -4970,24 +4970,22 @@ wxSizer* TabPrinter::create_bed_shape_widget(wxWindow* parent)
         {
             BedShapeDialog dlg(this);
             dlg.build_dialog(*m_config->option<ConfigOptionPoints>("bed_shape"),
-                //Y20
-                *m_config->option<ConfigOptionPoints>("bed_exclude_area_0"),
-                *m_config->option<ConfigOptionPoints>("bed_exclude_area_1"),
+                //Y20 //B52
+                *m_config->option<ConfigOptionPoints>("bed_exclude_area"),
                 *m_config->option<ConfigOptionString>("bed_custom_texture"),
                 *m_config->option<ConfigOptionString>("bed_custom_model"));
             if (dlg.ShowModal() == wxID_OK) {
                 const std::vector<Vec2d>& shape = dlg.get_shape();
-                //Y20
-                const std::vector<Vec2d>& exclude_area_0 = dlg.get_exclude_area_0();
-                const std::vector<Vec2d>& exclude_area_1 = dlg.get_exclude_area_1();
+                //Y20 //B52
+                const std::vector<Vec2d>& exclude_area = dlg.get_exclude_area();
                 const std::string& custom_texture = dlg.get_custom_texture();
                 const std::string& custom_model = dlg.get_custom_model();
-                if (!shape.empty())
+                //B52
+                if (!shape.empty() || !exclude_area.empty())
                 {
                     load_key_value("bed_shape", shape);
-                    //Y20
-                    load_key_value("bed_exclude_area_0", exclude_area_0);
-                    load_key_value("bed_exclude_area_1", exclude_area_1);
+                    //Y20 //B52
+                    load_key_value("bed_exclude_area", exclude_area);
                     load_key_value("bed_custom_texture", custom_texture);
                     load_key_value("bed_custom_model", custom_model);
                     update_changed_ui();
@@ -5000,9 +4998,8 @@ wxSizer* TabPrinter::create_bed_shape_widget(wxWindow* parent)
     {
         Search::OptionsSearcher& searcher = wxGetApp().sidebar().get_searcher();
         const Search::GroupAndCategory& gc = searcher.get_group_and_category("bed_shape");
-        //Y20
-        searcher.add_key("bed_exclude_area_0", m_type, gc.group, gc.category);
-        searcher.add_key("bed_exclude_area_1", m_type, gc.group, gc.category);
+        //Y20 //B52
+        searcher.add_key("bed_exclude_area", m_type, gc.group, gc.category);
         searcher.add_key("bed_custom_texture", m_type, gc.group, gc.category);
         searcher.add_key("bed_custom_model", m_type, gc.group, gc.category);
     }

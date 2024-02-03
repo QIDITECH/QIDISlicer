@@ -536,8 +536,8 @@ static std::vector<std::string> s_Preset_printer_options {
     "default_print_profile", "inherits",
     "remaining_times", "silent_mode",
     "machine_limits_usage", "thumbnails", "thumbnails_format",
-//Y20
-    "bed_exclude_area_0", "bed_exclude_area_1",
+//Y20 //B52
+    "bed_exclude_area",
 //Y16
     "chamber_temperature", "auxiliary_fan", "chamber_fan"
 };
@@ -655,7 +655,9 @@ static std::vector<std::string> s_Preset_sla_printer_options {
     //FIXME the print host keys are left here just for conversion from the Printer preset to Physical Printer preset.
     "print_host", "printhost_apikey", "printhost_cafile",
     "printer_notes",
-    "inherits"
+    "inherits",
+    //B52
+    "bed_exclude_area",
 };
 
 const std::vector<std::string>& Preset::print_options()          { return s_Preset_print_options; }
@@ -1348,9 +1350,8 @@ static const std::set<std::string> independent_from_extruder_number_options = {
     "filament_ramming_parameters",
     "gcode_substitutions",
     "post_process",
-//Y20
-    "bed_exclude_area_0",
-    "bed_exclude_area_1",
+//Y20 //B52
+    "bed_exclude_area",
 };
 
 bool PresetCollection::is_independent_from_extruder_number_option(const std::string& opt_key)

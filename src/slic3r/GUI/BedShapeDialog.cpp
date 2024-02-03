@@ -20,9 +20,10 @@
 namespace Slic3r {
 namespace GUI {
 
-BedShape::BedShape(const ConfigOptionPoints& points)
+//B52
+BedShape::BedShape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2)
 {
-    m_build_volume = { points.values, 0. };
+    m_build_volume = {points1.values, 0., points2.values};
 }
 
 static std::string get_option_label(BedShape::Parameter param)
@@ -149,23 +150,37 @@ void BedShape::apply_optgroup_values(ConfigOptionsGroupShp optgroup)
         optgroup->set_value("rect_origin"   , to_2d(-1 * m_build_volume.bounding_volume().min));
     }
 }
-//Y20
-void BedShape::apply_exclude_values(ConfigOptionsGroupShp optgroup)
+//Y20 //B52
+void BedShape::apply_exclude_values(const ConfigOptionPoints &points,ConfigOptionsGroupShp optgroup1, ConfigOptionsGroupShp optgroup2)
 {
-    optgroup->set_value("exclude_area_max"     , to_2d(m_build_volume.bounding_volume().max));
-    optgroup->set_value("exclude_area_min"   , to_2d(m_build_volume.bounding_volume().min));
+    if (points.values.size() == 1) {
+        optgroup1->set_value("exclude_area_max", to_2d(m_build_volume.bounding_volume().min));
+        optgroup1->set_value("exclude_area_min", to_2d(m_build_volume.bounding_volume().min));
+        optgroup2->set_value("exclude_area_max", to_2d(m_build_volume.bounding_volume().min));
+        optgroup2->set_value("exclude_area_min", to_2d(m_build_volume.bounding_volume().min));
+    } else if (points.values.size() == 8) {
+        optgroup1->set_value("exclude_area_max", Vec2d(points.values[4].x(), points.values[4].y()));
+        optgroup1->set_value("exclude_area_min", Vec2d(points.values[2].x(), points.values[2].y()));
+        optgroup2->set_value("exclude_area_max", to_2d(m_build_volume.bounding_volume().min));
+        optgroup2->set_value("exclude_area_min", to_2d(m_build_volume.bounding_volume().min));
+    } else if (points.values.size() > 14) {
+        optgroup1->set_value("exclude_area_max", Vec2d(points.values[4].x(), points.values[4].y()));
+        optgroup1->set_value("exclude_area_min", Vec2d(points.values[2].x(), points.values[2].y()));
+        optgroup2->set_value("exclude_area_max", Vec2d(points.values[11].x(), points.values[11].y()));
+        optgroup2->set_value("exclude_area_min", Vec2d(points.values[9].x(), points.values[9].y()));
+    }
 }
 
 BedShapeDialog::BedShapeDialog(wxWindow* parent) : DPIDialog(parent, wxID_ANY, _(L("Bed Shape")),
         wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {}
-//Y20
-void BedShapeDialog::build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
+//Y20 //B52
+void BedShapeDialog::build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
 {
     SetFont(wxGetApp().normal_font());
 
 	m_panel = new BedShapePanel(this);
-    //Y20
-    m_panel->build_panel(default_pt, exclude_area_0, exclude_area_1, custom_texture, custom_model);
+    //Y20 //B52
+    m_panel->build_panel(default_pt, exclude_area, custom_texture, custom_model);
 
 	auto main_sizer = new wxBoxSizer(wxVERTICAL);
 	main_sizer->Add(m_panel, 1, wxEXPAND);
@@ -203,14 +218,14 @@ void BedShapeDialog::on_dpi_changed(const wxRect &suggested_rect)
 
 const std::string BedShapePanel::NONE = "None";
 const std::string BedShapePanel::EMPTY_STRING = "";
-//Y20
-void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
+//Y20 //B52
+void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model)
 {
+    //B52
     wxGetApp().UpdateDarkUI(this);
     m_shape = default_pt.values;
     //Y20
-    m_exclude_area_0 = exclude_area_0.values;
-    m_exclude_area_1 = exclude_area_1.values;
+    m_exclude_area = exclude_area.values;
     m_custom_texture = custom_texture.value.empty() ? NONE : custom_texture.value;
     m_custom_model = custom_model.value.empty() ? NONE : custom_model.value;
 
@@ -280,10 +295,10 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
     top_sizer->Add(m_canvas, 1, wxEXPAND | wxALL, 10);
 
 	SetSizerAndFit(top_sizer);
-
-	set_shape(default_pt);
-    //Y20
-    set_exclude_area(exclude_area_0, exclude_area_1);
+    //B52
+	set_shape(default_pt, exclude_area);
+    //Y20 //B52
+    set_exclude_area(default_pt, exclude_area);
 	update_preview();
 }
 
@@ -498,27 +513,25 @@ wxPanel* BedShapePanel::init_model_panel()
 // Deduce the bed shape type(rect, circle, custom)
 // This routine shall be smart enough if the user messes up
 // with the list of points in the ini file directly.
-void BedShapePanel::set_shape(const ConfigOptionPoints& points)
+//B52
+void BedShapePanel::set_shape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2)
 {
-    BedShape shape(points);
+    BedShape shape(points1,points2);
 
     m_shape_options_book->SetSelection(int(shape.get_page_type()));
     shape.apply_optgroup_values(m_optgroups[int(shape.get_page_type())]);
 
     // Copy the polygon to the canvas, make a copy of the array, if custom shape is selected
     if (shape.is_custom())
-        m_loaded_shape = points.values;
+        m_loaded_shape = points1.values;
 
     update_shape();
 }
-//Y20
-void BedShapePanel::set_exclude_area(const ConfigOptionPoints& points_0, const ConfigOptionPoints& points_1)
+//Y20 //B52
+void BedShapePanel::set_exclude_area(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2)
 {
-    BedShape exclude_0(points_0);
-    exclude_0.apply_exclude_values(exclude_optgroup_0);
-
-    BedShape exclude_1(points_1);
-    exclude_1.apply_exclude_values(exclude_optgroup_1);
+    BedShape exclude(points1,points2);
+    exclude.apply_exclude_values(points2, exclude_optgroup_0, exclude_optgroup_1);
 
     update_shape();
 }
@@ -593,37 +606,72 @@ void BedShapePanel::update_shape()
         break;
     }
 
-//Y20
-    m_exclude_area_0 = update_exclude_area(exclude_optgroup_0);
-    m_exclude_area_1 = update_exclude_area(exclude_optgroup_1);
+//Y20 //B52
+    m_exclude_area = update_exclude_area(exclude_optgroup_0, exclude_optgroup_1);
 
     update_preview();
 }
 
-//Y20
-const std::vector<Vec2d>  BedShapePanel::update_exclude_area(ConfigOptionsGroupShp options_group)
+//Y20 //B52
+const std::vector<Vec2d> BedShapePanel::update_exclude_area(ConfigOptionsGroupShp options_group_0, ConfigOptionsGroupShp options_group_1)
 {
-    Vec2d exclude_max(Vec2d::Zero());
-    Vec2d exclude_min(Vec2d::Zero());
+    Vec2d              exclude_max_0(Vec2d::Zero());
+    Vec2d              exclude_min_0(Vec2d::Zero());
+    Vec2d              exclude_max_1(Vec2d::Zero());
+    Vec2d              exclude_min_1(Vec2d::Zero());
     std::vector<Vec2d> e_area = {Vec2d(0, 0)};
+    auto               page_idx  = m_shape_options_book->GetSelection();
+    auto               opt_group = m_optgroups[page_idx];
+    if (static_cast<BedShape::PageType>(page_idx) == BedShape::PageType::Rectangle) {
+        try {
+            exclude_max_0 = boost::any_cast<Vec2d>(options_group_0->get_value("exclude_area_max"));
+        } catch (const std::exception & /* e */) {
+            exclude_max_0 = Vec2d::Zero();
+        }
 
-    try { exclude_max = boost::any_cast<Vec2d>(options_group->get_value("exclude_area_max")); }
-    catch (const std::exception & /* e */) { return e_area; }
+        try {
+            exclude_min_0 = boost::any_cast<Vec2d>(options_group_0->get_value("exclude_area_min"));
+        } catch (const std::exception & /* e */) {
+            exclude_min_0 = Vec2d::Zero();
+        }
 
-    try { exclude_min = boost::any_cast<Vec2d>(options_group->get_value("exclude_area_min")); }
-    catch (const std::exception & /* e */)  { return e_area; }
+        try {
+            exclude_max_1 = boost::any_cast<Vec2d>(options_group_1->get_value("exclude_area_max"));
+        } catch (const std::exception & /* e */) {
+            exclude_max_1 = Vec2d::Zero();
+        }
     
-    auto e_x = exclude_max(0);
-    auto e_y = exclude_max(1);
+        try {
+            exclude_min_1 = boost::any_cast<Vec2d>(options_group_1->get_value("exclude_area_min"));
+        } catch (const std::exception & /* e */) {
+            exclude_min_1 = Vec2d::Zero();
+        }
 
-    auto e_dx = exclude_min(0);
-    auto e_dy = exclude_min(1);
+        if (exclude_max_0 != Vec2d(0., 0.)) {
+            e_area.push_back({0, 0});
+            e_area.push_back({exclude_min_0.x(), exclude_min_0.y()});
+            e_area.push_back({exclude_min_0.x(), exclude_max_0.y()});
+            e_area.push_back({exclude_max_0.x(), exclude_max_0.y()});
+            e_area.push_back({exclude_max_0.x(), exclude_min_0.y()});
+            e_area.push_back({exclude_min_0.x(), exclude_min_0.y()});
+            e_area.push_back({0, 0});
+        }
+        if (exclude_max_1 != Vec2d(0., 0.)) {
+            e_area.push_back({0, 0});
+            e_area.push_back({exclude_min_1.x(), exclude_min_1.y()});
+            e_area.push_back({exclude_min_1.x(), exclude_max_1.y()});
+            e_area.push_back({exclude_max_1.x(), exclude_max_1.y()});
+            e_area.push_back({exclude_max_1.x(), exclude_min_1.y()});
+            e_area.push_back({exclude_min_1.x(), exclude_min_1.y()});
+            e_area.push_back({0, 0});
+        }
 
-    e_area = { Vec2d(e_dx, e_dy),
-               Vec2d(e_x, e_dy),
-               Vec2d(e_x, e_y),
-               Vec2d(e_dx, e_y) };
-
+        if (e_area.size() > 1) {
+            for (const auto &point : e_area) {
+                m_shape.push_back({point.x(), point.y()});
+            }
+        }
+    }
     return e_area;
 }
 

@@ -29,7 +29,13 @@ static const Slic3r::ColorRGBA DEFAULT_TRANSPARENT_GRID_COLOR  = { 0.9f, 0.9f, 0
 namespace Slic3r {
 namespace GUI {
 
-bool Bed3D::set_shape(const Pointfs& bed_shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, bool force_as_custom)
+//B52
+bool Bed3D::set_shape(const Pointfs &    bed_shape,
+                      const double       max_print_height,
+                      const std::string &custom_texture,
+                      const std::string &custom_model,
+                      const Pointfs &    exclude_bed_shape,
+                      bool               force_as_custom)
 {
     auto check_texture = [](const std::string& texture) {
         boost::system::error_code ec; // so the exists call does not throw (e.g. after a permission problem)
@@ -66,12 +72,14 @@ bool Bed3D::set_shape(const Pointfs& bed_shape, const double max_print_height, c
     }
 
     
-    if (m_build_volume.bed_shape() == bed_shape && m_build_volume.max_print_height() == max_print_height && m_type == type && m_texture_filename == texture_filename && m_model_filename == model_filename)
+    //B52
+    if (m_build_volume.bed_shape() == bed_shape && m_build_volume.exclude_bed_shape() == exclude_bed_shape && m_build_volume.max_print_height() == max_print_height && m_type == type && m_texture_filename == texture_filename && m_model_filename == model_filename)
         // No change, no need to update the UI.
         return false;
 
     m_type = type;
-    m_build_volume = BuildVolume { bed_shape, max_print_height };
+    //B52
+    m_build_volume = BuildVolume{bed_shape, max_print_height, exclude_bed_shape};
     m_texture_filename = texture_filename;
     m_model_filename = model_filename;
     m_extended_bounding_box = this->calc_extended_bounding_box();
@@ -287,6 +295,7 @@ void Bed3D::init_contourlines()
 
 // Try to match the print bed shape with the shape of an active profile. If such a match exists,
 // return the print bed model.
+//B52
 std::tuple<Bed3D::Type, std::string, std::string> Bed3D::detect_type(const Pointfs& shape)
 {
     auto bundle = wxGetApp().preset_bundle;
@@ -294,12 +303,12 @@ std::tuple<Bed3D::Type, std::string, std::string> Bed3D::detect_type(const Point
         const Preset* curr = &bundle->printers.get_selected_preset();
         while (curr != nullptr) {
             if (curr->config.has("bed_shape")) {
-                if (shape == dynamic_cast<const ConfigOptionPoints*>(curr->config.option("bed_shape"))->values) {
+                //if (shape == dynamic_cast<const ConfigOptionPoints*>(curr->config.option("bed_shape"))->values) {
                     std::string model_filename = PresetUtils::system_printer_bed_model(*curr);
                     std::string texture_filename = PresetUtils::system_printer_bed_texture(*curr);
                     if (!model_filename.empty() && !texture_filename.empty())
                         return { Type::System, model_filename, texture_filename };
-                }
+                //}
             }
 
             curr = bundle->printers.get_preset_parent(*curr);

@@ -34,10 +34,13 @@ public:
     // Initialized to empty, all zeros, Invalid.
     BuildVolume() {}
     // Initialize from PrintConfig::bed_shape and PrintConfig::max_print_height
-    BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height);
+    //B52
+    BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height, const std::vector<Vec2d> &exclude_bed_shape);
 
     // Source data, unscaled coordinates.
     const std::vector<Vec2d>&   bed_shape()         const { return m_bed_shape; }
+    //B52
+    const std::vector<Vec2d>&   exclude_bed_shape()         const { return m_exclude_bed_shape; }
     double                      max_print_height()  const { return m_max_print_height; }
     
     // Derived data
@@ -101,6 +104,8 @@ public:
 private:
     // Source definition of the print bed geometry (PrintConfig::bed_shape)
     std::vector<Vec2d>  m_bed_shape;
+    //B52
+    std::vector<Vec2d> m_exclude_bed_shape;
     // Source definition of the print volume height (PrintConfig::max_print_height)
     double              m_max_print_height;
 

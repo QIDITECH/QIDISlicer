@@ -36,7 +36,8 @@ struct BedShape
         ExcludeMin
     };
 
-    BedShape(const ConfigOptionPoints& points);
+    //B52
+    BedShape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2);
 
     bool            is_custom() { return m_build_volume.type() == BuildVolume::Type::Convex || m_build_volume.type() == BuildVolume::Type::Custom; }
 
@@ -47,8 +48,8 @@ struct BedShape
 
     wxString        get_full_name_with_params();
     void            apply_optgroup_values(ConfigOptionsGroupShp optgroup);
-    //Y20
-    void            apply_exclude_values(ConfigOptionsGroupShp optgroup);
+    //Y20 //B52
+    void apply_exclude_values(const ConfigOptionPoints &points , ConfigOptionsGroupShp optgroup1, ConfigOptionsGroupShp optgroup2);
 
 private:
     BuildVolume m_build_volume;
@@ -62,22 +63,21 @@ class BedShapePanel : public wxPanel
 	Bed_2D*			   m_canvas;
     std::vector<Vec2d> m_shape;
     std::vector<Vec2d> m_loaded_shape;
-    //Y20
-    std::vector<Vec2d> m_exclude_area_0;
-    std::vector<Vec2d> m_exclude_area_1;
+    //Y20 //B52
+    std::vector<Vec2d> m_exclude_area;
     std::string        m_custom_texture;
     std::string        m_custom_model;
 
 public:
     BedShapePanel(wxWindow* parent) : wxPanel(parent, wxID_ANY), m_custom_texture(NONE), m_custom_model(NONE) {}
-//Y20
-    void build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
+//Y20 //B52
+    void build_panel(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
 
     // Returns the resulting bed shape polygon. This value will be stored to the ini file.
     const std::vector<Vec2d>& get_shape() const { return m_shape; }
-    //Y20
-    const std::vector<Vec2d>& get_exclude_area_0() const { return m_exclude_area_0; }
-    const std::vector<Vec2d>& get_exclude_area_1() const { return m_exclude_area_1; }
+    //Y20 //B52
+    const std::vector<Vec2d>& get_exclude_area() const { return m_exclude_area; }
+    //const std::vector<Vec2d>& get_exclude_area_1() const { return m_exclude_area_1; }
     const std::string& get_custom_texture() const { return (m_custom_texture != NONE) ? m_custom_texture : EMPTY_STRING; }
     const std::string& get_custom_model() const { return (m_custom_model != NONE) ? m_custom_model : EMPTY_STRING; }
 
@@ -90,12 +90,15 @@ private:
     ConfigOptionsGroupShp exclude_optgroup_1;
     wxPanel*    init_texture_panel();
     wxPanel*    init_model_panel();
-    void		set_shape(const ConfigOptionPoints& points);
-//Y20
-    void		set_exclude_area(const ConfigOptionPoints& points_0, const ConfigOptionPoints& points_1);
+    //B52
+    void                  set_shape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2);
+    //Y20 //B52
+    void        set_exclude_area(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2);
     void		update_preview();
 	void		update_shape();
-    const std::vector<Vec2d>		update_exclude_area(ConfigOptionsGroupShp options_group);
+    //B52
+    const std::vector<Vec2d> update_exclude_area(ConfigOptionsGroupShp options_group_0, ConfigOptionsGroupShp options_group_1);
+    mutable std::vector<BoundingBoxf3> m_exclude_bounding_box;
 	void		load_stl();
     void		load_texture();
     void		load_model();
@@ -111,13 +114,12 @@ class BedShapeDialog : public DPIDialog
 	BedShapePanel*	m_panel;
 public:
 	BedShapeDialog(wxWindow* parent);
-//Y20
-    void build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area_0, const ConfigOptionPoints& exclude_area_1, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
+//Y20 //B52
+    void build_dialog(const ConfigOptionPoints& default_pt, const ConfigOptionPoints& exclude_area, const ConfigOptionString& custom_texture, const ConfigOptionString& custom_model);
 
     const std::vector<Vec2d>& get_shape() const { return m_panel->get_shape(); }
-//Y20
-    const std::vector<Vec2d>& get_exclude_area_0() const { return m_panel->get_exclude_area_0(); }
-    const std::vector<Vec2d>& get_exclude_area_1() const { return m_panel->get_exclude_area_1(); }
+//Y20 //B52
+    const std::vector<Vec2d>& get_exclude_area() const { return m_panel->get_exclude_area(); }
     const std::string& get_custom_texture() const { return m_panel->get_custom_texture(); }
     const std::string& get_custom_model() const { return m_panel->get_custom_model(); }
 

@@ -8,7 +8,9 @@
 
 namespace Slic3r {
 
-BuildVolume::BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height) : m_bed_shape(bed_shape), m_max_print_height(max_print_height)
+//B52
+BuildVolume::BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height, const std::vector<Vec2d> &exclude_bed_shape)
+    : m_bed_shape(bed_shape), m_max_print_height(max_print_height),m_exclude_bed_shape(exclude_bed_shape)
 {
     assert(max_print_height >= 0);
 
@@ -22,9 +24,14 @@ BuildVolume::BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_p
     BoundingBoxf bboxf = get_extents(bed_shape);
     m_bboxf = BoundingBoxf3{ to_3d(bboxf.min, 0.), to_3d(bboxf.max, max_print_height) };
 
+    //B52
     if (bed_shape.size() >= 4 && std::abs((m_area - double(m_bbox.size().x()) * double(m_bbox.size().y()))) < sqr(SCALED_EPSILON)) {
         // Square print bed, use the bounding box for collision detection.
         m_type = Type::Rectangle;
+        m_circle.center = 0.5 * (m_bbox.min.cast<double>() + m_bbox.max.cast<double>());
+        m_circle.radius = 0.5 * m_bbox.size().cast<double>().norm();
+    } else if (exclude_bed_shape.size()>3) {
+        m_type          = Type::Rectangle;
         m_circle.center = 0.5 * (m_bbox.min.cast<double>() + m_bbox.max.cast<double>());
         m_circle.radius = 0.5 * m_bbox.size().cast<double>().norm();
     } else if (bed_shape.size() > 3) {
@@ -304,19 +311,49 @@ BuildVolume::ObjectState BuildVolume::object_state(const indexed_triangle_set& i
     }
 }
 
+//B52
 BuildVolume::ObjectState BuildVolume::volume_state_bbox(const BoundingBoxf3& volume_bbox, bool ignore_bottom) const
 {
     assert(m_type == Type::Rectangle);
     BoundingBox3Base<Vec3d> build_volume = this->bounding_volume().inflated(SceneEpsilon);
+    std::vector<BoundingBox3Base<Vec3d>> exclude_build_volume;
+    for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
+        std::vector<Vec2d> tem_exclude_bed_shap;
+        for (int j = 1; j < 6; j++)
+            tem_exclude_bed_shap.push_back(m_exclude_bed_shape[i + j]);
+        BoundingBoxf tem_bboxf = get_extents(tem_exclude_bed_shap);
+        auto                    tem_exclude_bboxf = BoundingBoxf3{to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height)};
+        BoundingBox3Base<Vec3d> tem_build_volume  = tem_exclude_bboxf.inflated(SceneEpsilon);
+        exclude_build_volume.push_back(tem_build_volume);
+    }
+
+    bool is_contain = false;
+    bool is_intersect = false;
+
+    for (const auto &tem_build_volume : exclude_build_volume) {
+        if (tem_build_volume.contains(volume_bbox)) {
+            is_contain=true;
+            is_intersect = false;
+            break;
+        }
+        else if (tem_build_volume.intersects(volume_bbox)) {
+            is_contain   = false;
+            is_intersect = true;
+            }
+    }
     if (m_max_print_height == 0.0)
         build_volume.max.z() = std::numeric_limits<double>::max();
     if (ignore_bottom)
         build_volume.min.z() = -std::numeric_limits<double>::max();
     return build_volume.max.z() <= - SceneEpsilon ? ObjectState::Below :
+           is_contain                               ? ObjectState::Outside :
+           is_intersect                          ? ObjectState::Outside :
            build_volume.contains(volume_bbox) ? ObjectState::Inside : 
-           build_volume.intersects(volume_bbox) ? ObjectState::Colliding : ObjectState::Outside;
+           build_volume.intersects(volume_bbox)     ? ObjectState::Colliding :
+                                                      ObjectState::Outside;
 }
 
+//B52
 bool BuildVolume::all_paths_inside(const GCodeProcessorResult& paths, const BoundingBoxf3& paths_bbox, bool ignore_bottom) const
 {
     auto move_valid = [](const GCodeProcessorResult::MoveVertex &move) {
@@ -332,7 +369,32 @@ bool BuildVolume::all_paths_inside(const GCodeProcessorResult& paths, const Boun
             build_volume.max.z() = std::numeric_limits<double>::max();
         if (ignore_bottom)
             build_volume.min.z() = -std::numeric_limits<double>::max();
-        return build_volume.contains(paths_bbox);
+        std::vector<BoundingBox3Base<Vec3d>> exclude_build_volume;
+        for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
+            std::vector<Vec2d> tem_exclude_bed_shap;
+            for (int j = 1; j < 5; j++)
+                tem_exclude_bed_shap.push_back(m_exclude_bed_shape[i + j]);
+            BoundingBoxf            tem_bboxf         = get_extents(tem_exclude_bed_shap);
+            auto                    tem_exclude_bboxf = BoundingBoxf3{to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height)};
+            BoundingBox3Base<Vec3d> tem_build_volume  = tem_exclude_bboxf.inflated(SceneEpsilon);
+            exclude_build_volume.push_back(tem_build_volume);
+        }
+
+        bool is_contain   = false;
+        bool is_intersect = false;
+
+        for (const auto &tem_build_volume : exclude_build_volume) {
+            if (tem_build_volume.contains(paths_bbox)) {
+                is_contain   = true;
+                is_intersect = false;
+                break;
+            } else if (tem_build_volume.intersects(paths_bbox)) {
+                is_contain   = false;
+                is_intersect = true;
+            }
+        }
+
+        return (build_volume.contains(paths_bbox) && !is_contain && !is_intersect);
     }
     case Type::Circle:
     {

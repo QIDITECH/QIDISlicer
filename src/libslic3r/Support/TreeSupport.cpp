@@ -3619,9 +3619,12 @@ void fff_tree_support_generate(PrintObject &print_object, std::function<void()> 
             break;
         ++idx;
     }
-    FFFTreeSupport::generate_support_areas(*print_object.print(), 
-        BuildVolume(Pointfs{ Vec2d{ -300., -300. }, Vec2d{ -300., +300. }, Vec2d{ +300., +300. }, Vec2d{ +300., -300. } }, 0.), { idx }, 
-        throw_on_cancel);
+    //B52
+    FFFTreeSupport::generate_support_areas(*print_object.print(),
+                                           BuildVolume(Pointfs{Vec2d{-300., -300.}, Vec2d{-300., +300.}, Vec2d{+300., +300.},
+                                                               Vec2d{+300., -300.}},
+                                                       0., Pointfs{Vec2d{0., 0.}}),
+                                           {idx}, throw_on_cancel);
 }
 
 } // namespace Slic3r

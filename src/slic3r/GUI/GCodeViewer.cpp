@@ -921,7 +921,9 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
                 { min.x(), max.y() } };
         }
 
-        wxGetApp().plater()->set_bed_shape(bed_shape, gcode_result.max_print_height, texture, model, gcode_result.bed_shape.empty());
+        //B52
+        wxGetApp().plater()->set_bed_shape(bed_shape, gcode_result.max_print_height, texture, model,
+                                           {{0.,0.}},gcode_result.bed_shape.empty());
     }
 
     m_print_statistics = gcode_result.print_statistics;
