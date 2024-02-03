@@ -143,6 +143,14 @@ std::pair<float,float> calculate_overhang_speed(const ExtrusionAttributes &attri
                               float                      external_perim_reference_speed,
                               float                      default_speed)
 {
+    //w19
+    bool is_overhang = attributes.overhang_attributes->start_distance_from_prev_layer >= 0.25 * attributes.width &&
+                       attributes.overhang_attributes->end_distance_from_prev_layer >= 0.25 * attributes.width;//&&
+                       //attributes.overhang_attributes->proximity_to_curled_lines > 0.05 ;
+
+    if (!is_overhang) {
+        return {default_speed, 0};
+    }
     assert(attributes.overhang_attributes.has_value());
     std::vector<std::pair<int, ConfigOptionFloatOrPercent>> overhangs_with_speeds = {
         {100, ConfigOptionFloatOrPercent{default_speed, false}}};
@@ -197,9 +205,11 @@ std::pair<float,float> calculate_overhang_speed(const ExtrusionAttributes &attri
 
     float extrusion_speed   = std::min(interpolate_speed(speed_sections, attributes.overhang_attributes->start_distance_from_prev_layer),
                                        interpolate_speed(speed_sections, attributes.overhang_attributes->end_distance_from_prev_layer));
+    //w19
     float curled_base_speed = interpolate_speed(speed_sections,
-                                                attributes.width * attributes.overhang_attributes->proximity_to_curled_lines);
-    float final_speed       = std::min(curled_base_speed, extrusion_speed);
+                                                attributes.width * attributes.overhang_attributes->proximity_to_curled_lines/tan(67.5));
+    float final_speed = std::min(curled_base_speed, extrusion_speed);
+    
     float fan_speed = std::min(interpolate_speed(fan_speed_sections, attributes.overhang_attributes->start_distance_from_prev_layer),
                                interpolate_speed(fan_speed_sections, attributes.overhang_attributes->end_distance_from_prev_layer));
 
