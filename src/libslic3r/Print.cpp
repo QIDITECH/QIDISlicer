@@ -190,6 +190,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         } else if (
                opt_key == "first_layer_height"
             || opt_key == "nozzle_diameter"
+            //Y23
+            || opt_key == "filament_shrink"
             || opt_key == "resolution"
             // Spiral Vase forces different kind of slicing than the normal model:
             // In Spiral Vase mode, holes are closed and only the largest area contour is kept at each layer.
