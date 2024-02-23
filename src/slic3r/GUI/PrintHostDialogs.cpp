@@ -145,7 +145,7 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     };
 
     //B53
-    auto* btn_ok = add_button(wxID_OK, true, _L("Upload"));
+    auto* btn_ok = add_button(wxID_OK, false, _L("Upload"));
     btn_ok->Bind(wxEVT_BUTTON, [this, validate_path, checkbox_sizer](wxCommandEvent &) {
         if (validate_path(txt_filename->GetValue())) {
             std::vector<bool> checkbox_states;
@@ -163,6 +163,18 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     });
     txt_filename->SetFocus();
     
+    //B53
+    Bind(wxEVT_CHECKBOX, [btn_ok, checkbox_sizer, this](wxCommandEvent &event) {
+        bool any_checkbox_selected = false;
+        for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+            if (checkbox && checkbox->GetValue()) {
+                any_checkbox_selected = true;
+                break;
+            }
+        }
+        btn_ok->Enable(any_checkbox_selected);
+    });
     if (post_actions.has(PrintHostPostUploadAction::QueuePrint)) {
         auto* btn_print = add_button(wxID_ADD, false, _L("Upload to Queue"));
         btn_print->Bind(wxEVT_BUTTON, [this, validate_path](wxCommandEvent&) {
@@ -190,6 +202,19 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
                 post_upload_action = PrintHostPostUploadAction::StartPrint;
                 EndDialog(wxID_OK);
             }
+        });
+        //B53
+        Bind(wxEVT_CHECKBOX, [btn_ok,btn_print, checkbox_sizer, this](wxCommandEvent &event) {
+            bool any_checkbox_selected = false;
+            for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
+                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+                if (checkbox && checkbox->GetValue()) {
+                    any_checkbox_selected = true;
+                    break;
+                }
+            }
+            btn_print->Enable(any_checkbox_selected);
+            btn_ok->Enable(any_checkbox_selected);
         });
     }
 
