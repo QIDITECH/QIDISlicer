@@ -511,6 +511,8 @@ static std::vector<std::string> s_Preset_filament_options {
     "smooth_time",
     //B39
     "disable_rapid_cooling_fan_first_layers",
+    //Y23
+    "filament_shrink",
     //w15
     "filament_wipe_distance"
 };
