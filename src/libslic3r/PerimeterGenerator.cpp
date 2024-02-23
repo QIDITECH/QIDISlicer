@@ -1745,7 +1745,7 @@ void PerimeterGenerator::process_classic(
     //w16
     const ExPolygons           *upper_slices,
     // Cache:
-    Polygons                   &lower_slices_polygons_cache,
+    Polygons                   &lower_layer_polygons_cache,
     Polygons                   &upper_layer_polygons_cache,
     // Output:
     // Loops with the external thin walls
@@ -1780,12 +1780,12 @@ void PerimeterGenerator::process_classic(
     bool    has_gap_fill 		= params.config.gap_fill_enabled.value && params.config.gap_fill_speed.value > 0;
 
     // prepare grown lower layer slices for overhang detection
-    if (params.config.overhangs && lower_slices != nullptr && lower_slices_polygons_cache.empty()) {
+    if (params.config.overhangs && lower_slices != nullptr && lower_layer_polygons_cache.empty()) {
         // We consider overhang any part where the entire nozzle diameter is not supported by the
         // lower layer, so we take lower slices and offset them by half the nozzle diameter used 
         // in the current layer
         double nozzle_diameter = params.print_config.nozzle_diameter.get_at(params.config.perimeter_extruder-1);
-        lower_slices_polygons_cache = offset(*lower_slices, float(scale_(+nozzle_diameter/2)));
+        lower_layer_polygons_cache = offset(*lower_slices, float(scale_(+nozzle_diameter / 2)));
     }
 
     // we need to process each island separately because we might have different
@@ -1797,6 +1797,12 @@ void PerimeterGenerator::process_classic(
     //w16
     ExPolygons fill_clip;
     ExPolygons top_fills;
+    //w16
+    
+    if (params.config.overhangs && upper_slices != nullptr && upper_layer_polygons_cache.empty()) {
+        double upper_nozzle_diameter = params.print_config.nozzle_diameter.get_at(params.config.perimeter_extruder - 1);
+        upper_layer_polygons_cache   = offset(*upper_slices, float(scale_(+upper_nozzle_diameter / 2)));
+    }
     if (loop_number > 0 && params.object_config.top_one_wall_type != TopOneWallType::Disable && upper_slices == nullptr)
         loop_number = 0;
     if (loop_number >= 0) {
@@ -1913,10 +1919,9 @@ void PerimeterGenerator::process_classic(
                                                                                                                last_box);
                 upper_polygons_series_clipped          = offset(upper_polygons_series_clipped, min_width_top_surface);
                 fill_clip = offset_ex(last, -double(ext_perimeter_spacing));
-                ExPolygons grown_lower_slices;
                 ExPolygons bridge_checker;
                 if (lower_slices != nullptr) {
-                    Polygons lower_polygons_series_clipped = ClipperUtils::clip_clipper_polygons_with_subject_bbox(lower_slices_polygons_cache,
+                    Polygons lower_polygons_series_clipped = ClipperUtils::clip_clipper_polygons_with_subject_bbox(lower_layer_polygons_cache,
                                                                                                                    last_box);
 
                     double bridge_offset = std::max(double(ext_perimeter_spacing), (double(perimeter_width)));
@@ -2002,7 +2007,7 @@ void PerimeterGenerator::process_classic(
             }
         }
         // at this point, all loops should be in contours[0]
-        ExtrusionEntityCollection entities = traverse_loops_classic(params, lower_slices_polygons_cache, contours.front(), thin_walls);
+        ExtrusionEntityCollection entities = traverse_loops_classic(params, lower_layer_polygons_cache, contours.front(), thin_walls);
         // if brim will be printed, reverse the order of perimeters so that
         // we continue inwards after having finished the brim
         // TODO: add test for perimeter order
@@ -2077,7 +2082,7 @@ void PerimeterGenerator::process_classic(
         params.config.perimeters > 0 && params.layer_id > params.object_config.raft_layers) {
         // Generate extra perimeters on overhang areas, and cut them to these parts only, to save print time and material
         auto [extra_perimeters, filled_area] = generate_extra_perimeters_over_overhangs(infill_areas,
-                                                                                        lower_slices_polygons_cache,
+                                                                                        lower_layer_polygons_cache,
                                                                                         loop_number + 1,
                                                                                         params.overhang_flow, params.scaled_resolution,
                                                                                         params.object_config, params.print_config);

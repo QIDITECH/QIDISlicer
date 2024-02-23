@@ -73,8 +73,8 @@ void process_classic(
     //w16
     const ExPolygons           *upper_slices,
     // Cache:
-    Polygons                   &lower_slices_polygons_cache,
-    Polygons                   &upper_slices_polygons_cache,
+    Polygons                   &lower_layer_polygons_cache,
+    Polygons                   &upper_layer_polygons_cache,
     // Output:
     // Loops with the external thin walls
     ExtrusionEntityCollection  &out_loops,
