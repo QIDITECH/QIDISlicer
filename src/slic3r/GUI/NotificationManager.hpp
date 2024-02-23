@@ -901,7 +901,8 @@ private:
 	// non-static so its not loaded too early. If static, the translations wont load correctly.
 	const std::vector<NotificationData> basic_notifications = {
 	{NotificationType::Mouse3dDisconnected, NotificationLevel::RegularNotificationLevel, 10,  _u8L("3D Mouse disconnected.") },
-	{NotificationType::PresetUpdateAvailable, NotificationLevel::ImportantNotificationLevel, 20,  _u8L("Configuration update is available."),  _u8L("See more."),
+	//Y24
+	{NotificationType::PresetUpdateAvailable, NotificationLevel::ImportantNotificationLevel, 0,  _u8L("Configuration update is available."),  _u8L("See more."),
 		[](wxEvtHandler* evnthndlr) {
 			if (evnthndlr != nullptr)
 				wxPostEvent(evnthndlr, PresetUpdateAvailableClickedEvent(EVT_PRESET_UPDATE_AVAILABLE_CLICKED));

@@ -942,6 +942,11 @@ Updates PresetUpdater::priv::get_config_updates(const Semver &old_slic3r_version
 					new_update = Update(std::move(path_in_rsrc), std::move(bundle_path), *recommended, vp.name, vp.changelog_url, current_not_supported);
 					bundle_path_idx_to_install = path_idx_in_rsrc;
 					found = true;
+//Y24
+				} else if (rsrc_vp.config_version > vp.config_version) {
+					new_update = Update(std::move(path_in_rsrc), std::move(bundle_path), *recommended, vp.name, vp.changelog_url, current_not_supported);
+					bundle_path_idx_to_install = path_idx_in_rsrc;
+					found = true;
 				} else {
 					BOOST_LOG_TRIVIAL(warning) << format("The recommended config version for vendor `%1%` in resources does not match the recommended\n"
 			                                             " config version for this version of QIDISlicer. Corrupted installation?", idx.vendor());
