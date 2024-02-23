@@ -2135,9 +2135,10 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 auto *   printer = preset_bundle.physical_printers.find_printer(tem_name);
                 if (printer != nullptr) {
                     wxString host = (printer->config.opt_string("print_host"));
-
-                    std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                    bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+                    //B45
+                    //std::regex          ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+                    //bool                isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+                    bool isValidIPAddress      = true;
                     DynamicPrintConfig *cfg_t            = &(printer->config);
 
                     wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
