@@ -549,7 +549,11 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.anchor_length_max = surface_fill.params.anchor_length_max;
         params.resolution        = resolution;
 		//w14
-        params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentricInternal) || surface_fill.params.pattern == ipEnsuring;
+		//w20
+        if (perimeter_generator == PerimeterGeneratorType::Mix_wall)
+			params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentricInternal) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentricInternal;
+        else
+			params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentricInternal) || surface_fill.params.pattern == ipEnsuring ;
         params.layer_height      = layerm.layer()->height;
 
         for (ExPolygon &expoly : surface_fill.expolygons) {
@@ -561,25 +565,25 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 			try {
                 if (params.use_arachne) {
 					//w14
-                    if (surface_fill.params.pattern == ipConcentricInternal) {
+                    /* if (surface_fill.params.pattern == ipConcentricInternal) {
                         layerm.region().config().infill_overlap.percent ?
                             f->overlap      = layerm.region().config().perimeter_extrusion_width * layerm.region().config().infill_overlap.value / 100 *(-1):
                             f->overlap = float(layerm.region().config().infill_overlap.value);
                         
                     } else
-                        f->overlap = 0;
+                        f->overlap = 0;*/
                     thick_polylines = f->fill_surface_arachne(&surface_fill.surface, params);
                 }
 				//w14
 				else {
-                    if (surface_fill.params.pattern == ipConcentricInternal) {
+                    /* if (surface_fill.params.pattern == ipConcentricInternal) {
                         layerm.region().config().infill_overlap.percent ?
                             f->overlap = layerm.region().config().perimeter_extrusion_width *
                                          layerm.region().config().infill_overlap.value / 100 * (-1) :
                             f->overlap = float(layerm.region().config().infill_overlap.value);
 
                     } else
-                        f->overlap = 0;
+                        f->overlap = 0;*/
                     polylines = f->fill_surface(&surface_fill.surface, params);
                 }
 			} catch (InfillFailedException &) {

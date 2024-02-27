@@ -133,13 +133,15 @@ enum DraftShield {
 enum class LabelObjectsStyle {
     Disabled, Octoprint, Firmware
 };
+//w20
 enum class PerimeterGeneratorType
 {
     // Classic perimeter generator using Clipper offsets with constant extrusion width.
     Classic,
     // Perimeter generator with variable extrusion width based on the paper
     // "A framework for adaptive width control of dense contour-parallel toolpaths in fused deposition modeling" ported from Cura.
-    Arachne
+    Arachne,
+    Mix_wall
 };
 //B3
 enum class GCodeThumbnailsFormat { QIDI,PNG, JPG, QOI };

@@ -230,9 +230,11 @@ static const t_config_enum_values s_keys_map_ForwardCompatibilitySubstitutionRul
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(ForwardCompatibilitySubstitutionRule)
 
+//w20
 static t_config_enum_values s_keys_map_PerimeterGeneratorType {
     { "classic", int(PerimeterGeneratorType::Classic) },
-    { "arachne", int(PerimeterGeneratorType::Arachne) }
+    { "arachne", int(PerimeterGeneratorType::Arachne) },
+    { "mix_wall", int(PerimeterGeneratorType::Mix_wall) }
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(PerimeterGeneratorType)
 
@@ -3531,6 +3533,7 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(0));
 
+    //w20
     def = this->add("perimeter_generator", coEnum);
     def->label = L("Perimeter generator");
     def->category = L("Layers and Perimeters");
@@ -3540,7 +3543,8 @@ void PrintConfigDef::init_fff_params()
                       "This setting also affects the Concentric infill.");
     def->set_enum<PerimeterGeneratorType>({
         { "classic", L("Classic") },
-        { "arachne", L("Arachne") }
+        { "arachne", L("Arachne") },
+        { "mix_wall", L("Mix_wall")}
     });
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<PerimeterGeneratorType>(PerimeterGeneratorType::Arachne));
