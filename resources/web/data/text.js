@@ -18,6 +18,7 @@ var LangText={
 		"t16": "Calibration",
 		"t17": "Pressure Advance",
 		"t18": "Exclude Objects",
+		"t19": "Max Volumetric Speed",
 
 		"l0": "Learn more:",
 		"l1": "You can download the 3D model from the following link.",
@@ -62,6 +63,9 @@ var LangText={
 		"l41": "4.PA calibration does not work with PETG.",
 		"l42": "When multiple models are printed at the same time, you can stop printing a model in the middle of printing.",
 		"l43": "Note: Models with the same file name are treated as the same object.",
+		"l44": "Different filaments have different maximum volume speed.",
+		"l45": "Nozzle material, caliber, printing temperature, etc., will affect the maximum volume speed.",
+		"l46": "During the test, the printing speed will increase layer by layer. When there is a hole or missing wire on the surface of the model, it indicates that the layer has reached the maximum volume speed, and the maximum volume speed is calculated according to the ratio of height.",
 	},
 	"zh_CN": {
 		"t1": "用户指南",
@@ -82,6 +86,7 @@ var LangText={
 		"t16": "校准",
 		"t17": "压力提前",
 		"t18": "排除对象",
+		"t19": "最大体积速度",
 
 		"l0": "了解更多：",
 		"l1": "您可以从以下链接下载3D模型。",
@@ -126,6 +131,9 @@ var LangText={
 		"l41": "4.PA校准不适用于PETG。",
 		"l42": "当多个模型同时打印时，你可以在打印中途停止某个模型的打印。",
 		"l43": "注：相同文件名的模型会被视为同一对象。",
+		"l44": "不同线材的最大体积速度各不相同。",
+		"l45": "喷嘴材质、口径、打印温度、等都会影响最大体积速度。",
+		"l46": "测试时打印速度会逐层增加，当模型表面出现空洞或缺丝时，说明该层已达到最大体积速度，根据高度比例算出最大体积速度。",
 	},
 	"ja": {
 		"t1": "ユーザーガイド",
@@ -146,6 +154,7 @@ var LangText={
 		"t16": "較正",
 		"t17": "圧力前進",
 		"t18": "対象をはずします",
+		"t19": "最大体積速度です",
 
 		"l0": "もっと詳しく知る:",
 		"l1": "3Dモデルは以下のWebサイトからダウンロードできます。",
@@ -190,6 +199,9 @@ var LangText={
 		"l41": "4.PA キャリブレーションは PETG では機能しません。",
 		"l42": "複数のモデルが同時に印刷されている場合は、あるモデルの印刷を途中でやめることができます。",
 		"l43": "注:同じファイル名のモデルは、同じ対象として扱われます。",
+		"l44": "最大体積速度は線材によって異なります。",
+		"l45": "ノズルの材質、口径、印刷温度などが最大体積速度に影響します。",
+		"l46": "テスト時の印刷速度は層ごとに増加します。模型の表面に穴ができたり、糸が欠けたりした場合、その層が最大体積速度に達したことを示し、高さの割合から最大体積速度を算出します。",
 	},
 	"fr": {
 		"t1": "Guide de l'utilisateur",
@@ -210,6 +222,7 @@ var LangText={
 		"t16": "Étalonnage",
 		"t17": "Avance de pression",
 		"t18": "Exclure des objets",
+		"t19": "Vitesse volumétrique Max",
 
 		"l0": "Apprendre encore plus:",
 		"l1": "Vous pouvez télécharger des modèles 3D à partir des sites Web suivants.",
@@ -254,6 +267,9 @@ var LangText={
 		"l41": "4.L'étalonnage PA ne fonctionne pas avec le PETG.",
 		"l42": "Lorsque plusieurs modèles sont imprimés en même temps, vous pouvez arrêter l’impression d’un modèle au milieu de l’impression.",
 		"l43": "Note: les modèles avec le même nom de fichier sont traités comme le même objet.",
+		"l44": "Différents filaments ont une vitesse de volume maximale différente.",
+		"l45": "Le matériau de la buse, le calibre, la température d’impression, etc., affecteront la vitesse de volume maximum.",
+		"l46": "Pendant l’essai, la vitesse d’impression augmentera couche par couche. Quand il y a un trou ou un fil manquant sur la surface du modèle, cela indique que la couche a atteint la vitesse volumique maximale, et la vitesse volumique maximale est calculée selon le rapport de la hauteur.",
 	},
 	"de": {
 		"t1": "Benutzerhandbuch",
@@ -274,6 +290,7 @@ var LangText={
 		"t16": "Kalibrierung",
 		"t17": "Druckvorschub",
 		"t18": "Subjekt wird eliminiert",
+		"t19": "Maximale geschwindigkeit",
 
 		"l0": "Erfahren Sie mehr:",
 		"l1": "Sie können 3D-Modelle von den folgenden Websites herunterladen.",
@@ -318,6 +335,9 @@ var LangText={
 		"l41": "4.Die PA-Kalibrierung funktioniert nicht mit PETG.",
 		"l42": "Wenn sie mehrere modelle gleichzeitig drucken, können sie den druckvorgang beenden.",
 		"l43": "Anmerkung: ein modell mit dem gleichen namen wird als gleiches objekt betrachtet.",
+		"l44": "Es gibt eine vielzahl Von lichtern mit maximale geschwindigkeit.",
+		"l45": "Die düsen, der durchmesser, die drucktemperatur all das beeinflusst die maximale geschwindigkeit.",
+		"l46": "Bei den tests wird die druckgeschwindigkeit etage für etage erhöht Wenn eine öffnung Oder keine linie in der oberfläche eines modells angezeigt wird, zeigt sie an, dass sie die höchstgeschwindigkeit erreicht hat und dass die höchste geschwindigkeit nach höhe angegeben wird.",
 	},
 	"be": {
 		"t1": "Кіраўніцтва карыстальніка",
@@ -338,6 +358,7 @@ var LangText={
 		"t16": "Каліброўка",
 		"t17": "Увеличение давления",
 		"t18": "Исключить объекты из списка",
+		"t19": "Максимальная объемная частота вращения",
 
 		"l0": "даведацца больш:",
 		"l1": "Вы можаце загрузіць 3D-мадэлі з наступных сайтаў.",
@@ -382,6 +403,9 @@ var LangText={
 		"l41": "4.Калибровка PA не работает с PETG.",
 		"l42": "Когда одновременно печатаются несколько моделей, можно прекратить печатание модели в процессе печати.",
 		"l43": "Примечание: модели с одним и тем же именем файла рассматриваются как Один и тот же объект.",
+		"l44": "Различные нити накала имеют разную максимальную объемную скорость.",
+		"l45": "Материал сопла, калибр, температура печати и т.д., повлияет на максимальную объемную скорость.",
+		"l46": "Во время теста скорость печати будет увеличиваться слой за слоем. Если на поверхности модели имеется отверстие или недостающая проволока, это указывает на то, что слой достиг максимальной объемной скорости, а максимальная объемная скорость рассчитывается в соответствии с отношением высоты.",
 	},
 };
 
