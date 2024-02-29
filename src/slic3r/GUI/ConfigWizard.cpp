@@ -686,7 +686,10 @@ void PagePrinters::set_run_reason(ConfigWizard::RunReason run_reason)
         && printer_pickers[0]->vendor_id == PresetBundle::QIDI_BUNDLE) {
 //Y15
         //printer_pickers[0]->select_one(0, true);
-        printer_pickers[0]->select_all(true, false);
+        for (int i = 0; i < printer_pickers.size(); i++)
+        {
+            printer_pickers[i]->select_all(true, false);
+        }
     }
 }
 
