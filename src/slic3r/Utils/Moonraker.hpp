@@ -19,7 +19,8 @@ class Http;
 class Moonraker : public PrintHost
 {
 public:
-    Moonraker(DynamicPrintConfig *config);
+    //B55
+    Moonraker(DynamicPrintConfig *config, bool add_port);
     ~Moonraker() override = default;
 
     const char* get_name() const override;

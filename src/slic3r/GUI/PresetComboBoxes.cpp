@@ -380,9 +380,10 @@ void PresetComboBox::open_physical_printer_url()
     const PhysicalPrinter &pp   = m_preset_bundle->physical_printers.get_selected_printer();
     std::string            host = pp.config.opt_string("print_host");
     assert(!host.empty());
-    // B31
-    if (host.find(":10088") == -1)
-        host = host + ":10088";
+    //B55
+    //// B31
+    //if (host.find(":10088") == -1)
+    //    host = host + ":10088";
     wxGetApp().open_browser_with_warning_dialog(host);
 }
 

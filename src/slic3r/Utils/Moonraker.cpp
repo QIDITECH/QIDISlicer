@@ -62,12 +62,15 @@ std::string substitute_host(const std::string& orig_addr, std::string sub_addr)
     return out;
 }
 #endif
-}
-Moonraker::Moonraker(DynamicPrintConfig *config) :
-    m_host(config->opt_string("print_host")),
-    m_apikey(config->opt_string("printhost_apikey")),
-    m_cafile(config->opt_string("printhost_cafile")),
-    m_ssl_revoke_best_effort(config->opt_bool("printhost_ssl_ignore_revoke"))
+} // namespace
+//B55
+Moonraker::Moonraker(DynamicPrintConfig *config, bool add_port)
+    : m_host(add_port ? config->opt_string("print_host").find(":10088") == std::string::npos ? config->opt_string("print_host") + ":10088" :
+                                                                                               config->opt_string("print_host") :
+                        config->opt_string("print_host"))
+    , m_apikey(config->opt_string("printhost_apikey"))
+    , m_cafile(config->opt_string("printhost_cafile"))
+    , m_ssl_revoke_best_effort(config->opt_bool("printhost_ssl_ignore_revoke"))
 {}
 
 const char* Moonraker::get_name() const { return "Moonraker"; }

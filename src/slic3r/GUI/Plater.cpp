@@ -8167,7 +8167,15 @@ void Plater::set_bed_shape() const
 
     auto    bed_shape = p->config->option<ConfigOptionPoints>("bed_shape")->values;
     auto    exclude_area = p->config->option<ConfigOptionPoints>("bed_exclude_area")->values;
-    set_bed_shape(bed_shape, p->config->option<ConfigOptionFloat>("max_print_height")->value,
+
+    Pointfs tem_shape = bed_shape;
+    tem_shape.push_back({0, 0});
+    for (const auto &point : exclude_area) {
+        tem_shape.push_back({point.x(), point.y()});
+    }
+    tem_shape.push_back({0, 0});
+
+    set_bed_shape(tem_shape, p->config->option<ConfigOptionFloat>("max_print_height")->value,
         p->config->option<ConfigOptionString>("bed_custom_texture")->value,
                     p->config->option<ConfigOptionString>("bed_custom_model")->value, exclude_area);
 }

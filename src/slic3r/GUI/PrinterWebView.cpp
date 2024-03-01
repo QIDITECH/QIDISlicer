@@ -360,10 +360,11 @@ void PrinterWebView::AddButton(const wxString &                             devi
     //customButton->Bind(wxEVT_BUTTON, std::bind(&PrinterWebView::OnCustomButtonClick, this,handler));
     customButton->Bind(wxEVT_BUTTON, [this, ip, customButton](wxCommandEvent &event) { 
         wxString host = ip; 
+        //B55
         if (!host.Lower().starts_with("http"))
             host = wxString::Format("http://%s", host);
-        if (!host.Lower().ends_with("10088"))
-            host = wxString::Format("%s:10088", host);
+        // if (!host.Lower().ends_with("10088"))
+        //     host = wxString::Format("%s:10088", host);
         load_url(host);
         customButton->ResumeStatusThread();
     });
@@ -540,11 +541,13 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
         std::string   printer_name  = printer.name;
         wxString      host          = printer.config.opt_string("print_host");
 
-        wxString formattedHost = wxString::Format("http://%s", host);
+        //B55
+        wxString formattedHost = host;
+        // wxString formattedHost = wxString::Format("http://%s", host);
         if (!host.Lower().starts_with("http"))
             wxString formattedHost = wxString::Format("http://%s", host);
-        if (!formattedHost.Lower().ends_with("10088"))
-            formattedHost = wxString::Format("%s:10088", formattedHost);
+        // if (!formattedHost.Lower().ends_with("10088"))
+        //     formattedHost = wxString::Format("%s:10088", formattedHost);
 
         std::string fullname    = preset_bundle.physical_printers.get_selected_full_printer_name();
         std::string preset_name = printer.get_preset_name(fullname);
@@ -557,8 +560,9 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
                 model_id = preset->config.opt_string("printer_model");
         }
 
-        boost::regex        ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-        bool                isValidIPAddress = boost::regex_match(host.ToStdString(), ipRegex);
+        //boost::regex        ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+        //bool                isValidIPAddress = boost::regex_match(host.ToStdString(), ipRegex);
+        bool                isValidIPAddress = true;
         DynamicPrintConfig *cfg_t            = &(printer.config);
 
         UnSelectedButton();
@@ -760,8 +764,9 @@ void PrinterWebView::load_url(wxString& url)
     //m_web = url;
     m_browser->LoadURL(url);
 
+    //B55
     url.Remove(0, 7);
-    url.Remove(url.length() - 6);
+    //url.Remove(url.length() - 6);
     for (MachineListButton *button : m_buttons) {
         if (url == (button->getIPLabel()))
             button->SetSelect(true);

@@ -46,8 +46,9 @@ enum class MachineLimitsUsage {
     Count,
 };
 
+//B55
 enum PrintHostType {
-    htQIDILink, htQIDIConnect, htOctoPrint, htMoonraker, htDuet, htFlashAir, htAstroBox, htRepetier, htMKS
+    htQIDILink, htQIDIConnect, htOctoPrint, htMoonraker, htMoonraker2,htDuet, htFlashAir, htAstroBox, htRepetier, htMKS
 };
 
 enum AuthorizationType {

@@ -280,7 +280,16 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
 	// right pane with preview canvas
 	m_canvas = new Bed_2D(this);
     m_canvas->SetMinSize({ FromDIP(400), FromDIP(400) });
-    m_canvas->Bind(wxEVT_PAINT, [this](wxPaintEvent& e) { m_canvas->repaint(m_shape); });
+    //B52
+    m_canvas->Bind(wxEVT_PAINT, [this](wxPaintEvent& e) {
+        std::vector<Vec2d> tem_shape = m_shape;
+        if (m_exclude_area.size() > 1) {
+            for (const auto &point : m_exclude_area) {
+                tem_shape.push_back({point.x(), point.y()});
+            }
+        }
+        m_canvas->repaint(tem_shape);
+    });
     m_canvas->Bind(wxEVT_SIZE, [this](wxSizeEvent& e) { m_canvas->Refresh(); });
 
     wxSizer* left_sizer = new wxBoxSizer(wxVERTICAL);
@@ -665,12 +674,12 @@ const std::vector<Vec2d> BedShapePanel::update_exclude_area(ConfigOptionsGroupSh
             e_area.push_back({exclude_min_1.x(), exclude_min_1.y()});
             e_area.push_back({0, 0});
         }
-
-        if (e_area.size() > 1) {
-            for (const auto &point : e_area) {
-                m_shape.push_back({point.x(), point.y()});
-            }
-        }
+        
+        //if (e_area.size() > 1) {
+        //    for (const auto &point : e_area) {
+        //        m_shape.push_back({point.x(), point.y()});
+        //    }
+        //}
     }
     return e_area;
 }

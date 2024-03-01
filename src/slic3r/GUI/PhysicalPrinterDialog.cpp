@@ -509,7 +509,7 @@ void PhysicalPrinterDialog::update(bool printer_change)
             text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
             if (!m_opened_as_connect && printhost_win && m_last_host_type != htQIDIConnect){
                 m_stored_host = printhost_win->GetValue();
-                printhost_win->SetValue(L"https://connect.prusa3d.com");
+                printhost_win->SetValue(L"https://connect.qidi3d.com");
                 }
         } else {
             m_printhost_browse_btn->Show();
@@ -743,6 +743,19 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
     Field* printhost_field = m_optgroup->get_field("print_host");
     text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
     const auto opt = m_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
+    if (opt->value == htMoonraker) {
+        Field *    printhost_field = m_optgroup->get_field("print_host");
+        text_ctrl *printhost_win   = printhost_field ? dynamic_cast<text_ctrl *>(printhost_field->getWindow()) : nullptr;
+        wxString temp_host = printhost_win->GetValue();
+        //B55
+        wxString formattedHost = temp_host;
+ /*       if (!temp_host.Lower().starts_with("http"))
+            wxString formattedHost = wxString::Format("http://%s", temp_host);*/
+        if (!formattedHost.Lower().ends_with("10088"))
+            formattedHost = wxString::Format("%s:10088", formattedHost);
+        m_optgroup->set_value("print_host", formattedHost, true);
+        m_optgroup->get_field("print_host")->field_changed();
+    }
     if (opt->value == htQIDIConnect) {
         if (printhost_win && printhost_win->GetValue() != L"https://connect.qidi3d.com"){
             InfoDialog msg(this, _L("Warning"), _L("URL of QIDIConnect is different from https://connect.qidi3d.com. Do you want to continue?"), true, wxYES_NO);

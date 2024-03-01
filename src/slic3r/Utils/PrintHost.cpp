@@ -46,6 +46,7 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
         const auto opt = config->option<ConfigOptionEnum<PrintHostType>>("host_type");
         const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
 
+        //B55
         switch (host_type) {
             case htOctoPrint: return new OctoPrint(config);
             case htDuet:      return new Duet(config);
@@ -55,7 +56,8 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
             case htQIDILink: return new QIDILink(config);
             case htQIDIConnect: return new QIDIConnect(config);
             case htMKS:       return new MKS(config);
-            case htMoonraker: return new Moonraker(config);
+            case htMoonraker: return new Moonraker(config,true);
+            case htMoonraker2: return new Moonraker(config,false);
             default:          return nullptr;
         }
     } else {

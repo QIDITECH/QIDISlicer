@@ -2148,11 +2148,13 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                         m_printer_view->AddButton(
                             printer_name, host, (data->model_id), (data->fullname),
                             [host, this](wxMouseEvent &event) {
-                                wxString formattedHost = wxString::Format("http://%s", host);
+                                //B55
+                                wxString formattedHost = host;
+                                 //wxString formattedHost = wxString::Format("http://%s", host);
                                 if (!host.Lower().starts_with("http"))
-                                    wxString formattedHost = wxString::Format("http://%s", host);
-                                if (!formattedHost.Lower().ends_with("10088"))
-                                    formattedHost = wxString::Format("%s:10088", formattedHost);
+                                     formattedHost = wxString::Format("http://%s", host);
+                                 //if (!formattedHost.Lower().ends_with("10088"))
+                                 //    formattedHost = wxString::Format("%s:10088", formattedHost);
                                 this->m_printer_view->load_url(formattedHost);
                             },
                             (data->selected), cfg_t);
@@ -2168,18 +2170,20 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
             if (const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config(); cfg) {
                 const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
                 wxString               host          = pp.config.opt_string("print_host");
+                //B55
                 //B45
-                std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
-                bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
-                if (host.empty() || !isValidIPAddress) {
+                //std::regex ipRegex(R"(\b(?:\d{1,3}\.){3}\d{1,3}\b)");
+                //bool       isValidIPAddress = std::regex_match(host.ToStdString(), ipRegex);
+                if (host.empty()) {
                     tem_host = "";
                     host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
                 }
+                //B55
                 else {
                     if (!host.Lower().starts_with("http"))
                         host = wxString::Format("http://%s", host);
-                    if (!host.Lower().ends_with("10088"))
-                        host = wxString::Format("%s:10088", host);
+                    // if (!host.Lower().ends_with("10088"))
+                    //     host = wxString::Format("%s:10088", host);
                 }
                 if (tem_host != host) {
                     //B45

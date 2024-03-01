@@ -71,11 +71,13 @@ static const t_config_enum_values s_keys_map_MachineLimitsUsage {
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(MachineLimitsUsage)
 
+//B55
 static const t_config_enum_values s_keys_map_PrintHostType {
     { "qidilink",      htQIDILink },
     { "qidiconnect",   htQIDIConnect },
     { "octoprint",      htOctoPrint },
     { "moonraker",      htMoonraker },
+    { "moonraker2",      htMoonraker2 },
     { "duet",           htDuet },
     { "flashair",       htFlashAir },
     { "astrobox",       htAstroBox },
@@ -2140,6 +2142,7 @@ void PrintConfigDef::init_fff_params()
     def->sidetext = L("mm");
     def->set_default_value(new ConfigOptionFloats { 0.4 });
 
+//B55
     def = this->add("host_type", coEnum);
     def->label = L("Host Type");
     def->tooltip = L("Slic3r can upload G-code files to a printer host. This field must contain "
@@ -2148,7 +2151,8 @@ void PrintConfigDef::init_fff_params()
         { "qidilink",      "QIDILink" },
         { "qidiconnect",   "QIDIConnect" },
         { "octoprint",      "OctoPrint" },
-        { "moonraker",      "Klipper (via Moonraker)" },
+        { "moonraker",      "Klipper (via QIDI)" },
+        { "moonraker2",      "Klipper (via Moonraker)" },
         { "duet",           "Duet" },
         { "flashair",       "FlashAir" },
         { "astrobox",       "AstroBox" },
