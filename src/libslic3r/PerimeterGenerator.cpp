@@ -1093,9 +1093,7 @@ void PerimeterGenerator::add_infill_contour_for_arachne(ExPolygons infill_contou
     for (ExPolygon &ex : infill_contour)
         ex.simplify_p(params.scaled_resolution, &inner_pp);
     ExPolygons inner_union = union_ex(inner_pp);
-    float      offset1     = -min_perimeter_infill_spacing / 2.;  
-    float      offset2     = insert + min_perimeter_infill_spacing / 2.;
-     infill_areas = offset2_ex(inner_union, offset1, offset2);
+    infill_areas           = offset_ex(inner_union, insert);
     append(out_fill_expolygons, std::move(infill_areas));
 }
 
