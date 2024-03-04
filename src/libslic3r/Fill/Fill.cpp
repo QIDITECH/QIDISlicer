@@ -19,6 +19,7 @@
 #include "Polygon.hpp"
 //w11
 #define NARROW_INFILL_AREA_THRESHOLD 3
+#define NARROW_INFILL_AREA_THRESHOLD_MIN 0.5
 namespace Slic3r {
 
 //static constexpr const float NarrowInfillAreaThresholdMM = 3.f;
@@ -117,7 +118,8 @@ struct SurfaceFill {
 static bool is_narrow_infill_area(const ExPolygon &expolygon)
 {
     ExPolygons offsets = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD));
-    if (offsets.empty())
+	ExPolygons offsets_min = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD_MIN));
+    if (offsets.empty() && !offsets_min.empty())
         return true;
 
     return false;
@@ -316,47 +318,31 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
     }
 
     // Use ipEnsuring pattern for all internal Solids.
-    {
-        for (size_t surface_fill_id = 0; surface_fill_id < surface_fills.size(); ++surface_fill_id)
-            if (SurfaceFill &fill = surface_fills[surface_fill_id]; fill.surface.surface_type == stInternalSolid) {
-                fill.params.pattern = ipEnsuring;
-            }
-    }
 	//w11
     if (layer.object()->config().detect_narrow_internal_solid_infill) {
-        size_t surface_fills_size = surface_fills.size();
-        for (size_t i = 0; i < surface_fills_size; i++) {
+        for (size_t i = 0; i < surface_fills.size(); i++) {
             if (surface_fills[i].surface.surface_type != stInternalSolid)
                 continue;
 
-            size_t              expolygons_size = surface_fills[i].expolygons.size();
+            size_t expolygons_size = surface_fills[i].expolygons.size();
             std::vector<size_t> narrow_expolygons_index;
             narrow_expolygons_index.reserve(expolygons_size);
+
             for (size_t j = 0; j < expolygons_size; j++)
                 if (is_narrow_infill_area(surface_fills[i].expolygons[j]))
                     narrow_expolygons_index.push_back(j);
 
-            if (narrow_expolygons_index.size() == 0) {
-                continue;
-            } else if (narrow_expolygons_index.size() == expolygons_size) {
-                // w11
-				// w14
+            if (narrow_expolygons_index.size() == expolygons_size) {
                 surface_fills[i].params.pattern = ipConcentricInternal;
             } else {
-                params         = surface_fills[i].params;
-                params.pattern = ipConcentricInternal;
-                surface_fills.emplace_back(params);
-                surface_fills.back().region_id            = surface_fills[i].region_id;
-                surface_fills.back().surface.surface_type = stInternalSolid;
-                surface_fills.back().surface.thickness    = surface_fills[i].surface.thickness;
-                for (size_t j = 0; j < narrow_expolygons_index.size(); j++) {
-                    surface_fills.back().expolygons.emplace_back(std::move(surface_fills[i].expolygons[narrow_expolygons_index[j]]));
-                }
-                for (int j = narrow_expolygons_index.size() - 1; j >= 0; j--) {
-                    surface_fills[i].expolygons.erase(surface_fills[i].expolygons.begin() + narrow_expolygons_index[j]);
-                }
+                surface_fills[i].params.pattern = ipEnsuring;
             }
         }
+    } else {
+        for (size_t surface_fill_id = 0; surface_fill_id < surface_fills.size(); ++surface_fill_id)
+            if (SurfaceFill &fill = surface_fills[surface_fill_id]; fill.surface.surface_type == stInternalSolid) {
+                fill.params.pattern = ipEnsuring;
+            }
     }
     return surface_fills;
 }
@@ -549,7 +535,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.anchor_length_max = surface_fill.params.anchor_length_max;
         params.resolution        = resolution;
 		//w14
-        params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentricInternal) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentricInternal;
+        params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentricInternal;
         params.layer_height      = layerm.layer()->height;
 
         for (ExPolygon &expoly : surface_fill.expolygons) {
@@ -558,28 +544,19 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 			surface_fill.surface.expolygon = std::move(expoly);
             Polylines      polylines;
             ThickPolylines thick_polylines;
-			try {
+//w14
+            if (this->object()->config().detect_narrow_internal_solid_infill && (surface_fill.params.pattern == ipConcentricInternal || surface_fill.params.pattern == ipEnsuring)) {
+                layerm.region().config().infill_overlap.percent ?
+                    f->overlap = layerm.region().config().perimeter_extrusion_width * layerm.region().config().infill_overlap.value / 100 * (-1) :
+                    f->overlap = float(layerm.region().config().infill_overlap.value);
+            } else
+                f->overlap = 0;
+
+            try {
                 if (params.use_arachne) {
-					//w14
-                    /* if (surface_fill.params.pattern == ipConcentricInternal) {
-                        layerm.region().config().infill_overlap.percent ?
-                            f->overlap      = layerm.region().config().perimeter_extrusion_width * layerm.region().config().infill_overlap.value / 100 *(-1):
-                            f->overlap = float(layerm.region().config().infill_overlap.value);
-                        
-                    } else
-                        f->overlap = 0;*/
                     thick_polylines = f->fill_surface_arachne(&surface_fill.surface, params);
                 }
-				//w14
-				else {
-                    /* if (surface_fill.params.pattern == ipConcentricInternal) {
-                        layerm.region().config().infill_overlap.percent ?
-                            f->overlap = layerm.region().config().perimeter_extrusion_width *
-                                         layerm.region().config().infill_overlap.value / 100 * (-1) :
-                            f->overlap = float(layerm.region().config().infill_overlap.value);
-
-                    } else
-                        f->overlap = 0;*/
+                else {
                     polylines = f->fill_surface(&surface_fill.surface, params);
                 }
 			} catch (InfillFailedException &) {
