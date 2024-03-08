@@ -94,6 +94,8 @@ public:
     // PrintConfig and PrintObjectConfig are used by infills that use Arachne (Concentric and FillEnsuring).
     const PrintConfig       *print_config        = nullptr;
     const PrintObjectConfig *print_object_config = nullptr;
+    //w21
+    ExPolygons no_overlap_expolygons;
 
 public:
     virtual ~Fill() {}

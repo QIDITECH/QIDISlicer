@@ -17,6 +17,8 @@
 #include "FillConcentric.hpp"
 #include "FillEnsuring.hpp"
 #include "Polygon.hpp"
+//w21
+#include "../ShortestPath.hpp"
 //w11
 #define NARROW_INFILL_AREA_THRESHOLD 3
 #define NARROW_INFILL_AREA_THRESHOLD_MIN 0.5
@@ -113,6 +115,9 @@ struct SurfaceFill {
 	Surface 			surface;
 	ExPolygons       	expolygons;
 	SurfaceFillParams	params;
+	//w21
+    std::vector<size_t> region_id_group;
+    ExPolygons          no_overlap_expolygons;
 };
 //w11
 static bool is_narrow_infill_area(const ExPolygon &expolygon)
@@ -221,8 +226,18 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
 	        			fill.region_id = region_id;
 	        			fill.surface = surface;
 	        			fill.expolygons.emplace_back(std::move(fill.surface.expolygon));
-	        		} else
-	        			fill.expolygons.emplace_back(surface.expolygon);
+						//w21
+                        fill.region_id_group.push_back(region_id);
+                        fill.no_overlap_expolygons = layerm.fill_no_overlap_expolygons();
+                    } else {
+						//w21
+                        fill.expolygons.emplace_back(surface.expolygon);
+                        auto t = find(fill.region_id_group.begin(), fill.region_id_group.end(), region_id);
+                        if (t == fill.region_id_group.end()) {
+                            fill.region_id_group.push_back(region_id);
+                            fill.no_overlap_expolygons = union_ex(fill.no_overlap_expolygons, layerm.fill_no_overlap_expolygons());
+                        }
+                    }
 				}
 	        }
 	}
@@ -337,6 +352,11 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
             } else {
                 surface_fills[i].params.pattern = ipEnsuring;
             }
+			//w21
+            if (narrow_expolygons_index.size() != expolygons_size && narrow_expolygons_index.size() != expolygons_size) {
+                surface_fills.back().region_id_group       = surface_fills[i].region_id_group;
+                surface_fills.back().no_overlap_expolygons = surface_fills[i].no_overlap_expolygons;
+			}
         }
     } else {
         for (size_t surface_fill_id = 0; surface_fill_id < surface_fills.size(); ++surface_fill_id)
@@ -541,11 +561,14 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         for (ExPolygon &expoly : surface_fill.expolygons) {
 			// Spacing is modified by the filler to indicate adjustments. Reset it for each expolygon.
 			f->spacing = surface_fill.params.spacing;
+			//w21
+            f->no_overlap_expolygons = intersection_ex(surface_fill.no_overlap_expolygons, ExPolygons() = {expoly}, ApplySafetyOffset::Yes);
 			surface_fill.surface.expolygon = std::move(expoly);
             Polylines      polylines;
             ThickPolylines thick_polylines;
 //w14
-            if (this->object()->config().detect_narrow_internal_solid_infill && (surface_fill.params.pattern == ipConcentricInternal || surface_fill.params.pattern == ipEnsuring)) {
+            if (this->object()->config().detect_narrow_internal_solid_infill &&
+                   (surface_fill.params.pattern == ipConcentricInternal || surface_fill.params.pattern == ipEnsuring)) {
                 layerm.region().config().infill_overlap.percent ?
                     f->overlap = layerm.region().config().perimeter_extrusion_width * layerm.region().config().infill_overlap.value / 100 * (-1) :
                     f->overlap = float(layerm.region().config().infill_overlap.value);
@@ -605,6 +628,47 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 						ExtrusionAttributes{ surface_fill.params.extrusion_role,
 							ExtrusionFlow{ flow_mm3_per_mm, float(flow_width), surface_fill.params.flow.height() } 
 						});
+					//w21
+					if (surface_fill.params.pattern == ipMonotonicLines && surface_fill.surface.surface_type == stTop) {
+                        ExPolygons unextruded_areas = diff_ex(f->no_overlap_expolygons, union_ex(eec->polygons_covered_by_spacing(10)));
+                        ExPolygons gapfill_areas = union_ex(unextruded_areas);
+                        if (!f->no_overlap_expolygons.empty())
+                            gapfill_areas = intersection_ex(gapfill_areas, f->no_overlap_expolygons);
+                        if (gapfill_areas.size() > 0 && params.density >= 1) {
+                            Flow       new_flow = surface_fill.params.flow.with_spacing(float(f->spacing));
+                            double     min      = 0.2 * new_flow.scaled_spacing() * (1 - INSET_OVERLAP_TOLERANCE);
+                            double     max      = 2. * new_flow.scaled_spacing();
+                            ExPolygons gaps_ex  = diff_ex(opening_ex(gapfill_areas, float(min / 2.)),
+                                                         offset2_ex(gapfill_areas, -float(max / 2.), float(max / 2. + ClipperSafetyOffset)));
+                            Points ordering_points;
+                            ordering_points.reserve(gaps_ex.size());
+                            ExPolygons gaps_ex_sorted;
+                            gaps_ex_sorted.reserve(gaps_ex.size());
+                            for (const ExPolygon &ex : gaps_ex)
+                                ordering_points.push_back(ex.contour.first_point());
+                            std::vector<Points::size_type> order = chain_points(ordering_points);
+                            for (size_t i : order)
+                                gaps_ex_sorted.emplace_back(std::move(gaps_ex[i]));
+
+                            ThickPolylines polylines;
+                            for (ExPolygon &ex : gaps_ex_sorted) {
+                                ex.douglas_peucker(0.0125 / 0.000001 * 0.1);
+                                ex.medial_axis(min, max, &polylines);
+                            }
+
+                            if (!polylines.empty() && !surface_fill.params.extrusion_role.is_bridge()) {
+                                ExtrusionEntityCollection gap_fill;
+                                polylines.erase(std::remove_if(polylines.begin(), polylines.end(),
+                                                               [&](const ThickPolyline &p) {
+                                                                   return p.length() < 0; // scale_(params.filter_out_gap_fill);
+                                                               }),
+                                                polylines.end());
+
+                                variable_width_gap(polylines, ExtrusionRole::GapFill, surface_fill.params.flow, gap_fill.entities);
+                                eec->append(std::move(gap_fill.entities));
+                            }
+                        }
+                    }
                     layerm.m_fills.entities.push_back(eec);
                 }
                 insert_fills_into_islands(*this, uint32_t(surface_fill.region_id), fill_begin, uint32_t(layerm.fills().size()));
@@ -650,6 +714,146 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
     	    assert(dynamic_cast<const ExtrusionEntityCollection*>(e) != nullptr);
 #endif
 }
+//w21
+void Layer::variable_width_gap(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out)
+{
+    const float tolerance = float(scale_(0.05));
+    for (const ThickPolyline &p : polylines) {
+        ExtrusionPaths paths = thick_polyline_to_extrusion_paths(p, role, flow, tolerance);
+        if (!paths.empty()) {
+            if (paths.front().first_point() == paths.back().last_point())
+                out.emplace_back(new ExtrusionLoop(std::move(paths)));
+            else {
+                for (ExtrusionPath &path : paths)
+                    out.emplace_back(new ExtrusionPath(std::move(path)));
+            }
+        }
+    }
+}
+//w21
+ExtrusionPaths Layer::thick_polyline_to_extrusion_paths(const ThickPolyline &thick_polyline,
+                                                          ExtrusionRole        role,
+                                                          const Flow &         flow,
+                                                          const float          tolerance)
+{
+    ExtrusionPaths paths;
+    ExtrusionPath  path(role);
+    ThickLines     lines = thick_polyline.thicklines();
+
+    size_t start_index = 0;
+    double max_width, min_width;
+
+    for (int i = 0; i < (int) lines.size(); ++i) {
+        const ThickLine &line = lines[i];
+
+        if (i == 0) {
+            max_width = line.a_width;
+            min_width = line.a_width;
+        }
+
+        const coordf_t line_len = line.length();
+        if (line_len < SCALED_EPSILON)
+            continue;
+
+        double thickness_delta = std::max(fabs(max_width - line.b_width), fabs(min_width - line.b_width));
+        if (thickness_delta > tolerance) {
+            if (start_index != i) {
+                path          = ExtrusionPath(role);
+                double length = lines[start_index].length();
+                double sum    = lines[start_index].length() * 0.5 * (lines[start_index].a_width + lines[start_index].b_width);
+                path.polyline.append(lines[start_index].a);
+                for (int idx = start_index + 1; idx < i; idx++) {
+                    length += lines[idx].length();
+                    sum += lines[idx].length() * 0.5 * (lines[idx].a_width + lines[idx].b_width);
+                    path.polyline.append(lines[idx].a);
+                }
+                path.polyline.append(lines[i].a);
+                if (length > SCALED_EPSILON) {
+                    double w        = sum / length;
+                    Flow   new_flow = flow.with_width(unscale<float>(w) + flow.height() * float(1. - 0.25 * PI));
+					
+                    //path.mm3_per_mm = new_flow.mm3_per_mm();
+                    path.set_mm3_per_mm(new_flow.mm3_per_mm());
+                    //path.width      = new_flow.width();
+                    path.set_width(new_flow.width());
+                    //path.height     = new_flow.height();
+                    path.set_height(new_flow.height());
+                    paths.emplace_back(std::move(path));
+                }
+            }
+
+            start_index = i;
+            max_width   = line.a_width;
+            min_width   = line.a_width;
+            thickness_delta = fabs(line.a_width - line.b_width);
+            if (thickness_delta > tolerance) {
+                const unsigned int    segments = (unsigned int) ceil(thickness_delta / tolerance);
+                const coordf_t        seg_len  = line_len / segments;
+                Points                pp;
+                std::vector<coordf_t> width;
+                {
+                    pp.push_back(line.a);
+                    width.push_back(line.a_width);
+                    for (size_t j = 1; j < segments; ++j) {
+                        pp.push_back(
+                            (line.a.cast<double>() + (line.b - line.a).cast<double>().normalized() * (j * seg_len)).cast<coord_t>());
+
+                        coordf_t w = line.a_width + (j * seg_len) * (line.b_width - line.a_width) / line_len;
+                        width.push_back(w);
+                        width.push_back(w);
+                    }
+                    pp.push_back(line.b);
+                    width.push_back(line.b_width);
+
+                    assert(pp.size() == segments + 1u);
+                    assert(width.size() == segments * 2);
+                }
+
+                lines.erase(lines.begin() + i);
+                for (size_t j = 0; j < segments; ++j) {
+                    ThickLine new_line(pp[j], pp[j + 1]);
+                    new_line.a_width = width[2 * j];
+                    new_line.b_width = width[2 * j + 1];
+                    lines.insert(lines.begin() + i + j, new_line);
+                }
+                --i;
+                continue;
+            }
+        }
+        else {
+            max_width = std::max(max_width, std::max(line.a_width, line.b_width));
+            min_width = std::min(min_width, std::min(line.a_width, line.b_width));
+        }
+    }
+    size_t final_size = lines.size();
+    if (start_index < final_size) {
+        path          = ExtrusionPath(role);
+        double length = lines[start_index].length();
+        double sum    = lines[start_index].length() * lines[start_index].a_width;
+        path.polyline.append(lines[start_index].a);
+        for (int idx = start_index + 1; idx < final_size; idx++) {
+            length += lines[idx].length();
+            sum += lines[idx].length() * lines[idx].a_width;
+            path.polyline.append(lines[idx].a);
+        }
+        path.polyline.append(lines[final_size - 1].b);
+        if (length > SCALED_EPSILON) {
+            double w        = sum / length;
+            Flow   new_flow = flow.with_width(unscale<float>(w) + flow.height() * float(1. - 0.25 * PI));
+            //path.mm3_per_mm = new_flow.mm3_per_mm();
+            path.set_mm3_per_mm(new_flow.mm3_per_mm());
+            //path.width      = new_flow.width();
+            path.set_width(new_flow.width());
+            //path.height     = new_flow.height();
+            path.set_height(new_flow.height());
+            paths.emplace_back(std::move(path));
+        }
+    }
+
+    return paths;
+}
+
+
 
 Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive::Octree* support_fill_octree,  FillLightning::Generator* lightning_generator) const
 {

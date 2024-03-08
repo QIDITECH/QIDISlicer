@@ -73,7 +73,9 @@ void LayerRegion::make_perimeters(
     // All fill areas produced for all input slices above.
     ExPolygons                                             &fill_expolygons,
     // Ranges of fill areas above per input slice.
-    std::vector<ExPolygonRange>                            &fill_expolygons_ranges)
+    std::vector<ExPolygonRange>                            &fill_expolygons_ranges,
+    //w21
+    ExPolygons                                             &fill_no_overlap_expolygons)
 {
     m_perimeters.clear();
     m_thin_fills.clear();
@@ -132,7 +134,9 @@ void LayerRegion::make_perimeters(
                 // output:
                 m_perimeters,
                 m_thin_fills,
-                fill_expolygons);
+                fill_expolygons,
+                //w21
+                fill_no_overlap_expolygons);
             else
                 PerimeterGenerator::process_arachne(
                 // input:
@@ -144,7 +148,9 @@ void LayerRegion::make_perimeters(
                 // output:
                 m_perimeters,
                 m_thin_fills,
-                fill_expolygons);
+                fill_expolygons,
+                //w21
+                fill_no_overlap_expolygons);
 
         else
             PerimeterGenerator::process_classic(
@@ -159,7 +165,9 @@ void LayerRegion::make_perimeters(
                 // output:
                 m_perimeters,
                 m_thin_fills,
-                fill_expolygons);
+                fill_expolygons,
+                //w21
+                fill_no_overlap_expolygons);
         perimeter_and_gapfill_ranges.emplace_back(
             ExtrusionRange{ perimeters_begin, uint32_t(m_perimeters.size()) }, 
             ExtrusionRange{ gap_fills_begin,  uint32_t(m_thin_fills.size()) });

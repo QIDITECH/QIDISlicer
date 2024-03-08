@@ -81,7 +81,9 @@ void process_classic(
     // Gaps without the thin walls
     ExtrusionEntityCollection  &out_gap_fill,
     // Infills without the gap fills
-    ExPolygons                 &out_fill_expolygons);
+    ExPolygons                 &out_fill_expolygons,
+    //w21
+    ExPolygons                 &out_fill_no_overlap);
 
 void process_arachne(
     // Inputs:
@@ -98,7 +100,9 @@ void process_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection &out_gap_fill,
     // Infills without the gap fills
-    ExPolygons &out_fill_expolygons);
+    ExPolygons &out_fill_expolygons,
+    //w21
+    ExPolygons &out_fill_no_overlap);
 
 void process_with_one_wall_arachne(
     // Inputs:
@@ -116,7 +120,9 @@ void process_with_one_wall_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection  &out_gap_fill,
     // Infills without the gap fills
-    ExPolygons                 &out_fill_expolygons);
+    ExPolygons &out_fill_expolygons,
+    //w21
+    ExPolygons &out_fill_no_overlap);
 
 //w16
 void add_infill_contour_for_arachne(ExPolygons        infill_contour,
@@ -128,7 +134,9 @@ void add_infill_contour_for_arachne(ExPolygons        infill_contour,
                                     bool              is_inner_part,
                                     const Parameters &params,
                                     ExPolygons &      infill_areas,
-                                    ExPolygons &      out_fill_expolygons);
+                                    ExPolygons &      out_fill_expolygons,
+                                    //w21
+                                    ExPolygons &      out_fill_no_overlap);
 
 ExtrusionMultiPath thick_polyline_to_multi_path(const ThickPolyline &thick_polyline, ExtrusionRole role, const Flow &flow, float tolerance, float merge_tolerance);
 

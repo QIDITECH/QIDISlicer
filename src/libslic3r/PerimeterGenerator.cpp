@@ -1079,7 +1079,9 @@ void PerimeterGenerator::add_infill_contour_for_arachne(ExPolygons infill_contou
                                                         bool       is_inner_part,
                                                         const Parameters &params,
                                                         ExPolygons &infill_areas,
-                                                        ExPolygons &      out_fill_expolygons)
+                                                        ExPolygons &      out_fill_expolygons,
+                                                        //w21
+                                                        ExPolygons &      out_fill_no_overlap)
 {
     if (offset_ex(infill_contour, -float(spacing / 2.)).empty()) {
         infill_contour.clear(); 
@@ -1097,6 +1099,8 @@ void PerimeterGenerator::add_infill_contour_for_arachne(ExPolygons infill_contou
     float      offset2     = insert + min_perimeter_infill_spacing / 2.;
     infill_areas           = offset2_ex(inner_union, offset1, offset2);
     append(out_fill_expolygons, offset2_ex(union_ex(inner_pp), float(-min_perimeter_infill_spacing / 2.), float(insert + min_perimeter_infill_spacing / 2.)));
+    //w21
+    append(out_fill_no_overlap,offset2_ex(inner_union, float(-min_perimeter_infill_spacing / 2.), float(min_perimeter_infill_spacing / 2.)));
 }
 
 
@@ -1116,7 +1120,9 @@ void PerimeterGenerator::process_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection  & /* out_gap_fill */,
     // Infills without the gap fills
-    ExPolygons                 &out_fill_expolygons)
+    ExPolygons                 &out_fill_expolygons,
+    //w21
+    ExPolygons                 &out_fill_no_overlap)
 {
     // other perimeters
     coord_t perimeter_spacing     = params.perimeter_flow.scaled_spacing();
@@ -1360,7 +1366,8 @@ void PerimeterGenerator::process_arachne(
             infill_areas = diff_ex(infill_areas, filled_area);
         }
     }
-    
+    //w21
+    append(out_fill_no_overlap, offset2_ex(union_ex(pp),float(-min_perimeter_infill_spacing / 2.), float(inset + min_perimeter_infill_spacing / 2.)));
     append(out_fill_expolygons, std::move(infill_areas));
 }
 
@@ -1380,7 +1387,9 @@ void PerimeterGenerator::process_with_one_wall_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection  & /* out_gap_fill */,
     // Infills without the gap fills
-    ExPolygons                 &out_fill_expolygons)
+    ExPolygons &out_fill_expolygons,
+    //w21
+    ExPolygons &out_fill_no_overlap)
 {
     // other perimeters
     coord_t perimeter_spacing     = params.perimeter_flow.scaled_spacing();
@@ -1686,16 +1695,21 @@ void PerimeterGenerator::process_with_one_wall_arachne(
 
 
         if (remain_loops >= 0) {
+            //w21
             add_infill_contour_for_arachne(infill_contour, loop_number, ext_perimeter_spacing, perimeter_spacing,
-                                           min_perimeter_infill_spacing, spacing, true, params, infill_areas, out_fill_expolygons);
+                                           min_perimeter_infill_spacing, spacing, true, params, infill_areas, out_fill_expolygons,out_fill_no_overlap);
         }
 
         
         if (remain_loops >= 0) {
             if (!inner_infill_contour.empty())
+                //w21
                 add_infill_contour_for_arachne(inner_infill_contour, remain_loops, ext_perimeter_spacing, perimeter_spacing,
-                                               min_perimeter_infill_spacing, spacing, true, params, infill_areas, out_fill_expolygons);
+                                               min_perimeter_infill_spacing, spacing, true, params, infill_areas, out_fill_expolygons,out_fill_no_overlap);
         }
+        //w21
+        append(out_fill_no_overlap,
+               offset2_ex(union_ex(pp), float(-min_perimeter_infill_spacing / 2.), float(min_perimeter_infill_spacing / 2.)));
         append(out_fill_expolygons, std::move(infill_areas));
     } else {
            infill_contour = union_ex(wallToolPaths.getInnerContour());
@@ -1732,7 +1746,8 @@ void PerimeterGenerator::process_with_one_wall_arachne(
                 infill_areas = diff_ex(infill_areas, filled_area);
             }
         }
-
+        //w21
+        append(out_fill_no_overlap,offset2_ex(union_ex(pp), float(-min_perimeter_infill_spacing / 2.), float(min_perimeter_infill_spacing / 2.)));
         append(out_fill_expolygons, std::move(infill_areas));
     }
 }
@@ -1753,7 +1768,9 @@ void PerimeterGenerator::process_classic(
     // Gaps without the thin walls
     ExtrusionEntityCollection  &out_gap_fill,
     // Infills without the gap fills
-    ExPolygons                 &out_fill_expolygons)
+    ExPolygons                 &out_fill_expolygons,
+    //w21
+    ExPolygons                 &out_fill_no_overlap)
 {
     // other perimeters
     coord_t perimeter_width         = params.perimeter_flow.scaled_width();
@@ -2058,9 +2075,14 @@ void PerimeterGenerator::process_classic(
             ext_perimeter_spacing / 2 :
             // two or more loops?
             perimeter_spacing / 2;
+    //w21
+    coord_t infill_peri_overlap = 0;
     // only apply infill overlap if we actually have one perimeter
-    if (inset > 0)
-        inset -= coord_t(scale_(params.config.get_abs_value("infill_overlap", unscale<double>(inset + solid_infill_spacing / 2))));
+    //w21
+    if (inset > 0) {
+        infill_peri_overlap = coord_t(scale_(params.config.get_abs_value("infill_overlap", unscale<double>( solid_infill_spacing / 2))));
+        inset -= infill_peri_overlap;
+    }
     // simplify infill contours according to resolution
     Polygons pp;
     for (ExPolygon &ex : last)
@@ -2075,8 +2097,27 @@ void PerimeterGenerator::process_classic(
             float(min_perimeter_infill_spacing / 2.));
 
      ExPolygons top_infill_exp = intersection_ex(fill_clip, offset_ex(top_fills, double(ext_perimeter_spacing / 2)));
-     
+     //w21
+    if (!top_fills.empty()) {
+         infill_areas = union_ex(infill_areas, offset_ex(top_infill_exp, double(infill_peri_overlap)));
+    }
         append(out_fill_expolygons, std::move(top_infill_exp));
+        //w21
+        {
+            ExPolygons polyWithoutOverlap;
+            if (min_perimeter_infill_spacing / 2 > infill_peri_overlap)
+                polyWithoutOverlap = offset2_ex(
+                    union_ex(pp),
+                    float(-inset - min_perimeter_infill_spacing / 2.),
+                    float(min_perimeter_infill_spacing / 2 - infill_peri_overlap));
+            else
+                polyWithoutOverlap = offset_ex(
+                    union_ex(pp),
+                    double(-inset - infill_peri_overlap));
+            if (!top_fills.empty())
+                polyWithoutOverlap = union_ex(polyWithoutOverlap, top_infill_exp);
+            out_fill_no_overlap.insert(out_fill_no_overlap.end(), polyWithoutOverlap.begin(), polyWithoutOverlap.end());
+        }
 
     if (lower_slices != nullptr && params.config.overhangs && params.config.extra_perimeters_on_overhangs &&
         params.config.perimeters > 0 && params.layer_id > params.object_config.raft_layers) {

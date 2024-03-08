@@ -132,6 +132,8 @@ public:
     // ordered collection of extrusion paths to fill surfaces
     // (this collection contains only ExtrusionEntityCollection objects)
     [[nodiscard]] const ExtrusionEntityCollection&  fills() const { return m_fills; }
+    //w21
+    [[nodiscard]] const ExPolygons &fill_no_overlap_expolygons() const { return m_fill_expolygons; }
     
     Flow    flow(FlowRole role) const;
     Flow    flow(FlowRole role, double layer_height) const;
@@ -149,7 +151,9 @@ public:
         // All fill areas produced for all input slices above.
         ExPolygons                                             &fill_expolygons,
         // Ranges of fill areas above per input slice.
-        std::vector<ExPolygonRange>                            &fill_expolygons_ranges);
+        std::vector<ExPolygonRange>                            &fill_expolygons_ranges,
+        //w21
+        ExPolygons                                             &fill_no_overlap_expolygons);
     void    process_external_surfaces(const Layer *lower_layer, const Polygons *lower_layer_covered);
     double  infill_area_threshold() const;
     // Trim surfaces by trimming polygons. Used by the elephant foot compensation at the 1st layer.
@@ -228,6 +232,8 @@ private:
     // collection of expolygons representing the bridged areas (thus not
     // needing support material)
 //  Polygons                    bridged;
+    //w21
+    ExPolygons                  m_fill_no_overlap_expolygons;
 };
 
 // LayerSlice contains one or more LayerIsland objects,
@@ -386,6 +392,9 @@ public:
     // Is there any valid extrusion assigned to this LayerRegion?
     virtual bool            has_extrusions() const { for (auto layerm : m_regions) if (layerm->has_extrusions()) return true; return false; }
 //    virtual bool            has_extrusions() const { for (const LayerSlice &lslice : lslices_ex) if (lslice.has_extrusions()) return true; return false; }
+    //w21
+    void variable_width_gap(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out);
+    ExtrusionPaths thick_polyline_to_extrusion_paths(const ThickPolyline &thick_polyline,ExtrusionRole role,const Flow & flow,const float tolerance);
 
 protected:
     friend class PrintObject;

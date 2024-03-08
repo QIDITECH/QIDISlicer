@@ -184,6 +184,10 @@ public:
     void   collect_polylines(Polylines &dst) const override { if (! this->polyline.empty()) dst.emplace_back(this->polyline); }
     void   collect_points(Points &dst) const override { append(dst, this->polyline.points); }
     double      total_volume() const override { return m_attributes.mm3_per_mm * unscale<double>(length()); }
+    //w21
+    void     set_width(float set_val) { m_attributes.width = set_val; }
+    void        set_height(float set_val) { m_attributes.height = set_val; }
+    void        set_mm3_per_mm(float set_val) { m_attributes.mm3_per_mm = set_val; }
 
 private:
     void _inflate_collection(const Polylines &polylines, ExtrusionEntityCollection* collection) const;
