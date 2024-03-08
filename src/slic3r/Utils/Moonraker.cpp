@@ -365,18 +365,17 @@ void Moonraker::set_auth(Http &http) const
     if (!m_cafile.empty())
         http.ca_file(m_cafile);
 }
-//B4
+//B52
 std::string Moonraker::make_url(const std::string &path) const
 {
-    std::string m_host_add = m_host + ":10088";
-    if (m_host_add.find("http://") == 0 || m_host_add.find("https://") == 0) {
-        if (m_host_add.back() == '/') {
-            return (boost::format("%1%%2%") % m_host_add % path).str();
+    if (m_host.find("http://") == 0 || m_host.find("https://") == 0) {
+        if (m_host.back() == '/') {
+            return (boost::format("%1%%2%") % m_host % path).str();
         } else {
-            return (boost::format("%1%/%2%") % m_host_add % path).str();
+            return (boost::format("%1%/%2%") % m_host % path).str();
         }
     } else {
-        return (boost::format("http://%1%/%2%") % m_host_add % path).str();
+        return (boost::format("http://%1%/%2%") % m_host % path).str();
     }
 }
 
