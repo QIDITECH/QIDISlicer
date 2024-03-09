@@ -4915,9 +4915,9 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
 
     const ModelObjectPtrs &model_objects     = GUI::wxGetApp().model().objects;
     std::vector<ColorRGBA> extruders_colors  = get_extruders_colors();
-//Y18
+//Y18 //B54
     if (thumbnail_params.transparent_background)
-        glsafe(::glClearColor(1.0f, 1.0f, 1.0f, 1.0f));
+        glsafe(::glClearColor(0.0f, 0.0f, 0.0f, 0.0f));
 
     glsafe(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
     glsafe(::glEnable(GL_DEPTH_TEST));

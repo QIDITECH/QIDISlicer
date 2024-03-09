@@ -81,7 +81,8 @@ inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb,
         int count = 0;
         for (const auto& [format, size] : thumbnails_list) {
         static constexpr const size_t max_row_length = 78;
-        ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{{size}, true, false, false, true});
+        //B54
+        ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{{size}, true, false, false, false});
         for (const ThumbnailData& data : thumbnails)
             if (data.is_valid()) {
                 switch (format) {
