@@ -721,11 +721,14 @@ void Layer::variable_width_gap(const ThickPolylines &polylines, ExtrusionRole ro
     for (const ThickPolyline &p : polylines) {
         ExtrusionPaths paths = thick_polyline_to_extrusion_paths(p, role, flow, tolerance);
         if (!paths.empty()) {
-            if (paths.front().first_point() == paths.back().last_point())
-                out.emplace_back(new ExtrusionLoop(std::move(paths)));
+            if (paths.front().first_point() == paths.back().last_point()) {
+				out.emplace_back(new ExtrusionLoop(std::move(paths)));
+            }
             else {
-                for (ExtrusionPath &path : paths)
-                    out.emplace_back(new ExtrusionPath(std::move(path)));
+                for (ExtrusionPath &path : paths) {
+                    if (path.length() >= scale_(flow.nozzle_diameter()/2.0) || path.width() >= scale_(flow.nozzle_diameter()/2.0)) 
+						out.emplace_back(new ExtrusionPath(std::move(path)));
+                }
             }
         }
     }
