@@ -5846,6 +5846,7 @@ void Plater::calib_max_volumetric_speed(const double StartVS, double EndVS, doub
     double vs_layer_height = nozzle_diameter * 0.8;
     double vs_external_perimeter_extrusion_width = nozzle_diameter * 1.75;
     auto max_print_height = build_volume().max_print_height();
+    auto max_print_x = build_volume().bounding_volume().size().x();
 
     float res = float(vs_layer_height * (vs_external_perimeter_extrusion_width - vs_layer_height * (1. - 0.25 * PI)));
     float start_speed = StartVS / res;
@@ -5883,6 +5884,10 @@ void Plater::calib_max_volumetric_speed(const double StartVS, double EndVS, doub
     select_all();
     sidebar().obj_manipul()->set_uniform_scaling(false);
     sidebar().obj_manipul()->on_change("size", 2, count * vs_layer_height);
+    if (max_print_x < 180)
+    {
+        sidebar().obj_manipul()->on_change("size", 0, max_print_x - 5);
+    }
     sidebar().obj_manipul()->set_uniform_scaling(true);
 
     sidebar().obj_list()->layers_editing();
