@@ -1509,6 +1509,8 @@ void TabPrint::build()
         optgroup->append_single_option_line("infill_first");
         //w11
         optgroup->append_single_option_line("detect_narrow_internal_solid_infill");
+        //w21
+        optgroup->append_single_option_line("filter_top_gap_infill");
 
     page = add_options_page(L("Skirt and brim"), "skirt+brim");
         category_path = "skirt-and-brim_133969#";

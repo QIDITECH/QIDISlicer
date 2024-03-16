@@ -595,6 +595,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionEnum<TopOneWallType>, top_one_wall_type))
     //w17
     ((ConfigOptionPercent,            top_area_threshold))
+    //w21
+    ((ConfigOptionFloat,               filter_top_gap_infill))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(

@@ -3683,6 +3683,15 @@ void PrintConfigDef::init_fff_params()
                      " Otherwise, rectilinear pattern is used defaultly.");
     def->mode     = comExpert;
     def->set_default_value(new ConfigOptionBool(true));
+    
+    //w21
+    def           = this->add("filter_top_gap_infill", coFloat);
+    def->label    = L("Filter out tiny top gaps infill");
+    def->category = L("Infill");
+    def->tooltip  = L("Filter out gaps smaller than the threshold specified. This setting affact top surface's gap infill");
+    def->min      = 0;
+    def->mode     = comExpert;
+    def->set_default_value(new ConfigOptionFloat(0));
 
 }
 

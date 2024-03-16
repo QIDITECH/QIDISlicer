@@ -479,6 +479,8 @@ static std::vector<std::string> s_Preset_print_options {
     , "top_one_wall_type"
     //w17
     ,"top_area_threshold"
+    //w21
+    ,"filter_top_gap_infill"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

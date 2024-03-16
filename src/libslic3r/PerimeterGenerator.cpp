@@ -1367,7 +1367,7 @@ void PerimeterGenerator::process_arachne(
         }
     }
     //w21
-    append(out_fill_no_overlap, offset2_ex(union_ex(pp),float(-min_perimeter_infill_spacing / 2.), float(inset + min_perimeter_infill_spacing / 2.)));
+    append(out_fill_no_overlap, offset2_ex(union_ex(pp),float(-min_perimeter_infill_spacing / 2.), float(  min_perimeter_infill_spacing / 2.)));
     append(out_fill_expolygons, std::move(infill_areas));
 }
 

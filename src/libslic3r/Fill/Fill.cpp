@@ -228,14 +228,14 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
 	        			fill.expolygons.emplace_back(std::move(fill.surface.expolygon));
 						//w21
                         fill.region_id_group.push_back(region_id);
-                        fill.no_overlap_expolygons = layerm.fill_no_overlap_expolygons();
+                        fill.no_overlap_expolygons = layerm.fill_no_overlap_expolygons;
                     } else {
 						//w21
                         fill.expolygons.emplace_back(surface.expolygon);
                         auto t = find(fill.region_id_group.begin(), fill.region_id_group.end(), region_id);
                         if (t == fill.region_id_group.end()) {
                             fill.region_id_group.push_back(region_id);
-                            fill.no_overlap_expolygons = union_ex(fill.no_overlap_expolygons, layerm.fill_no_overlap_expolygons());
+                            fill.no_overlap_expolygons = union_ex(fill.no_overlap_expolygons, layerm.fill_no_overlap_expolygons);
                         }
                     }
 				}
@@ -495,6 +495,8 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
     const Slic3r::BoundingBox bbox                = this->object()->bounding_box();
     const auto                resolution          = this->object()->print()->config().gcode_resolution.value;
     const auto                perimeter_generator = this->object()->config().perimeter_generator;
+	//w21
+	float					  filter_gap_infill_value = this->object()->config().filter_top_gap_infill;
 
 #ifdef SLIC3R_DEBUG_SLICE_PROCESSING
 	{
@@ -578,6 +580,9 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
             try {
                 if (params.use_arachne) {
                     thick_polylines = f->fill_surface_arachne(&surface_fill.surface, params);
+					//w21
+                    //if (f->layer_id % 2 == 0 && surface_fill.params.pattern == ipConcentricInternal)
+                     //   std::reverse(thick_polylines.begin(), thick_polylines.end());
                 }
                 else {
                     polylines = f->fill_surface(&surface_fill.surface, params);
@@ -664,7 +669,8 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                                                                }),
                                                 polylines.end());
 
-                                variable_width_gap(polylines, ExtrusionRole::GapFill, surface_fill.params.flow, gap_fill.entities);
+                                variable_width_gap(polylines, ExtrusionRole::GapFill, surface_fill.params.flow, gap_fill.entities,filter_gap_infill_value);
+
                                 eec->append(std::move(gap_fill.entities));
                             }
                         }
@@ -715,7 +721,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 #endif
 }
 //w21
-void Layer::variable_width_gap(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out)
+void Layer::variable_width_gap(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out,const float filter_gap_infill_value)
 {
     const float tolerance = float(scale_(0.05));
     for (const ThickPolyline &p : polylines) {
@@ -726,8 +732,12 @@ void Layer::variable_width_gap(const ThickPolylines &polylines, ExtrusionRole ro
             }
             else {
                 for (ExtrusionPath &path : paths) {
-                    if (path.length() >= scale_(flow.nozzle_diameter()/2.0) || path.width() >= scale_(flow.nozzle_diameter()/2.0)) 
-						out.emplace_back(new ExtrusionPath(std::move(path)));
+                    if (filter_gap_infill_value != 0) {
+                        if (path.length() >= scale_(filter_gap_infill_value) || path.width() >= scale_(filter_gap_infill_value))
+                            out.emplace_back(new ExtrusionPath(std::move(path)));
+                    }
+                    else
+                        out.emplace_back(new ExtrusionPath(std::move(path)));
                 }
             }
         }

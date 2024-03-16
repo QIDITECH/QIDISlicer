@@ -133,7 +133,7 @@ public:
     // (this collection contains only ExtrusionEntityCollection objects)
     [[nodiscard]] const ExtrusionEntityCollection&  fills() const { return m_fills; }
     //w21
-    [[nodiscard]] const ExPolygons &fill_no_overlap_expolygons() const { return m_fill_expolygons; }
+    ExPolygons fill_no_overlap_expolygons;
     
     Flow    flow(FlowRole role) const;
     Flow    flow(FlowRole role, double layer_height) const;
@@ -393,7 +393,7 @@ public:
     virtual bool            has_extrusions() const { for (auto layerm : m_regions) if (layerm->has_extrusions()) return true; return false; }
 //    virtual bool            has_extrusions() const { for (const LayerSlice &lslice : lslices_ex) if (lslice.has_extrusions()) return true; return false; }
     //w21
-    void variable_width_gap(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out);
+    void variable_width_gap(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out,const float filter_gap_infill_value);
     ExtrusionPaths thick_polyline_to_extrusion_paths(const ThickPolyline &thick_polyline,ExtrusionRole role,const Flow & flow,const float tolerance);
 
 protected:

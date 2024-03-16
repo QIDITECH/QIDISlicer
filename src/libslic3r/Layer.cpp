@@ -654,7 +654,7 @@ void Layer::make_perimeters()
                 fill_expolygons_ranges.clear();
                 surfaces_to_merge.clear();
                 //w21
-                fill_no_overlap_expolygons.clear();
+                //fill_no_overlap_expolygons.clear();
 
     	        // find compatible regions
                 layer_region_ids.clear();
@@ -696,7 +696,7 @@ void Layer::make_perimeters()
 
     	        if (layer_region_ids.size() == 1) {  // optimization
                     //w21
-    	            (*layerm)->make_perimeters((*layerm)->slices(), perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,fill_no_overlap_expolygons);
+    	            (*layerm)->make_perimeters((*layerm)->slices(), perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,(*layerm)->fill_no_overlap_expolygons);
                     this->sort_perimeters_into_islands((*layerm)->slices(), region_id, perimeter_and_gapfill_ranges, std::move(fill_expolygons), fill_expolygons_ranges, layer_region_ids);
     	        } else {
     	            SurfaceCollection new_slices;
@@ -732,7 +732,8 @@ void Layer::make_perimeters()
     	            }
     	            // make perimeters
                     //w21
-    	            layerm_config->make_perimeters(new_slices, perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,fill_no_overlap_expolygons);
+                    ExPolygons fill_no_overlap;
+    	            layerm_config->make_perimeters(new_slices, perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,fill_no_overlap);
                     this->sort_perimeters_into_islands(new_slices, region_id_config, perimeter_and_gapfill_ranges, std::move(fill_expolygons), fill_expolygons_ranges, layer_region_ids);
                     //w21
                     if (!new_slices.surfaces.empty()) {
@@ -743,7 +744,7 @@ void Layer::make_perimeters()
                             layer.m_fill_expolygons   = std::move(expp);
                             if (!layer.m_fill_expolygons.empty()) {
                                 layer.m_fill_surfaces.set(std::move(layer.m_fill_expolygons), layer.slices().surfaces.front());
-                                layer.m_fill_no_overlap_expolygons = intersection_ex(layer.slices().surfaces, fill_no_overlap_expolygons);
+                                layer.fill_no_overlap_expolygons = intersection_ex(layer.slices().surfaces, fill_no_overlap);
                             }
                            
                         }
