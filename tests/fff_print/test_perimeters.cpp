@@ -45,6 +45,8 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
         ExtrusionEntityCollection loops;
         ExtrusionEntityCollection gap_fill;
         ExPolygons                fill_expolygons;
+        //B56
+        ExPolygons                fill_expolygons_no_overlap;
         Flow                      flow(1., 1., 1.);
         PerimeterGenerator::Parameters perimeter_generator_params(
             1., // layer height
@@ -61,6 +63,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
 //        if (config.perimeter_generator == PerimeterGeneratorType::Arachne)
 //            PerimeterGenerator::process_arachne();
 //        else
+            //B56
             PerimeterGenerator::process_classic(
                 // input:
                 perimeter_generator_params,
@@ -71,7 +74,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
                 upper_layer_polygons_cache,
                 lower_layer_polygons_cache,
                 // output:
-                loops, gap_fill, fill_expolygons);
+                loops, gap_fill, fill_expolygons,fill_expolygons_no_overlap);
 
         THEN("expected number of collections") {
             REQUIRE(loops.entities.size() == data.expolygons.size());
