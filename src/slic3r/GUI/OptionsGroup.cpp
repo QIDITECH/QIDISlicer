@@ -618,7 +618,11 @@ void ConfigOptionsGroup::back_to_sys_value(const std::string& opt_key)
 void ConfigOptionsGroup::back_to_config_value(const DynamicPrintConfig& config, const std::string& opt_key)
 {
 	boost::any value;
+    //B52
 	if (opt_key == "bed_shape") {
+        value = get_config_value(config, "bed_exclude_area");
+        this->change_opt_value("bed_exclude_area", value);
+        OptionsGroup::on_change_OG("bed_exclude_area", value);
         for (const std::string& key : {"bed_custom_texture", "bed_custom_model"}) {
             value = config.opt_string(key);
             this->change_opt_value(key, value);
