@@ -83,6 +83,10 @@
 						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
 						<div class="trans" tid="t17"></div>
 					</li>
+					<li menu="MaxVolumetricSpeed" class="MenuBtn" onClick="GotoMenu('MaxVolumetricSpeed')">
+						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
+						<div class="trans" tid="t19"></div>
+					</li>
 				</ol>
 			</li>
 
@@ -93,6 +97,10 @@
 					<i class="fa fa-caret-right"></i>
 				</label>
 				<ol>
+					<li menu="Q1 Pro" class="MenuBtn" onClick="GotoMenu('Q1 Pro')">
+						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
+						<div>Q1 Pro</div>
+					</li>
 					<li menu="X-MAX 3" class="MenuBtn" onClick="GotoMenu('X-MAX 3')">
 						<div class="MenuBtnIcon"><img src="img/MenuBtnIcon.svg"/></div>
 						<div>X-MAX 3</div>
@@ -173,6 +181,10 @@
 			<div class="Thumbnail" onClick="GotoMenu('PressureAdvance')">
 				<div class="AutozoomImage"><img src="img/PressureAdvance.gif"/></div>
 				<div class="ThumbnailTitle trans" tid="t17"></div>
+			</div>
+			<div class="Thumbnail" onClick="GotoMenu('MaxVolumetricSpeed')">
+				<div class="AutozoomImage"><img src="img/MaxVolumetricSpeed.gif"/></div>
+				<div class="ThumbnailTitle trans" tid="t19"></div>
 			</div>
 			<div class="Thumbnail" onClick="GotoMenu('IssueReport')">
 				<div class="AutozoomImage"><img src="img/IssueReport.png"/></div>
@@ -292,6 +304,20 @@
 			<div class="IntroduceTextBold trans" tid="l39"></div>
 			<div class="IntroduceText trans" tid="l40"></div>
 			<div class="CenterImage"><img src="img/PressureAdvanceTower.png"/></div>
+		</div>
+
+		<div class="IntroduceBoard" board="MaxVolumetricSpeed">
+			<div class="IntroduceTitle trans" tid="t19"></div>
+			<div class="IntroduceText trans" tid="l44"></div>
+			<div class="IntroduceText trans" tid="l45"></div>
+			<div class="AutozoomImage"><img src="img/MaxVolumetricSpeed.gif"/></div>
+			<div class="IntroduceText trans" tid="l46"></div>
+		</div>
+
+		<div class="IntroduceBoard" board="Q1 Pro">
+			<div class="AutozoomImage"><img src="img/Q1 ProPoster.png"/></div>
+			<div class="IntroduceTextBold trans" tid="l0"></div>
+			<div class="IntroduceText">https://qidi3d.com</div>
 		</div>
 
 		<div class="IntroduceBoard" board="X-MAX 3">
@@ -527,6 +553,22 @@
 							<td>7.5 ± 1.5</td>
 						</tr>
 						<tr v-for="(item, index) in 1" :key="index">
+							<td>PLA-CF</td>
+							<td>≤30％</td>
+							<td>/</td>
+							<td>+</td>
+							<td>+</td>
+							<td>++</td>
+							<td>55.2℃</td>
+							<td>52.6℃</td>
+							<td>54.92 ± 0.22</td>
+							<td>4020.55 ± 99.11</td>
+							<td>4.90 ± 0.97</td>
+							<td>91.57 ± 0.31</td>
+							<td>4197.66 ± 279.96</td>
+							<td>6.65 ± 0.38</td>
+						</tr>
+						<tr v-for="(item, index) in 1" :key="index">
 							<td>UltraPA</td>
 							<td>≤15％</td>
 							<td>/</td>
@@ -554,6 +596,14 @@
 			<div class="IntroduceText trans" tid="l2"></div>
 			<div class="IntroduceText trans" tid="l3"></div>
 			<div class="EmailBlock">
+				<div class="PrinterBlock">
+					<div class="CenterImage"><img src="img/Q1 Pro.png"/></div>
+					<div class="ThumbnailTitle">Q1 Pro</div>
+					<div class="IntroduceText">
+						<b>E-mail:</b><br/>Q1support@qidi3d.com<br>Q1AMS@qidi3d.com<br/><br>
+						<b>Skype:</b><br/>Q1support@qidi3d.com
+					</div>
+				</div>
 				<div class="PrinterBlock">
 					<div class="CenterImage"><img src="img/X-MAX 3.png"/></div>
 					<div class="ThumbnailTitle">X-MAX 3</div>
