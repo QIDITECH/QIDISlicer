@@ -3719,7 +3719,7 @@ void PrintConfigDef::init_extruder_option_keys()
         "retract_layer_change",
         "retract_length",
         //B34
-        "filament_diameter",
+        // "filament_diameter",
         "extrusion_multiplier",
         "retract_length_toolchange",
         "retract_lift",
