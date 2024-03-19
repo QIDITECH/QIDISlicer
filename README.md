@@ -15,6 +15,8 @@ See the [QIDI's homepage](https://qidi3d.com) for more information.
 
 You can find the printer's firmware here:
 
+[Q1 Pro](https://github.com/QIDITECH/QIDI_Q1_Pro)
+
 [X-MAX 3](https://github.com/QIDITECH/QIDI_MAX3)
 
 [X-Plus 3](https://github.com/QIDITECH/QIDI_PLUS3)
