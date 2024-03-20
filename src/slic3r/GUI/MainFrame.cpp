@@ -2143,13 +2143,15 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                     bool isValidIPAddress      = true;
                     DynamicPrintConfig *cfg_t            = &(printer->config);
 
+                    const auto          opt                   = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
+                    const auto          host_type             = opt != nullptr ? opt->value : htOctoPrint;
                     wxStringTokenizer tokenizer3((data->lower_name), wxT("*"), wxTOKEN_RET_EMPTY_ALL);
                     wxString          printer_name = tokenizer3.GetNextToken();
 
                     if (isValidIPAddress) {
                         m_printer_view->AddButton(
-                            printer_name, host, (data->model_id), (data->fullname),
-                            (data->selected), cfg_t);
+                            printer_name, host, (data->model_id), (data->fullname), (data->selected),
+                                                  (host_type == htMoonraker), cfg_t);
                     }
                 }
             }
