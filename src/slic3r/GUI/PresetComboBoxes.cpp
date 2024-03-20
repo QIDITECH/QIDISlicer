@@ -40,6 +40,8 @@
 #include "PhysicalPrinterDialog.hpp"
 #include "MsgDialog.hpp"
 
+//B55
+#include "../Utils/PrintHost.hpp"
 // A workaround for a set of issues related to text fitting into gtk widgets:
 // See e.g.: https://github.com/qidi3d/QIDISlicer/issues/4584
 #if defined(__WXGTK20__) || defined(__WXGTK3__)
@@ -381,9 +383,12 @@ void PresetComboBox::open_physical_printer_url()
     std::string            host = pp.config.opt_string("print_host");
     assert(!host.empty());
     //B55
-    //// B31
-    //if (host.find(":10088") == -1)
-    //    host = host + ":10088";
+    const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config();
+    const auto                opt       = cfg->option<ConfigOptionEnum<PrintHostType>>("host_type");
+    const auto                host_type = opt != nullptr ? opt->value : htOctoPrint;
+    if (host_type == htMoonraker)
+         if (host.find(":10088") == -1)
+            host = host + ":10088";
     wxGetApp().open_browser_with_warning_dialog(host);
 }
 
