@@ -339,6 +339,7 @@ void PrinterWebView::AddButton(const wxString &                             devi
                                 const wxString &                            machine_type,
                                 const wxString &                            fullname,
                                 bool                                         isSelected,
+                                bool                isQIDI,
                                 DynamicPrintConfig *                         cfg_t)
  {
     wxString Machine_Name = Machine_Name.Format("%s%s", machine_type, "_thumbnail");
@@ -358,24 +359,13 @@ void PrinterWebView::AddButton(const wxString &                             devi
     customButton->SetIPText(ip);
     customButton->SetStateText("standby");
     customButton->SetProgressText("(0%)");
-    const auto opt = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
-     const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
-     wxString   formattedHost = ip;
-     if (!formattedHost.Lower().starts_with("http"))
-        formattedHost = wxString::Format("http://%s", formattedHost);
-     if (host_type == htMoonraker) {
-        if (!formattedHost.Lower().ends_with("10088"))
-            formattedHost = wxString::Format("%s:10088", formattedHost);
-    }
 
-    customButton->Bind(wxEVT_BUTTON, [this, ip, customButton, cfg_t](wxCommandEvent &event) { 
+    customButton->Bind(wxEVT_BUTTON, [this, ip, customButton, isQIDI](wxCommandEvent &event) { 
         //B55
-        const auto opt           = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
-        const auto host_type     = opt != nullptr ? opt->value : htOctoPrint;
         wxString   formattedHost = ip;
         if (!formattedHost.Lower().starts_with("http"))
             formattedHost = wxString::Format("http://%s", formattedHost);
-        if (host_type == htMoonraker) {
+            if (isQIDI) {
             if (!formattedHost.Lower().ends_with("10088"))
                 formattedHost = wxString::Format("%s:10088", formattedHost);
         }
@@ -581,8 +571,7 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
         UnSelectedButton();
         if (isValidIPAddress)
             AddButton(
-                printer_name, host, model_id, fullname,
-                true, cfg_t);
+                printer_name, host,model_id, fullname, true, (host_type == htMoonraker), cfg_t);
         load_url(formattedHost);
         UpdateLayout();
         Refresh();

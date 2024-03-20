@@ -263,6 +263,7 @@ public:
                     const wxString &                           machine_type,
                     const wxString &                           fullname,
                     bool                                       isSelected,
+                                          bool                isQIDI,
                     DynamicPrintConfig *                       cfg_t);
     void                        DeleteButton();
     void                        PauseButton();
