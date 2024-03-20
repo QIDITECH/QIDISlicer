@@ -257,11 +257,11 @@ public:
     //B45
     //void SendRecentList(int images);
     void SetButtons(std::vector<MachineListButton *> buttons);
+    //B55
     void  AddButton(const wxString &                           device_name,
                     const wxString &                           ip,
                     const wxString &                           machine_type,
                     const wxString &                           fullname,
-                    const std::function<void(wxMouseEvent &)> &handler,
                     bool                                       isSelected,
                     DynamicPrintConfig *                       cfg_t);
     void                        DeleteButton();

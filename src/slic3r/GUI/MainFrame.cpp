@@ -59,6 +59,8 @@
 #include <regex>
 #include <wx/regex.h>
 
+//B55
+#include "../Utils/PrintHost.hpp"
 
 namespace Slic3r {
 namespace GUI {
@@ -2147,16 +2149,6 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                     if (isValidIPAddress) {
                         m_printer_view->AddButton(
                             printer_name, host, (data->model_id), (data->fullname),
-                            [host, this](wxMouseEvent &event) {
-                                //B55
-                                wxString formattedHost = host;
-                                 //wxString formattedHost = wxString::Format("http://%s", host);
-                                if (!host.Lower().starts_with("http"))
-                                     formattedHost = wxString::Format("http://%s", host);
-                                 //if (!formattedHost.Lower().ends_with("10088"))
-                                 //    formattedHost = wxString::Format("%s:10088", formattedHost);
-                                this->m_printer_view->load_url(formattedHost);
-                            },
                             (data->selected), cfg_t);
                     }
                 }
@@ -2177,14 +2169,18 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 if (host.empty()) {
                     tem_host = "";
                     host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
-                }
+                } else {
                 //B55
-                else {
+                    const auto opt           = cfg->option<ConfigOptionEnum<PrintHostType>>("host_type");
+                    const auto host_type     = opt != nullptr ? opt->value : htOctoPrint;
                     if (!host.Lower().starts_with("http"))
                         host = wxString::Format("http://%s", host);
-                    // if (!host.Lower().ends_with("10088"))
-                    //     host = wxString::Format("%s:10088", host);
+                    if (host_type == htMoonraker) {
+                        if (!host.Lower().ends_with("10088"))
+                            host = wxString::Format("%s:10088", host);
+                    }
                 }
+                //B55
                 if (tem_host != host) {
                     //B45
                     m_printer_view->load_url(host);

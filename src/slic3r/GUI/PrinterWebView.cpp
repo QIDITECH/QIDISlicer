@@ -17,6 +17,8 @@
 #include <wx/regex.h>
 #include <boost/regex.hpp>
 #include <wx/graphics.h>
+//B55
+#include "../Utils/PrintHost.hpp"
 namespace pt = boost::property_tree;
 
 namespace Slic3r {
@@ -331,11 +333,11 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
 
 
 
+ //B55
 void PrinterWebView::AddButton(const wxString &                             device_name,
                                 const wxString &                            ip,
                                 const wxString &                            machine_type,
                                 const wxString &                            fullname,
-                                const std::function<void(wxMouseEvent &)> &handler,
                                 bool                                         isSelected,
                                 DynamicPrintConfig *                         cfg_t)
  {
@@ -356,16 +358,28 @@ void PrinterWebView::AddButton(const wxString &                             devi
     customButton->SetIPText(ip);
     customButton->SetStateText("standby");
     customButton->SetProgressText("(0%)");
-    customButton->SetClickHandler(handler);
-    //customButton->Bind(wxEVT_BUTTON, std::bind(&PrinterWebView::OnCustomButtonClick, this,handler));
-    customButton->Bind(wxEVT_BUTTON, [this, ip, customButton](wxCommandEvent &event) { 
-        wxString host = ip; 
+    const auto opt = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
+     const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
+     wxString   formattedHost = ip;
+     if (!formattedHost.Lower().starts_with("http"))
+        formattedHost = wxString::Format("http://%s", formattedHost);
+     if (host_type == htMoonraker) {
+        if (!formattedHost.Lower().ends_with("10088"))
+            formattedHost = wxString::Format("%s:10088", formattedHost);
+    }
+
+    customButton->Bind(wxEVT_BUTTON, [this, ip, customButton, cfg_t](wxCommandEvent &event) { 
         //B55
-        if (!host.Lower().starts_with("http"))
-            host = wxString::Format("http://%s", host);
-        // if (!host.Lower().ends_with("10088"))
-        //     host = wxString::Format("%s:10088", host);
-        load_url(host);
+        const auto opt           = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
+        const auto host_type     = opt != nullptr ? opt->value : htOctoPrint;
+        wxString   formattedHost = ip;
+        if (!formattedHost.Lower().starts_with("http"))
+            formattedHost = wxString::Format("http://%s", formattedHost);
+        if (host_type == htMoonraker) {
+            if (!formattedHost.Lower().ends_with("10088"))
+                formattedHost = wxString::Format("%s:10088", formattedHost);
+        }
+        load_url(formattedHost);
         customButton->ResumeStatusThread();
     });
     #if defined(__WIN32__) || defined(__WXMAC__)
@@ -391,7 +405,6 @@ void PrinterWebView::AddButton(const wxString &                             devi
  //B45
  void PrinterWebView::PauseButton()
  {
-     //BOOST_LOG_TRIVIAL(error) << " Pause";
 
      if (m_buttons.empty()) {
          BOOST_LOG_TRIVIAL(info) << " empty";
@@ -404,7 +417,6 @@ void PrinterWebView::AddButton(const wxString &                             devi
  //B45
  void PrinterWebView::ResumeButton()
  {
-     //BOOST_LOG_TRIVIAL(error) << " Resume";
 
      if (m_buttons.empty()) {
          BOOST_LOG_TRIVIAL(info) << " empty";
@@ -418,7 +430,6 @@ void PrinterWebView::AddButton(const wxString &                             devi
   //B45
  void PrinterWebView::StopAllThread()
  {
-     // BOOST_LOG_TRIVIAL(error) << " Stop";
 
      if (m_buttons.empty()) {
          BOOST_LOG_TRIVIAL(info) << " empty";
@@ -432,7 +443,6 @@ void PrinterWebView::AddButton(const wxString &                             devi
   //B45
  void PrinterWebView::UnSelectedButton()
  {
-     // BOOST_LOG_TRIVIAL(error) << " Resume";
 
      if (m_buttons.empty()) {
          BOOST_LOG_TRIVIAL(info) << " empty";
@@ -529,6 +539,7 @@ void PrinterWebView::OnRightButtonClick(wxCommandEvent &event)
     Refresh();
 }
 
+//B55
 void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
 {
     PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString);
@@ -541,13 +552,6 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
         std::string   printer_name  = printer.name;
         wxString      host          = printer.config.opt_string("print_host");
 
-        //B55
-        wxString formattedHost = host;
-        // wxString formattedHost = wxString::Format("http://%s", host);
-        if (!host.Lower().starts_with("http"))
-            wxString formattedHost = wxString::Format("http://%s", host);
-        // if (!formattedHost.Lower().ends_with("10088"))
-        //     formattedHost = wxString::Format("%s:10088", formattedHost);
 
         std::string fullname    = preset_bundle.physical_printers.get_selected_full_printer_name();
         std::string preset_name = printer.get_preset_name(fullname);
@@ -565,14 +569,19 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
         bool                isValidIPAddress = true;
         DynamicPrintConfig *cfg_t            = &(printer.config);
 
+        const auto          opt              = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
+        const auto          host_type        = opt != nullptr ? opt->value : htOctoPrint;
+        wxString            formattedHost    = host;
+        if (!formattedHost.Lower().starts_with("http"))
+            formattedHost = wxString::Format("http://%s", formattedHost);
+        if (host_type == htMoonraker) {
+            if (!formattedHost.Lower().ends_with("10088"))
+                formattedHost = wxString::Format("%s:10088", formattedHost);
+        }
         UnSelectedButton();
         if (isValidIPAddress)
             AddButton(
                 printer_name, host, model_id, fullname,
-                [formattedHost, this](wxMouseEvent &event) {
-                    wxString host = formattedHost;
-                    load_url(host);
-                },
                 true, cfg_t);
         load_url(formattedHost);
         UpdateLayout();
@@ -765,8 +774,10 @@ void PrinterWebView::load_url(wxString& url)
     m_browser->LoadURL(url);
 
     //B55
+    if (url.Lower().starts_with("http"))
     url.Remove(0, 7);
-    //url.Remove(url.length() - 6);
+    if (url.Lower().ends_with("10088"))
+        url.Remove(url.length() - 6);
     for (MachineListButton *button : m_buttons) {
         if (url == (button->getIPLabel()))
             button->SetSelect(true);

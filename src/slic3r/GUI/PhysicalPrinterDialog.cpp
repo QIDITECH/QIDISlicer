@@ -747,14 +747,6 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
         Field *    printhost_field = m_optgroup->get_field("print_host");
         text_ctrl *printhost_win   = printhost_field ? dynamic_cast<text_ctrl *>(printhost_field->getWindow()) : nullptr;
         wxString temp_host = printhost_win->GetValue();
-        //B55
-        wxString formattedHost = temp_host;
- /*       if (!temp_host.Lower().starts_with("http"))
-            wxString formattedHost = wxString::Format("http://%s", temp_host);*/
-        if (!formattedHost.Lower().ends_with("10088"))
-            formattedHost = wxString::Format("%s:10088", formattedHost);
-        m_optgroup->set_value("print_host", formattedHost, true);
-        m_optgroup->get_field("print_host")->field_changed();
     }
     if (opt->value == htQIDIConnect) {
         if (printhost_win && printhost_win->GetValue() != L"https://connect.qidi3d.com"){
