@@ -290,7 +290,7 @@ private:
                       // B11
                       _L("is based on Slic3r by Alessandro Ranellucci and the RepRap community.") + "\n";
                 //+
-                // _L("Developed by QIDI Research.") + "\n\n" +
+                // _L("Developed by QIDI Technology.") + "\n\n" +
                 // title + " " + _L("is licensed under the") + " " + _L("GNU Affero General Public License, version 3") + ".\n\n" +
                 // _L("Contributions by Vojtech Bubnik, Enrico Turri, Oleksandra Iushchenko, Tamas Meszaros, Lukas Matena, Vojtech Kral, David Kocik and numerous others.") + "\n\n" +
                 // _L("Artwork model by Creative Tools");
@@ -3083,7 +3083,7 @@ int GUI_App::extruders_edited_cnt() const
 
 wxString GUI_App::current_language_code_safe() const
 {
-	// Translate the language code to a code, for which QIDI Research maintains translations.
+	// Translate the language code to a code, for which QIDI Technology maintains translations.
 	const std::map<wxString, wxString> mapping {
 		{ "cs", 	"cs_CZ", },
 		{ "sk", 	"cs_CZ", },

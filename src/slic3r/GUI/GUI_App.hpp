@@ -295,7 +295,7 @@ public:
     void            load_current_presets(bool check_printer_presets = true);
 
     wxString        current_language_code() const { return m_wxLocale->GetCanonicalName(); }
-	// Translate the language code to a code, for which QIDI Research maintains translations. Defaults to "en_US".
+	// Translate the language code to a code, for which QIDI Technology maintains translations. Defaults to "en_US".
     wxString 		current_language_code_safe() const;
     bool            is_localized() const { return m_wxLocale->GetLocale() != "English"; }
 

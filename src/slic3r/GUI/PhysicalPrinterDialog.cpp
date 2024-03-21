@@ -504,7 +504,7 @@ void PhysicalPrinterDialog::update(bool printer_change)
         // Hide Browse and Test buttons for Connect
         if (opt->value == htQIDIConnect) {
             m_printhost_browse_btn->Hide();
-            // hide show hostname and PrusaConnect address
+            // hide show hostname and QIDIConnect address
             Field* printhost_field = m_optgroup->get_field("print_host");
             text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
             if (!m_opened_as_connect && printhost_win && m_last_host_type != htQIDIConnect){
@@ -513,7 +513,7 @@ void PhysicalPrinterDialog::update(bool printer_change)
                 }
         } else {
             m_printhost_browse_btn->Show();
-            // hide PrusaConnect address and show hostname
+            // hide QIDIConnect address and show hostname
             Field* printhost_field = m_optgroup->get_field("print_host");
             text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
             if (!m_opened_as_connect && printhost_win && m_last_host_type == htQIDIConnect) {
@@ -579,13 +579,13 @@ void PhysicalPrinterDialog::update_host_type(bool printer_change)
                 );
     };
 
-    // set all_presets_are_prusalink_supported
+    // set all_presets_are_qidilink_supported
     for (PresetForPrinter* prstft : m_presets) {
         std::string preset_name = prstft->get_preset_name();
         if (Preset* preset = wxGetApp().preset_bundle->printers.find_preset(preset_name)) {
             std::string model_id = preset->config.opt_string("printer_model");            
             if (preset->vendor) {
-                if (preset->vendor->name == "QIDI Research") {
+                if (preset->vendor->name == "QIDI Technology") {
                     const std::vector<VendorProfile::PrinterModel>& models = preset->vendor->models;
                     auto it = std::find_if(models.begin(), models.end(),
                         [model_id](const VendorProfile::PrinterModel& model) { return model.id == model_id; });
@@ -609,11 +609,11 @@ void PhysicalPrinterDialog::update_host_type(bool printer_change)
             break;
         }
         std::string model_id = preset->config.opt_string("printer_model");
-        if (preset->vendor && preset->vendor->name != "QIDI Research") {
+        if (preset->vendor && preset->vendor->name != "QIDI Technology") {
             connect.supported = false;
             break;
         }
-        if (preset->vendor && preset->vendor->name != "QIDI Research") {
+        if (preset->vendor && preset->vendor->name != "QIDI Technology") {
             connect.supported = false;
             break;
         }

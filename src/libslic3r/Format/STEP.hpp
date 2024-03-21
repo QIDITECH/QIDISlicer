@@ -1,6 +1,5 @@
 // Original implementation of STEP format import created by Bambulab.
 // https://github.com/bambulab/BambuStudio
-// Forked off commit 1555904, modified by QIDI Research.
 
 #ifndef slic3r_Format_STEP_hpp_
 #define slic3r_Format_STEP_hpp_
