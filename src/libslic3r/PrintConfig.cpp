@@ -3652,8 +3652,6 @@ void PrintConfigDef::init_fff_params()
         "deretract_speed", "retract_restart_extra", "retract_before_travel", "retract_length_toolchange", "retract_restart_extra_toolchange",
         //w15
         "wipe_distance",
-        //B34
-        "filament_diameter",
         "extrusion_multiplier",
         // bools
         "retract_layer_change", "wipe", "travel_lift_before_obstacle", "travel_ramping_lift",
@@ -3704,8 +3702,6 @@ void PrintConfigDef::init_extruder_option_keys()
         "retract_before_wipe", "retract_restart_extra", "retract_before_travel", "wipe",
         "travel_slope", "travel_max_lift", "travel_ramping_lift", "travel_lift_before_obstacle",
         "retract_layer_change", "retract_length_toolchange", "retract_restart_extra_toolchange", "extruder_colour",
-        //B34
-        "filament_diameter",
         "extrusion_multiplier",
         "default_filament_profile",
         //w15
@@ -3718,8 +3714,6 @@ void PrintConfigDef::init_extruder_option_keys()
         "retract_before_wipe",
         "retract_layer_change",
         "retract_length",
-        //B34
-        // "filament_diameter",
         "extrusion_multiplier",
         "retract_length_toolchange",
         "retract_lift",

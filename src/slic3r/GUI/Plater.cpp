@@ -5585,13 +5585,20 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
                                                             print_config->get_abs_value("extrusion_width", pa_layer_height) :
                                                             print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height);
     double       pa_travel_speed = print_config->get_abs_value("first_layer_travel_speed") * 60;
-    double       retract_length                        = double(printer_config->opt_float("retract_length", 0));
-    double       retract_speed                         = double(printer_config->opt_float("retract_speed", 0)) * 60;
+    //B58
+    double retract_length = (filament_config->option("filament_retract_length")->is_nil()) ?
+                                double(printer_config->opt_float("retract_length", 0)) :
+                                double(filament_config->opt_float("filament_retract_length", 0));
+    double retract_speed  = (filament_config->option("filament_retract_speed")->is_nil()) ?
+                                double(printer_config->opt_float("retract_speed", 0)) * 60 :
+                                double(filament_config->opt_float("filament_retract_speed", 0)) * 60;
 
-    double       filament_diameter = double(printer_config->opt_float("filament_diameter", 0));
+    //B58
+    double       filament_diameter = double(filament_config->opt_float("filament_diameter", 0));
     const Flow   line_flow         = Flow(pa_line_width, pa_layer_height, nozzle_diameter);
     const double filament_area     = M_PI * std::pow(filament_diameter / 2, 2);
-    const double print_flow_ratio  = double(printer_config->opt_float("extrusion_multiplier", 0));
+    //B58
+    const double print_flow_ratio  = double(filament_config->opt_float("extrusion_multiplier", 0));
 
     const double e_per_mm = line_flow.mm3_per_mm() / filament_area * print_flow_ratio;
 
@@ -5672,6 +5679,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     DynamicPrintConfig  new_config;
     DynamicPrintConfig *printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     DynamicPrintConfig *print_config = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
+    DynamicPrintConfig *filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
 
     double pa_travel_speed                       = print_config->get_abs_value("travel_speed") * 60;
 
@@ -5682,10 +5690,12 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
                                 nozzle_diameter * 1.125 :
                                 print_config->get_abs_value("extrusion_width", pa_layer_height) :
                                 print_config->get_abs_value("external_perimeter_extrusion_width", pa_layer_height);
-    double       filament_diameter = double(printer_config->opt_float("filament_diameter", 0));
+    //B58
+    double       filament_diameter = double(filament_config->opt_float("filament_diameter", 0));
     const Flow   line_flow         = Flow(pa_line_width, pa_layer_height, nozzle_diameter);
     const double filament_area     = M_PI * std::pow(filament_diameter / 2, 2);
-    const double print_flow_ratio  = double(printer_config->opt_float("extrusion_multiplier", 0));
+    //B58
+    const double print_flow_ratio                = double(filament_config->opt_float("extrusion_multiplier", 0));
     const double e_per_mm = line_flow.mm3_per_mm() / filament_area * print_flow_ratio;
     const double external_perimeter_acceleration = print_config->get_abs_value("external_perimeter_acceleration");
 
@@ -5705,9 +5715,16 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     const double speed_fast                            = print_config->get_abs_value("external_perimeter_speed") * 60;
     const double speed_first_layer                     = print_config->get_abs_value("first_layer_speed", speed_perimeter) * 60;
 
-    double retract_lift   = double(printer_config->opt_float("retract_lift", 0));
-    double retract_length = double(printer_config->opt_float("retract_length", 0));
-    double retract_speed  = double(printer_config->opt_float("retract_speed", 0)) * 60;
+    //B58
+    double retract_length = (filament_config->option("filament_retract_length")->is_nil()) ?
+                                double(printer_config->opt_float("retract_length", 0)) :
+                                double(filament_config->opt_float("filament_retract_length", 0));
+    double retract_speed  = (filament_config->option("filament_retract_speed")->is_nil()) ?
+                                double(printer_config->opt_float("retract_speed", 0)) * 60 :
+                                double(filament_config->opt_float("filament_retract_speed", 0)) * 60;
+    double retract_lift   = (filament_config->option("filament_retract_lift")->is_nil()) ?
+                                double(printer_config->opt_float("retract_lift", 0)) :
+                                double(filament_config->opt_float("filament_retract_lift", 0));
 
     // Position aided model
     select_all();
