@@ -291,7 +291,6 @@ void ComboBox::mouseDown(wxMouseEvent &event)
 
 void ComboBox::mouseWheelMoved(wxMouseEvent &event)
 {
-    event.Skip();
     if (drop_down) return;
     auto delta = ((event.GetWheelRotation() < 0) == event.IsWheelInverted()) ? -1 : 1;
     unsigned int n = GetSelection() + delta;
@@ -305,15 +304,12 @@ void ComboBox::keyDown(wxKeyEvent& event)
 {
     int key_code = event.GetKeyCode();
     switch (key_code) {
-        case WXK_RETURN:
+        case WXK_RETURN: {
             if (drop_down) {
                 drop.DismissAndNotify();
-                wxCommandEvent e(wxEVT_COMBOBOX);
-                e.SetEventObject(this);
-                e.SetId(GetId());
-                e.SetInt(GetSelection());
-                GetEventHandler()->ProcessEvent(e);
-            } else if (drop.HasDismissLongTime()) {
+                sendComboBoxEvent();
+            }
+            else if (drop.HasDismissLongTime()) {
                 drop.autoPosition();
                 drop_down = true;
                 drop.Popup();
@@ -321,14 +317,19 @@ void ComboBox::keyDown(wxKeyEvent& event)
                 GetEventHandler()->ProcessEvent(e);
             }
             break;
+        }
         case WXK_UP: {
             if (GetSelection() > 0)
                 SetSelection(GetSelection() - 1);
+            if (!drop.IsShown())
+                sendComboBoxEvent();
             break;
         }
         case WXK_DOWN: {
             if (GetSelection() + 1 < int(texts.size()))
                 SetSelection(GetSelection() + 1);
+            if (!drop.IsShown())
+                sendComboBoxEvent();
             break;
         }
         case WXK_LEFT: {

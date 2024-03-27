@@ -642,7 +642,7 @@ void Preview::update_layers_slider_mode()
                         if ((volume->config.has("extruder") && 
                             volume->config.option("extruder")->getInt() != 0 && // extruder isn't default
                             volume->config.option("extruder")->getInt() != extruder) ||
-                            !volume->mmu_segmentation_facets.empty())
+                            !volume->mm_segmentation_facets.empty())
                             return false;
 
                     for (const auto& range : object->layer_config_ranges)
@@ -841,7 +841,7 @@ void Preview::load_print_as_fff(bool keep_z_range)
                 wxGetApp().plater()->model().custom_gcode_per_print_z.gcodes :
                 m_canvas->get_custom_gcode_per_print_z();
             const bool contains_color_gcodes = std::any_of(std::begin(gcodes), std::end(gcodes),
-                [] (auto const& item) { return item.type == CustomGCode::Type::ColorChange; });
+                [](auto const& item) { return item.type == CustomGCode::Type::ColorChange || item.type == CustomGCode::Type::ToolChange; });
             const GCodeViewer::EViewType choice = contains_color_gcodes ?
                 GCodeViewer::EViewType::ColorPrint :
                 (number_extruders > 1) ? GCodeViewer::EViewType::Tool : GCodeViewer::EViewType::FeatureType;

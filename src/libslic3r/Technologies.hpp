@@ -49,8 +49,6 @@
 #define ENABLE_OPENGL_ES 0
 // Enable OpenGL core profile context (tested against Mesa 20.1.8 on Windows)
 #define ENABLE_GL_CORE_PROFILE (1 && !ENABLE_OPENGL_ES)
-// Enable OpenGL debug messages using debug context
-#define ENABLE_OPENGL_DEBUG_OPTION (1 && ENABLE_GL_CORE_PROFILE)
 
 // Enable imgui dialog which allows to set the parameters used to export binarized gcode
 #define ENABLE_BINARIZED_GCODE_DEBUG_WINDOW 0

@@ -564,7 +564,7 @@ wxString file_wildcards(FileType file_type, const std::string &custom_extension)
     return file_wildcards(file_wildcards_by_type[file_type], custom_extension);
 }
 
-wxString sla_wildcards(const char *formatid)
+wxString sla_wildcards(const char *formatid, const std::string& custom_extension)
 {
     const ArchiveEntry *entry = get_archive_entry(formatid);
     wxString ret;
@@ -584,11 +584,11 @@ wxString sla_wildcards(const char *formatid)
             wc.file_extensions.emplace_back(ext);
         }
 
-        ret = file_wildcards(wc, {});
+        ret = file_wildcards(wc, custom_extension);
     }
 
     if (ret.empty())
-        ret = file_wildcards(FT_SL1);
+        ret = file_wildcards(FT_SL1, custom_extension);
 
     return ret;
 }
@@ -886,12 +886,8 @@ std::string GUI_App::get_gl_info(bool for_github)
 wxGLContext* GUI_App::init_glcontext(wxGLCanvas& canvas)
 {
 #if ENABLE_GL_CORE_PROFILE
-#if ENABLE_OPENGL_DEBUG_OPTION
     return m_opengl_mgr.init_glcontext(canvas, init_params != nullptr ? init_params->opengl_version : std::make_pair(0, 0),
-        init_params != nullptr ? init_params->opengl_debug : false);
-#else
-    return m_opengl_mgr.init_glcontext(canvas, init_params != nullptr ? init_params->opengl_version : std::make_pair(0, 0));
-#endif // ENABLE_OPENGL_DEBUG_OPTION
+        init_params != nullptr ? init_params->opengl_compatibiity_profile : false, init_params != nullptr ? init_params->opengl_debug : false);
 #else
     return m_opengl_mgr.init_glcontext(canvas);
 #endif // ENABLE_GL_CORE_PROFILE
@@ -2058,7 +2054,7 @@ void GUI_App::import_model(wxWindow *parent, wxArrayString& input_files) const
 {
     input_files.Clear();
     wxFileDialog dialog(parent ? parent : GetTopWindow(),
-        _L("Choose one or more files (STL/3MF/STEP/OBJ/AMF/QIDI):"),
+        _L("Choose one or more files (STL/3MF/STEP/OBJ/AMF/SVG):"),
         from_u8(app_config->get_last_dir()), "",
         file_wildcards(FT_MODEL), wxFD_OPEN | wxFD_MULTIPLE | wxFD_FILE_MUST_EXIST);
 

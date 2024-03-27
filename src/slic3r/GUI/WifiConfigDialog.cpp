@@ -29,6 +29,19 @@ WifiConfigDialog::WifiConfigDialog(wxWindow* parent, std::string& file_path, Rem
      , out_file_path(file_path)
      , m_removable_manager(removable_manager)
 {
+    // Propagation of error in wifi scanner construtor
+    if (!m_wifi_scanner->is_init()) {
+        // TRN Error dialog of configuration -> wifi configuration file 
+        wxString msg = format_wxstr(L"%1%\n\n%2%", _L("Failed to scan wireless networks. Please fill SSID manually."),
+#ifdef _WIN32
+            // TRN Windows specific second line of error dialog of configuration -> wifi configuration file 
+            _L("Library wlanapi.dll was not loaded.")
+#else
+            ""
+#endif // _WIN32
+            );
+        show_error(this, msg);
+    }
     wxPanel* panel = new wxPanel(this);
     wxBoxSizer* vsizer = new wxBoxSizer(wxVERTICAL);
     panel->SetSizer(vsizer);
@@ -188,11 +201,14 @@ void WifiConfigDialog::on_rescan_networks(wxCommandEvent& e)
 void WifiConfigDialog::rescan_networks(bool select)
 {
     assert(m_ssid_combo && m_wifi_scanner);
+    // Do not do anything if scanner is in faulty state (which should has been propageted in constructor call)
+    if (!m_wifi_scanner->is_init())
+        return;
     m_wifi_scanner->scan();
     std::string current = m_wifi_scanner->get_current_ssid();
     const auto& map = m_wifi_scanner->get_map();
     m_ssid_combo->Clear();
-    for (const auto pair : map) {
+    for (const auto &pair : map) {
         m_ssid_combo->Append(pair.first);
         // select ssid of current network (if connected)
         if (current == pair.first)

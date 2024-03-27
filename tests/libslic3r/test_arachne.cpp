@@ -478,7 +478,7 @@ TEST_CASE("Arachne - #8849 - Missing part of model", "[ArachneMissingPart8849]")
     export_perimeters_to_svg(debug_out_path("arachne-missing-part-8849.svg"), polygons, perimeters, union_ex(wall_tool_paths.getInnerContour()));
 #endif
 
-    int64_t total_extrusion_length = 0;
+    [[maybe_unused]] int64_t total_extrusion_length = 0;
     for (Arachne::VariableWidthLines &perimeter : perimeters)
         for (Arachne::ExtrusionLine &extrusion_line : perimeter)
             total_extrusion_length += extrusion_line.getLength();

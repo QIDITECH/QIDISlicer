@@ -1094,7 +1094,7 @@ static wxString get_string_value(std::string opt_key, const DynamicPrintConfig& 
 
     switch (opt->type) {
     case coInt:
-        return from_u8((boost::format("%1%") % config.opt_int(opt_key)).str());
+        return from_u8((boost::format("%1%") % config.option(opt_key)->getInt()).str());
     case coInts: {
         if (is_nullable) {
             auto values = config.opt<ConfigOptionIntsNullable>(opt_key);
@@ -1139,7 +1139,7 @@ static wxString get_string_value(std::string opt_key, const DynamicPrintConfig& 
         return _L("Undef");
     }
     case coFloat:
-        return double_to_string(config.opt_float(opt_key));
+        return double_to_string(config.option(opt_key)->getFloat());
     case coFloats: {
         if (is_nullable) {
             auto values = config.opt<ConfigOptionFloatsNullable>(opt_key);
@@ -1294,7 +1294,7 @@ void UnsavedChangesDialog::update_tree(Preset::Type type, PresetCollection* pres
         m_tree->model->AddPreset(type, from_u8(presets->get_edited_preset().name), old_pt, from_u8(new_selected_preset));
 
         // Collect dirty options.
-        const bool deep_compare = type != Preset::TYPE_FILAMENT;
+        const bool deep_compare = type != Preset::TYPE_FILAMENT && type != Preset::TYPE_SLA_MATERIAL;
         auto dirty_options = presets->current_dirty_options(deep_compare);
 
         // process changes of extruders count
@@ -1631,7 +1631,7 @@ void DiffPresetDialog::create_edit_sizer()
 {
     // Add check box for the edit mode
     m_use_for_transfer = new wxCheckBox(this, wxID_ANY, _L("Transfer values from left to right"));
-    m_use_for_transfer->SetToolTip(_L("If enabled, this dialog can be used for transver selected values from left to right preset."));
+    m_use_for_transfer->SetToolTip(_L("If checked, this dialog can be used for transferring selected values from the preset on the left to the preset on the right."));
     m_use_for_transfer->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) {
         bool use = m_use_for_transfer->GetValue();
         m_tree->GetColumn(DiffModel::colToggle)->SetHidden(!use);

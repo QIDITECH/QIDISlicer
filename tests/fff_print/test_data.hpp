@@ -63,11 +63,11 @@ template <typename T>
 bool _equiv(const T& a, const T& b, double epsilon) { return abs(a - b) < epsilon; }
 
 Slic3r::Model model(const std::string& model_name, TriangleMesh&& _mesh);
-void init_print(std::vector<TriangleMesh> 		  &&meshes, Slic3r::Print &print, Slic3r::Model& model, const DynamicPrintConfig &config_in, bool comments = false);
-void init_print(std::initializer_list<TestMesh> 	meshes, Slic3r::Print &print, Slic3r::Model& model, const Slic3r::DynamicPrintConfig &config_in = Slic3r::DynamicPrintConfig::full_print_config(), bool comments = false);
-void init_print(std::initializer_list<TriangleMesh> meshes, Slic3r::Print &print, Slic3r::Model& model, const Slic3r::DynamicPrintConfig &config_in = Slic3r::DynamicPrintConfig::full_print_config(), bool comments = false);
-void init_print(std::initializer_list<TestMesh> 	meshes, Slic3r::Print &print, Slic3r::Model& model, std::initializer_list<Slic3r::ConfigBase::SetDeserializeItem> config_items, bool comments = false);
-void init_print(std::initializer_list<TriangleMesh> meshes, Slic3r::Print &print, Slic3r::Model& model, std::initializer_list<Slic3r::ConfigBase::SetDeserializeItem> config_items, bool comments = false);
+void init_print(std::vector<TriangleMesh> 		  &&meshes, Slic3r::Print &print, Slic3r::Model& model, const DynamicPrintConfig &config_in, bool comments = false, unsigned duplicate_count = 1);
+void init_print(std::initializer_list<TestMesh> 	meshes, Slic3r::Print &print, Slic3r::Model& model, const Slic3r::DynamicPrintConfig &config_in = Slic3r::DynamicPrintConfig::full_print_config(), bool comments = false, unsigned duplicate_count = 1);
+void init_print(std::initializer_list<TriangleMesh> meshes, Slic3r::Print &print, Slic3r::Model& model, const Slic3r::DynamicPrintConfig &config_in = Slic3r::DynamicPrintConfig::full_print_config(), bool comments = false, unsigned duplicate = 1);
+void init_print(std::initializer_list<TestMesh> 	meshes, Slic3r::Print &print, Slic3r::Model& model, std::initializer_list<Slic3r::ConfigBase::SetDeserializeItem> config_items, bool comments = false, unsigned duplicate = 1);
+void init_print(std::initializer_list<TriangleMesh> meshes, Slic3r::Print &print, Slic3r::Model& model, std::initializer_list<Slic3r::ConfigBase::SetDeserializeItem> config_items, bool comments = false, unsigned duplicate = 1);
 
 void init_and_process_print(std::initializer_list<TestMesh> 	meshes, Slic3r::Print &print, const DynamicPrintConfig& config, bool comments = false);
 void init_and_process_print(std::initializer_list<TriangleMesh> meshes, Slic3r::Print &print, const DynamicPrintConfig& config, bool comments = false);

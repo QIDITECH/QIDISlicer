@@ -210,8 +210,8 @@ public:
     {
             return EmbossStyle::operator==(other) && 
                 projection == other.projection &&
-                distance == other.distance && 
-                angle == other.angle;
+                is_approx(distance, other.distance) &&
+                is_approx(angle, other.angle);
         }
 
         // cache for view font name with maximal width in imgui

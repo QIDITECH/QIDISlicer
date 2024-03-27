@@ -697,11 +697,12 @@ void gcode_spread_points(
 		*/
 		float area_total     = 0;
 		float volume_total   = 0;
+		size_t n_cells     = 0;
+
+#if 0
 		float volume_excess  = 0;
 		float volume_deficit = 0;
-		size_t n_cells = 0;
 		float area_circle_total = 0; 
-#if 0
 		// The intermediate lines.
 		for (int j = row_first; j < row_last; ++ j) {
 			const std::pair<float, float> &span1 = spans[j];
@@ -755,7 +756,9 @@ void gcode_spread_points(
 				cell.volume  = acc[j][i];
 				cell.area    = mask[j][i];
 				assert(cell.area >= 0.f && cell.area <= 1.000001f);
+#if 0
 				area_circle_total += area;
+#endif
 				if (cell.area < area)
 					cell.area = area;
 				cell.fraction_covered = std::clamp((cell.area > 0) ? (area / cell.area) : 0, 0.f, 1.f);
@@ -765,10 +768,13 @@ void gcode_spread_points(
 				}
 				float cell_height = cell.volume / cell.area;
 				cell.excess_height = cell_height - height_target;
+#if 0
+                area_circle_total += area;
 				if (cell.excess_height > 0.f)
 					volume_excess  += cell.excess_height * cell.area * cell.fraction_covered;
 				else
 					volume_deficit -= cell.excess_height * cell.area * cell.fraction_covered;
+#endif
 				volume_total += cell.volume * cell.fraction_covered;
 				area_total   += cell.area * cell.fraction_covered;
 			}

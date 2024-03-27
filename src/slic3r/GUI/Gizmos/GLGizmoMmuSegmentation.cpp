@@ -512,7 +512,7 @@ void GLGizmoMmuSegmentation::update_model_object() const
         if (! mv->is_model_part())
             continue;
         ++idx;
-        updated |= mv->mmu_segmentation_facets.set(*m_triangle_selectors[idx].get());
+        updated |= mv->mm_segmentation_facets.set(*m_triangle_selectors[idx].get());
     }
 
     if (updated) {
@@ -542,7 +542,7 @@ void GLGizmoMmuSegmentation::init_model_triangle_selectors()
         size_t extruder_idx = get_extruder_color_idx(*mv, extruders_count);
         m_triangle_selectors.emplace_back(std::make_unique<TriangleSelectorMmGui>(*mesh, m_modified_extruders_colors, m_original_extruders_colors[extruder_idx]));
         // Reset of TriangleSelector is done inside TriangleSelectorMmGUI's constructor, so we don't need it to perform it again in deserialize().
-        m_triangle_selectors.back()->deserialize(mv->mmu_segmentation_facets.get_data(), false);
+        m_triangle_selectors.back()->deserialize(mv->mm_segmentation_facets.get_data(), false);
         m_triangle_selectors.back()->request_update_render_data();
     }
     m_original_volumes_extruder_idxs = get_extruder_id_for_volumes(*mo);

@@ -207,7 +207,7 @@ static void check_nfp(const std::string & outfile_prefix,
     auto orb_ex_offs_pos_r_ch = offset_ex(orb_ex_r_ch,  scaled<float>(EPSILON));
     auto orb_ex_offs_neg_r_ch = offset_ex(orb_ex_r_ch, -scaled<float>(EPSILON));
 
-    auto bedpoly_offs = offset_ex(bedpoly, SCALED_EPSILON);
+    auto bedpoly_offs = offset_ex(bedpoly, static_cast<float>(SCALED_EPSILON));
 
     auto check_at_nfppos = [&](const Point &pos) {
         ExPolygons orb_ex = orb_ex_r;

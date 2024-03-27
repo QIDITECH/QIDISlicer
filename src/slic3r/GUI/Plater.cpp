@@ -736,10 +736,35 @@ static wxRichToolTipPopup* get_rtt_popup(wxButton* btn)
     return nullptr;
 }
 
+// Help function to find and check if some combobox is dropped down and then dismiss it
+static bool found_and_dismiss_shown_dropdown(wxWindow* win)
+{
+    auto children = win->GetChildren(); 
+    if (children.IsEmpty()) {
+        if (auto dd = dynamic_cast<DropDown*>(win); dd && dd->IsShown()) {
+            dd->CallDismissAndNotify();
+            return true;
+        }
+    }
+
+    for (auto child : children) {
+        if (found_and_dismiss_shown_dropdown(child))
+            return true;
+    }
+    return false;
+}
 void Sidebar::priv::show_rich_tip(const wxString& tooltip, wxButton* btn)
 {   
     if (tooltip.IsEmpty())
         return;
+    // Currently state (propably wxWidgets issue) : 
+    // When second wxPopupTransientWindow is popped up, then first wxPopupTransientWindow doesn't receive EVT_DISMISS and stay on the top. 
+    // New comboboxes use wxPopupTransientWindow as DropDown now
+    // That is why DropDown stay on top, when we show rich tooltip for btn.
+    // (see https://github.com/prusa3d/PrusaSlicer/issues/11988)
+
+    // So, check the combo boxes and close them if necessary before showing the rich tip.
+    found_and_dismiss_shown_dropdown(scrolled);
     wxRichToolTip tip(tooltip, "");
     tip.SetIcon(wxICON_NONE);
     tip.SetTipKind(wxTipKind_BottomRight);
@@ -774,7 +799,7 @@ Sidebar::Sidebar(Plater *parent)
 {
     SetFont(wxGetApp().normal_font());
     p->scrolled = new wxScrolledWindow(this);
-//    p->scrolled->SetScrollbars(0, 100, 1, 2); // ys_DELETE_after_testing. pixelsPerUnitY = 100 from https://github.com/qidi3d/QIDISlicer/commit/8f019e5fa992eac2c9a1e84311c990a943f80b01, 
+//    p->scrolled->SetScrollbars(0, 100, 1, 2); // ys_DELETE_after_testing. pixelsPerUnitY = 100 from https://github.com/prusa3d/PrusaSlicer/commit/8f019e5fa992eac2c9a1e84311c990a943f80b01, 
     // but this cause the bad layout of the sidebar, when all infoboxes appear.
     // As a result we can see the empty block at the bottom of the sidebar
     // But if we set this value to 5, layout will be better
@@ -921,8 +946,7 @@ Sidebar::Sidebar(Plater *parent)
         int bmp_px_cnt = 32;
 #endif //__APPLE__
         ScalableBitmap bmp = ScalableBitmap(this, icon_name, bmp_px_cnt);
-        *btn = new ScalableButton(this, wxID_ANY, bmp, label, wxBU_EXACTFIT);
-        (*btn)->SetFont(wxGetApp().bold_font());
+        *btn = new ScalableButton(this, wxID_ANY, bmp, "", wxBU_EXACTFIT);
         wxGetApp().SetWindowVariantForButton((*btn));
 
 #ifdef _WIN32
@@ -940,10 +964,9 @@ Sidebar::Sidebar(Plater *parent)
         (*btn)->Hide();
     };
 
-    init_scalable_btn(&p->btn_send_gcode, "export_gcode", _L("Send to printer"), _L("Send to printer") + " " + GUI::shortkey_ctrl_prefix() + "Shift+G");
+    init_scalable_btn(&p->btn_send_gcode   , "export_gcode", _L("Send to printer") + " " +GUI::shortkey_ctrl_prefix() + "Shift+G");
 //    init_scalable_btn(&p->btn_eject_device, "eject_sd"       , _L("Remove device ") + GUI::shortkey_ctrl_prefix() + "T");
-    init_scalable_btn(&p->btn_export_gcode_removable, "export_to_sd", _L("Export"), _L("Export to SD card / Flash drive") + " " + GUI::shortkey_ctrl_prefix() + "U");
-//Y14
+	init_scalable_btn(&p->btn_export_gcode_removable, "export_to_sd", _L("Export to SD card / Flash drive") + " " + GUI::shortkey_ctrl_prefix() + "U");
     // regular buttons "Slice now" and "Export G-code"
 
 //    const int scaled_height = p->btn_eject_device->GetBitmapHeight() + 4;
@@ -2612,6 +2635,8 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                         config.apply(loaded_printer_technology == ptFFF ?
                             static_cast<const ConfigBase&>(FullPrintConfig::defaults()) :
                             static_cast<const ConfigBase&>(SLAFullPrintConfig::defaults()));
+                        // Set all the nullable values in defaults to nils.
+                        config.null_nullables();
                         // and place the loaded config over the base.
                         config += std::move(config_loaded);
                     }
@@ -2692,7 +2717,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                 if (imperial_units)
                     // Convert even if the object is big.
                     convert_from_imperial_units(model, false);
-                else if (model.looks_like_saved_in_meters()) {
+                else if (!type_3mf && model.looks_like_saved_in_meters()) {
                     auto convert_model_if = [](Model& model, bool condition) {
                         if (condition)
                             //FIXME up-scale only the small parts?
@@ -2714,7 +2739,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                     }
                     convert_model_if(model, answer_convert_from_meters == wxID_YES);
                 }
-                else if (model.looks_like_imperial_units()) {
+                else if (!type_3mf && model.looks_like_imperial_units()) {
                     auto convert_model_if = [convert_from_imperial_units](Model& model, bool condition) {
                         if (condition)
                             //FIXME up-scale only the small parts?
@@ -3698,7 +3723,7 @@ bool Plater::priv::replace_volume_with_stl(int object_idx, int volume_idx, const
         // We need to make sure that the painted data point to existing triangles.
         new_volume->supported_facets.assign(old_volume->supported_facets);
         new_volume->seam_facets.assign(old_volume->seam_facets);
-        new_volume->mmu_segmentation_facets.assign(old_volume->mmu_segmentation_facets);
+        new_volume->mm_segmentation_facets.assign(old_volume->mm_segmentation_facets);
     }
     std::swap(old_model_object->volumes[volume_idx], old_model_object->volumes.back());
     old_model_object->delete_volume(old_model_object->volumes.size() - 1);
@@ -6202,7 +6227,7 @@ void Plater::convert_gcode_to_ascii()
         if (res == EResult::InvalidMagicNumber) {
             in_file.close();
             out_file.close();
-            boost::filesystem::copy_file(input_path, output_path, boost::filesystem::copy_option::overwrite_if_exists);
+            boost::filesystem::copy_file(input_path, output_path, boost::filesystem::copy_options::overwrite_existing);
         }
         else if (res != EResult::Success) {
             MessageDialog msg_dlg(this, _L(std::string(translate_result(res))), _L("Error converting G-code file"), wxICON_INFORMATION | wxOK);
@@ -6281,7 +6306,7 @@ void Plater::convert_gcode_to_binary()
         if (res == EResult::AlreadyBinarized) {
             in_file.close();
             out_file.close();
-            boost::filesystem::copy_file(input_path, output_path, boost::filesystem::copy_option::overwrite_if_exists);
+            boost::filesystem::copy_file(input_path, output_path, boost::filesystem::copy_options::overwrite_existing);
         }
         else if (res != EResult::Success) {
             MessageDialog msg_dlg(this, _L(std::string(translate_result(res))), _L("Error converting G-code file"), wxICON_INFORMATION | wxOK);
@@ -6513,7 +6538,7 @@ bool Plater::preview_zip_archive(const boost::filesystem::path& archive_path)
                             std::replace(name.begin(), name.end(), '\\', '/');
                             // rename if file exists
                             std::string filename = path.filename().string();
-                            std::string extension = boost::filesystem::extension(path);
+                            std::string extension = path.extension().string();
                             std::string just_filename = filename.substr(0, filename.size() - extension.size());
                             std::string final_filename = just_filename;
 
@@ -7357,7 +7382,7 @@ void Plater::export_gcode(bool prefer_removable)
             start_dir,
             from_path(default_output_file.filename()),
             printer_technology() == ptFFF ? GUI::file_wildcards(FT_GCODE, ext) :
-                                            GUI::sla_wildcards(p->sla_print.printer_config().sla_archive_format.value.c_str()),
+                                            GUI::sla_wildcards(p->sla_print.printer_config().sla_archive_format.value.c_str(), ext),
             wxFD_SAVE | wxFD_OVERWRITE_PROMPT
         );
         if (dlg.ShowModal() == wxID_OK) {
@@ -8496,10 +8521,10 @@ void Plater::clear_before_change_mesh(int obj_idx, const std::string &notificati
     // may be different and they would make no sense.
     bool paint_removed = false;
     for (ModelVolume* mv : mo->volumes) {
-        paint_removed |= ! mv->supported_facets.empty() || ! mv->seam_facets.empty() || ! mv->mmu_segmentation_facets.empty();
+        paint_removed |= ! mv->supported_facets.empty() || ! mv->seam_facets.empty() || ! mv->mm_segmentation_facets.empty();
         mv->supported_facets.reset();
         mv->seam_facets.reset();
-        mv->mmu_segmentation_facets.reset();
+        mv->mm_segmentation_facets.reset();
     }
     if (paint_removed) {
         // snapshot_time is captured by copy so the lambda knows where to undo/redo to.

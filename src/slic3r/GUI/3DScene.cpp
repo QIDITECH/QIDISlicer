@@ -496,6 +496,14 @@ int GLVolumeCollection::load_wipe_tower_preview(
     if (height == 0.0f)
         height = 0.1f;
 
+    // Because the GLVolume is also used for arrangement, it must be safely larger
+    // than the actual extruded tower, otherwise the arranged tower ends up out of bed.
+    float offset = 0.3;
+    pos_x -= offset;
+    pos_y -= offset;
+    width += 2.f * offset;
+    depth += 2.f * offset;
+    brim_width += offset;
     static const float brim_height = 0.2f;
 //    const float scaled_brim_height = brim_height / height;
 

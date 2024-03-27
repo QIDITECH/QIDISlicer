@@ -499,7 +499,7 @@ void GalleryDialog::change_thumbnail()
         png_path.replace_extension("png");
 
         fs::path current = fs::path(into_u8(input_files.Item(0)));
-        fs::copy_file(current, png_path, fs::copy_option::overwrite_if_exists);
+        fs::copy_file(current, png_path, fs::copy_options::overwrite_existing);
     }
     catch (fs::filesystem_error const& e) {
         std::cerr << e.what() << '\n';

@@ -610,7 +610,15 @@ void SLAPrint::Steps::support_points(SLAPrintObject &po)
         // the density config value is in percents:
         config.density_relative = float(cfg.support_points_density_relative / 100.f);
         config.minimal_distance = float(cfg.support_points_minimal_distance);
+        switch (cfg.support_tree_type) {
+        case sla::SupportTreeType::Default:
+        case sla::SupportTreeType::Organic:
         config.head_diameter    = float(cfg.support_head_front_diameter);
+            break;
+        case sla::SupportTreeType::Branching:
+            config.head_diameter = float(cfg.branchingsupport_head_front_diameter);
+            break;
+        }
 
         // scaling for the sub operations
         double d = objectstep_scale * OBJ_STEP_LEVELS[slaposSupportPoints] / 100.0;

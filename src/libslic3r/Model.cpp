@@ -412,19 +412,23 @@ bool Model::looks_like_multipart_object() const
 {
     if (this->objects.size() <= 1)
         return false;
-    double zmin = std::numeric_limits<double>::max();
+    BoundingBoxf3 tbb;
     for (const ModelObject *obj : this->objects) {
         if (obj->volumes.size() > 1 || obj->config.keys().size() > 1)
             return false;
-        for (const ModelVolume *vol : obj->volumes) {
-            double zmin_this = vol->mesh().bounding_box().min(2);
-            if (zmin == std::numeric_limits<double>::max())
-                zmin = zmin_this;
-            else if (std::abs(zmin - zmin_this) > EPSILON)
-                // The volumes don't share zmin.
+        BoundingBoxf3 bb_this = obj->volumes[0]->mesh().bounding_box();
+
+        // FIXME: There is sadly the case when instances are empty (AMF files). The normalization of instances in that
+        // case is performed only after this function is called. For now (shortly before the 2.7.2 release, let's
+        // just do this non-invasive check. Reordering all the functions could break it much more.
+        BoundingBoxf3 tbb_this = (! obj->instances.empty() ? obj->instances[0]->transform_bounding_box(bb_this) : bb_this);
+
+        if (!tbb.defined)
+            tbb = tbb_this;
+        else if (tbb.intersects(tbb_this) || tbb.shares_boundary(tbb_this))
+            // The volumes has intersects bounding boxes or share some boundary
                 return true;
         }
-    }
     return false;
 }
 
@@ -1221,7 +1225,7 @@ void ModelObject::convert_units(ModelObjectPtrs& new_objects, ConversionType con
 
             vol->supported_facets.assign(volume->supported_facets);
             vol->seam_facets.assign(volume->seam_facets);
-            vol->mmu_segmentation_facets.assign(volume->mmu_segmentation_facets);
+            vol->mm_segmentation_facets.assign(volume->mm_segmentation_facets);
 
             // Perform conversion only if the target "imperial" state is different from the current one.
             // This check supports conversion of "mixed" set of volumes, each with different "imperial" state.
@@ -1333,7 +1337,7 @@ void ModelVolume::reset_extra_facets()
 {
     this->supported_facets.reset();
     this->seam_facets.reset();
-    this->mmu_segmentation_facets.reset();
+    this->mm_segmentation_facets.reset();
 }
 
 
@@ -1899,7 +1903,7 @@ void ModelVolume::assign_new_unique_ids_recursive()
     config.set_new_unique_id();
     supported_facets.set_new_unique_id();
     seam_facets.set_new_unique_id();
-    mmu_segmentation_facets.set_new_unique_id();
+    mm_segmentation_facets.set_new_unique_id();
 }
 
 void ModelVolume::rotate(double angle, Axis axis)
@@ -2208,7 +2212,7 @@ bool model_mmu_segmentation_data_changed(const ModelObject& mo, const ModelObjec
 {
     return model_property_changed(mo, mo_new, 
         [](const ModelVolumeType t) { return t == ModelVolumeType::MODEL_PART; }, 
-        [](const ModelVolume &mv_old, const ModelVolume &mv_new){ return mv_old.mmu_segmentation_facets.timestamp_matches(mv_new.mmu_segmentation_facets); });
+        [](const ModelVolume &mv_old, const ModelVolume &mv_new){ return mv_old.mm_segmentation_facets.timestamp_matches(mv_new.mm_segmentation_facets); });
 }
 
 bool model_has_parameter_modifiers_in_objects(const Model &model)

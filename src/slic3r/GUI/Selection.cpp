@@ -925,9 +925,9 @@ const std::pair<Vec3d, double> Selection::get_bounding_sphere() const
                 const TriangleMesh* hull = volume.convex_hull();
                 const indexed_triangle_set& its = (hull != nullptr) ?
                     hull->its : m_model->objects[volume.object_idx()]->volumes[volume.volume_idx()]->mesh().its;
-                const Transform3d& matrix = volume.world_matrix();
+                const Transform3f matrix = volume.world_matrix().cast<float>();
                 for (const Vec3f& v : its.vertices) {
-                    const Vec3d vv = matrix * v.cast<double>();
+                    const Vec3f vv = matrix * v;
                     points.push_back(Point(vv.x(), vv.y(), vv.z()));
                 }
             }
@@ -1340,6 +1340,7 @@ void Selection::scale_and_translate(const Vec3d& scale, const Vec3d& world_trans
         synchronize_unselected_volumes();
 #endif // !DISABLE_INSTANCES_SYNCH
 
+    if (m_mode == EMode::Instance)
     ensure_on_bed();
     set_bounding_boxes_dirty();
     wxGetApp().plater()->canvas3D()->requires_check_outside_state();

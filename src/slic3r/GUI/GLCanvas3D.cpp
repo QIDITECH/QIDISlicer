@@ -3189,7 +3189,10 @@ void GLCanvas3D::on_key(wxKeyEvent& evt)
                     // m_canvas->HandleAsNavigationKey(evt);   // XXX: Doesn't work in some cases / on Linux
                     post_event(SimpleEvent(EVT_GLCANVAS_TAB));
                 }
-                else if (keyCode == WXK_TAB && evt.ShiftDown() && ! wxGetApp().is_gcode_viewer()) {
+                else if (! wxGetApp().is_gcode_viewer() && keyCode == WXK_TAB &&
+                    // Use strong condition for modifiers state to avoid cases when Shift can be combined with other modifiers
+                    // (see https://github.com/prusa3d/PrusaSlicer/issues/7799)
+                    evt.GetModifiers() == wxMOD_SHIFT) {
                     // Collapse side-panel with Shift+Tab
                     post_event(SimpleEvent(EVT_GLCANVAS_COLLAPSE_SIDEBAR));
                 }
@@ -4915,6 +4918,7 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
 
     const ModelObjectPtrs &model_objects     = GUI::wxGetApp().model().objects;
     std::vector<ColorRGBA> extruders_colors  = get_extruders_colors();
+    const bool             is_enabled_painted_thumbnail = !model_objects.empty() && !extruders_colors.empty();
 //Y18 //B54
     if (thumbnail_params.transparent_background)
         glsafe(::glClearColor(0.0f, 0.0f, 0.0f, 0.0f));
@@ -4930,8 +4934,7 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
     for (GLVolume* vol : visible_volumes) {
         const int obj_idx = vol->object_idx();
         const int vol_idx = vol->volume_idx();
-        const bool render_as_painted = (obj_idx >= 0 && vol_idx >= 0) ?
-            !model_objects[obj_idx]->volumes[vol_idx]->mmu_segmentation_facets.empty() : false;
+        const bool render_as_painted = is_enabled_painted_thumbnail && obj_idx >= 0 && vol_idx >= 0 && !model_objects[obj_idx]->volumes[vol_idx]->mm_segmentation_facets.empty();
         GLShaderProgram* shader = wxGetApp().get_shader(render_as_painted ? "mm_gouraud" : "gouraud_light");
         if (shader == nullptr)
             continue;
@@ -4967,7 +4970,7 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
           const ModelVolume& model_volume = *model_objects[obj_idx]->volumes[vol_idx];
             const size_t extruder_idx = get_extruder_color_idx(model_volume, extruders_count);
             TriangleSelectorMmGui ts(model_volume.mesh(), extruders_colors, extruders_colors[extruder_idx]);
-            ts.deserialize(model_volume.mmu_segmentation_facets.get_data(), true);
+            ts.deserialize(model_volume.mm_segmentation_facets.get_data(), true);
             ts.request_update_render_data();
 
             ts.render(nullptr, model_matrix);
@@ -6860,14 +6863,22 @@ void GLCanvas3D::_load_print_toolpaths(const BuildVolume &build_volume)
             _3DScene::extrusionentity_to_verts(print->brim(), print_zs[i], Point(0, 0), init_data);
         _3DScene::extrusionentity_to_verts(print->skirt(), print_zs[i], Point(0, 0), init_data);
         // Ensure that no volume grows over the limits. If the volume is too large, allocate a new one.
-        if (init_data.vertices_size_bytes() > MAX_VERTEX_BUFFER_SIZE) {
+        if (init_data.vertices_size_bytes() >= MAX_VERTEX_BUFFER_SIZE) {
             volume->model.init_from(std::move(init_data));
-            GLVolume &vol = *volume;
-            volume = m_volumes.new_toolpath_volume(vol.color);
+            volume->is_outside = !contains(build_volume, volume->model);
+            volume = m_volumes.new_toolpath_volume(volume->color);
+            init_data = GLModel::Geometry();
         }
     }
+    init_data = GLModel::Geometry();
+    if (init_data.is_empty()) {
+        delete volume;
+        m_volumes.volumes.pop_back();
+    }
+    else {
     volume->model.init_from(std::move(init_data));
     volume->is_outside = !contains(build_volume, volume->model);
+}
 }
 
 void GLCanvas3D::_load_print_object_toolpaths(const PrintObject& print_object, const BuildVolume& build_volume, const std::vector<std::string>& str_tool_colors, const std::vector<CustomGCode::Item>& color_print_values)

@@ -149,8 +149,13 @@ void SliceConnection::print_info(const std::string &tag) const
         std::cout << "variance: " << variance.x() << " " << variance.y() << std::endl;
         std::cout << "covariance: " << covariance << std::endl;
     }
-Integrals::Integrals (const Polygons& polygons) {
-    for (const Polygon &polygon : polygons) {
+Integrals::Integrals(const Polygon &polygon)
+{
+    if (polygon.points.size() < 3) {
+        assert(false && "Polygon is expected to have non-zero area!");
+        *this = Integrals{};
+        return;
+    }
         Vec2f p0 = unscaled(polygon.first_point()).cast<float>();
         for (size_t i = 2; i < polygon.points.size(); i++) {
             Vec2f p1 = unscaled(polygon.points[i - 1]).cast<float>();
@@ -167,6 +172,44 @@ Integrals::Integrals (const Polygons& polygons) {
             this->xy += sign * second_moment_of_area_covariance;
         }
     }
+Integrals::Integrals(const Polygons &polygons)
+{
+    for (const Polygon &polygon : polygons) {
+        *this = *this + Integrals{polygon};
+    }
+}
+
+Integrals::Integrals(const Polylines& polylines, const std::vector<float>& widths) {
+    assert(polylines.size() == widths.size());
+    for (size_t i = 0; i < polylines.size(); ++i) {
+        Lines polyline{polylines[i].lines()};
+        float width{widths[i]};
+        for (const Line& line : polyline) {
+            Vec2f line_direction = unscaled(line.vector()).cast<float>();
+            Vec2f normal{line_direction.y(), -line_direction.x()};
+            normal.normalize();
+
+            Vec2f line_a = unscaled(line.a).cast<float>();
+            Vec2f line_b = unscaled(line.b).cast<float>();
+            Vec2crd a = scaled(Vec2f{line_a + normal * width/2});
+            Vec2crd b = scaled(Vec2f{line_b + normal * width/2});
+            Vec2crd c = scaled(Vec2f{line_b - normal * width/2});
+            Vec2crd d = scaled(Vec2f{line_a - normal * width/2});
+
+            const Polygon ractangle({a, b, c, d});
+            Integrals integrals{ractangle};
+            *this = *this + integrals;
+        }
+    }
+}
+
+Integrals::Integrals(float area, Vec2f x_i, Vec2f x_i_squared, float xy)
+    : area(area), x_i(std::move(x_i)), x_i_squared(std::move(x_i_squared)), xy(xy)
+{}
+
+Integrals operator+(const Integrals &a, const Integrals &b)
+{
+    return Integrals{a.area + b.area, a.x_i + b.x_i, a.x_i_squared + b.x_i_squared, a.xy + b.xy};
 }
 
 SliceConnection estimate_slice_connection(size_t slice_idx, const Layer *layer)
@@ -468,9 +511,40 @@ ObjectPart::ObjectPart(
             continue;
         }
 
-        const Polygons polygons{collection->polygons_covered_by_width()};
+        for (const ExtrusionEntity* entity: collection->flatten()) {
+            Polylines polylines;
+            std::vector<float> widths;
 
-        const Integrals integrals{polygons};
+            if (
+                const auto* path = dynamic_cast<const ExtrusionPath*>(entity);
+                path != nullptr
+            ) {
+                polylines.push_back(path->as_polyline());
+                widths.push_back(path->width());
+            } else if (
+                const auto* loop = dynamic_cast<const ExtrusionLoop*>(entity);
+                loop != nullptr
+            ) {
+                for (const ExtrusionPath& path : loop->paths) {
+                    polylines.push_back(path.as_polyline());
+                    widths.push_back(path.width());
+                }
+            } else if (
+                const auto* multi_path = dynamic_cast<const ExtrusionMultiPath*>(entity);
+                multi_path != nullptr
+            ) {
+                for (const ExtrusionPath& path : multi_path->paths) {
+                    polylines.push_back(path.as_polyline());
+                    widths.push_back(path.width());
+                }
+            } else {
+                throw std::runtime_error(
+                    "Failed to construct object part from extrusions!"
+                    " Unknown extrusion type."
+                );
+            }
+
+            const Integrals integrals{polylines, widths};
         const float volume = integrals.area * layer_height;
         this->volume += volume;
         this->volume_centroid_accumulator += to_3d(integrals.x_i, center_z * integrals.area) / integrals.area * volume;
@@ -481,6 +555,7 @@ ObjectPart::ObjectPart(
             this->sticking_second_moment_of_area_accumulator += integrals.x_i_squared;
             this->sticking_second_moment_of_area_covariance_accumulator += integrals.xy;
         }
+    }
     }
 
     if (brim) {

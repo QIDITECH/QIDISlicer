@@ -51,6 +51,13 @@ GLGizmoSVG::GLGizmoSVG(GLCanvas3D &parent)
 // Private functions to create emboss volume
 namespace{
 
+// TRN - Title in Undo/Redo stack after rotate with SVG around emboss axe
+const std::string rotation_snapshot_name = L("SVG rotate");
+// NOTE: Translation is made in "m_parent.do_rotate()"
+
+// TRN - Title in Undo/Redo stack after move with SVG along emboss axe - From surface
+const std::string move_snapshot_name = L("SVG move");
+// NOTE: Translation is made in "m_parent.do_translate()"
 // Variable keep limits for variables
 const struct Limits
 {
@@ -539,7 +546,7 @@ void GLGizmoSVG::on_stop_dragging()
 
     // apply rotation
     // TRN This is an item label in the undo-redo stack.
-    m_parent.do_rotate(L("SVG-Rotate"));
+    m_parent.do_rotate(rotation_snapshot_name);
     m_rotate_start_angle.reset();
     volume_transformation_changed();
 
@@ -1266,8 +1273,7 @@ void GLGizmoSVG::calculate_scale() {
 float GLGizmoSVG::get_scale_for_tolerance(){ 
     return std::max(m_scale_width.value_or(1.f), m_scale_height.value_or(1.f)); }
 
-bool GLGizmoSVG::process()
-{
+bool GLGizmoSVG::process(bool make_snapshot) {
     // no volume is selected -> selection from right panel
     assert(m_volume != nullptr);
     if (m_volume == nullptr) 
@@ -1288,7 +1294,7 @@ bool GLGizmoSVG::process()
     EmbossShape shape = m_volume_shape; // copy
     auto base = std::make_unique<DataBase>(m_volume->name, m_job_cancel, std::move(shape));
     base->is_outside = m_volume->type() == ModelVolumeType::MODEL_PART;
-    DataUpdate data{std::move(base), m_volume_id};
+    DataUpdate data{std::move(base), m_volume_id, make_snapshot};
     return start_update_volume(std::move(data), *m_volume, m_parent.get_selection(), m_raycast_manager);    
 }
 
@@ -1490,8 +1496,9 @@ void GLGizmoSVG::draw_filename(){
             std::string new_path = choose_svg_file();
             if (!new_path.empty()) {
                 file_changed = true;
-                m_volume_shape.svg_file = {}; // clear data
-                m_volume_shape.svg_file->path = new_path;
+                EmbossShape::SvgFile svg_file_new;
+                svg_file_new.path = new_path;
+                m_volume_shape.svg_file = svg_file_new; // clear data
             }
         } else if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("%s", _u8L("Change to another .svg file").c_str());
@@ -1681,6 +1688,7 @@ void GLGizmoSVG::draw_size()
     };
 
     std::optional<Vec3d> new_relative_scale;
+    bool make_snap = false;
     if (m_keep_ratio) {
         std::stringstream ss;
         ss << std::setprecision(2) << std::fixed << width << " x " << height << " " << (use_inch ? "in" : "mm");
@@ -1699,6 +1707,8 @@ void GLGizmoSVG::draw_size()
                 new_relative_scale = Vec3d(width_ratio, width_ratio, 1.);
             }
         }
+        if (m_imgui->get_last_slider_status().deactivated_after_edit)
+            make_snap = true; // only last change of slider make snap
     } else {
         ImGuiInputTextFlags flags = 0;
 
@@ -1718,6 +1728,7 @@ void GLGizmoSVG::draw_size()
             if (is_valid_scale_ratio(width_ratio)) {
                 m_scale_width = m_scale_width.value_or(1.f) * width_ratio;
                 new_relative_scale = Vec3d(width_ratio, 1., 1.);
+                make_snap = true;
             }
         }
         if (ImGui::IsItemHovered())
@@ -1731,6 +1742,7 @@ void GLGizmoSVG::draw_size()
             if (is_valid_scale_ratio(height_ratio)) {
                 m_scale_height = m_scale_height.value_or(1.f) * height_ratio;
                 new_relative_scale  = Vec3d(1., height_ratio, 1.);
+                make_snap = true;
             }
         }
         if (ImGui::IsItemHovered())
@@ -1752,6 +1764,7 @@ void GLGizmoSVG::draw_size()
     if (can_reset) {
         if (reset_button(m_icons)) {
             new_relative_scale = Vec3d(1./m_scale_width.value_or(1.f), 1./m_scale_height.value_or(1.f), 1.);
+            make_snap = true;
         } else if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", _u8L("Reset scale").c_str());
     }
@@ -1765,20 +1778,24 @@ void GLGizmoSVG::draw_size()
         };        
         selection_transform(selection, selection_scale_fnc);
 
-        m_parent.do_scale(L("Resize"));
+        std::string snap_name; // Empty mean do not store on undo/redo stack
+        m_parent.do_scale(snap_name);
         wxGetApp().obj_manipul()->set_dirty();
         // should be the almost same
         calculate_scale();
                 
-        NSVGimage *img = m_volume_shape.svg_file->image.get();
+        const NSVGimage *img = m_volume_shape.svg_file->image.get();
         assert(img != NULL);
         if (img != NULL){
             NSVGLineParams params{get_tesselation_tolerance(get_scale_for_tolerance())};
             m_volume_shape.shapes_with_ids = create_shape_with_ids(*img, params);
             m_volume_shape.final_shape = {}; // reset cache for final shape
-            process();        
+            if (!make_snap) // Be carefull: Last change may be without change of scale
+                process(false);
         }
     }
+    if (make_snap)
+        process(); // make undo/redo snap-shot
 }
 
 void GLGizmoSVG::draw_use_surface() 
@@ -1833,17 +1850,20 @@ void GLGizmoSVG::draw_distance()
             is_moved = true;
     }
 
-    bool can_reset = m_distance.has_value();
-    if (can_reset) {
+    bool is_stop_sliding = m_imgui->get_last_slider_status().deactivated_after_edit;
+    bool is_reseted = false;
+    if (m_distance.has_value()) {
         if (reset_button(m_icons)) {
             m_distance.reset();
-            is_moved = true;
+            is_reseted = true;
         } else if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", _u8L("Reset distance").c_str());
     }
 
-    if (is_moved)
-        do_local_z_move(m_parent, m_distance.value_or(.0f) - prev_distance);
+    if (is_moved || is_reseted)
+        do_local_z_move(m_parent.get_selection(), m_distance.value_or(.0f) - prev_distance);    
+    if (is_stop_sliding || is_reseted)
+        m_parent.do_move(move_snapshot_name);
 }
 
 void GLGizmoSVG::draw_rotation()
@@ -1865,7 +1885,7 @@ void GLGizmoSVG::draw_rotation()
 
         double diff_angle = angle_rad - angle;
         
-        do_local_z_rotate(m_parent, diff_angle);
+        do_local_z_rotate(m_parent.get_selection(), diff_angle);
 
         // calc angle after rotation
         m_angle = calc_angle(m_parent.get_selection());
@@ -1874,20 +1894,26 @@ void GLGizmoSVG::draw_rotation()
         if (m_volume->emboss_shape->projection.use_surface)
             process();
     }
+    bool is_stop_sliding = m_imgui->get_last_slider_status().deactivated_after_edit;
 
     // Reset button
+    bool is_reseted = false;
     if (m_angle.has_value()) {
         if (reset_button(m_icons)) {
-            do_local_z_rotate(m_parent, -(*m_angle));
+            do_local_z_rotate(m_parent.get_selection(), -(*m_angle));
             m_angle.reset();
 
             // recalculate for surface cut
             if (m_volume->emboss_shape->projection.use_surface)
                 process();
+            is_reseted = true;
         } else if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", _u8L("Reset rotation").c_str());
     }
 
+    // Apply rotation on model (backend)
+    if (is_stop_sliding || is_reseted)
+        m_parent.do_rotate(rotation_snapshot_name);    
     // Keep up - lock button icon
     if (!m_volume->is_the_only_one_part()) {
         ImGui::SameLine(m_gui_cfg->lock_offset);

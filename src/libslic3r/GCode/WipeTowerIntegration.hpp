@@ -26,7 +26,8 @@ public:
         m_tool_changes(tool_changes),
         m_final_purge(final_purge),
         m_layer_idx(-1),
-        m_tool_change_idx(0)
+        m_tool_change_idx(0),
+        m_last_wipe_tower_print_z(print_config.z_offset.value)
     {}
 
     std::string prime(GCodeGenerator &gcodegen);
@@ -56,7 +57,7 @@ private:
     // Current layer index.
     int                                                          m_layer_idx;
     int                                                          m_tool_change_idx;
-    double                                                       m_last_wipe_tower_print_z = 0.f;
+    double                                                       m_last_wipe_tower_print_z;
 };
 
 } // namespace GCode

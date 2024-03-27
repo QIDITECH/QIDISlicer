@@ -336,7 +336,7 @@ public:
 	void		rename_preset();
 	void		delete_preset();
 	void		toggle_show_hide_incompatible();
-	void		update_show_hide_incompatible_button();
+	void		update_compatibility_ui();
 	void		update_ui_from_settings();
 	void		update_label_colours();
 	void		decorate();
@@ -480,6 +480,7 @@ public:
     bool        set_active_extruder(int new_selected_extruder);
     void        invalidate_active_extruder() { m_active_extruder = -1; }
     void        update_extruder_combobox();
+    void        update_extruder_combobox_visibility();
     int         get_active_extruder() const { return m_active_extruder; }
 
 	const std::string&	get_custom_gcode(const t_config_option_key& opt_key) override;
@@ -548,6 +549,12 @@ public:
 
 class TabSLAMaterial : public Tab
 {
+	void		create_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& opt_key);
+	void		update_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& opt_key, bool is_checked = true);
+	void		add_material_overrides_page();
+	void		update_material_overrides_page();
+
+	std::map<std::string, wxWindow*> m_overrides_options;
 public:
     TabSLAMaterial(wxBookCtrlBase* parent) :
 		Tab(parent, _(L("Material Settings")), Slic3r::Preset::TYPE_SLA_MATERIAL) {}

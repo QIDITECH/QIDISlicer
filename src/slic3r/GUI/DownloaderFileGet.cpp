@@ -36,36 +36,36 @@ std::string FileGet::escape_url(const std::string& unescaped)
 bool FileGet::is_subdomain(const std::string& url, const std::string& domain)
 {
 	// domain should be f.e. printables.com (.com including)
-	// char* host;
-	// std::string host_string;
-	// CURLUcode rc;
-	// CURLU* curl = curl_url();
-	// if (!curl) {
-	// 	BOOST_LOG_TRIVIAL(error) << "Failed to init Curl library in function is_domain.";
-	// 	return false;
-	// }
-	// rc = curl_url_set(curl, CURLUPART_URL, url.c_str(), 0);
-	// if (rc != CURLUE_OK) {
-	// 	curl_url_cleanup(curl);
-	// 	return false;
-	// }
-	// rc = curl_url_get(curl, CURLUPART_HOST, &host, 0);
-	// if (rc != CURLUE_OK || !host) {
-	// 	curl_url_cleanup(curl);
-	// 	return false;
-	// }
-	// host_string = std::string(host);
-	// curl_free(host);
-	// // now host should be subdomain.domain or just domain
-	// if (domain == host_string) {
-	// 	curl_url_cleanup(curl);
-	// 	return true;
-	// }
-	// if(boost::ends_with(host_string, "." + domain)) {
-	// 	curl_url_cleanup(curl);
-	// 	return true;
-	// }
-	// curl_url_cleanup(curl);
+	char* host;
+	std::string host_string;
+	CURLUcode rc;
+	CURLU* curl = curl_url();
+	if (!curl) {
+		BOOST_LOG_TRIVIAL(error) << "Failed to init Curl library in function is_domain.";
+		return false;
+	}
+	rc = curl_url_set(curl, CURLUPART_URL, url.c_str(), 0);
+	if (rc != CURLUE_OK) {
+		curl_url_cleanup(curl);
+		return false;
+	}
+	rc = curl_url_get(curl, CURLUPART_HOST, &host, 0);
+	if (rc != CURLUE_OK || !host) {
+		curl_url_cleanup(curl);
+		return false;
+	}
+	host_string = std::string(host);
+	curl_free(host);
+	// now host should be subdomain.domain or just domain
+	if (domain == host_string) {
+		curl_url_cleanup(curl);
+		return true;
+	}
+	if(boost::ends_with(host_string, "." + domain)) {
+		curl_url_cleanup(curl);
+		return true;
+	}
+	curl_url_cleanup(curl);
 	return false;
 }
 
@@ -134,7 +134,7 @@ void FileGet::priv::get_perform()
 	if (m_written == 0)
 	{
 		boost::filesystem::path dest_path = m_dest_folder / m_filename;
-		std::string extension = boost::filesystem::extension(dest_path);
+		std::string extension = dest_path.extension().string();
 		std::string just_filename = m_filename.substr(0, m_filename.size() - extension.size());
 		std::string final_filename = just_filename;
         // Find unsed filename 

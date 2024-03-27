@@ -68,6 +68,8 @@ PresetBundle::PresetBundle() :
     this->sla_materials.default_preset().config.optptr("sla_material_settings_id", true);
     this->sla_materials.default_preset().compatible_printers_condition();
     this->sla_materials.default_preset().inherits();
+    // Set all the nullable values to nils.
+    this->sla_materials.default_preset().config.null_nullables();
 
     this->sla_prints.default_preset().config.optptr("sla_print_settings_id", true);
     this->sla_prints.default_preset().config.opt_string("output_filename_format", true) = "[input_filename_base].sl1";
@@ -687,6 +689,7 @@ void PresetBundle::export_selections(AppConfig &config)
     //assert(this->printers.get_edited_preset().printer_technology() != ptFFF || extruders_filaments.size() > 1 || filaments.get_selected_preset().alias == extruders_filaments.front().get_selected_preset()->alias);
     config.clear_section("presets");
     config.set("presets", "print",        prints.get_selected_preset_name());
+    if (!extruders_filaments.empty()) // Tomas: To prevent crash with SLA overrides
     config.set("presets", "filament", extruders_filaments.front().get_selected_preset_name());
     for (unsigned i = 1; i < extruders_filaments.size(); ++i) {
         char name[64];

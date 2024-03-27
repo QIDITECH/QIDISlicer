@@ -118,23 +118,22 @@ unsigned get_logging_level()
 }
 
 // Force set_logging_level(<=error) after loading of the DLL.
-// This is currently only needed if libslic3r is loaded as a shared library into Perl interpreter
-// to perform unit and integration tests.
+// This is used ot disable logging for unit and integration tests.
 static struct RunOnInit {
     RunOnInit() { 
         set_logging_level(1);
     }
 } g_RunOnInit;
 
-void disable_multi_threading()
+void enforce_thread_count(const std::size_t count)
 {
     // Disable parallelization to simplify debugging.
 #ifdef TBB_HAS_GLOBAL_CONTROL
 	{
-		static tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 1);
+		static tbb::global_control gc(tbb::global_control::max_allowed_parallelism, count);
 	}
 #else // TBB_HAS_GLOBAL_CONTROL
-    static tbb::task_scheduler_init *tbb_init = new tbb::task_scheduler_init(1);
+    static tbb::task_scheduler_init *tbb_init = new tbb::task_scheduler_init(count);
     UNUSED(tbb_init);
 #endif // TBB_HAS_GLOBAL_CONTROL
 }
@@ -700,7 +699,7 @@ CopyFileResult copy_file_inner(const std::string& from, const std::string& to, s
 	// That may happen when copying on some exotic file system, for example Linux on Chrome.
 	copy_file_linux(source, target, ec);
 #else // __linux__
-	boost::filesystem::copy_file(source, target, boost::filesystem::copy_option::overwrite_if_exists, ec);
+	boost::filesystem::copy_file(source, target, boost::filesystem::copy_options::overwrite_existing, ec);
 #endif // __linux__
 	if (ec) {
 		error_message = ec.message();
@@ -792,7 +791,8 @@ bool is_idx_file(const boost::filesystem::directory_entry &dir_entry)
 bool is_gcode_file(const std::string &path)
 {
 	return boost::iends_with(path, ".gcode") || boost::iends_with(path, ".gco") ||
-		   boost::iends_with(path, ".g")     || boost::iends_with(path, ".ngc");
+					 boost::iends_with(path, ".g") || boost::iends_with(path, ".ngc") ||
+					 boost::iends_with(path, ".bgcode") || boost::iends_with(path, ".bgc");
 }
 
 bool is_img_file(const std::string &path)

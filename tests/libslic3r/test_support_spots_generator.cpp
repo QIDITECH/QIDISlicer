@@ -6,7 +6,7 @@ using namespace Slic3r;
 using namespace SupportSpotsGenerator;
 
 
-TEST_CASE("Numerical integral calculation compared with exact solution.", "[SupportSpotsGenerator]") {
+namespace Rectangle {
     const float width = 10;
     const float height = 20;
     const Polygon polygon = {
@@ -15,13 +15,35 @@ TEST_CASE("Numerical integral calculation compared with exact solution.", "[Supp
         scaled(Vec2f{width / 2, height / 2}),
         scaled(Vec2f{-width / 2, height / 2})
     };
+}
 
-    const Integrals integrals{{polygon}};
-    CHECK(integrals.area == Approx(width * height));
+TEST_CASE("Numerical integral over polygon calculation compared with exact solution.", "[SupportSpotsGenerator]") {
+    const Integrals integrals{Rectangle::polygon};
+
+    CHECK(integrals.area == Approx(Rectangle::width * Rectangle::height));
     CHECK(integrals.x_i.x() == Approx(0));
     CHECK(integrals.x_i.y() == Approx(0));
-    CHECK(integrals.x_i_squared.x() == Approx(std::pow(width, 3) * height / 12));
-    CHECK(integrals.x_i_squared.y() == Approx(width * std::pow(height, 3) / 12));
+    CHECK(integrals.x_i_squared.x() == Approx(std::pow(Rectangle::width, 3) * Rectangle::height / 12));
+    CHECK(integrals.x_i_squared.y() == Approx(Rectangle::width * std::pow(Rectangle::height, 3) / 12));
+}
+
+TEST_CASE("Integrals over multiple polygons", "[SupportSpotsGenerator]") {
+    const Integrals integrals{{Rectangle::polygon, Rectangle::polygon}};
+
+    CHECK(integrals.area == Approx(2 * Rectangle::width * Rectangle::height));
+}
+
+TEST_CASE("Numerical integral over line calculation compared with exact solution.", "[SupportSpotsGenerator]") {
+    const float length = 10;
+    const float width = 20;
+    const Polyline polyline{scaled(Vec2f{-length/2.0f, 0.0f}), scaled(Vec2f{length/2.0f, 0.0f})};
+
+    const Integrals integrals{{polyline}, {width}};
+    CHECK(integrals.area == Approx(length * width));
+    CHECK(integrals.x_i.x() == Approx(0));
+    CHECK(integrals.x_i.y() == Approx(0));
+    CHECK(integrals.x_i_squared.x() == Approx(std::pow(length, 3) * width / 12));
+    CHECK(integrals.x_i_squared.y() == Approx(length * std::pow(width, 3) / 12));
 }
 
 TEST_CASE("Moment values and ratio check.", "[SupportSpotsGenerator]") {
@@ -37,7 +59,7 @@ TEST_CASE("Moment values and ratio check.", "[SupportSpotsGenerator]") {
         scaled(Vec2f{0, height})
     };
 
-    const Integrals integrals{{polygon}};
+    const Integrals integrals{polygon};
 
     const Vec2f x_axis{1, 0};
     const float x_axis_moment = compute_second_moment(integrals, x_axis);
@@ -69,7 +91,7 @@ TEST_CASE("Moments calculation for rotated axis.", "[SupportSpotsGenerator]") {
         scaled(Vec2f{77.56229640885199, 189.33057746591336})
     };
 
-    Integrals integrals{{polygon}};
+    Integrals integrals{polygon};
 
     // Meassured counterclockwise from (1, 0)
     const float angle = 1.432f;
@@ -130,7 +152,7 @@ TEST_CASE_METHOD(ObjectPartFixture, "Constructing ObjectPart using extrusion col
         std::nullopt
     };
 
-    Integrals expected{{expected_polygon}};
+    Integrals expected{expected_polygon};
 
     CHECK(part.connected_to_bed == true);
     Vec3f volume_centroid{part.volume_centroid_accumulator / part.volume};

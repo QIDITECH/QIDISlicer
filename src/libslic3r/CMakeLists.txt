@@ -80,7 +80,6 @@ set(SLIC3R_SOURCES
     ExtrusionSimulator.hpp
     FileParserError.hpp
     Fill/Fill.cpp
-    Fill/Fill.hpp
     Fill/Fill3DHoneycomb.cpp
     Fill/Fill3DHoneycomb.hpp
     Fill/FillAdaptive.cpp
@@ -184,6 +183,8 @@ set(SLIC3R_SOURCES
     GCode/GCodeProcessor.hpp
     GCode/AvoidCrossingPerimeters.cpp
     GCode/AvoidCrossingPerimeters.hpp
+    GCode/Travels.cpp
+    GCode/Travels.hpp
     GCode.cpp
     GCode.hpp
     GCodeReader.cpp
@@ -205,6 +206,8 @@ set(SLIC3R_SOURCES
     Geometry/Voronoi.hpp
     Geometry/VoronoiOffset.cpp
     Geometry/VoronoiOffset.hpp
+    Geometry/VoronoiUtils.hpp
+    Geometry/VoronoiUtils.cpp
     Geometry/VoronoiVisualUtils.hpp
     Int128.hpp
     JumpPointSearch.cpp
@@ -486,8 +489,9 @@ set(SLIC3R_SOURCES
     Arachne/utils/PolygonsSegmentIndex.hpp
     Arachne/utils/PolylineStitcher.hpp
     Arachne/utils/PolylineStitcher.cpp
-    Arachne/utils/VoronoiUtils.hpp
-    Arachne/utils/VoronoiUtils.cpp
+    Geometry/Voronoi.cpp
+    Geometry/VoronoiUtils.hpp
+    Geometry/VoronoiUtils.cpp
     Arachne/SkeletalTrapezoidation.hpp
     Arachne/SkeletalTrapezoidation.cpp
     Arachne/SkeletalTrapezoidationEdge.hpp

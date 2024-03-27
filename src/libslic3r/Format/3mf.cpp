@@ -119,7 +119,7 @@ static constexpr const char* PRINTABLE_ATTR = "printable";
 static constexpr const char* INSTANCESCOUNT_ATTR = "instances_count";
 static constexpr const char* CUSTOM_SUPPORTS_ATTR = "slic3rpe:custom_supports";
 static constexpr const char* CUSTOM_SEAM_ATTR = "slic3rpe:custom_seam";
-static constexpr const char* MMU_SEGMENTATION_ATTR = "slic3rpe:mmu_segmentation";
+static constexpr const char* MM_SEGMENTATION_ATTR = "slic3rpe:mmu_segmentation";
 
 static constexpr const char* KEY_ATTR = "key";
 static constexpr const char* VALUE_ATTR = "value";
@@ -173,6 +173,7 @@ static constexpr const char *FONT_FACE_NAME_ATTR = "face_name";
 static constexpr const char *FONT_STYLE_ATTR     = "style";
 static constexpr const char *FONT_WEIGHT_ATTR    = "weight";
 
+// Store / load of EmbossShape
 static constexpr const char *SHAPE_TAG = "slic3rpe:shape";
 static constexpr const char *SHAPE_SCALE_ATTR   = "scale";
 static constexpr const char *UNHEALED_ATTR = "unhealed";
@@ -182,6 +183,7 @@ static constexpr const char *SVG_FILE_PATH_IN_3MF_ATTR = "filepath3mf";
 // EmbossProjection
 static constexpr const char *DEPTH_ATTR       = "depth";
 static constexpr const char *USE_SURFACE_ATTR = "use_surface";
+// static constexpr const char *FIX_TRANSFORMATION_ATTR = "transform";
 const unsigned int VALID_OBJECT_TYPES_COUNT = 1;
 const char* VALID_OBJECT_TYPES[] =
 {
@@ -353,7 +355,7 @@ namespace Slic3r {
             std::vector<Vec3i> triangles;
             std::vector<std::string> custom_supports;
             std::vector<std::string> custom_seam;
-            std::vector<std::string> mmu_segmentation;
+            std::vector<std::string> mm_segmentation;
 
             bool empty() { return vertices.empty() || triangles.empty(); }
 
@@ -362,7 +364,7 @@ namespace Slic3r {
                 triangles.clear();
                 custom_supports.clear();
                 custom_seam.clear();
-                mmu_segmentation.clear();
+                mm_segmentation.clear();
             }
         };
 
@@ -698,12 +700,19 @@ namespace Slic3r {
         m_name = boost::filesystem::path(filename).stem().string();
 
         // we first loop the entries to read from the archive the .model file only, in order to extract the version from it
+        bool found_model = false;
         for (mz_uint i = 0; i < num_entries; ++i) {
             if (mz_zip_reader_file_stat(&archive, i, &stat)) {
                 std::string name(stat.m_filename);
                 std::replace(name.begin(), name.end(), '\\', '/');
 
-                if (boost::algorithm::istarts_with(name, MODEL_FOLDER) && boost::algorithm::iends_with(name, MODEL_EXTENSION)) {
+                if (boost::algorithm::iends_with(name, MODEL_EXTENSION)) {
+                    if(found_model){
+                        close_zip_reader(&archive);
+                        add_error("3mf contain multiple .model files and it is not supported yet.");
+                        return false;
+                    }
+                    found_model = true;
                     try
                     {
                         // valid model name -> extract model
@@ -721,6 +730,11 @@ namespace Slic3r {
                     }
                 }
             }
+        }
+        if (!found_model) {
+            close_zip_reader(&archive);
+            add_error("Not valid 3mf. There is missing .model file.");
+            return false;
         }
 
         // we then loop again the entries to read other files stored in the archive
@@ -1820,7 +1834,7 @@ namespace Slic3r {
 
         m_curr_object.geometry.custom_supports.push_back(get_attribute_value_string(attributes, num_attributes, CUSTOM_SUPPORTS_ATTR));
         m_curr_object.geometry.custom_seam.push_back(get_attribute_value_string(attributes, num_attributes, CUSTOM_SEAM_ATTR));
-        m_curr_object.geometry.mmu_segmentation.push_back(get_attribute_value_string(attributes, num_attributes, MMU_SEGMENTATION_ATTR));
+        m_curr_object.geometry.mm_segmentation.push_back(get_attribute_value_string(attributes, num_attributes, MM_SEGMENTATION_ATTR));
         return true;
     }
 
@@ -2310,41 +2324,30 @@ namespace Slic3r {
             if (has_transform)
                 volume->source.transform = Slic3r::Geometry::Transformation(volume_matrix_to_object);
 
-            // recreate custom supports, seam and mmu segmentation from previously loaded attribute
+            // recreate custom supports, seam and mm segmentation from previously loaded attribute
             volume->supported_facets.reserve(triangles_count);
             volume->seam_facets.reserve(triangles_count);
-            volume->mmu_segmentation_facets.reserve(triangles_count);
+            volume->mm_segmentation_facets.reserve(triangles_count);
             for (size_t i=0; i<triangles_count; ++i) {
                 size_t index = volume_data.first_triangle_id + i;
                 assert(index < geometry.custom_supports.size());
                 assert(index < geometry.custom_seam.size());
-                assert(index < geometry.mmu_segmentation.size());
+                assert(index < geometry.mm_segmentation.size());
                 if (! geometry.custom_supports[index].empty())
                     volume->supported_facets.set_triangle_from_string(i, geometry.custom_supports[index]);
                 if (! geometry.custom_seam[index].empty())
                     volume->seam_facets.set_triangle_from_string(i, geometry.custom_seam[index]);
-                if (! geometry.mmu_segmentation[index].empty())
-                    volume->mmu_segmentation_facets.set_triangle_from_string(i, geometry.mmu_segmentation[index]);
+                if (! geometry.mm_segmentation[index].empty())
+                    volume->mm_segmentation_facets.set_triangle_from_string(i, geometry.mm_segmentation[index]);
             }
             volume->supported_facets.shrink_to_fit();
             volume->seam_facets.shrink_to_fit();
-            volume->mmu_segmentation_facets.shrink_to_fit();
+            volume->mm_segmentation_facets.shrink_to_fit();
             if (auto &es = volume_data.shape_configuration; es.has_value())
                 volume->emboss_shape = std::move(es);            
             if (auto &tc = volume_data.text_configuration; tc.has_value())
                 volume->text_configuration = std::move(tc);
 
-                //// Transformation before store to 3mf
-                //const Transform3d &pre_trmat = *tc->fix_3mf_tr;
-                //// Cannot use source tranformation
-                //// When store transformed againg to 3mf it is not modified !!!
-                //// const Transform3d &pre_trmat = volume->source.transform.get_matrix();
-
-                //// create fix transformation
-                //assert(tc->fix_3mf_tr.has_value());
-                //volume->text_configuration->fix_3mf_tr =
-                //    pre_trmat.inverse() *
-                //    volume->get_transformation().get_matrix();
             
             // apply the remaining volume's metadata
             for (const Metadata& metadata : volume_data.metadata) {
@@ -3003,12 +3006,12 @@ namespace Slic3r {
                     output_buffer += "\"";
                 }
 
-                std::string mmu_painting_data_string = volume->mmu_segmentation_facets.get_triangle_as_string(i);
-                if (! mmu_painting_data_string.empty()) {
+                std::string mm_painting_data_string = volume->mm_segmentation_facets.get_triangle_as_string(i);
+                if (! mm_painting_data_string.empty()) {
                     output_buffer += " ";
-                    output_buffer += MMU_SEGMENTATION_ATTR;
+                    output_buffer += MM_SEGMENTATION_ATTR;
                     output_buffer += "=\"";
-                    output_buffer += mmu_painting_data_string;
+                    output_buffer += mm_painting_data_string;
                     output_buffer += "\"";
                 }
 
@@ -3424,7 +3427,6 @@ namespace Slic3r {
                     if (const std::optional<EmbossShape> &es = volume->emboss_shape;
                         es.has_value())
                         to_xml(stream, *es, *volume, archive);
-                    // stores volume's text data
                     if (const std::optional<TextConfiguration> &tc = volume->text_configuration;
                         tc.has_value())
                         TextConfigurationSerialization::to_xml(stream, *tc);
@@ -3575,11 +3577,11 @@ bool load_3mf(const char* path, DynamicPrintConfig& config, ConfigSubstitutionCo
     // All import should use "C" locales for number formatting.
     CNumericLocalesSetter locales_setter;
     _3MF_Importer         importer;
-    importer.load_model_from_file(path, *model, config, config_substitutions, check_version);
+    bool res = importer.load_model_from_file(path, *model, config, config_substitutions, check_version);
     importer.log_errors();
     handle_legacy_project_loaded(importer.version(), config, importer.qidislicer_generator_version());
 
-    return !model->objects.empty() || !config.empty();
+    return res;
 }
 
 bool store_3mf(const char* path, Model* model, const DynamicPrintConfig* config, bool fullpath_sources, const ThumbnailData* thumbnail_data, bool zip64)
@@ -3698,10 +3700,13 @@ namespace {
 
 FontProp::HorizontalAlign read_horizontal_align(const char **attributes, unsigned int num_attributes, const TextConfigurationSerialization::HorizontalAlignToName& horizontal_align_to_name){
     std::string horizontal_align_str = get_attribute_value_string(attributes, num_attributes, HORIZONTAL_ALIGN_ATTR);
-    // FIX of baked transformation
+    // Back compatibility
+    // PS 2.6.0 do not have align
     if (horizontal_align_str.empty())
         return FontProp::HorizontalAlign::center;
 
+    // Back compatibility
+    // PS 2.6.1 store indices(0|1|2) instead of text for align
     if (horizontal_align_str.length() == 1) {
         int horizontal_align_int = 0;
         if(boost::spirit::qi::parse(horizontal_align_str.c_str(), horizontal_align_str.c_str() + 1, boost::spirit::qi::int_, horizontal_align_int))
@@ -3711,12 +3716,11 @@ FontProp::HorizontalAlign read_horizontal_align(const char **attributes, unsigne
     return bimap_cvt(horizontal_align_to_name, std::string_view(horizontal_align_str), FontProp::HorizontalAlign::center);    
     }
 
-    // IMPROVE: check if volume was modified (translated, rotated OR scaled)
 FontProp::VerticalAlign read_vertical_align(const char **attributes, unsigned int num_attributes, const TextConfigurationSerialization::VerticalAlignToName& vertical_align_to_name){
     std::string vertical_align_str = get_attribute_value_string(attributes, num_attributes, VERTICAL_ALIGN_ATTR);
-    // when no change do not calculate transformation only store original fix matrix
 
-    // Create transformation used after load actual stored volume
+    // Back compatibility
+    // PS 2.6.0 do not have align
     if (vertical_align_str.empty())
         return FontProp::VerticalAlign::center;
 
@@ -3730,7 +3734,7 @@ FontProp::VerticalAlign read_vertical_align(const char **attributes, unsigned in
 
     return bimap_cvt(vertical_align_to_name, std::string_view(vertical_align_str), FontProp::VerticalAlign::center);
     }
-}
+} // namespace
 
 std::optional<TextConfiguration> TextConfigurationSerialization::read(const char **attributes, unsigned int num_attributes)
 {

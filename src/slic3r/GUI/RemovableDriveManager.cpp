@@ -754,7 +754,7 @@ namespace search_for_drives_internal
 				stat(path.c_str(), &buf);
 				uid_t uid = buf.st_uid;
 				if (getuid() == uid)
-					out.emplace_back(DriveData{ boost::filesystem::basename(boost::filesystem::path(path)), path });
+                    out.emplace_back(DriveData{ boost::filesystem::path(path).stem().string(), path });
 			}
 		}
 	}

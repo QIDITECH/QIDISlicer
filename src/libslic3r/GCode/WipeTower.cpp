@@ -530,7 +530,6 @@ WipeTower::WipeTower(const PrintConfig& config, const PrintRegionConfig& default
     m_no_sparse_layers(config.wipe_tower_no_sparse_layers),
     m_gcode_flavor(config.gcode_flavor),
     m_travel_speed(config.travel_speed),
-    m_travel_speed_z(config.travel_speed_z),
     m_infill_speed(default_region_config.infill_speed),
     m_perimeter_speed(default_region_config.perimeter_speed),
     m_current_tool(initial_tool),
@@ -1560,8 +1559,9 @@ void WipeTower::generate(std::vector<std::vector<WipeTower::ToolChangeResult>> &
         }
     }
 
-    for (auto& used : m_used_filament_length) // reset used filament stats
-        used = 0.f;
+    m_used_filament_length.assign(m_used_filament_length.size(), 0.f); // reset used filament stats
+    assert(m_used_filament_length_until_layer.empty());
+    m_used_filament_length_until_layer.emplace_back(0.f, m_used_filament_length);
 
     m_old_temperature = -1; // reset last temperature written in the gcode
 
@@ -1604,6 +1604,9 @@ void WipeTower::generate(std::vector<std::vector<WipeTower::ToolChangeResult>> &
         }
 
 		result.emplace_back(std::move(layer_result));
+        if (m_used_filament_length_until_layer.empty() || m_used_filament_length_until_layer.back().first != layer.z)
+            m_used_filament_length_until_layer.emplace_back();
+        m_used_filament_length_until_layer.back() = std::make_pair(layer.z, m_used_filament_length);
 	}
 }
 

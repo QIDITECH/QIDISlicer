@@ -483,7 +483,7 @@ void Tab::OnActivate()
         update_btns_enabling();
         m_btn_hide_incompatible_presets->Show(m_show_btn_incompatible_presets && m_type != Slic3r::Preset::TYPE_PRINTER);
         if (TabFilament* tab = dynamic_cast<TabFilament*>(this))
-            tab->update_extruder_combobox();
+            tab->update_extruder_combobox_visibility();
 
         Layout();
     }
@@ -667,7 +667,7 @@ void Tab::init_options_list()
     m_options_list.clear();
 
     for (const std::string& opt_key : m_config->keys())
-        emplace_option(opt_key, m_type != Preset::TYPE_FILAMENT && !PresetCollection::is_independent_from_extruder_number_option(opt_key));
+        emplace_option(opt_key, m_type != Preset::TYPE_FILAMENT && m_type != Preset::TYPE_SLA_MATERIAL && !PresetCollection::is_independent_from_extruder_number_option(opt_key));
 }
 
 template<class T>
@@ -967,7 +967,7 @@ void Tab::sys_color_changed()
     if (m_detach_preset_btn)
         m_detach_preset_btn->sys_color_changed();
 
-    update_show_hide_incompatible_button();
+    m_btn_hide_incompatible_presets->SetBitmap(*get_bmp_bundle(m_show_incompatible_presets ? "flag_red" : "flag_green"));
 
     // update icons for tree_ctrl
     wxVector <wxBitmapBundle> img_bundles;
@@ -1957,13 +1957,13 @@ void TabFilament::update_line_with_near_label_widget(ConfigOptionsGroupShp optgr
         field->toggle(is_checked);
 }
 
-std::vector<std::pair<std::string, std::vector<std::string>>> option_keys {
+std::vector<std::pair<std::string, std::vector<std::string>>> filament_overrides_option_keys {
     {"Travel lift", {
                                         "filament_retract_lift",
         "filament_travel_ramping_lift",
         "filament_travel_max_lift",
         "filament_travel_slope",
-        //"filament_travel_lift_before_obstacle",
+        "filament_travel_lift_before_obstacle",
                                         "filament_retract_lift_above",
         "filament_retract_lift_below"
     }},
@@ -1991,7 +1991,7 @@ void TabFilament::add_filament_overrides_page()
 
     const int extruder_idx = 0; // #ys_FIXME
 
-    for (const auto&[title, keys] : option_keys) {
+    for (const auto&[title, keys] : filament_overrides_option_keys) {
         ConfigOptionsGroupShp optgroup = page->new_optgroup(L(title));
         for (const std::string& opt_key : keys) {
         create_line_with_near_label_widget(optgroup, opt_key, extruder_idx);
@@ -2037,7 +2037,7 @@ void TabFilament::update_filament_overrides_page()
         || m_config->opt_float("filament_retract_lift", extruder_idx) > 0
     );
 
-    for (const auto&[title, keys] : option_keys) {
+    for (const auto&[title, keys] : filament_overrides_option_keys) {
         std::optional<ConfigOptionsGroupShp> optgroup{get_option_group(page, title)};
         if (!optgroup) {
             continue;
@@ -2103,14 +2103,17 @@ void TabFilament::create_extruder_combobox()
     m_h_buttons_sizer->Add(m_extruders_cb, 0, wxALIGN_CENTER_VERTICAL);
 }
 
-void TabFilament::update_extruder_combobox()
+void TabFilament::update_extruder_combobox_visibility()
 {
-    if (!m_presets_choice->IsShown())
-        return; // it will be updated later, on OnActive()
 
     const size_t extruder_cnt = static_cast<const ConfigOptionFloats*>(m_preset_bundle->printers.get_edited_preset().config.option("nozzle_diameter"))->values.size();
-
     m_extruders_cb->Show(extruder_cnt > 1);
+}
+
+void TabFilament::update_extruder_combobox()
+{
+    const size_t extruder_cnt = m_preset_bundle->printers.get_selected_preset().printer_technology() == ptSLA ? m_extruders_cb->GetCount() :
+                                static_cast<const ConfigOptionFloats*>(m_preset_bundle->printers.get_edited_preset().config.option("nozzle_diameter"))->values.size();
 
     if (extruder_cnt != m_extruders_cb->GetCount()) {
         m_extruders_cb->Clear();
@@ -2130,6 +2133,7 @@ void TabFilament::update_extruder_combobox()
     }
 
     m_extruders_cb->SetSelection(m_active_extruder);
+    m_extruders_cb->Show(extruder_cnt > 1);
 }
 
 bool TabFilament::set_active_extruder(int new_selected_extruder)
@@ -3324,7 +3328,7 @@ void TabPrinter::build_extruder_pages(size_t n_before_extruders)
         optgroup->append_single_option_line("travel_ramping_lift", "", extruder_idx);
         optgroup->append_single_option_line("travel_max_lift", "", extruder_idx);
         optgroup->append_single_option_line("travel_slope", "", extruder_idx);
-        //optgroup->append_single_option_line("travel_lift_before_obstacle", "", extruder_idx);
+        optgroup->append_single_option_line("travel_lift_before_obstacle", "", extruder_idx);
 
         line = { L("Only lift"), "" };
         line.append_option(optgroup->get_option("retract_lift_above", extruder_idx));
@@ -3578,7 +3582,6 @@ void TabPrinter::toggle_options()
 
         bool wipe = m_config->opt_bool("wipe", i);
         toggle_option("retract_before_wipe", wipe, i);
-        toggle_option("wipd_distance", wipe, i);
 
         if (use_firmware_retraction && wipe) {
             //wxMessageDialog dialog(parent(),
@@ -3600,7 +3603,7 @@ void TabPrinter::toggle_options()
             load_config(new_conf);
         }
 
-        //toggle_option("travel_lift_before_obstacle", ramping_lift, i);
+        toggle_option("travel_lift_before_obstacle", ramping_lift, i);
         toggle_option("retract_length_toolchange", have_multiple_extruders, i);
 
         bool toolchange_retraction = m_config->opt_float("retract_length_toolchange", i) > 0;
@@ -4524,36 +4527,38 @@ void Tab::delete_preset()
 void Tab::toggle_show_hide_incompatible()
 {
     m_show_incompatible_presets = !m_show_incompatible_presets;
-    m_presets_choice->set_show_incompatible_presets(m_show_incompatible_presets);
-    update_show_hide_incompatible_button();
-    update_tab_ui();
+    update_compatibility_ui();
 }
 
-void Tab::update_show_hide_incompatible_button()
+void Tab::update_compatibility_ui()
 {
     m_btn_hide_incompatible_presets->SetBitmap(*get_bmp_bundle(m_show_incompatible_presets ? "flag_red" : "flag_green"));
     m_btn_hide_incompatible_presets->SetToolTip(m_show_incompatible_presets ?
         "Both compatible an incompatible presets are shown. Click to hide presets not compatible with the current printer." :
         "Only compatible presets are shown. Click to show both the presets compatible and not compatible with the current printer.");
+    m_presets_choice->set_show_incompatible_presets(m_show_incompatible_presets);
+    m_presets_choice->update();
 }
 
 void Tab::update_ui_from_settings()
 {
-    // Show the 'show / hide presets' button only for the print and filament tabs, and only if enabled
-    // in application preferences.
-    m_show_btn_incompatible_presets = wxGetApp().app_config->get("show_incompatible_presets")[0] == '1' ? true : false;
-    bool show = m_show_btn_incompatible_presets && m_type != Slic3r::Preset::TYPE_PRINTER;
+    // Show the 'show / hide presets' button only for the print and filament tabs
+    if (m_type == Slic3r::Preset::TYPE_PRINTER)
+        return;
+
+    // and only if enabled in application preferences.
+    bool show = wxGetApp().app_config->get_bool("show_incompatible_presets");
+    if (m_show_btn_incompatible_presets == show)
+        return;
+
+    m_show_btn_incompatible_presets = show;
+    m_btn_hide_incompatible_presets->Show(m_show_btn_incompatible_presets);
     Layout();
-    show ? m_btn_hide_incompatible_presets->Show() :  m_btn_hide_incompatible_presets->Hide();
-    // If the 'show / hide presets' button is hidden, hide the incompatible presets.
-    if (show) {
-        update_show_hide_incompatible_button();
-    }
+    if (show)
+        update_compatibility_ui();
     else {
-        if (m_show_incompatible_presets) {
-            m_show_incompatible_presets = false;
-            update_tab_ui();
-        }
+        m_presets_choice->set_show_incompatible_presets(false);
+        m_presets_choice->update();
     }
 }
 
@@ -5391,6 +5396,7 @@ void TabSLAMaterial::build()
 
     optgroup->append_line(line);
 
+    add_material_overrides_page();
     page = add_options_page(L("Notes"), "note");
     optgroup = page->new_optgroup(L("Notes"), 0);
     optgroup->label_width = 0;
@@ -5431,6 +5437,8 @@ void TabSLAMaterial::toggle_options()
     const Preset &current_printer = wxGetApp().preset_bundle->printers.get_edited_preset();
     std::string model = current_printer.config.opt_string("printer_model");
     m_config_manipulation.toggle_field("material_print_speed", model != "SL1");
+    if (m_active_page->title() == "Material Overrides")
+        update_material_overrides_page();
 }
 
 void TabSLAMaterial::update()
@@ -5438,6 +5446,7 @@ void TabSLAMaterial::update()
     if (m_preset_bundle->printers.get_selected_preset().printer_technology() == ptFFF)
         return;
 
+    toggle_options();
     update_description_lines();
     Layout();
 
@@ -5452,13 +5461,14 @@ void TabSLAMaterial::update()
 
 static void add_options_into_line(ConfigOptionsGroupShp &optgroup,
                                   const std::vector<SamePair<std::string>> &prefixes,
-                                  const std::string &optkey)
+                                  const std::string &optkey,
+                                  const std::string &preprefix = std::string())
 {
-    auto opt = optgroup->get_option(prefixes.front().first + optkey);
+    auto opt = optgroup->get_option(preprefix + prefixes.front().first + optkey);
     Line line{ opt.opt.label, "" };
     line.full_width = 1;
     for (auto &prefix : prefixes) {
-        opt = optgroup->get_option(prefix.first + optkey);
+        opt = optgroup->get_option(preprefix + prefix.first + optkey);
         opt.opt.label = prefix.second;
         opt.opt.width = 12; // TODO
         line.append_option(opt);
@@ -5504,6 +5514,163 @@ void TabSLAPrint::build_sla_support_params(const std::vector<SamePair<std::strin
     add_options_into_line(optgroup, prefixes, "support_max_pillar_link_distance");
 }
 
+static std::vector<std::string> get_override_opt_kyes_for_line(const std::string& title, const std::string& key)
+{
+    const std::string preprefix = "material_ow_";
+
+    std::vector<std::string> opt_keys;
+    opt_keys.reserve(3);
+
+    if (title == "Support head" || title == "Support pillar") {
+        for (auto& prefix : { "", "branching" })
+            opt_keys.push_back(preprefix + prefix + key);
+    }
+    else if (key == "relative_correction") {
+        for (auto& axis : { "x", "y", "z" })
+            opt_keys.push_back(preprefix + key + "_" + char(axis[0]));
+    }
+    else
+        opt_keys.push_back(preprefix + key);
+
+    return opt_keys;
+}
+
+void TabSLAMaterial::create_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& key)
+{
+    if (optgroup->title == "Support head" || optgroup->title == "Support pillar")
+        add_options_into_line(optgroup, { {"", L("Default")}, {"branching", L("Branching")} }, key, "material_ow_");
+    else {
+        const std::string opt_key = std::string("material_ow_") + key;
+        if (key == "relative_correction") {
+            Line line = Line{ m_preset_bundle->printers.get_edited_preset().config.def()->get("relative_correction")->full_label, "" };
+            for (auto& axis : { "X", "Y", "Z" }) {
+                auto opt = optgroup->get_option(opt_key + "_" + char(std::tolower(axis[0])));
+                opt.opt.label = axis;
+                line.append_option(opt);
+            }
+            optgroup->append_line(line);
+        }
+        else
+            optgroup->append_single_option_line(opt_key);
+    }
+
+    Line* line = optgroup->get_last_line();
+    if (!line)
+        return;
+
+    line->near_label_widget = [this, optgroup_wk = ConfigOptionsGroupWkp(optgroup), key](wxWindow* parent) {
+        wxWindow* check_box = CheckBox::GetNewWin(parent);
+        wxGetApp().UpdateDarkUI(check_box);
+
+        check_box->Bind(wxEVT_CHECKBOX, [this, optgroup_wk, key](wxCommandEvent& evt) {
+            const bool is_checked = evt.IsChecked();
+            if (auto optgroup_sh = optgroup_wk.lock(); optgroup_sh) {
+                auto opt_keys = get_override_opt_kyes_for_line(optgroup_sh->title.ToStdString(), key);
+                for (const std::string& opt_key : opt_keys)
+                    if (Field* field = optgroup_sh->get_fieldc(opt_key, 0); field != nullptr) {
+                        field->toggle(is_checked);
+                        if (is_checked)
+                            field->set_last_meaningful_value();
+                        else
+                            field->set_na_value();
+                    }
+            }
+
+            toggle_options();
+        });
+
+        m_overrides_options[key] = check_box;
+        return check_box;
+    };
+}
+
+std::vector<std::pair<std::string, std::vector<std::string>>> material_overrides_option_keys{
+    {"Support head", {
+        "support_head_front_diameter",
+        "support_head_penetration",
+        "support_head_width"
+    }},
+    {"Support pillar", {
+        "support_pillar_diameter",
+    }},
+    {"Automatic generation", {
+        "support_points_density_relative"
+    }},
+    {"Corrections", {
+        "relative_correction",
+        "elefant_foot_compensation"
+    }}
+};
+
+void TabSLAMaterial::add_material_overrides_page()
+{
+    // TRN: Page title in Material Settings in SLA mode.
+    PageShp page = add_options_page(L("Material Overrides"), "wrench");
+
+    for (const auto& [title, keys] : material_overrides_option_keys) {
+        ConfigOptionsGroupShp optgroup = page->new_optgroup(L(title));
+        for (const std::string& opt_key : keys) {
+            create_line_with_near_label_widget(optgroup, opt_key);
+        }
+    }
+}
+
+void TabSLAMaterial::update_line_with_near_label_widget(ConfigOptionsGroupShp optgroup, const std::string& key, bool is_checked/* = true*/)
+{
+    if (!m_overrides_options[key])
+        return;
+
+    const std::string preprefix = "material_ow_";
+
+    std::vector<std::string> opt_keys;
+    opt_keys.reserve(3);
+
+    if (optgroup->title == "Support head" || optgroup->title == "Support pillar") {
+        for (auto& prefix : { "", "branching" }) {
+            std::string opt_key = preprefix + prefix + key;
+            is_checked = !m_config->option(opt_key)->is_nil();
+            opt_keys.push_back(opt_key);
+        }
+    }
+    else if (key == "relative_correction") {
+        for (auto& axis : { "x", "y", "z" }) {
+            std::string opt_key = preprefix + key + "_" + char(axis[0]);
+            is_checked = !m_config->option(opt_key)->is_nil();
+            opt_keys.push_back(opt_key);
+        }
+    }
+    else {
+        std::string opt_key = preprefix + key;
+        is_checked = !m_config->option(opt_key)->is_nil();
+        opt_keys.push_back(opt_key);
+    }
+
+    CheckBox::SetValue(m_overrides_options[key], is_checked);
+
+    for (const std::string& opt_key : opt_keys) {
+        Field* field = optgroup->get_field(opt_key);
+        if (field != nullptr)
+            field->toggle(is_checked);
+    }
+}
+
+void TabSLAMaterial::update_material_overrides_page()
+{
+    if (!m_active_page || m_active_page->title() != "Material Overrides")
+        return;
+    Page* page = m_active_page;
+
+    for (const auto& [title, keys] : material_overrides_option_keys) {
+        std::optional<ConfigOptionsGroupShp> optgroup{ get_option_group(page, title) };
+        if (!optgroup) {
+            continue;
+        }
+
+        for (const std::string& key : keys) {
+            update_line_with_near_label_widget(*optgroup, key);
+        }
+    }
+}
 void TabSLAPrint::build()
 {
     m_presets = &m_preset_bundle->sla_prints;
@@ -5613,7 +5780,6 @@ void TabSLAPrint::update()
 
     m_update_cnt++;
 
-    m_config_manipulation.update_print_sla_config(m_config, true);
 
     update_description_lines();
     Layout();

@@ -7,7 +7,6 @@
 #include "../BuildVolume.hpp"
 #include "../ClipperUtils.hpp"
 #include "../EdgeGrid.hpp"
-#include "../Fill/Fill.hpp"
 #include "../Layer.hpp"
 #include "../Print.hpp"
 #include "../MultiPoint.hpp"

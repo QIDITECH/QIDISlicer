@@ -142,6 +142,15 @@ public:
         return this->min.x() < other.max.x() && this->max.x() > other.min.x() && this->min.y() < other.max.y() && this->max.y() > other.min.y() && 
             this->min.z() < other.max.z() && this->max.z() > other.min.z();
     }
+    // Shares some boundary.
+    bool shares_boundary(const BoundingBox3Base<PointType>& other) const {
+        return is_approx(this->min.x(), other.max.x()) ||
+               is_approx(this->max.x(), other.min.x()) ||
+               is_approx(this->min.y(), other.max.y()) ||
+               is_approx(this->max.y(), other.min.y()) ||
+               is_approx(this->min.z(), other.max.z()) ||
+               is_approx(this->max.z(), other.min.z());
+    }
 };
 
 // Will prevent warnings caused by non existing definition of template in hpp

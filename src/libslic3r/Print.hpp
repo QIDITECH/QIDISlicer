@@ -433,7 +433,7 @@ struct WipeTowerData
     std::unique_ptr<std::vector<WipeTower::ToolChangeResult>> priming;
     std::vector<std::vector<WipeTower::ToolChangeResult>> tool_changes;
     std::unique_ptr<WipeTower::ToolChangeResult>          final_purge;
-    std::vector<float>                                    used_filament;
+    std::vector<std::pair<float, std::vector<float>>>     used_filament_until_layer;
     int                                                   number_of_toolchanges;
 
     // Depth of the wipe tower to pass to GLCanvas3D for exact bounding box:
@@ -452,7 +452,7 @@ struct WipeTowerData
         priming.reset(nullptr);
         tool_changes.clear();
         final_purge.reset(nullptr);
-        used_filament.clear();
+        used_filament_until_layer.clear();
         number_of_toolchanges = -1;
         depth = 0.f;
         z_and_depth_pairs.clear();
@@ -619,9 +619,6 @@ public:
     // If zero, then the print is empty and the print shall not be executed.
     unsigned int                num_object_instances() const;
 
-    // For Perl bindings. 
-    PrintObjectPtrs&            objects_mutable() { return m_objects; }
-    PrintRegionPtrs&            print_regions_mutable() { return m_print_regions; }
 
     const ExtrusionEntityCollection& skirt() const { return m_skirt; }
     const ExtrusionEntityCollection& brim() const { return m_brim; }

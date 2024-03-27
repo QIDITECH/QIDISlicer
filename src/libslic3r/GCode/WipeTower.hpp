@@ -219,7 +219,7 @@ public:
         return m_current_layer_finished;
 	}
 
-    std::vector<float> get_used_filament() const { return m_used_filament_length; }
+    std::vector<std::pair<float, std::vector<float>>> get_used_filament_until_layer() const { return m_used_filament_length_until_layer; }
     int get_number_of_toolchanges() const { return m_num_tool_changes; }
 
     struct FilamentParameters {
@@ -275,7 +275,6 @@ private:
 	size_t m_max_color_changes 	= 0; 	// Maximum number of color changes per layer.
     int    m_old_temperature    = -1;   // To keep track of what was the last temp that we set (so we don't issue the command when not neccessary)
     float  m_travel_speed       = 0.f;
-    float  m_travel_speed_z     = 0.f;
 	float  m_infill_speed       = 0.f;
 	float  m_perimeter_speed    = 0.f;
     float  m_first_layer_speed  = 0.f;
@@ -380,6 +379,7 @@ private:
 
     // Stores information about used filament length per extruder:
     std::vector<float> m_used_filament_length;
+	std::vector<std::pair<float, std::vector<float>>> m_used_filament_length_until_layer;
 
     // Return index of first toolchange that switches to non-soluble extruder
     // ot -1 if there is no such toolchange.

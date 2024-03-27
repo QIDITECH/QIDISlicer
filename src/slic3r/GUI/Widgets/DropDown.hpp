@@ -85,6 +85,7 @@ public:
     bool HasDismissLongTime();
     
     static void SetTransparentBG(wxDC& dc, wxWindow* win);
+    void CallDismissAndNotify() { DismissAndNotify(); }
 protected:
     void OnDismiss() override;
 

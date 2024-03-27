@@ -41,7 +41,8 @@ namespace {
 std::string to_ini(const ConfMap &m)
 {
     std::string ret;
-    for (auto &param : m) ret += param.first + " = " + param.second + "\n";
+    for (auto &param : m)
+        ret += param.first + " = " + param.second + "\n";
     
     return ret;
 }

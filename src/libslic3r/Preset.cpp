@@ -636,7 +636,25 @@ static std::vector<std::string> s_Preset_sla_material_options {
     "material_print_speed",
     "default_sla_material_profile",
     "compatible_prints", "compatible_prints_condition",
-    "compatible_printers", "compatible_printers_condition", "inherits"
+    "compatible_printers", "compatible_printers_condition", "inherits",
+
+    // overriden options
+    "material_ow_support_head_front_diameter",
+    "material_ow_support_head_penetration",
+    "material_ow_support_head_width",
+    "material_ow_support_pillar_diameter",
+
+    "material_ow_branchingsupport_head_front_diameter",
+    "material_ow_branchingsupport_head_penetration",
+    "material_ow_branchingsupport_head_width",
+    "material_ow_branchingsupport_pillar_diameter",
+
+    "material_ow_support_points_density_relative",
+
+    "material_ow_relative_correction_x",
+    "material_ow_relative_correction_y",
+    "material_ow_relative_correction_z",
+    "material_ow_elefant_foot_compensation"
 };
 
 static std::vector<std::string> s_Preset_sla_printer_options {
@@ -763,7 +781,7 @@ void PresetCollection::load_presets(
                     preset.config.apply(std::move(config));
                     Preset::normalize(preset.config);
                     // Report configuration fields, which are misplaced into a wrong group.
-                    std::string incorrect_keys = Preset::remove_invalid_keys(config, default_preset.config);
+                    std::string incorrect_keys = Preset::remove_invalid_keys(preset.config, default_preset.config);
                     if (! incorrect_keys.empty())
                         BOOST_LOG_TRIVIAL(error) << "Error in a preset file: The preset \"" <<
                             preset.file << "\" contains the following incorrect keys: " << incorrect_keys << ", which were removed";
@@ -2294,7 +2312,6 @@ size_t ExtruderFilaments::update_compatible_internal(const PresetWithVendorProfi
     const ConfigOption* opt = active_printer.preset.config.option("nozzle_diameter");
     if (opt)
         config.set_key_value("num_extruders", new ConfigOptionInt((int)static_cast<const ConfigOptionFloats*>(opt)->values.size()));
-    bool some_compatible = false;
 
     // Adjust printer preset config to the first extruder from m_extruder_id 
     Preset printer_preset_adjusted = active_printer.preset;
@@ -2322,7 +2339,6 @@ size_t ExtruderFilaments::update_compatible_internal(const PresetWithVendorProfi
         const PresetWithVendorProfile this_preset_with_vendor_profile = m_filaments->get_preset_with_vendor_profile(*preset);
         bool    was_compatible = extr_filament.is_compatible;
         extr_filament.is_compatible = is_compatible_with_printer(this_preset_with_vendor_profile, active_printer_adjusted, &config);
-        some_compatible |= extr_filament.is_compatible;
         if (active_print != nullptr)
             extr_filament.is_compatible &= is_compatible_with_print(this_preset_with_vendor_profile, *active_print, active_printer_adjusted);
         if (!extr_filament.is_compatible && is_selected &&

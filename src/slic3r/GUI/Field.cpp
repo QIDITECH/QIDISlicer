@@ -846,6 +846,7 @@ void SpinCtrl::BUILD() {
 	switch (m_opt.type) {
 	case coInt:
 		default_value = m_opt.default_value->getInt();
+        m_last_meaningful_value = default_value;
 		break;
 	case coInts:
 	{

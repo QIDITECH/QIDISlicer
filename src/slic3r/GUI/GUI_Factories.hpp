@@ -37,6 +37,8 @@ public:
 	static std::vector<wxBitmapBundle*> get_text_volume_bitmaps();
 	static std::vector<wxBitmapBundle*> get_svg_volume_bitmaps();
 
+    static wxString                     get_repaire_result_message(const std::vector<std::string>& succes_models,
+                                                                   const std::vector<std::pair<std::string, std::string>>& failed_models);
     MenuFactory();
     ~MenuFactory() = default;
 

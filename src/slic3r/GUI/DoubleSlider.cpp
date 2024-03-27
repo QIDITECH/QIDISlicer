@@ -2236,7 +2236,7 @@ static std::string get_new_color(const std::string& color)
     data->SetChooseFull(1);
     data->SetColour(clr);
 
-    wxColourDialog dialog(nullptr, data);
+    wxColourDialog dialog(GUI::wxGetApp().GetTopWindow(), data);
     dialog.CenterOnParent();
     if (dialog.ShowModal() == wxID_OK)
         return dialog.GetColourData().GetColour().GetAsString(wxC2S_HTML_SYNTAX).ToStdString();

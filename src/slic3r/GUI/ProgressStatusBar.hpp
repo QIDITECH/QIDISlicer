@@ -58,9 +58,6 @@ public:
     wxString    get_status_text() const;
     void        set_font(const wxFont &font);
 
-    // Temporary methods to satisfy Perl side
-    void        show_cancel_button();
-    void        hide_cancel_button();
 
     void        update_dark_ui();
 

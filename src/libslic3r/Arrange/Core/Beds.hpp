@@ -181,6 +181,11 @@ inline ExPolygons to_expolygons(const ArrangeBed &bed)
 
 ArrangeBed to_arrange_bed(const Points &bedpts);
 
+template<class Bed, class En = void> struct IsRectangular_ : public std::false_type {};
+template<> struct IsRectangular_<RectangleBed>: public std::true_type {};
+template<> struct IsRectangular_<BoundingBox>: public std::true_type {};
+
+template<class Bed> static constexpr bool IsRectangular = IsRectangular_<Bed>::value;
 } // namespace arr2
 
 inline BoundingBox &bounding_box(BoundingBox &bb) { return bb; }

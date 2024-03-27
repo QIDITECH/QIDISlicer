@@ -811,8 +811,8 @@ public:
     // List of seam enforcers/blockers.
     FacetsAnnotation    seam_facets;
 
-    // List of mesh facets painted for MMU segmentation.
-    FacetsAnnotation    mmu_segmentation_facets;
+    // List of mesh facets painted for MM segmentation.
+    FacetsAnnotation    mm_segmentation_facets;
 
     // Is set only when volume is Embossed Text type
     // Contain information how to re-create volume
@@ -916,12 +916,12 @@ public:
         this->config.set_new_unique_id();
         this->supported_facets.set_new_unique_id();
         this->seam_facets.set_new_unique_id();
-        this->mmu_segmentation_facets.set_new_unique_id();
+        this->mm_segmentation_facets.set_new_unique_id();
     }
 
     bool is_fdm_support_painted() const { return !this->supported_facets.empty(); }
     bool is_seam_painted() const { return !this->seam_facets.empty(); }
-    bool is_mm_painted() const { return !this->mmu_segmentation_facets.empty(); }
+    bool is_mm_painted() const { return !this->mm_segmentation_facets.empty(); }
 
 protected:
 	friend class Print;
@@ -960,11 +960,11 @@ private:
         assert(this->config.id().valid());
         assert(this->supported_facets.id().valid());
         assert(this->seam_facets.id().valid());
-        assert(this->mmu_segmentation_facets.id().valid());
+        assert(this->mm_segmentation_facets.id().valid());
         assert(this->id() != this->config.id());
         assert(this->id() != this->supported_facets.id());
         assert(this->id() != this->seam_facets.id());
-        assert(this->id() != this->mmu_segmentation_facets.id());
+        assert(this->id() != this->mm_segmentation_facets.id());
         return true;
     }
 
@@ -990,23 +990,23 @@ private:
         ObjectBase(other),
         name(other.name), source(other.source), m_mesh(other.m_mesh), m_convex_hull(other.m_convex_hull),
         config(other.config), m_type(other.m_type), object(object), m_transformation(other.m_transformation),
-        supported_facets(other.supported_facets), seam_facets(other.seam_facets), mmu_segmentation_facets(other.mmu_segmentation_facets),
+        supported_facets(other.supported_facets), seam_facets(other.seam_facets), mm_segmentation_facets(other.mm_segmentation_facets),
         cut_info(other.cut_info), text_configuration(other.text_configuration), emboss_shape(other.emboss_shape)
     {
 		assert(this->id().valid()); 
         assert(this->config.id().valid()); 
         assert(this->supported_facets.id().valid());
         assert(this->seam_facets.id().valid());
-        assert(this->mmu_segmentation_facets.id().valid());
+        assert(this->mm_segmentation_facets.id().valid());
         assert(this->id() != this->config.id());
         assert(this->id() != this->supported_facets.id());
         assert(this->id() != this->seam_facets.id());
-        assert(this->id() != this->mmu_segmentation_facets.id());
+        assert(this->id() != this->mm_segmentation_facets.id());
 		assert(this->id() == other.id());
         assert(this->config.id() == other.config.id());
         assert(this->supported_facets.id() == other.supported_facets.id());
         assert(this->seam_facets.id() == other.seam_facets.id());
-        assert(this->mmu_segmentation_facets.id() == other.mmu_segmentation_facets.id());
+        assert(this->mm_segmentation_facets.id() == other.mm_segmentation_facets.id());
         this->set_material_id(other.material_id());
     }
     // Providing a new mesh, therefore this volume will get a new unique ID assigned.
@@ -1018,11 +1018,11 @@ private:
         assert(this->config.id().valid()); 
         assert(this->supported_facets.id().valid());
         assert(this->seam_facets.id().valid());
-        assert(this->mmu_segmentation_facets.id().valid());
+        assert(this->mm_segmentation_facets.id().valid());
         assert(this->id() != this->config.id());
         assert(this->id() != this->supported_facets.id());
         assert(this->id() != this->seam_facets.id());
-        assert(this->id() != this->mmu_segmentation_facets.id());
+        assert(this->id() != this->mm_segmentation_facets.id());
 		assert(this->id() != other.id());
         assert(this->config.id() == other.config.id());
         this->set_material_id(other.material_id());
@@ -1033,11 +1033,11 @@ private:
         assert(this->config.id() != other.config.id()); 
         assert(this->supported_facets.id() != other.supported_facets.id());
         assert(this->seam_facets.id() != other.seam_facets.id());
-        assert(this->mmu_segmentation_facets.id() != other.mmu_segmentation_facets.id());
+        assert(this->mm_segmentation_facets.id() != other.mm_segmentation_facets.id());
         assert(this->id() != this->config.id());
         assert(this->supported_facets.empty());
         assert(this->seam_facets.empty());
-        assert(this->mmu_segmentation_facets.empty());
+        assert(this->mm_segmentation_facets.empty());
     }
 
     ModelVolume& operator=(ModelVolume &rhs) = delete;
@@ -1045,19 +1045,19 @@ private:
 	friend class cereal::access;
 	friend class UndoRedo::StackImpl;
 	// Used for deserialization, therefore no IDs are allocated.
-	ModelVolume() : ObjectBase(-1), config(-1), supported_facets(-1), seam_facets(-1), mmu_segmentation_facets(-1), object(nullptr) {
+	ModelVolume() : ObjectBase(-1), config(-1), supported_facets(-1), seam_facets(-1), mm_segmentation_facets(-1), object(nullptr) {
 		assert(this->id().invalid());
         assert(this->config.id().invalid());
         assert(this->supported_facets.id().invalid());
         assert(this->seam_facets.id().invalid());
-        assert(this->mmu_segmentation_facets.id().invalid());
+        assert(this->mm_segmentation_facets.id().invalid());
 	}
 	template<class Archive> void load(Archive &ar) {
 		bool has_convex_hull;
         ar(name, source, m_mesh, m_type, m_material_id, m_transformation, m_is_splittable, has_convex_hull, cut_info);
         cereal::load_by_value(ar, supported_facets);
         cereal::load_by_value(ar, seam_facets);
-        cereal::load_by_value(ar, mmu_segmentation_facets);
+        cereal::load_by_value(ar, mm_segmentation_facets);
         cereal::load_by_value(ar, config);
         cereal::load(ar, text_configuration);
         cereal::load(ar, emboss_shape);
@@ -1075,7 +1075,7 @@ private:
         ar(name, source, m_mesh, m_type, m_material_id, m_transformation, m_is_splittable, has_convex_hull, cut_info);
         cereal::save_by_value(ar, supported_facets);
         cereal::save_by_value(ar, seam_facets);
-        cereal::save_by_value(ar, mmu_segmentation_facets);
+        cereal::save_by_value(ar, mm_segmentation_facets);
         cereal::save_by_value(ar, config);
         cereal::save(ar, text_configuration);
         cereal::save(ar, emboss_shape);

@@ -5,12 +5,15 @@
 #include <GL/glew.h>
 
 #include <algorithm>
+#include <wx/progdlg.h>
 
 #include "slic3r/GUI/GUI_App.hpp"
 #include "slic3r/GUI/Plater.hpp"
 #include "slic3r/GUI/GUI_ObjectManipulation.hpp"
+#include "slic3r/GUI/GUI_Factories.hpp"
 #include "slic3r/GUI/format.hpp"
 #include "slic3r/Utils/UndoRedo.hpp"
+#include "slic3r/Utils/FixModelByWin10.hpp"
 #include "libslic3r/AppConfig.hpp"
 #include "libslic3r/TriangleMeshSlicer.hpp"
 
@@ -3255,6 +3258,8 @@ void update_object_cut_id(CutObjectBase& cut_id, ModelObjectCutAttributes attrib
 static void check_objects_after_cut(const ModelObjectPtrs& objects)
 {
     std::vector<std::string> err_objects_names;
+    std::vector<int> err_objects_idxs;
+    int obj_idx{ 0 };
     for (const ModelObject* object : objects) {
         std::vector<std::string> connectors_names;
         connectors_names.reserve(object->volumes.size());
@@ -3265,17 +3270,86 @@ static void check_objects_after_cut(const ModelObjectPtrs& objects)
         sort_remove_duplicates(connectors_names);
         if (connectors_count != connectors_names.size())
             err_objects_names.push_back(object->name);
+        // check manifol/repairs
+        auto stats = object->get_object_stl_stats();
+        if (!stats.manifold() || stats.repaired())
+            err_objects_idxs.push_back(obj_idx);
+        obj_idx++;
     }
-    if (err_objects_names.empty())
-        return;
+    auto plater = wxGetApp().plater();
 
+    if (!err_objects_names.empty()) {
     wxString names = from_u8(err_objects_names[0]);
     for (size_t i = 1; i < err_objects_names.size(); i++)
         names += ", " + from_u8(err_objects_names[i]);
-    WarningDialog(wxGetApp().plater(), format_wxstr("Objects(%1%) have duplicated connectors. "
+        WarningDialog(plater, format_wxstr("Objects(%1%) have duplicated connectors. "
                                 "Some connectors may be missing in slicing result.\n"
                                 "Please report to QIDISlicer team in which scenario this issue happened.\n"
                                 "Thank you.", names)).ShowModal();
+}
+    if (is_windows10() && !err_objects_idxs.empty()) {
+        auto dlg = WarningDialog(plater, _L("Open edges or errors were detected after the cut.\n"
+                                            "Do you want to fix them by Windows repair algorithm?"), 
+                                         _L("Errors detected after cut operation"), wxYES_NO);
+        if (dlg.ShowModal() == wxID_YES) {
+            //          model_name
+            std::vector<std::string>                           succes_models;
+            //                    model_name   failing reason
+            std::vector<std::pair<std::string, std::string>>   failed_models;
+
+            std::vector<std::string> model_names;
+
+            for (int obj_idx : err_objects_idxs)
+                model_names.push_back(objects[obj_idx]->name);
+
+            auto fix_and_update_progress = [model_names, &objects](const int obj_idx, int model_idx,
+                wxProgressDialog& progress_dlg,
+                std::vector<std::string>& succes_models,
+                std::vector<std::pair<std::string, std::string>>& failed_models) -> bool
+                {
+                    const std::string& model_name = model_names[model_idx];
+                    wxString msg;
+                    if (model_names.size() == 1)
+                        msg = GUI::format(_L("Repairing object %1%"), model_name) + "\n";
+                    else {
+                        // TRN: This is followed by a list of object which are to be repaired.
+                        msg = _L("Repairing objects:")  + "\n";
+                        for (int i = 0; i < int(model_names.size()); ++i)
+                            msg += (i == model_idx ? " > " : "   ") + from_u8(model_names[i]) + "\n";
+                        msg += "\n";
+                    }
+
+                    std::string res;
+                    if (!fix_model_by_win10_sdk_gui(*objects[obj_idx], -1, progress_dlg, msg, res))
+                        return false;
+                    
+                    if (res.empty())
+                        succes_models.push_back(model_name);
+                    else
+                        failed_models.push_back({ model_name, res });
+                    return true;
+                };
+
+            // Open a progress dialog.
+            // TRN: This shows in a progress dialog while the operation is in progress.
+            wxProgressDialog progress_dlg(_L("Fixing by Windows repair algorithm"), "", 100, find_toplevel_parent(plater),
+                wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_CAN_ABORT);
+            int model_idx{ 0 };
+            for (int obj_idx : err_objects_idxs) {
+                if (!fix_and_update_progress(obj_idx, model_idx, progress_dlg, succes_models, failed_models))
+                    break;
+                model_idx++;
+            }
+
+            // Close the progress dialog
+            progress_dlg.Update(100, "");
+
+            // Show info dialog
+            wxString msg = MenuFactory::get_repaire_result_message(succes_models, failed_models);
+            // TRN: Title of a dialog informing the user about the result of the model repair operation.
+            InfoDialog(plater, _L("Repair operation finished"), msg).ShowModal();
+        }
+    }
 }
 void synchronize_model_after_cut(Model& model, const CutObjectBase& cut_id)
 {

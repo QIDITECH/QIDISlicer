@@ -94,6 +94,9 @@ public:
     // If per layer extruder switches are inserted by the G-code preview slider, this value contains the new (1 based) extruder, with which the whole object layer is being printed with.
     // If not overriden, it is set to 0.
     unsigned int 				extruder_override = 0;
+    // For multi-extruder printers, when there is a color change, this contains an extruder (1 based) on which the color change will be performed.
+    // Otherwise, it is set to 0.
+    unsigned int                extruder_needed_for_color_changer = 0;
     // Should a skirt be printed at this layer?
     // Layers are marked for infinite skirt aka draft shield. Not all the layers have to be printed.
     bool                        has_skirt = false;
@@ -165,7 +168,7 @@ public:
 
 private:
     void				initialize_layers(std::vector<coordf_t> &zs);
-    void 				collect_extruders(const PrintObject &object, const std::vector<std::pair<double, unsigned int>> &per_layer_extruder_switches);
+    void 				collect_extruders(const PrintObject &object, const std::vector<std::pair<double, unsigned int>> &per_layer_extruder_switches, const std::vector<std::pair<double, unsigned int>> &per_layer_color_changes);
     void				reorder_extruders(unsigned int last_extruder_id);
     void 				fill_wipe_tower_partitions(const PrintConfig &config, coordf_t object_bottom_z, coordf_t max_layer_height);
     bool                insert_wipe_tower_extruder();

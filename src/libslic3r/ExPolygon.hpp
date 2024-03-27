@@ -434,7 +434,7 @@ inline void expolygons_rotate(ExPolygons &expolys, double angle)
         expoly.rotate(angle);
 }
 
-inline bool expolygons_contain(ExPolygons &expolys, const Point &pt, bool border_result = true)
+inline bool expolygons_contain(const ExPolygons &expolys, const Point &pt, bool border_result = true)
 {
     for (const ExPolygon &expoly : expolys)
         if (expoly.contains(pt, border_result))
@@ -465,6 +465,7 @@ std::vector<BoundingBox> get_extents_vector(const ExPolygons &polygons);
 bool has_duplicate_points(const ExPolygon &expoly);
 bool has_duplicate_points(const ExPolygons &expolys);
 
+// Return True when erase some otherwise False.
 bool remove_same_neighbor(ExPolygons &expolys);
 bool remove_sticks(ExPolygon &poly);
 void keep_largest_contour_only(ExPolygons &polygons);
