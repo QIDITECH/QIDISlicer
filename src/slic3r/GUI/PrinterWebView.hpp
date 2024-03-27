@@ -79,6 +79,7 @@ public:
     wxString getLabel() { return full_label; }
     wxString getIPLabel() { return m_ip_text; }
 
+    bool     getIsQIDI() { return m_is_QIDI; }
 
     void SetBitMap(const wxBitmap &bitmap)
     {
@@ -93,6 +94,12 @@ public:
         Refresh();
     }
 
+    //B58
+    void SetIsQIDI(const bool &text)
+    {
+        m_is_QIDI = text;
+        //Refresh();
+    }
     wxString GetNameText()
     {
         return m_name_text;
@@ -219,6 +226,8 @@ private:
     wxString m_state_text; 
     wxString m_progress_text; 
     std::function<void(wxMouseEvent &)> m_handlerl;
+    //B58
+    bool m_is_QIDI;
     wxDECLARE_EVENT_TABLE();
 };
 

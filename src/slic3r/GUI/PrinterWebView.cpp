@@ -360,6 +360,7 @@ void PrinterWebView::AddButton(const wxString &                             devi
     customButton->SetStateText("standby");
     customButton->SetProgressText("(0%)");
 
+    customButton->SetIsQIDI(isQIDI);
     customButton->Bind(wxEVT_BUTTON, [this, ip, customButton, isQIDI](wxCommandEvent &event) { 
         //B55
         wxString   formattedHost = ip;
@@ -664,9 +665,34 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) {
                 button->SetNameText((wxString::FromUTF8(printer_name)));
                 button->SetIPText(host);
                 button->SetLabel(fullname);
+                //B58
+                const auto opt = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
+                const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
+                bool       isQIDI    = (host_type == htMoonraker);
+                wxString   formattedHost = host;
+                if (!formattedHost.Lower().starts_with("http"))
+                    formattedHost = wxString::Format("http://%s", formattedHost);
+                if (isQIDI) {
+                    if (!formattedHost.Lower().ends_with("10088"))
+                        formattedHost = wxString::Format("%s:10088", formattedHost);
+                }
+                button->Bind(wxEVT_BUTTON, [this, host, button, isQIDI](wxCommandEvent &event) {
+                //B55
+                    wxString formattedHost = host;
+                    if (!formattedHost.Lower().starts_with("http"))
+                        formattedHost = wxString::Format("http://%s", formattedHost);
+                    if (isQIDI) {
+                        if (!formattedHost.Lower().ends_with("10088"))
+                            formattedHost = wxString::Format("%s:10088", formattedHost);
+                    }
+                    load_url(formattedHost);
+                    button->ResumeStatusThread();
+                });
                 wxString Machine_Name = Machine_Name.Format("%s%s", model_id, "_thumbnail");
 
                 button->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
+                //B58
+                load_url(formattedHost);
                 UpdateLayout();
                 Refresh();
             }
