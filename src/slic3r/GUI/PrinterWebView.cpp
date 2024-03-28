@@ -570,9 +570,10 @@ void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
                 formattedHost = wxString::Format("%s:10088", formattedHost);
         }
         UnSelectedButton();
+        //B60
         if (isValidIPAddress)
             AddButton(
-                printer_name, host,model_id, fullname, true, (host_type == htMoonraker), cfg_t);
+                printer_name, host,model_id, wxString::FromUTF8(fullname), true, (host_type == htMoonraker), cfg_t);
         load_url(formattedHost);
         UpdateLayout();
         Refresh();
