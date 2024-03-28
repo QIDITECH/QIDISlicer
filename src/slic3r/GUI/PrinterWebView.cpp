@@ -665,7 +665,7 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) {
                 button->SetNameText((wxString::FromUTF8(printer_name)));
                 button->SetIPText(host);
                 button->SetLabel(fullname);
-                //B58
+                //B59
                 const auto opt = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
                 const auto host_type = opt != nullptr ? opt->value : htOctoPrint;
                 bool       isQIDI    = (host_type == htMoonraker);
@@ -691,7 +691,7 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event) {
                 wxString Machine_Name = Machine_Name.Format("%s%s", model_id, "_thumbnail");
 
                 button->SetBitMap(get_bmp_bundle(std::string(Machine_Name.mb_str()), 80)->GetBitmapFor(this));
-                //B58
+                //B59
                 load_url(formattedHost);
                 UpdateLayout();
                 Refresh();

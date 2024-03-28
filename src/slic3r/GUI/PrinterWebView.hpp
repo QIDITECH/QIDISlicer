@@ -94,7 +94,7 @@ public:
         Refresh();
     }
 
-    //B58
+    //B59
     void SetIsQIDI(const bool &text)
     {
         m_is_QIDI = text;
@@ -226,7 +226,7 @@ private:
     wxString m_state_text; 
     wxString m_progress_text; 
     std::function<void(wxMouseEvent &)> m_handlerl;
-    //B58
+    //B59
     bool m_is_QIDI;
     wxDECLARE_EVENT_TABLE();
 };

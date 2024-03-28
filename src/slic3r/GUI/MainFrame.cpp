@@ -2058,7 +2058,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
         size_t new_selection = tab == (size_t)(-1) ? m_last_selected_tab : (m_layout == ESettingsLayout::Dlg && tab != 0) ? tab - 1 : tab;
         //B4
         if (m_tabpanel->GetSelection() == 4) {
-            //B45 //B58
+            //B45 //B59 //B60
             PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
             const PhysicalPrinterCollection &ph_printers = preset_bundle.physical_printers;
             struct PhysicalPrinterPresetData
@@ -2070,6 +2070,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                 std::string  model_id;
                 wxString    host;
                 bool        is_QIDI;
+                std::string preset_name;
             };
             std::vector<PhysicalPrinterPresetData> preset_data;
             for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
@@ -2084,7 +2085,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                             else
                                 model_id = preset->config.opt_string("printer_model");
                         }
-                        //B58
+                        //B59 //B60
                         wxStringTokenizer tokenizer(wxString::FromUTF8(it->get_full_name(preset_name)), "*");
                         std::string       tem_name = (into_u8(tokenizer.GetNextToken().Trim().mb_str()));
                         auto *            printer  = preset_bundle.physical_printers.find_printer(tem_name);
@@ -2105,7 +2106,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                         }
                         preset_data.push_back({printer_name, wxString::FromUTF8(preset_name),
                                                wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
-                                               model_id, host, (host_type == htMoonraker)});
+                                               model_id, host, (host_type == htMoonraker), preset_name});
                     }
                 }
             }
@@ -2116,7 +2117,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
             for (auto it = m_buttons.begin(); it != m_buttons.end();) {
                 bool foundPreset = false;
                 for (const PhysicalPrinterPresetData &data : preset_data) {
-                    //B58
+                    //B59
                     if ((*it)->getLabel() == data.fullname && (*it)->getIPLabel() == data.host && (*it)->getIsQIDI() == data.is_QIDI) {
                         foundPreset = true;
                         break;
@@ -2147,10 +2148,10 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
                     missingPresets.push_back(&data);
                 }
             }
-            //B58
+            //B59 //B60
             for (const PhysicalPrinterPresetData *data : missingPresets) {
 
-                Preset *preset = m_collection->find_preset((data->name).ToStdString());
+                Preset *preset = m_collection->find_preset((data->preset_name));
                 if (!preset || !preset->is_visible)
                     continue;
                 wxStringTokenizer tokenizer((data->fullname), "*");
