@@ -20,6 +20,9 @@
 //w21
 #include "../ShortestPath.hpp"
 //w11
+
+#include "LayerRegion.hpp"
+
 #define NARROW_INFILL_AREA_THRESHOLD 3
 #define NARROW_INFILL_AREA_THRESHOLD_MIN 0.5
 namespace Slic3r {
@@ -228,14 +231,14 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
 	        			fill.expolygons.emplace_back(std::move(fill.surface.expolygon));
 						//w21
                         fill.region_id_group.push_back(region_id);
-                        fill.no_overlap_expolygons = layerm.fill_no_overlap_expolygons;
+                        //fill.no_overlap_expolygons = layerm.fill_no_overlap_expolygons;
                     } else {
 						//w21
                         fill.expolygons.emplace_back(surface.expolygon);
                         auto t = find(fill.region_id_group.begin(), fill.region_id_group.end(), region_id);
                         if (t == fill.region_id_group.end()) {
                             fill.region_id_group.push_back(region_id);
-                            fill.no_overlap_expolygons = union_ex(fill.no_overlap_expolygons, layerm.fill_no_overlap_expolygons);
+                            //fill.no_overlap_expolygons = union_ex(fill.no_overlap_expolygons, layerm.fill_no_overlap_expolygons);
                         }
                     }
 				}

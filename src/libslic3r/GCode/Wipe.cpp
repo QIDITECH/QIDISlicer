@@ -32,27 +32,11 @@ void Wipe::init(const PrintConfig &config, const std::vector<unsigned int> &extr
         this->enable(wipe_xy);
 }
 
-void Wipe::set_path(SmoothPath &&path, bool reversed)
-{
+void Wipe::set_path(SmoothPath &&path) {
     this->reset_path();
 
     if (this->enabled() && ! path.empty()) {
-        if (coord_t wipe_len_max_scaled = scaled(m_wipe_len_max); reversed) {
-            m_path = std::move(path.back().path);
-            Geometry::ArcWelder::reverse(m_path);
-            int64_t len = Geometry::ArcWelder::estimate_path_length(m_path);
-            for (auto it = std::next(path.rbegin()); len < wipe_len_max_scaled && it != path.rend(); ++ it) {
-                if (it->path_attributes.role.is_bridge())
-                    break; // Do not perform a wipe on bridges.
-                assert(it->path.size() >= 2);
-                assert(m_path.back().point == it->path.back().point);
-                if (m_path.back().point != it->path.back().point)
-                    // ExtrusionMultiPath is interrupted in some place. This should not really happen.
-                    break;
-                len += Geometry::ArcWelder::estimate_path_length(it->path);
-                m_path.insert(m_path.end(), it->path.rbegin() + 1, it->path.rend());
-            }
-        } else {
+        const coord_t wipe_len_max_scaled = scaled(m_wipe_len_max);
             m_path = std::move(path.front().path);
             int64_t len = Geometry::ArcWelder::estimate_path_length(m_path);
             for (auto it = std::next(path.begin()); len < wipe_len_max_scaled && it != path.end(); ++ it) {
@@ -67,7 +51,6 @@ void Wipe::set_path(SmoothPath &&path, bool reversed)
                 m_path.insert(m_path.end(), it->path.begin() + 1, it->path.end());
             }
         }
-    }
 
     assert(m_path.empty() || m_path.size() > 1);
 }

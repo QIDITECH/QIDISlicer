@@ -169,6 +169,8 @@ private:
         bool        extrude_end_tag       = false;
     };
 
+    using GCodeLines = std::vector<GCodeLine>;
+    using GCodeLinesConstIt = GCodeLines::const_iterator;
     // Output buffer will only grow. It will not be reallocated over and over.
     std::vector<char>               output_buffer;
     size_t                          output_buffer_length;
@@ -182,9 +184,10 @@ private:
     bool process_line(const char *line, const char *line_end, GCodeLine &buf);
     void output_gcode_line(size_t line_idx);
 
+    GCodeLinesConstIt advance_segment_beyond_small_gap(const GCodeLinesConstIt &last_extruding_line_it) const;
     // Go back from the current circular_buffer_pos and lower the feedtrate to decrease the slope of the extrusion rate changes.
     // Then go forward and adjust the feedrate to decrease the slope of the extrusion rate changes.
-    void adjust_volumetric_rate();
+    void adjust_volumetric_rate(size_t first_line_idx, size_t last_line_idx);
 
     // Push the text to the end of the output_buffer.
     inline void push_to_output(GCodeG1Formatter &formatter);

@@ -60,7 +60,7 @@ CopyrightsDialog::CopyrightsDialog()
     m_html = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition, 
                               wxSize(40 * em_unit(), 20 * em_unit()), wxHW_SCROLLBAR_AUTO);
 
-    wxFont font = get_default_font(this);
+    wxFont font = this->GetFont();// get_default_font(this);
     const int fs = font.GetPointSize();
     const int fs2 = static_cast<int>(1.2f*fs);
     int size[] = { fs, fs, fs, fs, fs2, fs2, fs2 };
@@ -289,7 +289,7 @@ AboutDialog::AboutDialog()
             "<a href=\"https://qidi3d.com/\">%6%</a>"
             "<br /><br />"
             "%7%<br />"
-            "%8% &copy; 2016-2023 Prusa Research. <br />"
+            "%8% &copy; 2016-2024 Prusa Research. <br />"
             "%9% &copy; 2011-2018 Alessandro Ranellucci. <br />"
             "<a href=\"http://slic3r.org/\">Slic3r</a> %10% "
             "<a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">%11%</a>."

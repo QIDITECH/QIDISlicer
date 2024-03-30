@@ -2989,13 +2989,7 @@ void GUI_App::MacOpenFiles(const wxArrayString &fileNames)
 
 void GUI_App::MacOpenURL(const wxString& url)
 {
-    if (app_config && !app_config->get_bool("downloader_url_registered"))
-    {
-        notification_manager()->push_notification(NotificationType::URLNotRegistered);
-        BOOST_LOG_TRIVIAL(error) << "Recieved command to open URL, but it is not allowed in app configuration. URL: " << url;
-        return;
-    }
-    start_download(boost::nowide::narrow(url));
+    start_download(into_u8(url));
 }
 
 #endif /* __APPLE */
@@ -3166,6 +3160,9 @@ void GUI_App::show_desktop_integration_dialog()
 
 void GUI_App::show_downloader_registration_dialog()
 {
+#if defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION) 
+    return;
+#endif
     InfoDialog msg(nullptr
         , format_wxstr(_L("Welcome to %1% version %2%."), SLIC3R_APP_NAME, SLIC3R_VERSION)
         , format_wxstr(_L(
@@ -3177,10 +3174,10 @@ void GUI_App::show_downloader_registration_dialog()
     if (msg.ShowModal() == wxID_YES) {
         auto downloader_worker = new DownloaderUtils::Worker(nullptr);
         downloader_worker->perform_register(app_config->get("url_downloader_dest"));
-#ifdef __linux__
+#if defined(__linux__)
         if (downloader_worker->get_perform_registration_linux())
             DesktopIntegrationDialog::perform_downloader_desktop_integration();
-#endif // __linux__
+#endif //(__linux__)
     } else {
         app_config->set("downloader_url_registered", "0");
     }
@@ -3567,6 +3564,17 @@ void GUI_App::start_download(std::string url)
         BOOST_LOG_TRIVIAL(error) << "Could not start URL download: plater is nullptr.";
         return; 
     }
+    // Windows register and deregister executable path to registry - cant get here when not registered
+    // Apple registers via info.plist attached to exectable - might get here
+    // Linux registers via desktop integration file - might get here only if such file was created outside Slicer.
+    // Desktop integration is limited with SLIC3R_DESKTOP_INTEGRATION (cmake option). 
+#if defined(__APPLE__) || (defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION))
+    if (app_config && app_config->get_bool("downloader_url_registered")) {
+        notification_manager()->push_notification(NotificationType::URLNotRegistered);
+        BOOST_LOG_TRIVIAL(error) << "Recieved command to open URL, but it is not allowed in app configuration. URL: " << url;
+        return;
+    }
+#endif //defined(__APPLE__) || (defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION))
     //lets always init so if the download dest folder was changed, new dest is used 
         boost::filesystem::path dest_folder(app_config->get("url_downloader_dest"));
         if (dest_folder.empty() || !boost::filesystem::is_directory(dest_folder)) {

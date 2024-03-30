@@ -159,6 +159,7 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "use_volumetric_e",
         "variable_layer_height",
         "wipe",
+        "wipe_tower_acceleration",
         //w15
         "wipe_distance"
     };
@@ -208,9 +209,12 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "filament_unloading_speed_start"
             || opt_key == "filament_toolchange_delay"
             || opt_key == "filament_cooling_moves"
+            || opt_key == "filament_stamping_loading_speed"
+            || opt_key == "filament_stamping_distance"
             || opt_key == "filament_minimal_purge_on_wipe_tower"
             || opt_key == "filament_cooling_initial_speed"
             || opt_key == "filament_cooling_final_speed"
+            || opt_key == "filament_purge_multiplier"
             || opt_key == "filament_ramming_parameters"
             || opt_key == "filament_multitool_ramming"
             || opt_key == "filament_multitool_ramming_volume"
@@ -228,13 +232,16 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "wipe_tower_cone_angle"
             || opt_key == "wipe_tower_bridging"
             || opt_key == "wipe_tower_extra_spacing"
+            || opt_key == "wipe_tower_extra_flow"
             || opt_key == "wipe_tower_no_sparse_layers"
             || opt_key == "wipe_tower_extruder"
             || opt_key == "wiping_volumes_matrix"
+            || opt_key == "wiping_volumes_use_custom_matrix"
             || opt_key == "parking_pos_retraction"
             || opt_key == "cooling_tube_retraction"
             || opt_key == "cooling_tube_length"
             || opt_key == "extra_loading_move"
+            || opt_key == "multimaterial_purging"
             || opt_key == "travel_speed"
             || opt_key == "travel_speed_z"
             || opt_key == "first_layer_speed"

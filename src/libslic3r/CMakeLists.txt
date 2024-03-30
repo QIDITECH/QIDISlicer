@@ -215,6 +215,7 @@ set(SLIC3R_SOURCES
     KDTreeIndirect.hpp
     Layer.cpp
     Layer.hpp
+    LayerRegion.hpp
     LayerRegion.cpp
     libslic3r.h
     "${CMAKE_CURRENT_BINARY_DIR}/libslic3r_version.h"

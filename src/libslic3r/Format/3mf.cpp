@@ -86,6 +86,11 @@ const std::string SLA_DRAIN_HOLES_FILE = "Metadata/Slic3r_PE_sla_drain_holes.txt
 const std::string CUSTOM_GCODE_PER_PRINT_Z_FILE = "Metadata/QIDI_Slicer_custom_gcode_per_print_z.xml";
 const std::string CUT_INFORMATION_FILE = "Metadata/QIDI_Slicer_cut_information.xml";
 
+static constexpr const char *RELATIONSHIP_TAG = "Relationship";
+
+static constexpr const char* TARGET_ATTR = "Target";
+static constexpr const char* RELS_TYPE_ATTR = "Type";
+
 static constexpr const char* MODEL_TAG = "model";
 static constexpr const char* RESOURCES_TAG = "resources";
 static constexpr const char* OBJECT_TAG = "object";
@@ -113,6 +118,7 @@ static constexpr const char* Z_ATTR = "z";
 static constexpr const char* V1_ATTR = "v1";
 static constexpr const char* V2_ATTR = "v2";
 static constexpr const char* V3_ATTR = "v3";
+static constexpr const char* PPATH_ATTR = "p:path";
 static constexpr const char* OBJECTID_ATTR = "objectid";
 static constexpr const char* TRANSFORM_ATTR = "transform";
 static constexpr const char* PRINTABLE_ATTR = "printable";
@@ -329,18 +335,20 @@ namespace Slic3r {
 
     class _3MF_Importer : public _3MF_Base
     {
+        typedef std::pair<std::string, int> PathId;
         struct Component
         {
-            int object_id;
+            PathId object_id;
+            std::string path;
             Transform3d transform;
 
-            explicit Component(int object_id)
+            explicit Component(PathId object_id)
                 : object_id(object_id)
                 , transform(Transform3d::Identity())
             {
             }
 
-            Component(int object_id, const Transform3d& transform)
+            Component(PathId object_id, const Transform3d &transform)
                 : object_id(object_id)
                 , transform(transform)
             {
@@ -458,11 +466,11 @@ namespace Slic3r {
         };
 
         // Map from a 1 based 3MF object ID to a 0 based ModelObject index inside m_model->objects.
-        typedef std::map<int, int> IdToModelObjectMap;
-        typedef std::map<int, ComponentsList> IdToAliasesMap;
+        typedef std::map<PathId, int> IdToModelObjectMap;
+        typedef std::map<PathId, ComponentsList> IdToAliasesMap;
         typedef std::vector<Instance> InstancesList;
         typedef std::map<int, ObjectMetadata> IdToMetadataMap;
-        typedef std::map<int, Geometry> IdToGeometryMap;
+        typedef std::map<PathId, Geometry> IdToGeometryMap;
         typedef std::map<int, std::vector<coordf_t>> IdToLayerHeightsProfileMap;
         typedef std::map<int, t_layer_config_ranges> IdToLayerConfigRangesMap;
         typedef std::map<int, CutObjectInfo>         IdToCutObjectInfoMap;
@@ -503,6 +511,8 @@ namespace Slic3r {
         std::string m_curr_metadata_name;
         std::string m_curr_characters;
         std::string m_name;
+        std::string m_start_part_path;
+        std::string m_model_path;
 
     public:
         _3MF_Importer();
@@ -526,8 +536,9 @@ namespace Slic3r {
         }
 
         bool _load_model_from_file(const std::string& filename, Model& model, DynamicPrintConfig& config, ConfigSubstitutionContext& config_substitutions);
+        bool _extract_relationships_from_archive(mz_zip_archive &archive, const mz_zip_archive_file_stat &stat);
+        bool _extract_model_from_archive(mz_zip_archive &archive, const mz_zip_archive_file_stat &stat);
         bool _is_svg_shape_file(const std::string &filename) const;
-        bool _extract_model_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat);
         void _extract_cut_information_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat, ConfigSubstitutionContext& config_substitutions);
         void _extract_layer_heights_profile_config_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat);
         void _extract_layer_config_ranges_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat, ConfigSubstitutionContext& config_substitutions);
@@ -540,6 +551,9 @@ namespace Slic3r {
         bool _extract_model_config_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat, Model& model);
         void _extract_embossed_svg_shape_file(const std::string &filename, mz_zip_archive &archive, const mz_zip_archive_file_stat &stat);
 
+        // handlers to parse the .rels file
+        void _handle_start_relationships_element(const char* name, const char** attributes);
+        bool _handle_start_relationship(const char **attributes, unsigned int num_attributes);
         // handlers to parse the .model file
         void _handle_start_model_xml_element(const char* name, const char** attributes);
         void _handle_end_model_xml_element(const char* name);
@@ -591,7 +605,7 @@ namespace Slic3r {
         bool _handle_start_text_configuration(const char** attributes, unsigned int num_attributes);
         bool _handle_start_shape_configuration(const char **attributes, unsigned int num_attributes);
 
-        bool _create_object_instance(int object_id, const Transform3d& transform, const bool printable, unsigned int recur_counter);
+        bool _create_object_instance(PathId object_id, const Transform3d& transform, const bool printable, unsigned int recur_counter);
 
         void _apply_transform(ModelInstance& instance, const Transform3d& transform);
 
@@ -611,6 +625,8 @@ namespace Slic3r {
 
         bool _generate_volumes(ModelObject& object, const Geometry& geometry, const ObjectMetadata::VolumeMetadataList& volumes, ConfigSubstitutionContext& config_substitutions);
 
+        // callbacks to parse the .rels file
+        static void XMLCALL _handle_start_relationships_element(void *userData, const char *name, const char **attributes);
         // callbacks to parse the .model file
         static void XMLCALL _handle_start_model_xml_element(void* userData, const char* name, const char** attributes);
         static void XMLCALL _handle_end_model_xml_element(void* userData, const char* name);
@@ -660,6 +676,7 @@ namespace Slic3r {
         m_sla_support_points.clear();
         m_curr_metadata_name.clear();
         m_curr_characters.clear();
+        m_start_part_path = MODEL_FILE; // set default value for invalid .rel file
         clear_errors();
 
         return _load_model_from_file(filename, model, config, config_substitutions);
@@ -699,23 +716,28 @@ namespace Slic3r {
 
         m_name = boost::filesystem::path(filename).stem().string();
 
-        // we first loop the entries to read from the archive the .model file only, in order to extract the version from it
+        int index = mz_zip_reader_locate_file(&archive, RELATIONSHIPS_FILE.c_str(), nullptr, 0);
+        if (index < 0 || !mz_zip_reader_file_stat(&archive, index, &stat))
+            return false;
+        
+        mz_zip_archive_file_stat start_part_stat{std::numeric_limits<mz_uint32>::max()};
+        m_model_path = MODEL_FILE;
+        _extract_relationships_from_archive(archive, stat);
         bool found_model = false;
+        // we first loop the entries to read from the .model files which are not root
         for (mz_uint i = 0; i < num_entries; ++i) {
             if (mz_zip_reader_file_stat(&archive, i, &stat)) {
                 std::string name(stat.m_filename);
                 std::replace(name.begin(), name.end(), '\\', '/');
 
                 if (boost::algorithm::iends_with(name, MODEL_EXTENSION)) {
-                    if(found_model){
-                        close_zip_reader(&archive);
-                        add_error("3mf contain multiple .model files and it is not supported yet.");
-                        return false;
+                    // valid model name -> extract model
+                    m_model_path = "/" + name;
+                    if (m_model_path == m_start_part_path) {
+                        start_part_stat = stat;
+                        continue;
                     }
-                    found_model = true;
-                    try
-                    {
-                        // valid model name -> extract model
+                    try {
                         if (!_extract_model_from_archive(archive, stat)) {
                             close_zip_reader(&archive);
                             add_error("Archive does not contain a valid model");
@@ -728,8 +750,25 @@ namespace Slic3r {
                         close_zip_reader(&archive);
                         throw Slic3r::FileIOError(e.what());
                     }
+                    found_model = true;
                 }
             }
+        }
+        // Read root model file
+        if (start_part_stat.m_file_index < num_entries) {
+            try {
+                m_model_path.clear();
+                if (!_extract_model_from_archive(archive, start_part_stat)) {
+                    close_zip_reader(&archive);
+                    add_error("Archive does not contain a valid model");
+                    return false;
+                }
+            } catch (const std::exception &e) {
+                // ensure the zip archive is closed and rethrow the exception
+                close_zip_reader(&archive);
+                throw Slic3r::FileIOError(e.what());
+            }
+            found_model = true;
         }
         if (!found_model) {
             close_zip_reader(&archive);
@@ -869,7 +908,7 @@ namespace Slic3r {
             ObjectMetadata::VolumeMetadataList volumes;
             ObjectMetadata::VolumeMetadataList* volumes_ptr = nullptr;
 
-            IdToMetadataMap::iterator obj_metadata = m_objects_metadata.find(object.first);
+            IdToMetadataMap::iterator obj_metadata = m_objects_metadata.find(object.first.second);
             if (obj_metadata != m_objects_metadata.end()) {
                 // config data has been found, this model was saved using slic3r pe
 
@@ -950,8 +989,55 @@ namespace Slic3r {
             }
         }
 
-//        // fixes the min z of the model if negative
-//        model.adjust_min_z();
+        // We support our 3mf contains only configuration without mesh,
+        // others MUST contain mesh (triangles and vertices).
+        if (!m_qidislicer_generator_version.has_value() && model.objects.empty()) {
+            const std::string msg = (boost::format(_u8L("The 3MF file does not contain a valid mesh.\n\n\"%1%\"")) % filename).str();
+            throw Slic3r::RuntimeError(msg);
+        }
+
+        return true;
+    }
+
+    bool _3MF_Importer::_extract_relationships_from_archive(mz_zip_archive &archive, const mz_zip_archive_file_stat &stat)
+    {
+        if (stat.m_uncomp_size == 0 ||
+            stat.m_uncomp_size > 10000000 // Prevent overloading by big Relations file(>10MB). there is no reason to be soo big
+            ) {
+            add_error("Found invalid size");
+            return false;
+        }
+
+        _destroy_xml_parser();
+
+        m_xml_parser = XML_ParserCreate(nullptr);
+        if (m_xml_parser == nullptr) {
+            add_error("Unable to create parser");
+            return false;
+        }
+
+        XML_SetUserData(m_xml_parser, (void *) this);
+        XML_SetStartElementHandler(m_xml_parser, _handle_start_relationships_element);
+
+        void *parser_buffer = XML_GetBuffer(m_xml_parser, (int) stat.m_uncomp_size);
+        if (parser_buffer == nullptr) {
+            add_error("Unable to create buffer");
+            return false;
+        }
+
+        mz_bool res = mz_zip_reader_extract_file_to_mem(&archive, stat.m_filename, parser_buffer, (size_t) stat.m_uncomp_size, 0);
+        if (res == 0) {
+            add_error("Error while reading config data to buffer");
+            return false;
+        }
+
+        if (!XML_ParseBuffer(m_xml_parser, (int) stat.m_uncomp_size, 1)) {
+            char error_buf[1024];
+            ::sprintf(error_buf, "Error (%s) while parsing xml file at line %d", XML_ErrorString(XML_GetErrorCode(m_xml_parser)),
+                      (int) XML_GetCurrentLineNumber(m_xml_parser));
+            add_error(error_buf);
+            return false;
+        }
 
         return true;
     }
@@ -1515,6 +1601,39 @@ namespace Slic3r {
         }
     }
 
+    void XMLCALL _3MF_Importer::_handle_start_relationships_element(void *userData, const char *name, const char **attributes)
+    {
+        _3MF_Importer *importer = (_3MF_Importer *) userData;
+        if (importer != nullptr)
+            importer->_handle_start_relationships_element(name, attributes);
+    }
+
+    void _3MF_Importer::_handle_start_relationships_element(const char *name, const char **attributes)
+    {
+        if (m_xml_parser == nullptr)
+            return;
+
+        bool         res            = true;
+        unsigned int num_attributes = (unsigned int) XML_GetSpecifiedAttributeCount(m_xml_parser);
+
+        if (::strcmp(RELATIONSHIP_TAG, name) == 0)
+            res = _handle_start_relationship(attributes, num_attributes);
+
+        m_curr_characters.clear();
+        if (!res)
+            _stop_xml_parser();
+    }
+
+    bool _3MF_Importer::_handle_start_relationship(const char **attributes, unsigned int num_attributes)
+    {
+        std::string type = get_attribute_value_string(attributes, num_attributes, RELS_TYPE_ATTR);
+        // only exactly that string type mean root model file
+        if (type == "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel") {
+            std::string path = get_attribute_value_string(attributes, num_attributes, TARGET_ATTR);
+            m_start_part_path = path;
+        }
+        return true;
+    }
     void _3MF_Importer::_handle_start_model_xml_element(const char* name, const char** attributes)
     {
         if (m_xml_parser == nullptr)
@@ -1654,6 +1773,8 @@ namespace Slic3r {
 
     bool _3MF_Importer::_handle_end_model()
     {
+        if (!m_model_path.empty())
+            return true;
         // deletes all non-built or non-instanced objects
         for (const IdToModelObjectMap::value_type& object : m_objects) {
             if (object.second >= int(m_model->objects.size())) {
@@ -1722,6 +1843,7 @@ namespace Slic3r {
     bool _3MF_Importer::_handle_end_object()
     {
         if (m_curr_object.object != nullptr) {
+            PathId object_id{m_model_path, m_curr_object.id};
             if (m_curr_object.geometry.empty()) {
                 // no geometry defined
                 // remove the object from the model
@@ -1729,26 +1851,26 @@ namespace Slic3r {
 
                 if (m_curr_object.components.empty()) {
                     // no components defined -> invalid object, delete it
-                    IdToModelObjectMap::iterator object_item = m_objects.find(m_curr_object.id);
+                    IdToModelObjectMap::iterator object_item = m_objects.find(object_id);
                     if (object_item != m_objects.end())
                         m_objects.erase(object_item);
 
-                    IdToAliasesMap::iterator alias_item = m_objects_aliases.find(m_curr_object.id);
+                    IdToAliasesMap::iterator alias_item = m_objects_aliases.find(object_id);
                     if (alias_item != m_objects_aliases.end())
                         m_objects_aliases.erase(alias_item);
                 }
                 else
                     // adds components to aliases
-                    m_objects_aliases.insert({ m_curr_object.id, m_curr_object.components });
+                    m_objects_aliases.insert({ object_id, m_curr_object.components });
             }
             else {
                 // geometry defined, store it for later use
-                m_geometries.insert({ m_curr_object.id, std::move(m_curr_object.geometry) });
+                m_geometries.insert({ object_id, std::move(m_curr_object.geometry) });
 
                 // stores the object for later use
-                if (m_objects.find(m_curr_object.id) == m_objects.end()) {
-                    m_objects.insert({ m_curr_object.id, m_curr_object.model_object_idx });
-                    m_objects_aliases.insert({ m_curr_object.id, { 1, Component(m_curr_object.id) } }); // aliases itself
+                if (m_objects.find(object_id) == m_objects.end()) {
+                    m_objects.insert({ object_id, m_curr_object.model_object_idx });
+                    m_objects_aliases.insert({object_id, {1, Component(object_id)}}); // aliases itself
                 }
                 else {
                     add_error("Found object with duplicate id");
@@ -1859,19 +1981,22 @@ namespace Slic3r {
 
     bool _3MF_Importer::_handle_start_component(const char** attributes, unsigned int num_attributes)
     {
+        std::string path = get_attribute_value_string(attributes, num_attributes, PPATH_ATTR);
+        if (path.empty()) path = m_model_path;
         int object_id = get_attribute_value_int(attributes, num_attributes, OBJECTID_ATTR);
         Transform3d transform = get_transform_from_3mf_specs_string(get_attribute_value_string(attributes, num_attributes, TRANSFORM_ATTR));
 
-        IdToModelObjectMap::iterator object_item = m_objects.find(object_id);
+        PathId path_id { path, object_id };
+        IdToModelObjectMap::iterator object_item = m_objects.find(path_id);
         if (object_item == m_objects.end()) {
-            IdToAliasesMap::iterator alias_item = m_objects_aliases.find(object_id);
+            IdToAliasesMap::iterator alias_item = m_objects_aliases.find(path_id);
             if (alias_item == m_objects_aliases.end()) {
                 add_error("Found component with invalid object id");
                 return false;
             }
         }
 
-        m_curr_object.components.emplace_back(object_id, transform);
+        m_curr_object.components.emplace_back(path_id, transform);
 
         return true;
     }
@@ -1905,9 +2030,11 @@ namespace Slic3r {
 
         int object_id = get_attribute_value_int(attributes, num_attributes, OBJECTID_ATTR);
         Transform3d transform = get_transform_from_3mf_specs_string(get_attribute_value_string(attributes, num_attributes, TRANSFORM_ATTR));
+        std::string path = get_attribute_value_string(attributes, num_attributes, PPATH_ATTR);
+        if (path.empty()) path = m_model_path;
         int printable = get_attribute_value_bool(attributes, num_attributes, PRINTABLE_ATTR);
 
-        return _create_object_instance(object_id, transform, printable, 1);
+        return _create_object_instance({path, object_id}, transform, printable, 1);
     }
 
     bool _3MF_Importer::_handle_end_item()
@@ -2063,7 +2190,7 @@ namespace Slic3r {
         return true;
     }
 
-    bool _3MF_Importer::_create_object_instance(int object_id, const Transform3d& transform, const bool printable, unsigned int recur_counter)
+    bool _3MF_Importer::_create_object_instance(PathId object_id, const Transform3d& transform, const bool printable, unsigned int recur_counter)
     {
         static const unsigned int MAX_RECURSIONS = 10;
 

@@ -32,8 +32,8 @@ namespace Slic3r {
 
 static std::vector<std::string> s_project_options {
     "colorprint_heights",
-    "wiping_volumes_extruders",
-    "wiping_volumes_matrix"
+    "wiping_volumes_matrix",
+    "wiping_volumes_use_custom_matrix"
 };
 
 const char *PresetBundle::QIDI_BUNDLE = "QIDITechnology";
@@ -1202,6 +1202,7 @@ ConfigSubstitutions PresetBundle::load_config_file_config_bundle(
     load_one(this->printers,      tmp_bundle.printers,      tmp_bundle.printers     .get_selected_preset_name(), true);
 
     this->extruders_filaments.clear();
+    this->extruders_filaments.emplace_back(ExtruderFilaments(&filaments));
     this->update_multi_material_filament_presets();
     for (size_t i = 1; i < std::min(tmp_bundle.extruders_filaments.size(), this->extruders_filaments.size()); ++i)
         this->extruders_filaments[i].select_filament(load_one(this->filaments, tmp_bundle.filaments, tmp_bundle.extruders_filaments[i].get_selected_preset_name(), false));
@@ -1691,6 +1692,7 @@ std::pair<PresetsConfigSubstitutions, size_t> PresetBundle::load_configbundle(
 
         // Extruder_filaments have to be recreated with new loaded filaments
         this->extruders_filaments.clear();
+        this->extruders_filaments.emplace_back(ExtruderFilaments(&filaments));
         this->update_multi_material_filament_presets();
         for (size_t i = 0; i < std::min(this->extruders_filaments.size(), active_filaments.size()); ++ i)
             this->extruders_filaments[i].select_filament(filaments.find_preset(active_filaments[i], true)->name);
@@ -1729,27 +1731,21 @@ void PresetBundle::update_multi_material_filament_presets()
 
     // Now verify if wiping_volumes_matrix has proper size (it is used to deduce number of extruders in wipe tower generator):
     std::vector<double> old_matrix = this->project_config.option<ConfigOptionFloats>("wiping_volumes_matrix")->values;
-    size_t old_number_of_extruders = size_t(sqrt(old_matrix.size())+EPSILON);
+    size_t old_number_of_extruders = size_t(std::sqrt(old_matrix.size())+EPSILON);
     if (num_extruders != old_number_of_extruders) {
-            // First verify if purging volumes presets for each extruder matches number of extruders
-            std::vector<double>& extruders = this->project_config.option<ConfigOptionFloats>("wiping_volumes_extruders")->values;
-            while (extruders.size() < 2*num_extruders) {
-                extruders.push_back(extruders.size()>1 ? extruders[0] : 50.);  // copy the values from the first extruder
-                extruders.push_back(extruders.size()>1 ? extruders[1] : 50.);
-            }
-            while (extruders.size() > 2*num_extruders) {
-                extruders.pop_back();
-                extruders.pop_back();
-            }
+        // Extract the relevant config options, even values from possibly modified presets.
+        const double default_purge = static_cast<const ConfigOptionFloat*>(this->printers.get_edited_preset().config.option("multimaterial_purging"))->value;
+        const std::vector<double> filament_purging_multipliers = get_config_options_for_current_filaments<ConfigOptionPercents>("filament_purge_multiplier");
 
         std::vector<double> new_matrix;
-        for (unsigned int i=0;i<num_extruders;++i)
+        for (unsigned int i=0;i<num_extruders;++i) {
             for (unsigned int j=0;j<num_extruders;++j) {
                 // append the value for this pair from the old matrix (if it's there):
                 if (i<old_number_of_extruders && j<old_number_of_extruders)
                     new_matrix.push_back(old_matrix[i*old_number_of_extruders + j]);
                 else
-                    new_matrix.push_back( i==j ? 0. : extruders[2*i]+extruders[2*j+1]); // so it matches new extruder volumes
+                    new_matrix.push_back( i==j ? 0. : default_purge * filament_purging_multipliers[j] / 100.);
+            }
             }
 		this->project_config.option<ConfigOptionFloats>("wiping_volumes_matrix")->values = new_matrix;
     }

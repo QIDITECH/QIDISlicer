@@ -33,6 +33,7 @@ std::optional<Point> sample_path_point_at_distance_from_end(const SmoothPath &pa
 // rather discard such a degenerate segment.
 double clip_end(SmoothPath &path, double distance, double min_point_distance_threshold);
 
+void reverse(SmoothPath &path);
 class SmoothPathCache
 {
 public:

@@ -19,9 +19,13 @@
 #ifdef WIN32
 #include <wx/msw/registry.h>
 #endif // WIN32
-#ifdef __linux__
+#if defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
 #include "DesktopIntegrationDialog.hpp"
-#endif //__linux__
+#endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
+
+#if defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION)
+#include "NotificationManager.hpp"
+#endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
 
 namespace Slic3r {
 
@@ -121,9 +125,11 @@ void PreferencesDialog::show(const std::string& highlight_opt_key /*= std::strin
 	if (wxGetApp().is_editor()) {
 		auto app_config = get_app_config();
 
+#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 		downloader->set_path_name(app_config->get("url_downloader_dest"));
 		downloader->allow(!app_config->has("downloader_url_registered") || app_config->get_bool("downloader_url_registered"));
 
+#endif
 		for (const std::string& opt_key : {"suppress_hyperlinks", "downloader_url_registered"})
 			m_optgroup_other->set_value(opt_key, app_config->get_bool(opt_key));
 
@@ -627,14 +633,18 @@ void PreferencesDialog::build()
 			//  "If disabled, the descriptions of configuration parameters in settings tabs will work as hyperlinks."),
 			app_config->get_bool("suppress_hyperlinks"));
 		
+#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 		append_bool_option(m_optgroup_other, "downloader_url_registered",
 			L("Allow downloads from Printables.com"),
 			L("If enabled, QIDISlicer will be allowed to download from Printables.com"),
 			app_config->get_bool("downloader_url_registered"));
+#endif
 
 		activate_options_tab(m_optgroup_other);
 
+#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 		create_downloader_path_sizer();
+#endif
 		create_settings_font_widget();
 
 #if ENABLE_ENVIRONMENT_MAP
@@ -739,16 +749,18 @@ void PreferencesDialog::update_ctrls_alignment()
 
 void PreferencesDialog::accept(wxEvent&)
 {
+#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 	if(wxGetApp().is_editor()) {
 		if (const auto it = m_values.find("downloader_url_registered"); it != m_values.end())
 			downloader->allow(it->second == "1");
 		if (!downloader->on_finish())
 			return;
-#ifdef __linux__
+#if defined(__linux__)
 		if( downloader->get_perform_registration_linux()) 
 			DesktopIntegrationDialog::perform_downloader_desktop_integration();
-#endif // __linux__
+#endif
 	}
+#endif
 
 	std::vector<std::string> options_to_recreate_GUI = { "no_defaults", "tabs_as_menu", "sys_menu_enabled", "font_pt_size", "suppress_round_corners" };
 

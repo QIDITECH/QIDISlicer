@@ -894,7 +894,7 @@ public:
     // Select filament by the full filament name, which contains name of filament, separator and name of selected preset
     // If full_name doesn't contain name of selected preset, then select first preset in the list for this filament
     bool select_filament(const std::string& name, bool force = false);
-    void select_filament(size_t idx)                        { m_idx_selected = idx; }
+    void select_filament(size_t idx);
 
     std::string             get_selected_preset_name()  const { return m_idx_selected == size_t(-1) ? std::string() : m_extr_filaments[m_idx_selected].preset->name; }
     const Preset*           get_selected_preset()       const { return m_idx_selected == size_t(-1) ? nullptr   : m_extr_filaments[m_idx_selected].preset; }

@@ -133,6 +133,11 @@ double clip_end(SmoothPath &path, double distance, double min_point_distance_thr
     return distance;
 }
 
+void reverse(SmoothPath &path) {
+    std::reverse(path.begin(), path.end());
+    for (SmoothPathElement &path_element : path)
+        Geometry::ArcWelder::reverse(path_element.path);
+}
 void SmoothPathCache::interpolate_add(const ExtrusionPath &path, const InterpolationParameters &params)
 {
     double tolerance = params.tolerance;

@@ -620,8 +620,6 @@ void Layer::make_perimeters()
     std::vector<uint32_t>                                   layer_region_ids;
     std::vector<std::pair<ExtrusionRange, ExtrusionRange>>  perimeter_and_gapfill_ranges;
     ExPolygons                                              fill_expolygons;
-    //w21
-    ExPolygons                                              fill_no_overlap_expolygons;
     std::vector<ExPolygonRange>                             fill_expolygons_ranges;
     SurfacesPtr                                             surfaces_to_merge;
     SurfacesPtr                                             surfaces_to_merge_temp;
@@ -652,8 +650,6 @@ void Layer::make_perimeters()
                 fill_expolygons.clear();
                 fill_expolygons_ranges.clear();
                 surfaces_to_merge.clear();
-                //w21
-                //fill_no_overlap_expolygons.clear();
 
     	        // find compatible regions
                 layer_region_ids.clear();
@@ -694,8 +690,7 @@ void Layer::make_perimeters()
     		        }
 
     	        if (layer_region_ids.size() == 1) {  // optimization
-                    //w21
-    	            (*layerm)->make_perimeters((*layerm)->slices(), perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,(*layerm)->fill_no_overlap_expolygons);
+    	            (*layerm)->make_perimeters((*layerm)->slices(), perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges);
                     this->sort_perimeters_into_islands((*layerm)->slices(), region_id, perimeter_and_gapfill_ranges, std::move(fill_expolygons), fill_expolygons_ranges, layer_region_ids);
     	        } else {
     	            SurfaceCollection new_slices;
@@ -730,24 +725,8 @@ void Layer::make_perimeters()
                         }
     	            }
     	            // make perimeters
-                    //w21
-                    ExPolygons fill_no_overlap;
-    	            layerm_config->make_perimeters(new_slices, perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,fill_no_overlap);
+    	            layerm_config->make_perimeters(new_slices, perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges);
                     this->sort_perimeters_into_islands(new_slices, region_id_config, perimeter_and_gapfill_ranges, std::move(fill_expolygons), fill_expolygons_ranges, layer_region_ids);
-                    //w21
-                    if (!new_slices.surfaces.empty()) {
-                        for (size_t idx : layer_region_ids) {
-                            // Separate the fill surfaces.
-                            LayerRegion &layer      = *m_regions[idx];
-                            ExPolygons   expp     = intersection_ex(new_slices.surfaces, layer.slices().surfaces);
-                            layer.m_fill_expolygons   = std::move(expp);
-                            if (!layer.m_fill_expolygons.empty()) {
-                                layer.m_fill_surfaces.set(std::move(layer.m_fill_expolygons), layer.slices().surfaces.front());
-                                layer.fill_no_overlap_expolygons = intersection_ex(layer.slices().surfaces, fill_no_overlap);
-                            }
-                           
-                        }
-                    }
     	        }
     	    }
         }

@@ -1171,7 +1171,7 @@ Polyline AvoidCrossingPerimeters::travel_to(const GCodeGenerator &gcodegen, cons
 {
     // If use_external, then perform the path planning in the world coordinate system (correcting for the gcodegen offset).
     // Otherwise perform the path planning in the coordinate system of the active object.
-    bool        use_external  = m_use_external_mp || m_use_external_mp_once;
+    bool        use_external  = m_use_external_mp || use_external_mp_once;
     Point       scaled_origin = use_external ? Point::new_scale(gcodegen.origin()(0), gcodegen.origin()(1)) : Point(0, 0);
     const Point start         = *gcodegen.last_position + scaled_origin;
     const Point end           = point + scaled_origin;
