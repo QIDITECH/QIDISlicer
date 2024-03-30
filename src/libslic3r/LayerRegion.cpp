@@ -73,7 +73,9 @@ void LayerRegion::make_perimeters(
     // All fill areas produced for all input slices above.
     ExPolygons                                             &fill_expolygons,
     // Ranges of fill areas above per input slice.
-    std::vector<ExPolygonRange>                            &fill_expolygons_ranges)
+    std::vector<ExPolygonRange>                            &fill_expolygons_ranges,
+    //w21
+    ExPolygons                                             &fill_no_overlap_expolygons)
 {
     m_perimeters.clear();
     m_thin_fills.clear();
@@ -106,8 +108,12 @@ void LayerRegion::make_perimeters(
 
     // Cummulative sum of polygons over all the regions.
     const ExPolygons *lower_slices = this->layer()->lower_layer ? &this->layer()->lower_layer->lslices : nullptr;
+    //w16
+    const ExPolygons *upper_slices = this->layer()->upper_layer ? &this->layer()->upper_layer->lslices : nullptr;
     // Cache for offsetted lower_slices
     Polygons          lower_layer_polygons_cache;
+    //w16
+    Polygons          upper_layer_polygons_cache;
 
     for (const Surface &surface : slices) {
         auto perimeters_begin      = uint32_t(m_perimeters.size());
@@ -115,16 +121,38 @@ void LayerRegion::make_perimeters(
         auto fill_expolygons_begin = uint32_t(fill_expolygons.size());
         if (this->layer()->object()->config().perimeter_generator.value == PerimeterGeneratorType::Arachne && !spiral_vase)
             
+            //w16
+            if (this->layer()->object()->config().top_one_wall_type == TopOneWallType::Alltop)
+            PerimeterGenerator::process_with_one_wall_arachne(
+                // input:
+                params,
+                surface,
+                lower_slices,
+                //w16
+                upper_slices,
+                lower_layer_polygons_cache,
+                upper_layer_polygons_cache,
+                // output:
+                m_perimeters,
+                m_thin_fills,
+                fill_expolygons,
+                //w21
+                fill_no_overlap_expolygons);
+            else
                 PerimeterGenerator::process_arachne(
                 // input:
                 params,
                 surface,
                 lower_slices,
+                //w16
+                upper_slices,
                 lower_layer_polygons_cache,
                 // output:
                 m_perimeters,
                 m_thin_fills,
-                fill_expolygons);
+                fill_expolygons,
+                //w21
+                fill_no_overlap_expolygons);
 
         else
             PerimeterGenerator::process_classic(
@@ -132,11 +160,16 @@ void LayerRegion::make_perimeters(
                 params,
                 surface,
                 lower_slices,
+                //w16
+                upper_slices,
                 lower_layer_polygons_cache,
+                upper_layer_polygons_cache,
                 // output:
                 m_perimeters,
                 m_thin_fills,
-                fill_expolygons);
+                fill_expolygons,
+                //w21
+                fill_no_overlap_expolygons);
         perimeter_and_gapfill_ranges.emplace_back(
             ExtrusionRange{ perimeters_begin, uint32_t(m_perimeters.size()) }, 
             ExtrusionRange{ gap_fills_begin,  uint32_t(m_thin_fills.size()) });

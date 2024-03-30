@@ -92,6 +92,8 @@ public:
     // ordered collection of extrusion paths to fill surfaces
     // (this collection contains only ExtrusionEntityCollection objects)
     [[nodiscard]] const ExtrusionEntityCollection&  fills() const { return m_fills; }
+    //w21
+    ExPolygons fill_no_overlap_expolygons;
 
     Flow    flow(FlowRole role) const;
     Flow    flow(FlowRole role, double layer_height) const;
@@ -109,7 +111,9 @@ public:
         // All fill areas produced for all input slices above.
         ExPolygons                                             &fill_expolygons,
         // Ranges of fill areas above per input slice.
-        std::vector<ExPolygonRange>                            &fill_expolygons_ranges);
+        std::vector<ExPolygonRange>                            &fill_expolygons_ranges,        
+        //w21
+        ExPolygons                                             &fill_no_overlap_expolygons);
     void    process_external_surfaces(const Layer *lower_layer, const Polygons *lower_layer_covered);
     double  infill_area_threshold() const;
     // Trim surfaces by trimming polygons. Used by the elephant foot compensation at the 1st layer.
