@@ -224,6 +224,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "high_current_on_filament_swap"
             || opt_key == "infill_first"
             || opt_key == "single_extruder_multi_material"
+            //Y25
+            || opt_key == "wipe_device"
             || opt_key == "temperature"
             || opt_key == "idle_temperature"
             || opt_key == "wipe_tower"

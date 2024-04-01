@@ -2842,6 +2842,7 @@ void TabPrinter::build_fff()
         optgroup->append_single_option_line("auxiliary_fan");
         optgroup->append_single_option_line("chamber_fan");
         optgroup->append_single_option_line("chamber_temperature");
+        optgroup->append_single_option_line("wipe_device");
 
     const int gcode_field_height = 15; // 150
     const int notes_field_height = 25; // 250
