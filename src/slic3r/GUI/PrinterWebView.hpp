@@ -71,6 +71,13 @@ public:
             else
                 SetBackgroundColour(wxColour(67, 67, 71)); 
         #endif
+        Bind(wxEVT_PAINT, &MachineListButton::OnPaint, this);
+        Bind(wxEVT_ENTER_WINDOW, &MachineListButton::OnMouseEnter, this);
+        Bind(wxEVT_LEAVE_WINDOW, &MachineListButton::OnMouseLeave, this);
+        Bind(wxEVT_SET_FOCUS, &MachineListButton::OnSetFocus, this);
+        Bind(wxEVT_KILL_FOCUS, &MachineListButton::OnKillFocus, this);
+        Bind(wxEVT_KEY_DOWN, &MachineListButton::OnKeyDown, this);
+        //Bind(wxEVT_KEY_UP, &MachineListButton::OnKeyUp, this);
     }
 
     void SetLabel(const wxString &fullname) { full_label = fullname; }
@@ -159,7 +166,7 @@ public:
     void        OnKeyUp(wxKeyEvent &event);
     void        OnMouseEnter(wxMouseEvent &event);
     void        OnMouseLeave(wxMouseEvent &event);
-    void        OnMouseLeftDown(wxMouseEvent &event);
+    //void        OnMouseLeftDown(wxMouseEvent &event);
     //void        OnMouseLeftUp(wxMouseEvent &event);
     //void        OnClickHandler(wxCommandEvent &event);
     void SetStatusThread(std::thread thread) { m_statusThread = std::move(thread); }
@@ -228,7 +235,7 @@ private:
     std::function<void(wxMouseEvent &)> m_handlerl;
     //B59
     bool m_is_QIDI;
-    wxDECLARE_EVENT_TABLE();
+    //wxDECLARE_EVENT_TABLE();
 };
 
 
@@ -258,6 +265,8 @@ public:
     void OnScroll(wxScrollWinEvent &event);
     void OnScrollup(wxScrollWinEvent &event);
     void OnScrolldown(wxScrollWinEvent &event);
+    //B63
+    void OnKeyUp(wxKeyEvent &event);
 
     void SetUpdateHandler(const std::function<void(wxCommandEvent &)> &handler) { m_handlerl = handler; }
     void SetDeleteHandler(const std::function<void(wxCommandEvent &)> &handler) { m_delete_handlerl = handler; }
@@ -280,6 +289,8 @@ public:
     void                        StopAllThread();
     void                        UnSelectedButton();
 
+    //B63
+    void                        RefreshButton();
     std::vector<MachineListButton *>     GetButton() { return m_buttons; };
 
 private:
@@ -306,6 +317,11 @@ private:
     wxWebView* m_browser;
     long m_zoomFactor;
 
+    //B63
+    MachineListButton *add_button;
+    MachineListButton *delete_button;
+    MachineListButton *edit_button;
+    MachineListButton *refresh_button;
     // DECLARE_EVENT_TABLE()
 };
 

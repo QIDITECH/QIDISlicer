@@ -25,13 +25,12 @@ namespace Slic3r {
 namespace GUI {
 
 
-wxBEGIN_EVENT_TABLE(MachineListButton, wxButton) EVT_PAINT(MachineListButton::OnPaint) EVT_ENTER_WINDOW(MachineListButton::OnMouseEnter)
-    EVT_LEAVE_WINDOW(MachineListButton::OnMouseLeave)
-    //EVT_LEFT_DOWN(MachineListButton::OnMouseLeftDown)
-    //    EVT_LEFT_UP(MachineListButton::OnMouseLeftUp)
-    EVT_SET_FOCUS(MachineListButton::OnSetFocus)
-            EVT_KILL_FOCUS(MachineListButton::OnKillFocus) EVT_KEY_DOWN(MachineListButton::OnKeyDown) EVT_KEY_UP(MachineListButton::OnKeyUp)
-        wxEND_EVENT_TABLE()
+//wxBEGIN_EVENT_TABLE(MachineListButton, wxButton) EVT_PAINT(MachineListButton::OnPaint) EVT_ENTER_WINDOW(MachineListButton::OnMouseEnter)
+//    EVT_LEAVE_WINDOW(MachineListButton::OnMouseLeave)
+//    // EVT_LEFT_DOWN(MachineListButton::OnMouseLeftDown)
+//    //    EVT_LEFT_UP(MachineListButton::OnMouseLeftUp)
+//    EVT_SET_FOCUS(MachineListButton::OnSetFocus) EVT_KILL_FOCUS(MachineListButton::OnKillFocus) EVT_KEY_DOWN(MachineListButton::OnKeyDown)
+//        EVT_KEY_UP(MachineListButton::OnKeyUp) wxEND_EVENT_TABLE()
 
  //B45
 
@@ -196,7 +195,8 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
         //MachineListButton *add_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
         //                                                                wxDefaultValidator, wxButtonNameStr);
         //wxButton *add_button = new wxButton(buttonPanel, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-    MachineListButton *add_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
+    //B63
+    add_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
                                                             wxDefaultValidator, wxButtonNameStr);
     #if defined(__WIN32__) || defined(__WXMAC__)
         add_button->SetBackgroundColour(wxColour(30, 30, 21));
@@ -211,7 +211,8 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
 
 
     //wxButton *delete_button = new wxButton(buttonPanel, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
-    MachineListButton *delete_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
+    //B63
+    delete_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
                                                                 wxDefaultValidator, wxButtonNameStr);
     #if defined(__WIN32__) || defined(__WXMAC__)
         delete_button->SetBackgroundColour(wxColour(30, 30, 21));
@@ -224,7 +225,8 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     buttonsizer->Add(delete_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
     delete_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnDeleteButtonClick, this);
 
-    MachineListButton *edit_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
+    //B63
+    edit_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize, wxBU_LEFT,
                                                 wxDefaultValidator, wxButtonNameStr);
     //wxButton *edit_button = new wxButton(buttonPanel, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
     #if defined(__WIN32__) || defined(__WXMAC__)
@@ -238,7 +240,7 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     buttonsizer->Add(edit_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
     edit_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnEditButtonClick, this);
 
-    MachineListButton *refresh_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize,
+    refresh_button = new MachineListButton(buttonPanel, wxID_ANY, "", "", wxDefaultPosition, wxDefaultSize,
                                                                 wxBU_LEFT, wxDefaultValidator, wxButtonNameStr);
     //wxButton *refresh_button = new wxButton(buttonPanel, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
     #if defined(__WIN32__) || defined(__WXMAC__)
@@ -387,10 +389,27 @@ void PrinterWebView::AddButton(const wxString &                             devi
     #else
         customButton->SetSize(wxSize(200, -1));
     #endif
+    //B63
+    customButton->Bind(wxEVT_KEY_UP, &PrinterWebView::OnKeyUp, this);
 
     leftsizer->Add(customButton, wxSizerFlags().Border(wxALL, 1).Expand());
     leftsizer->Layout();
     m_buttons.push_back(customButton);
+ }
+//B63
+ void PrinterWebView::RefreshButton()
+ {
+     if (m_buttons.empty()) {
+         BOOST_LOG_TRIVIAL(info) << " empty";
+     } else {
+         for (MachineListButton *button : m_buttons) {
+             button->Refresh();
+         }
+         add_button->Refresh();
+         delete_button->Refresh();
+         edit_button->Refresh();
+         refresh_button->Refresh();
+     }
  }
 
  //B45
@@ -781,6 +800,13 @@ void PrinterWebView::OnScroll(wxScrollWinEvent &event)
     event.Skip();
 }
 
+//B63
+void PrinterWebView::OnKeyUp(wxKeyEvent &event)
+{
+    
+    event.Skip();
+    RefreshButton();
+}
 //B45
 void PrinterWebView::load_url(wxString& url)
 {

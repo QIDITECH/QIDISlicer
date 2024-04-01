@@ -2178,6 +2178,8 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
             #if defined(__WIN32__) || defined(__WXMAC__)
                 m_printer_view->ResumeButton();
+                //B63
+                m_printer_view->SetFocus();
             #endif 
 
 
