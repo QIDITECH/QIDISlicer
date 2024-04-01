@@ -542,6 +542,8 @@ static std::vector<std::string> s_Preset_printer_options {
     "machine_limits_usage", "thumbnails", "thumbnails_format",
 //Y20 //B52
     "bed_exclude_area",
+//Y25
+    "wipe_device",
 //Y16
     "chamber_temperature", "auxiliary_fan", "chamber_fan"
 };

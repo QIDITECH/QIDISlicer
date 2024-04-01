@@ -2853,6 +2853,12 @@ void PrintConfigDef::init_fff_params()
     def->tooltip = L("The printer multiplexes filaments into a single hot end.");
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBool(false));
+//Y25
+    def = this->add("wipe_device", coBool);
+    def->label = L("Wipe Device");
+    def->tooltip = L("Enable wipe device.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
 
     def = this->add("single_extruder_multi_material_priming", coBool);
     def->label = L("Prime all printing extruders");
@@ -3436,6 +3442,7 @@ void PrintConfigDef::init_fff_params()
     def->tooltip = "";
     def->set_default_value(new ConfigOptionBool{ false });
     def = this->add("wipe_tower_x", coFloat);
+
     def->label = L("Position X");
     def->tooltip = L("X coordinate of the left front corner of a wipe tower");
     def->sidetext = L("mm");
@@ -3499,6 +3506,7 @@ void PrintConfigDef::init_fff_params()
     def->min = 100.;
     def->max = 300.;
     def->set_default_value(new ConfigOptionPercent(100.));
+
     def = this->add("wipe_into_infill", coBool);
     def->category = L("Wipe options");
     def->label = L("Wipe into this object's infill");
