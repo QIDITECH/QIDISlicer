@@ -731,7 +731,6 @@ void Layer::make_perimeters()
                     //w21
     	            ExPolygons fill_no_overlap;
     	            layerm_config->make_perimeters(new_slices, perimeter_and_gapfill_ranges, fill_expolygons, fill_expolygons_ranges,fill_no_overlap);
-                    this->sort_perimeters_into_islands(new_slices, region_id_config, perimeter_and_gapfill_ranges, std::move(fill_expolygons), fill_expolygons_ranges, layer_region_ids);
                     //w21
                     if (!new_slices.surfaces.empty()) {
                         for (size_t idx : layer_region_ids) {
@@ -746,6 +745,7 @@ void Layer::make_perimeters()
                            
                         }
                     }
+                    this->sort_perimeters_into_islands(new_slices, region_id_config, perimeter_and_gapfill_ranges, std::move(fill_expolygons), fill_expolygons_ranges, layer_region_ids);
     	        }
     	    }
         }
