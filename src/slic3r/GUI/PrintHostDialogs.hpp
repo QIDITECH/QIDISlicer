@@ -23,13 +23,14 @@ namespace Slic3r {
 
 namespace GUI {
 
-//B53
+//B53 //B62
 struct PhysicalPrinterPresetData
 {
     wxString lower_name; // just for sorting
     wxString name;       // preset_name
     wxString fullname;   // full name
     bool     selected;   // is selected
+    std::string preset_name;
     int      checkboxId;
 };
 class PrintHostSendDialog : public GUI::MsgDialog

@@ -7978,7 +7978,7 @@ void Plater::send_gcode()
                 wxGetApp().preset_bundle->printers.get_edited_preset().config.opt_string("printer_notes"));
         }
 
-        //B53
+       //B53 //B62
         auto pppd = dlg.pppd();
         auto checkbox_states = dlg.checkbox_states();
         for (int i = 0; i < pppd.size(); i++) {
@@ -7987,7 +7987,7 @@ void Plater::send_gcode()
                 auto          m_collection  = &preset_bundle.printers;
                 auto          preset_data   = pppd[i];
 
-                Preset *preset = m_collection->find_preset((preset_data.name).ToStdString());
+               Preset *preset = m_collection->find_preset(preset_data.preset_name);
                 if (!preset || !preset->is_visible)
                     continue;
                 wxStringTokenizer tokenizer((preset_data.fullname), "*");

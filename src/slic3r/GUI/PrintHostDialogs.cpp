@@ -81,8 +81,11 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
         for (const std::string &preset_name : it->get_preset_names()) {
             Preset *preset = wxGetApp().preset_bundle->printers.find_preset(preset_name);
             if (preset != nullptr) {
+                //B62
                 preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
-                                       wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name)});
+                        wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
+                        preset_name
+                });
             }
         }
     }
