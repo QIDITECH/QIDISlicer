@@ -7726,6 +7726,13 @@ void publish(Model &model) {
     }
 }
 }
+//B61
+ThumbnailData Plater::get_thumbnailldate() {
+    ThumbnailData    thumbnail_data;
+    ThumbnailsParams thumbnail_params = {{}, false, true, true, true};
+    p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_3MF.first, THUMBNAIL_SIZE_3MF.second, thumbnail_params, Camera::EType::Ortho);
+    return thumbnail_data;
+}
 bool Plater::export_3mf(const boost::filesystem::path& output_path)
 {
     if (p->model.objects.empty()) {
@@ -7960,8 +7967,10 @@ void Plater::send_gcode()
             return;
         }
     }
+     //B61   
+     PrintHostSendDialog dlg(default_output_file, upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names,
+                            this, (this->fff_print().print_statistics()));
 
-    PrintHostSendDialog dlg(default_output_file, upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names);
     if (dlg.ShowModal() == wxID_OK) {
         if (printer_technology() == ptFFF) {
             const std::string ext = boost::algorithm::to_lower_copy(dlg.filename().extension().string());
@@ -7969,7 +7978,8 @@ void Plater::send_gcode()
                                        wxGetApp().app_config->get_bool("use_binary_gcode_when_supported");
             const wxString error_str = check_binary_vs_ascii_gcode_extension(printer_technology(), ext, binary_output);
             if (! error_str.IsEmpty()) {
-                ErrorDialog(this, error_str, t_kill_focus([](const std::string& key) -> void { wxGetApp().sidebar().jump_to_option(key); })).ShowModal();
+                ErrorDialog(this, error_str, t_kill_focus([](const std::string &key) -> void { wxGetApp().sidebar().jump_to_option(key); }))
+                    .ShowModal();
                 return;
             }
             bool supports_binary = wxGetApp().preset_bundle->printers.get_edited_preset().config.opt_bool("binary_gcode");

@@ -39,14 +39,25 @@ static const char *CONFIG_KEY_PATH  = "printhost_path";
 static const char *CONFIG_KEY_GROUP = "printhost_group";
 static const char* CONFIG_KEY_STORAGE = "printhost_storage";
 
-PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUploadActions post_actions, const wxArrayString &groups, const wxArrayString& storage_paths, const wxArrayString& storage_names)
-    : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Send G-Code to printer host"), _L("Upload to Printer Host with the following filename:"), 0) // Set style = 0 to avoid default creation of the "OK" button. 
+//B61
+PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
+                                         PrintHostPostUploadActions post_actions,
+                                         const wxArrayString &      groups,
+                                         const wxArrayString &      storage_paths,
+                                         const wxArrayString &      storage_names,
+                                         Plater *                   plater,
+                                         const PrintStatistics &    ps)
+    : MsgDialog(static_cast<wxWindow *>(wxGetApp().mainframe),
+                _L("Send G-Code to printer host"),
+                _L(""),
+                0) // Set style = 0 to avoid default creation of the "OK" button. 
                                                                                                                                                                // All buttons will be added later in this constructor 
     , txt_filename(new wxTextCtrl(this, wxID_ANY))
     , combo_groups(!groups.IsEmpty() ? new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, groups, wxCB_READONLY) : nullptr)
     , combo_storage(storage_names.GetCount() > 1 ? new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, storage_names, wxCB_READONLY) : nullptr)
     , post_upload_action(PrintHostPostUploadAction::None)
     , m_paths(storage_paths)
+    , m_plater(plater)
 {
 #ifdef __APPLE__
     txt_filename->OSXDisableAllSmartSubstitutions();
@@ -55,7 +66,52 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
 
     auto *label_dir_hint = new wxStaticText(this, wxID_ANY, _L("Use forward slashes ( / ) as a directory separator if needed."));
     label_dir_hint->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
+    //B61
+    auto *label_dir_hint2 = new wxStaticText(this, wxID_ANY, _L("Upload to Printer Host with the following filename:"));
+    label_dir_hint2->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 
+    //B61
+    ThumbnailData thumbnail_data = m_plater->get_thumbnailldate();
+
+    wxImage image(thumbnail_data.width, thumbnail_data.height);
+    image.InitAlpha();
+
+    for (unsigned int r = 0; r < thumbnail_data.height; ++r) {
+        unsigned int rr = (thumbnail_data.height - 1 - r) * thumbnail_data.width;
+        for (unsigned int c = 0; c < thumbnail_data.width; ++c) {
+            unsigned char *px = (unsigned char *) thumbnail_data.pixels.data() + 4 * (rr + c);
+            image.SetRGB((int) c, (int) r, px[0], px[1], px[2]);
+            image.SetAlpha((int) c, (int) r, px[3]);
+        }
+    }
+    wxBitmap        bitmap(image);
+    wxStaticBitmap *static_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap);
+    //static_bitmap->SetSize(wxSize(20, 20));
+    static_bitmap->SetMinSize(wxSize(100, 100));
+    content_sizer->Add(static_bitmap, 0, wxALL | wxALIGN_CENTER);
+
+    wxBoxSizer *row_sizer = new wxBoxSizer(wxHORIZONTAL);
+
+    // Add add.svg image
+    //wxBitmap        add_bitmap(*get_bmp_bundle("add.svg"), wxBITMAP_TYPE_SVG);
+    wxStaticBitmap *add_bitmap = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("print_time", 20));
+    row_sizer->Add(add_bitmap, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    // Add ps.estimated_normal_print_time text
+    wxStaticText *estimated_print_time_text = new wxStaticText(this, wxID_ANY, wxString::Format("%s", ps.estimated_normal_print_time));
+    row_sizer->Add(estimated_print_time_text, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    // Add delete.svg image
+    wxStaticBitmap *delete_static_bitmap = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("cost_weight", 20));
+    row_sizer->Add(delete_static_bitmap, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    // Add ps.total_weight text
+    wxStaticText *total_weight_text = new wxStaticText(this, wxID_ANY, wxString::Format("%.4fg", ps.total_weight));
+    row_sizer->Add(total_weight_text, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    content_sizer->Add(row_sizer, 0, wxALIGN_CENTER);
+    //B61
+    content_sizer->Add(label_dir_hint2);
     content_sizer->Add(txt_filename, 0, wxEXPAND);
     content_sizer->Add(label_dir_hint);
     content_sizer->AddSpacer(VERT_SPACING);

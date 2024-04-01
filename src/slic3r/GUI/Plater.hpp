@@ -291,6 +291,8 @@ public:
 
     void apply_cut_object_to_model(size_t init_obj_idx, const ModelObjectPtrs& cut_objects);
 
+    //B61
+    ThumbnailData get_thumbnailldate();
     void export_gcode(bool prefer_removable);
     void export_stl_obj(bool extended = false, bool selection_only = false);
     void export_amf();

@@ -12,6 +12,9 @@
 #include "GUI_Utils.hpp"
 #include "MsgDialog.hpp"
 #include "../Utils/PrintHost.hpp"
+//B61
+#include "Plater.hpp"
+#include "libslic3r/Print.hpp"
 
 class wxButton;
 class wxTextCtrl;
@@ -36,7 +39,14 @@ struct PhysicalPrinterPresetData
 class PrintHostSendDialog : public GUI::MsgDialog
 {
 public:
-    PrintHostSendDialog(const boost::filesystem::path &path, PrintHostPostUploadActions post_actions, const wxArrayString& groups, const wxArrayString& storage_paths, const wxArrayString& storage_names);
+    //B61
+    PrintHostSendDialog(const boost::filesystem::path &path,
+                        PrintHostPostUploadActions     post_actions,
+                        const wxArrayString &          groups,
+                        const wxArrayString &          storage_paths,
+                        const wxArrayString &          storage_names,
+                        Plater *                       plater,
+                        const PrintStatistics &        ps);
     boost::filesystem::path filename() const;
     PrintHostPostUploadAction post_action() const;
     std::string group() const;
@@ -57,6 +67,8 @@ private:
     //B53
     std::vector<PhysicalPrinterPresetData> m_presetData;
     std::vector<bool>                      m_checkbox_states;
+    //B61
+    Plater *m_plater{nullptr};
 };
 
 

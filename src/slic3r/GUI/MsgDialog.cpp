@@ -52,15 +52,18 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
 	auto *headtext = new wxStaticText(this, wxID_ANY, headline);
 	headtext->SetFont(boldfont);
     headtext->Wrap(CONTENT_WIDTH*wxGetApp().em_unit());
+    //B61
+    if (title != _L("Send G-Code to printer host")) {
 	rightsizer->Add(headtext);
 	rightsizer->AddSpacer(VERT_SPACING);
+    }
 
 	rightsizer->Add(content_sizer, 1, wxEXPAND);
     btn_sizer->AddStretchSpacer();
 
-    //B44
+    //B44 //B61
 	logo = new wxStaticBitmap(this, wxID_ANY, bitmap.IsOk() ? bitmap : wxNullBitmap);
-    if (title == "App Update available") {
+    if (title == "App Update available" or title == _L("Send G-Code to printer host")) {
         topsizer->Add(rightsizer, 1, wxLEFT | wxTOP | wxRIGHT | wxEXPAND, BORDER);
 
     } else { 
@@ -73,7 +76,8 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
     //B50
     // if (style & wxOK)
     //     add_button(wxID_OK, true);
-    if (title != "App Update available") {
+    //B61
+    if (title != "App Update available" and title != _L("Send G-Code to printer host")) {
         apply_style(style);
     }
 	SetSizerAndFit(main_sizer);
