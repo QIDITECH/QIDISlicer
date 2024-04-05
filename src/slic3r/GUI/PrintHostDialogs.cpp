@@ -87,7 +87,7 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     wxBitmap        bitmap(image);
     wxStaticBitmap *static_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap);
     //static_bitmap->SetSize(wxSize(20, 20));
-    static_bitmap->SetMinSize(wxSize(100, 100));
+    //static_bitmap->SetMinSize(wxSize(100, 100));
     content_sizer->Add(static_bitmap, 0, wxALL | wxALIGN_CENTER);
 
     wxBoxSizer *row_sizer = new wxBoxSizer(wxHORIZONTAL);
