@@ -63,9 +63,11 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
 
     //B44 //B61
 	logo = new wxStaticBitmap(this, wxID_ANY, bitmap.IsOk() ? bitmap : wxNullBitmap);
-    if (title == "App Update available" or title == _L("Send G-Code to printer host")) {
+    if (title == "App Update available") {
         topsizer->Add(rightsizer, 1, wxLEFT | wxTOP | wxRIGHT | wxEXPAND, BORDER);
 
+    } else if(title == _L("Send G-Code to printer host")){
+        topsizer->Add(rightsizer, 1, wxLEFT | wxRIGHT | wxEXPAND, BORDER);
     } else { 
         topsizer->Add(logo, 0, wxALL, BORDER);
         topsizer->Add(rightsizer, 1, wxTOP | wxBOTTOM | wxRIGHT | wxEXPAND, BORDER);
