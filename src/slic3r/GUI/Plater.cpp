@@ -5679,9 +5679,12 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     gcode << pa_end_gcode;
     pa_end_gcode      = gcode.str();
 
+    new_config.set_key_value("perimeter_generator", new ConfigOptionEnum<PerimeterGeneratorType>(PerimeterGeneratorType::Arachne));
     new_config.set_key_value("end_gcode", new ConfigOptionString(pa_end_gcode));
 
+    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_printer = wxGetApp().get_tab(Preset::TYPE_PRINTER);
+    tab_print->load_config(new_config);
     tab_printer->load_config(new_config);
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and "
@@ -5704,6 +5707,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     const Vec2d plate_center = build_volume().bed_center();
     int   count              = int((EndPA - StartPA) / PAStep + 0.0001);
 
+    Tab *tab_print    = wxGetApp().get_tab(Preset::TYPE_PRINT);
     Tab *tab_printer  = wxGetApp().get_tab(Preset::TYPE_PRINTER);
 
     //B34 Get parameter
@@ -5829,7 +5833,9 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     auto pa_end_gcode = printer_config->opt_string("end_gcode");
     gcode << pa_end_gcode;
     pa_end_gcode      = gcode.str();
+    new_config.set_key_value("perimeter_generator", new ConfigOptionEnum<PerimeterGeneratorType>(PerimeterGeneratorType::Arachne));
     new_config.set_key_value("end_gcode", new ConfigOptionString(pa_end_gcode));
+    tab_print->load_config(new_config);
     tab_printer->load_config(new_config);
 
     std::string message = _u8L("NOTICE: The calibration function modifies some parameters. After calibration, record the best value and restore the other parameters.");
