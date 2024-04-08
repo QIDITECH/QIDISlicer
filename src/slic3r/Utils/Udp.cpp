@@ -755,8 +755,15 @@ void LookupUdpSession::handle_receive(const error_code &error, size_t bytes, std
 	if (bytes == 0 || !replyfn) {
 		return;
 	}
+	//B63
+    std::string delimiter = ",";
+    
+    size_t first_d = pData.find(delimiter);
+    size_t second_d = pData.find(delimiter, first_d + 1); 
+    size_t third_d = pData.find(delimiter, second_d + 1); 
+    std::string ip = pData.substr(second_d + 1, third_d - second_d - 1);
     asio::ip::address addr = asio::ip::address::from_string("127.0.0.1");
-    UdpReply      reply(addr, 80, std::move(pData.substr(pData.find_last_of(",") + 1)),
+    UdpReply      reply(addr, 80, std::move(ip),
                        pData.substr(pData.find("mkswifi:") + 8, pData.find(",") - 8));
 	replyfn(std::move(reply));
 
