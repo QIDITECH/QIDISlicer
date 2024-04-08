@@ -1409,7 +1409,7 @@ void PerimeterGenerator::process_with_one_wall_arachne(
         double nozzle_diameter = params.print_config.nozzle_diameter.get_at(params.config.perimeter_extruder-1);
         lower_slices_polygons_cache = offset(*lower_slices, float(scale_(+nozzle_diameter/2)));
     }
-    if (params.config.overhangs && upper_slices != nullptr && upper_slices_polygons_cache.empty()) {
+    if ( upper_slices != nullptr && upper_slices_polygons_cache.empty()) {
         double upper_nozzle_diameter = params.print_config.nozzle_diameter.get_at(params.config.perimeter_extruder - 1);
         upper_slices_polygons_cache  = offset(*upper_slices, float(scale_(EPSILON)));
     }
@@ -1817,7 +1817,7 @@ void PerimeterGenerator::process_classic(
     ExPolygons top_fills;
     //w16
     
-    if (params.config.overhangs && upper_slices != nullptr && upper_layer_polygons_cache.empty()) {
+    if ( upper_slices != nullptr && upper_layer_polygons_cache.empty()) {
         double upper_nozzle_diameter = params.print_config.nozzle_diameter.get_at(params.config.perimeter_extruder - 1);
         upper_layer_polygons_cache   = offset(*upper_slices, float(scale_(+upper_nozzle_diameter / 2)));
     }
