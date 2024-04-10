@@ -4952,8 +4952,10 @@ void GLCanvas3D::_render_thumbnail_internal(ThumbnailData& thumbnail_data, const
         else {
             shader->set_uniform("emission_factor", 0.0f);
 //Y18
-            vol->model.set_color((vol->printable && !vol->is_outside) ? ColorRGBA { 0.2f, 0.6f, 1.0f, 1.0f } : ColorRGBA::GRAY());
-            //vol->model.set_color((vol->printable && !vol->is_outside) ? vol->color : ColorRGBA::GRAY());
+            if (extruders_count > 1)
+                vol->model.set_color((vol->printable && !vol->is_outside) ? vol->color : ColorRGBA::GRAY());
+            else
+                vol->model.set_color((vol->printable && !vol->is_outside) ? ColorRGBA { 0.2f, 0.6f, 1.0f, 1.0f } : ColorRGBA::GRAY());
         }
         // the volume may have been deactivated by an active gizmo
         const bool is_active = vol->is_active;
