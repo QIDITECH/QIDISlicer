@@ -2102,7 +2102,7 @@ void PerimeterGenerator::process_classic(
     if (!top_fills.empty()) {
          infill_areas = union_ex(infill_areas, offset_ex(top_infill_exp, double(infill_peri_overlap)));
     }
-        append(out_fill_expolygons, std::move(top_infill_exp));
+        
         //w21
         {
             ExPolygons polyWithoutOverlap;
