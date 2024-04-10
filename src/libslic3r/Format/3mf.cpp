@@ -190,6 +190,8 @@ static constexpr const char *SVG_FILE_PATH_IN_3MF_ATTR = "filepath3mf";
 static constexpr const char *DEPTH_ATTR       = "depth";
 static constexpr const char *USE_SURFACE_ATTR = "use_surface";
 // static constexpr const char *FIX_TRANSFORMATION_ATTR = "transform";
+
+
 const unsigned int VALID_OBJECT_TYPES_COUNT = 1;
 const char* VALID_OBJECT_TYPES[] =
 {
@@ -336,6 +338,7 @@ namespace Slic3r {
     class _3MF_Importer : public _3MF_Base
     {
         typedef std::pair<std::string, int> PathId;
+
         struct Component
         {
             PathId object_id;
@@ -476,7 +479,6 @@ namespace Slic3r {
         typedef std::map<int, CutObjectInfo>         IdToCutObjectInfoMap;
         typedef std::map<int, std::vector<sla::SupportPoint>> IdToSlaSupportPointsMap;
         typedef std::map<int, std::vector<sla::DrainHole>> IdToSlaDrainHolesMap;
-
         using PathToEmbossShapeFileMap = std::map<std::string, std::shared_ptr<std::string>>;
         // Version of the 3mf file
         unsigned int m_version;
@@ -554,6 +556,7 @@ namespace Slic3r {
         // handlers to parse the .rels file
         void _handle_start_relationships_element(const char* name, const char** attributes);
         bool _handle_start_relationship(const char **attributes, unsigned int num_attributes);
+
         // handlers to parse the .model file
         void _handle_start_model_xml_element(const char* name, const char** attributes);
         void _handle_end_model_xml_element(const char* name);
@@ -627,6 +630,7 @@ namespace Slic3r {
 
         // callbacks to parse the .rels file
         static void XMLCALL _handle_start_relationships_element(void *userData, const char *name, const char **attributes);
+
         // callbacks to parse the .model file
         static void XMLCALL _handle_start_model_xml_element(void* userData, const char* name, const char** attributes);
         static void XMLCALL _handle_end_model_xml_element(void* userData, const char* name);
@@ -724,6 +728,7 @@ namespace Slic3r {
         m_model_path = MODEL_FILE;
         _extract_relationships_from_archive(archive, stat);
         bool found_model = false;
+
         // we first loop the entries to read from the .model files which are not root
         for (mz_uint i = 0; i < num_entries; ++i) {
             if (mz_zip_reader_file_stat(&archive, i, &stat)) {
@@ -754,6 +759,7 @@ namespace Slic3r {
                 }
             }
         }
+
         // Read root model file
         if (start_part_stat.m_file_index < num_entries) {
             try {
@@ -1045,6 +1051,7 @@ namespace Slic3r {
     bool _3MF_Importer::_is_svg_shape_file(const std::string &name) const { 
         return boost::starts_with(name, MODEL_FOLDER) && boost::ends_with(name, ".svg");
     }
+
     bool _3MF_Importer::_extract_model_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat)
     {
         if (stat.m_uncomp_size == 0) {
@@ -1502,6 +1509,7 @@ namespace Slic3r {
                 svg->file_data = m_path_to_emboss_shape_files[filename];
         }
     }
+
     bool _3MF_Importer::_extract_model_config_from_archive(mz_zip_archive& archive, const mz_zip_archive_file_stat& stat, Model& model)
     {
         if (stat.m_uncomp_size == 0) {
@@ -1634,7 +1642,8 @@ namespace Slic3r {
         }
         return true;
     }
-    void _3MF_Importer::_handle_start_model_xml_element(const char* name, const char** attributes)
+
+    void _3MF_Importer::_handle_start_model_xml_element(const char *name, const char **attributes)
     {
         if (m_xml_parser == nullptr)
             return;
@@ -1775,6 +1784,7 @@ namespace Slic3r {
     {
         if (!m_model_path.empty())
             return true;
+
         // deletes all non-built or non-instanced objects
         for (const IdToModelObjectMap::value_type& object : m_objects) {
             if (object.second >= int(m_model->objects.size())) {
@@ -1956,7 +1966,11 @@ namespace Slic3r {
 
         m_curr_object.geometry.custom_supports.push_back(get_attribute_value_string(attributes, num_attributes, CUSTOM_SUPPORTS_ATTR));
         m_curr_object.geometry.custom_seam.push_back(get_attribute_value_string(attributes, num_attributes, CUSTOM_SEAM_ATTR));
-        m_curr_object.geometry.mm_segmentation.push_back(get_attribute_value_string(attributes, num_attributes, MM_SEGMENTATION_ATTR));
+        std::string mm_segmentation_serialized = get_attribute_value_string(attributes, num_attributes, MM_SEGMENTATION_ATTR);
+        if (mm_segmentation_serialized.empty())
+            mm_segmentation_serialized = get_attribute_value_string(attributes, num_attributes, "paint_color");
+        m_curr_object.geometry.mm_segmentation.push_back(mm_segmentation_serialized);
+
         return true;
     }
 
@@ -1983,9 +1997,10 @@ namespace Slic3r {
     {
         std::string path = get_attribute_value_string(attributes, num_attributes, PPATH_ATTR);
         if (path.empty()) path = m_model_path;
-        int object_id = get_attribute_value_int(attributes, num_attributes, OBJECTID_ATTR);
+        
+        int         object_id = get_attribute_value_int(attributes, num_attributes, OBJECTID_ATTR);
         Transform3d transform = get_transform_from_3mf_specs_string(get_attribute_value_string(attributes, num_attributes, TRANSFORM_ATTR));
-
+        
         PathId path_id { path, object_id };
         IdToModelObjectMap::iterator object_item = m_objects.find(path_id);
         if (object_item == m_objects.end()) {
@@ -2096,7 +2111,7 @@ namespace Slic3r {
     {
     public:
         TextConfigurationSerialization() = delete;
-
+                
         using TypeToName = boost::bimap<EmbossStyle::Type, std::string_view>;
         static const TypeToName type_to_name;
 
@@ -2131,11 +2146,11 @@ namespace Slic3r {
     {
         IdToMetadataMap::iterator object = m_objects_metadata.find(m_curr_config.object_id);
         if (object == m_objects_metadata.end()) {
-            add_error("Cannot assign volume mesh to a valid object");
+            add_error("Can not assign volume mesh to a valid object");
             return false;
         }
         if (object->second.volumes.empty()) {
-            add_error("Cannot assign mesh to a valid volume");
+            add_error("Can not assign mesh to a valid volume");
             return false;
         }
         ObjectMetadata::VolumeMetadata& volume = object->second.volumes.back();
@@ -2470,11 +2485,11 @@ namespace Slic3r {
             volume->supported_facets.shrink_to_fit();
             volume->seam_facets.shrink_to_fit();
             volume->mm_segmentation_facets.shrink_to_fit();
+
             if (auto &es = volume_data.shape_configuration; es.has_value())
                 volume->emboss_shape = std::move(es);            
             if (auto &tc = volume_data.text_configuration; tc.has_value())
                 volume->text_configuration = std::move(tc);
-
             
             // apply the remaining volume's metadata
             for (const Metadata& metadata : volume_data.metadata) {
@@ -3550,10 +3565,11 @@ namespace Slic3r {
                     for (const std::string& key : volume->config.keys()) {
                         stream << "   <" << METADATA_TAG << " " << TYPE_ATTR << "=\"" << VOLUME_TYPE << "\" " << KEY_ATTR << "=\"" << key << "\" " << VALUE_ATTR << "=\"" << volume->config.opt_serialize(key) << "\"/>\n";
                     }
-                                                        
+
                     if (const std::optional<EmbossShape> &es = volume->emboss_shape;
                         es.has_value())
                         to_xml(stream, *es, *volume, archive);
+                    
                     if (const std::optional<TextConfiguration> &tc = volume->text_configuration;
                         tc.has_value())
                         TextConfigurationSerialization::to_xml(stream, *tc);
@@ -3759,11 +3775,12 @@ S bimap_cvt(const boost::bimap<F, S> &bmap, F f, const S &def_value)
 }
 
 } // namespace
+
 /// <summary>
 /// TextConfiguration serialization
 /// </summary>
 const TextConfigurationSerialization::TypeToName TextConfigurationSerialization::type_to_name =
-            boost::assign::list_of<TypeToName::relation>
+    boost::assign::list_of<TypeToName::relation>
     (EmbossStyle::Type::file_path, "file_name")
     (EmbossStyle::Type::wx_win_font_descr, "wxFontDescriptor_Windows")
     (EmbossStyle::Type::wx_lin_font_descr, "wxFontDescriptor_Linux")
@@ -3780,6 +3797,8 @@ const TextConfigurationSerialization::VerticalAlignToName TextConfigurationSeria
     (FontProp::VerticalAlign::top, "top")
     (FontProp::VerticalAlign::center, "middle")
     (FontProp::VerticalAlign::bottom, "bottom");
+
+
 void TextConfigurationSerialization::to_xml(std::stringstream &stream, const TextConfiguration &tc)
 {
     stream << "   <" << TEXT_TAG << " ";
@@ -3827,6 +3846,7 @@ namespace {
 
 FontProp::HorizontalAlign read_horizontal_align(const char **attributes, unsigned int num_attributes, const TextConfigurationSerialization::HorizontalAlignToName& horizontal_align_to_name){
     std::string horizontal_align_str = get_attribute_value_string(attributes, num_attributes, HORIZONTAL_ALIGN_ATTR);
+
     // Back compatibility
     // PS 2.6.0 do not have align
     if (horizontal_align_str.empty())
@@ -3838,10 +3858,11 @@ FontProp::HorizontalAlign read_horizontal_align(const char **attributes, unsigne
         int horizontal_align_int = 0;
         if(boost::spirit::qi::parse(horizontal_align_str.c_str(), horizontal_align_str.c_str() + 1, boost::spirit::qi::int_, horizontal_align_int))
             return static_cast<FontProp::HorizontalAlign>(horizontal_align_int);
-}
+    }
 
     return bimap_cvt(horizontal_align_to_name, std::string_view(horizontal_align_str), FontProp::HorizontalAlign::center);    
-    }
+}
+
 
 FontProp::VerticalAlign read_vertical_align(const char **attributes, unsigned int num_attributes, const TextConfigurationSerialization::VerticalAlignToName& vertical_align_to_name){
     std::string vertical_align_str = get_attribute_value_string(attributes, num_attributes, VERTICAL_ALIGN_ATTR);
@@ -3860,7 +3881,8 @@ FontProp::VerticalAlign read_vertical_align(const char **attributes, unsigned in
     }
 
     return bimap_cvt(vertical_align_to_name, std::string_view(vertical_align_str), FontProp::VerticalAlign::center);
-    }
+}
+
 } // namespace
 
 std::optional<TextConfiguration> TextConfigurationSerialization::read(const char **attributes, unsigned int num_attributes)
@@ -3882,6 +3904,7 @@ std::optional<TextConfiguration> TextConfigurationSerialization::read(const char
     fp.align = FontProp::Align(
         read_horizontal_align(attributes, num_attributes, horizontal_align_to_name),
         read_vertical_align(attributes, num_attributes, vertical_align_to_name));
+
     int collection_number = get_attribute_value_int(attributes, num_attributes, COLLECTION_NUMBER_ATTR);
     if (collection_number > 0) fp.collection_number = static_cast<unsigned int>(collection_number);
 

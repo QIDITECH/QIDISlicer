@@ -418,6 +418,7 @@ PrinterPicker::PrinterPicker(wxWindow *parent, const VendorProfile &vendor, wxSt
         wxGetApp().SetWindowVariantForButton(sel_all_std);
         wxGetApp().SetWindowVariantForButton(sel_all);
         wxGetApp().SetWindowVariantForButton(sel_none);
+
         wxGetApp().UpdateDarkUI(sel_all_std);
         wxGetApp().UpdateDarkUI(sel_all);
         wxGetApp().UpdateDarkUI(sel_none);
@@ -750,6 +751,7 @@ PageMaterials::PageMaterials(ConfigWizard *parent, Materials *materials, wxStrin
 
     wxGetApp().SetWindowVariantForButton(sel_all);
     wxGetApp().SetWindowVariantForButton(sel_none);
+
     grid->Add(new wxBoxSizer(wxHORIZONTAL));
     grid->Add(new wxBoxSizer(wxHORIZONTAL));
     grid->Add(new wxBoxSizer(wxHORIZONTAL));
@@ -788,6 +790,7 @@ PageMaterials::PageMaterials(ConfigWizard *parent, Materials *materials, wxStrin
     reload_presets();
     set_compatible_printers_html_window(std::vector<std::string>(), false);
 }
+
 void PageMaterials::check_and_update_presets(bool force_reload_presets /*= false*/)
 {
     if (presets_loaded)
@@ -796,6 +799,7 @@ void PageMaterials::check_and_update_presets(bool force_reload_presets /*= false
 //    if (force_reload_presets)
         reload_presets();
 }
+
 void PageMaterials::on_paint()
 {
 }
@@ -909,7 +913,6 @@ void PageMaterials::set_compatible_printers_html_window(const std::vector<std::s
             );
         }
     }
-       
    
     wxFont font = wxGetApp().normal_font();// get_default_font_for_dpi(this, get_dpi_for_window(this));
     const int fs = font.GetPointSize();
@@ -2613,9 +2616,11 @@ void ConfigWizard::priv::update_materials(Technology technology)
             materials.compatibility_counter[preset.alias].insert(printer);
         }
     };
+
     if ((any_fff_selected || custom_printer_in_bundle || custom_printer_selected) && (technology & T_FFF)) {
         filaments.clear();
         aliases_fff.clear();
+
         for (const auto &[name, bundle] : bundles) {
             for (const auto &filament : bundle.preset_bundle->filaments) {
                 // Iterate printers in all bundles
@@ -2629,9 +2634,9 @@ void ConfigWizard::priv::update_materials(Technology technology)
                 // template filament bundle has no printers - filament would be never added
                 if(bundle.vendor_profile && bundle.vendor_profile->templates_profile && bundle.preset_bundle->printers.begin() == bundle.preset_bundle->printers.end())
                     add_material(filaments, aliases_fff, filament);
-                }
             }
         }
+    }
 
     if (any_sla_selected && (technology & T_SLA)) {
         sla_materials.clear();
@@ -2649,10 +2654,10 @@ void ConfigWizard::priv::update_materials(Technology technology)
                     if (is_compatible_with_printer(PresetWithVendorProfile(material, nullptr), PresetWithVendorProfile(printer, nullptr)))
                         // Check if material is already added
                         add_material(sla_materials, aliases_sla, material, &printer);
-                    }
                 }
             }
         }
+    }
 }
 
 void ConfigWizard::priv::on_custom_setup(const bool custom_wanted)
@@ -2781,25 +2786,25 @@ bool ConfigWizard::priv::on_bnt_finish()
 {
     wxBusyCursor wait;
 
-#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
     if (!page_downloader->on_finish_downloader()) {
         index->go_to(page_downloader);
         return false;
     }
-#endif
+
     /* If some printers were added/deleted, but related MaterialPage wasn't activated,
      * than last changes wouldn't be updated for filaments/materials.
      * SO, do that before check_and_install_missing_materials()
      */
     if (page_filaments)
-    page_filaments->check_and_update_presets();
+        page_filaments->check_and_update_presets();
     if (page_sla_materials)
-    page_sla_materials->check_and_update_presets();
-
+        page_sla_materials->check_and_update_presets();
+    
     // Even if we have only custom printer installed, check filament selection. 
     // Template filaments could be selected in this case. 
     if (custom_printer_selected && !any_fff_selected && !any_sla_selected) 
         return check_and_install_missing_materials(T_FFF);
+
     // check, that there is selected at least one filament/material
     return check_and_install_missing_materials(T_ANY);
 }
@@ -3235,6 +3240,7 @@ bool ConfigWizard::priv::apply_config(AppConfig *app_config, PresetBundle *prese
             wxGetApp().associate_3mf_files();
         if (page_files_association->associate_stl())
             wxGetApp().associate_stl_files();
+//Y
         if (page_files_association->associate_step())
             wxGetApp().associate_step_files();
     }
@@ -3414,9 +3420,7 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
 
     
     p->add_page(p->page_update   = new PageUpdate(this));
-#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
     p->add_page(p->page_downloader = new PageDownloader(this));
-#endif
     p->add_page(p->page_reload_from_disk = new PageReloadFromDisk(this));
 #ifdef _WIN32
     p->add_page(p->page_files_association = new PageFilesAssociation(this));

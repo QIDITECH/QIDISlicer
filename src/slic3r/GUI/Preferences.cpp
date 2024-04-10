@@ -14,6 +14,7 @@
 #include "ConfigWizard.hpp"
 
 #include "Widgets/SpinInput.hpp"
+
 #include <boost/dll/runtime_symbol_info.hpp>
 
 #ifdef WIN32
@@ -21,10 +22,6 @@
 #endif // WIN32
 #if defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
 #include "DesktopIntegrationDialog.hpp"
-#endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
-
-#if defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION)
-#include "NotificationManager.hpp"
 #endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
 
 namespace Slic3r {
@@ -88,6 +85,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent) :
         sz.x += 1;
 #endif
     SetSize(sz);
+
 	m_highlighter.set_timer_owner(this, 0);
 }
 
@@ -125,11 +123,9 @@ void PreferencesDialog::show(const std::string& highlight_opt_key /*= std::strin
 	if (wxGetApp().is_editor()) {
 		auto app_config = get_app_config();
 
-#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 		downloader->set_path_name(app_config->get("url_downloader_dest"));
 		downloader->allow(!app_config->has("downloader_url_registered") || app_config->get_bool("downloader_url_registered"));
 
-#endif
 		for (const std::string& opt_key : {"suppress_hyperlinks", "downloader_url_registered"})
 			m_optgroup_other->set_value(opt_key, app_config->get_bool(opt_key));
 
@@ -138,6 +134,7 @@ void PreferencesDialog::show(const std::string& highlight_opt_key /*= std::strin
 										   ,"default_action_on_select_preset" })
 			m_optgroup_general->set_value(opt_key, app_config->get(opt_key) == "none");
 		m_optgroup_general->set_value("default_action_on_dirty_project", app_config->get("default_action_on_dirty_project").empty());
+
 		// update colors for color pickers of the labels
 		update_color(m_sys_colour, wxGetApp().get_label_clr_sys());
 		update_color(m_mod_colour, wxGetApp().get_label_clr_modified());
@@ -155,6 +152,7 @@ void PreferencesDialog::show(const std::string& highlight_opt_key /*= std::strin
 static std::shared_ptr<ConfigOptionsGroup>create_options_tab(const wxString& title, wxBookCtrlBase* tabs)
 {
 	wxPanel* tab = new wxPanel(tabs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_LEFT | wxTAB_TRAVERSAL);
+
 	tabs->AddPage(tab, _(title));
 	tab->SetFont(wxGetApp().normal_font());
 
@@ -163,6 +161,7 @@ static std::shared_ptr<ConfigOptionsGroup>create_options_tab(const wxString& tit
 	// Sizer in the scrolled area
 	auto* scrolled_sizer = new wxBoxSizer(wxVERTICAL);
 	scrolled->SetSizer(scrolled_sizer);
+
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	sizer->Add(scrolled, 1, wxEXPAND);
 	sizer->SetSizeHints(tab);
@@ -182,6 +181,7 @@ static void activate_options_tab(std::shared_ptr<ConfigOptionsGroup> optgroup)
 	sizer->Add(optgroup->sizer, 0, wxEXPAND | wxALL, 10);
 
 	optgroup->parent()->Layout();
+
 	// apply sercher
 	wxGetApp().sidebar().get_searcher().append_preferences_options(optgroup->get_lines());
 }
@@ -323,7 +323,6 @@ void PreferencesDialog::build()
 			L("Associate .stl files to QIDISlicer"),
 			L("If enabled, sets QIDISlicer as default application to open .stl files."),
 			app_config->get_bool("associate_stl"));
-
 #endif // _WIN32
 
 		m_optgroup_general->append_separator();
@@ -626,6 +625,7 @@ void PreferencesDialog::build()
                     L("If the 'Supports binary G-code' option is enabled in Printer Settings, "
                       "checking this option will result in the export of G-code in binary format."),
                     app_config->get_bool("use_binary_gcode_when_supported"));
+
 		append_bool_option(m_optgroup_other, "suppress_hyperlinks",
 			L("Suppress to open hyperlink in browser"),
 			L("If enabled, QIDISlicer will not open a hyperlinks in your browser."),
@@ -633,18 +633,14 @@ void PreferencesDialog::build()
 			//  "If disabled, the descriptions of configuration parameters in settings tabs will work as hyperlinks."),
 			app_config->get_bool("suppress_hyperlinks"));
 		
-#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 		append_bool_option(m_optgroup_other, "downloader_url_registered",
 			L("Allow downloads from Printables.com"),
 			L("If enabled, QIDISlicer will be allowed to download from Printables.com"),
 			app_config->get_bool("downloader_url_registered"));
-#endif
 
 		activate_options_tab(m_optgroup_other);
 
-#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 		create_downloader_path_sizer();
-#endif
 		create_settings_font_widget();
 
 #if ENABLE_ENVIRONMENT_MAP
@@ -749,18 +745,16 @@ void PreferencesDialog::update_ctrls_alignment()
 
 void PreferencesDialog::accept(wxEvent&)
 {
-#if !defined(__linux__) || (defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION))
 	if(wxGetApp().is_editor()) {
 		if (const auto it = m_values.find("downloader_url_registered"); it != m_values.end())
 			downloader->allow(it->second == "1");
 		if (!downloader->on_finish())
 			return;
-#if defined(__linux__)
+#if defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION) 
 		if( downloader->get_perform_registration_linux()) 
 			DesktopIntegrationDialog::perform_downloader_desktop_integration();
-#endif
+#endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
 	}
-#endif
 
 	std::vector<std::string> options_to_recreate_GUI = { "no_defaults", "tabs_as_menu", "sys_menu_enabled", "font_pt_size", "suppress_round_corners" };
 

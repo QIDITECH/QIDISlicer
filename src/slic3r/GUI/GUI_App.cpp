@@ -822,6 +822,7 @@ void GUI_App::post_init()
     // This is ugly but I honestly found no better way to do it.
     // Neither wxShowEvent nor wxWindowCreateEvent work reliably.
     if (this->preset_updater) { // G-Code Viewer does not initialize preset_updater.
+
 #if 0 // This code was moved to EVT_CONFIG_UPDATER_SYNC_DONE bind - after preset_updater finishes synchronization.
         if (! this->check_updates(false))
             // Configuration is not compatible and reconfigure was refused by the user. Application is closing.
@@ -1097,10 +1098,12 @@ static int get_app_font_pt_size(const AppConfig* app_config)
 
     return (font_pt_size > max_font_pt_size) ? max_font_pt_size : font_pt_size;
 }
+
 bool GUI_App::on_init_inner()
 {
     // TODO: remove this when all asserts are gone.
     wxDisableAsserts();
+
     // Set initialization of image handlers before any UI actions - See GH issue #7469
     wxInitAllImageHandlers();
 
@@ -1299,6 +1302,7 @@ bool GUI_App::on_init_inner()
         Bind(EVT_CONFIG_UPDATER_SYNC_DONE, [this](const wxCommandEvent& evt) {
             this->check_updates(false);
         });
+
     }
     else {
 #ifdef __WXMSW__ 
@@ -1642,7 +1646,7 @@ void GUI_App::UpdateDVCDarkUI(wxDataViewCtrl* dvc, bool highlited/* = false*/)
     UpdateDarkUI(dvc, highlited ? dark_mode() : false);
 #ifdef _MSW_DARK_MODE
     if (!dvc->HasFlag(wxDV_NO_HEADER))
-    dvc->RefreshHeaderDarkMode(&m_normal_font);
+        dvc->RefreshHeaderDarkMode(&m_normal_font);
 #endif //_MSW_DARK_MODE
     if (dvc->HasFlag(wxDV_ROW_LINES))
         dvc->SetAlternateRowColour(m_color_highlight_default);
@@ -1687,6 +1691,7 @@ int GUI_App::get_max_font_pt_size()
     }
     return 15;
 }
+
 void GUI_App::init_fonts()
 {
     m_small_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
@@ -3160,9 +3165,6 @@ void GUI_App::show_desktop_integration_dialog()
 
 void GUI_App::show_downloader_registration_dialog()
 {
-#if defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION) 
-    return;
-#endif
     InfoDialog msg(nullptr
         , format_wxstr(_L("Welcome to %1% version %2%."), SLIC3R_APP_NAME, SLIC3R_VERSION)
         , format_wxstr(_L(
@@ -3174,10 +3176,10 @@ void GUI_App::show_downloader_registration_dialog()
     if (msg.ShowModal() == wxID_YES) {
         auto downloader_worker = new DownloaderUtils::Worker(nullptr);
         downloader_worker->perform_register(app_config->get("url_downloader_dest"));
-#if defined(__linux__)
+#if defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
         if (downloader_worker->get_perform_registration_linux())
             DesktopIntegrationDialog::perform_downloader_desktop_integration();
-#endif //(__linux__)
+#endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
     } else {
         app_config->set("downloader_url_registered", "0");
     }
@@ -3459,7 +3461,6 @@ void GUI_App::associate_bgcode_files()
 {
     associate_file_type(L".bgcode", L"QIDISlicer.GCodeViewer.1", L"QIDISlicerGCodeViewer", true);
 }
-
 #endif // __WXMSW__
 
 void GUI_App::on_version_read(wxCommandEvent& evt)
@@ -3564,17 +3565,16 @@ void GUI_App::start_download(std::string url)
         BOOST_LOG_TRIVIAL(error) << "Could not start URL download: plater is nullptr.";
         return; 
     }
-    // Windows register and deregister executable path to registry - cant get here when not registered
-    // Apple registers via info.plist attached to exectable - might get here
-    // Linux registers via desktop integration file - might get here only if such file was created outside Slicer.
-    // Desktop integration is limited with SLIC3R_DESKTOP_INTEGRATION (cmake option). 
-#if defined(__APPLE__) || (defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION))
-    if (app_config && app_config->get_bool("downloader_url_registered")) {
+
+    #if defined(__APPLE__) || (defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION))
+    if (app_config && !app_config->get_bool("downloader_url_registered"))
+    {
         notification_manager()->push_notification(NotificationType::URLNotRegistered);
-        BOOST_LOG_TRIVIAL(error) << "Recieved command to open URL, but it is not allowed in app configuration. URL: " << url;
+        BOOST_LOG_TRIVIAL(error) << "Received command to open URL, but it is not allowed in app configuration. URL: " << url;
         return;
     }
-#endif //defined(__APPLE__) || (defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION))
+    #endif //defined(__APPLE__) || (defined(__linux__) && !defined(SLIC3R_DESKTOP_INTEGRATION))
+
     //lets always init so if the download dest folder was changed, new dest is used 
         boost::filesystem::path dest_folder(app_config->get("url_downloader_dest"));
         if (dest_folder.empty() || !boost::filesystem::is_directory(dest_folder)) {
@@ -3582,7 +3582,7 @@ void GUI_App::start_download(std::string url)
             BOOST_LOG_TRIVIAL(error) << msg;
             show_error(nullptr, msg);
             return;
-        } 
+        }
     m_downloader->init(dest_folder);
     m_downloader->start_download(url);
 }
@@ -3619,5 +3619,6 @@ void GUI_App::open_wifi_config_dialog(bool forced, const wxString& drive_path/* 
     }
     m_wifi_config_dialog_shown = false;
 }
+
 } // GUI
 } //Slic3r
