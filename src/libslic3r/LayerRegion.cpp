@@ -137,7 +137,9 @@ void LayerRegion::make_perimeters(
                 m_thin_fills,
                 fill_expolygons,
                 //w21
-                fill_no_overlap_expolygons);
+                fill_no_overlap_expolygons,
+                //w23
+                this->layer()->id());
             else
                 PerimeterGenerator::process_arachne(
                 // input:
@@ -152,7 +154,9 @@ void LayerRegion::make_perimeters(
                 m_thin_fills,
                 fill_expolygons,
                 //w21
-                fill_no_overlap_expolygons);
+                fill_no_overlap_expolygons,
+                //w23
+                this->layer()->id());
 
         else
             PerimeterGenerator::process_classic(
@@ -169,7 +173,9 @@ void LayerRegion::make_perimeters(
                 m_thin_fills,
                 fill_expolygons,
                 //w21
-                fill_no_overlap_expolygons);
+                fill_no_overlap_expolygons,
+                //w23
+                this->layer()->id());
         perimeter_and_gapfill_ranges.emplace_back(
             ExtrusionRange{ perimeters_begin, uint32_t(m_perimeters.size()) }, 
             ExtrusionRange{ gap_fills_begin,  uint32_t(m_thin_fills.size()) });

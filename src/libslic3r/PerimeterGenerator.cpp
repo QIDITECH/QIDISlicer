@@ -1123,7 +1123,9 @@ void PerimeterGenerator::process_arachne(
     // Infills without the gap fills
     ExPolygons                 &out_fill_expolygons,
     //w21
-    ExPolygons                 &out_fill_no_overlap)
+    ExPolygons                 &out_fill_no_overlap,
+    //w23
+    const size_t               layer_id)
 {
     // other perimeters
     coord_t perimeter_spacing     = params.perimeter_flow.scaled_spacing();
@@ -1151,7 +1153,8 @@ void PerimeterGenerator::process_arachne(
     Polygons   last_p      = to_polygons(last);
 
     //w16
-    if (upper_slices == nullptr && params.object_config.top_one_wall_type == TopOneWallType::Onlytopmost)
+    //w23
+    if ((upper_slices == nullptr && params.object_config.top_one_wall_type == TopOneWallType::Onlytopmost)||(params.object_config.only_one_wall_first_layer && layer_id == 0))
         loop_number = 0;
 
     Arachne::WallToolPaths wallToolPaths(last_p, ext_perimeter_spacing, perimeter_spacing, coord_t(loop_number + 1), 0, params.layer_height, params.object_config, params.print_config);
@@ -1388,9 +1391,11 @@ void PerimeterGenerator::process_with_one_wall_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection  & /* out_gap_fill */,
     // Infills without the gap fills
-    ExPolygons &out_fill_expolygons,
+    ExPolygons                 &out_fill_expolygons,
     //w21
-    ExPolygons &out_fill_no_overlap)
+    ExPolygons                 &out_fill_no_overlap,
+    //w23
+    const size_t               layer_id)
 {
     // other perimeters
     coord_t perimeter_spacing     = params.perimeter_flow.scaled_spacing();
@@ -1419,6 +1424,9 @@ void PerimeterGenerator::process_with_one_wall_arachne(
     // extra perimeters for each one
     // detect how many perimeters must be generated for this island
     int        loop_number = params.config.perimeters + surface.extra_perimeters - 1; // 0-indexed loops
+    //w23
+    if (params.object_config.only_one_wall_first_layer && layer_id == 0)
+        loop_number = 0;
     ExPolygons last        = offset_ex(surface.expolygon.simplify_p(params.scaled_resolution), - float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
     Polygons   last_p      = to_polygons(last);
 
@@ -1771,7 +1779,9 @@ void PerimeterGenerator::process_classic(
     // Infills without the gap fills
     ExPolygons                 &out_fill_expolygons,
     //w21
-    ExPolygons                 &out_fill_no_overlap)
+    ExPolygons                 &out_fill_no_overlap,
+    //w23
+    const size_t               layer_id)
 {
     // other perimeters
     coord_t perimeter_width         = params.perimeter_flow.scaled_width();
@@ -1821,7 +1831,9 @@ void PerimeterGenerator::process_classic(
         double upper_nozzle_diameter = params.print_config.nozzle_diameter.get_at(params.config.perimeter_extruder - 1);
         upper_layer_polygons_cache   = offset(*upper_slices, float(scale_(+upper_nozzle_diameter / 2)));
     }
-    if (loop_number > 0 && params.object_config.top_one_wall_type != TopOneWallType::Disable && upper_slices == nullptr)
+    //w16
+    //w23
+    if (loop_number > 0 && (params.object_config.top_one_wall_type != TopOneWallType::Disable && upper_slices == nullptr) || (params.object_config.only_one_wall_first_layer && layer_id == 0))
         loop_number = 0;
     if (loop_number >= 0) {
         // In case no perimeters are to be generated, loop_number will equal to -1.

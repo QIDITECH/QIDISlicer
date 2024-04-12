@@ -868,7 +868,9 @@ bool PrintObject::invalidate_state_by_config_options(
             //w16
             || opt_key == "top_one_wall_type"
             //w17
-            || opt_key == "top_area_threshold") {
+            || opt_key == "top_area_threshold"
+            //w23
+            || opt_key == "only_one_wall_first_layer") {
             steps.emplace_back(posSlice);
         } else if (
                opt_key == "seam_position"

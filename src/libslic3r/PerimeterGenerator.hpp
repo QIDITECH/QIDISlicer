@@ -83,7 +83,9 @@ void process_classic(
     // Infills without the gap fills
     ExPolygons                 &out_fill_expolygons,
     //w21
-    ExPolygons                 &out_fill_no_overlap);
+    ExPolygons                 &out_fill_no_overlap,
+    //w23
+    const size_t               layer_id );
 
 void process_arachne(
     // Inputs:
@@ -100,9 +102,11 @@ void process_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection &out_gap_fill,
     // Infills without the gap fills
-    ExPolygons &out_fill_expolygons,
+    ExPolygons                &out_fill_expolygons,
     //w21
-    ExPolygons &out_fill_no_overlap);
+    ExPolygons                &out_fill_no_overlap,
+    //w23
+    const size_t              layer_id);
 
 void process_with_one_wall_arachne(
     // Inputs:
@@ -120,9 +124,11 @@ void process_with_one_wall_arachne(
     // Gaps without the thin walls
     ExtrusionEntityCollection  &out_gap_fill,
     // Infills without the gap fills
-    ExPolygons &out_fill_expolygons,
+    ExPolygons                 &out_fill_expolygons,
     //w21
-    ExPolygons &out_fill_no_overlap);
+    ExPolygons                 &out_fill_no_overlap,
+    //w23
+    const size_t               layer_id);
 
 //w16
 void add_infill_contour_for_arachne(ExPolygons        infill_contour,

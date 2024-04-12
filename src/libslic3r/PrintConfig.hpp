@@ -597,6 +597,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionPercent,            top_area_threshold))
     //w21
     ((ConfigOptionFloat,               filter_top_gap_infill))
+    //w23
+    ((ConfigOptionBool, only_one_wall_first_layer))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(

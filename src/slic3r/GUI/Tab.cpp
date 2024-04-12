@@ -1472,6 +1472,8 @@ void TabPrint::build()
         optgroup->append_single_option_line("top_one_wall_type");
         //w17
         optgroup->append_single_option_line("top_area_threshold");
+        //w23
+        optgroup->append_single_option_line("only_one_wall_first_layer");
 
         optgroup = page->new_optgroup(L("Fuzzy skin (experimental)"));
         category_path = "fuzzy-skin_246186/#";
