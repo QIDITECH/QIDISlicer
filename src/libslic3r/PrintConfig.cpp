@@ -3633,6 +3633,7 @@ void PrintConfigDef::init_fff_params()
     def->label    = L("Only one wall on first layer");
     def->category = L("Advanced");
     def->tooltip  = L("Use only one wall on the first layer of model");
+    def->mode     = comAdvanced;
     def->set_default_value(new ConfigOptionBool(false));
 
     def = this->add("wall_transition_length", coFloatOrPercent);
