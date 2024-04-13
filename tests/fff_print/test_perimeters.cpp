@@ -74,7 +74,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
                 upper_layer_polygons_cache,
                 lower_layer_polygons_cache,
                 // output:
-                loops, gap_fill, fill_expolygons,fill_expolygons_no_overlap,0);
+                loops, gap_fill, fill_expolygons,fill_expolygons_no_overlap);
 
         THEN("expected number of collections") {
             REQUIRE(loops.entities.size() == data.expolygons.size());
@@ -105,7 +105,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
                 [](const ExtrusionEntity *ee){ return dynamic_cast<const ExtrusionLoop*>(ee)->polygon().is_counter_clockwise(); });
             REQUIRE(ccw == data.ccw);
         }
-        THEN("expected ccw/cw order") {1
+        THEN("expected ccw/cw order") {
             std::vector<bool> ccw_order;
             for (auto *ee : loops.entities)
                 ccw_order.emplace_back(dynamic_cast<const ExtrusionLoop*>(ee)->polygon().is_counter_clockwise());
