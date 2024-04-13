@@ -74,7 +74,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
                 upper_layer_polygons_cache,
                 lower_layer_polygons_cache,
                 // output:
-                loops, gap_fill, fill_expolygons,fill_expolygons_no_overlap);
+                loops, gap_fill, fill_expolygons,fill_expolygons_no_overlap,0);
 
         THEN("expected number of collections") {
             REQUIRE(loops.entities.size() == data.expolygons.size());
