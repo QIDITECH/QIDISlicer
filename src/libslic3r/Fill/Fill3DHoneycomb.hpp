@@ -16,7 +16,7 @@ public:
     ~Fill3DHoneycomb() override {}
 
 	// require bridge flow since most of this pattern hangs in air
-    bool use_bridge_flow() const override { return true; }
+    
 
 protected:
 	void _fill_surface_single(
