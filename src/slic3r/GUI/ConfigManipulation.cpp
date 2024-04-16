@@ -371,7 +371,9 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     toggle_field("min_feature_size", have_arachne);
     toggle_field("min_bead_width", have_arachne);
     toggle_field("thin_walls", !have_arachne);
-
+    //w21
+    bool is_top_one_wall = config->opt_enum<TopOneWallType>("top_one_wall_type") != TopOneWallType::Disable;
+    toggle_field("top_area_threshold", is_top_one_wall);
 }
 
 void ConfigManipulation::toggle_print_sla_options(DynamicPrintConfig* config)
