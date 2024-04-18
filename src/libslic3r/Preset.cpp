@@ -483,6 +483,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"filter_top_gap_infill"
     //w23
     ,"only_one_wall_first_layer"
+    //w25
+    ,"slow_down_layers"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

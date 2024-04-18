@@ -857,6 +857,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloatOrPercent,     first_layer_extrusion_width))
     ((ConfigOptionFloatOrPercent,     first_layer_height))
     ((ConfigOptionFloatOrPercent,     first_layer_speed))
+    //w25
+    ((ConfigOptionInt,                slow_down_layers))
     ((ConfigOptionInts,               first_layer_temperature))
     ((ConfigOptionIntsNullable,       idle_temperature))
     //B26

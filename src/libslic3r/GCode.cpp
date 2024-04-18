@@ -3370,6 +3370,19 @@ std::string GCodeGenerator::_extrude(
             m_config.get_abs_value("first_layer_speed", speed);
     else if (this->object_layer_over_raft())
         speed = m_config.get_abs_value("first_layer_speed_over_raft", speed);
+    //w25
+    else if (m_config.slow_down_layers > 1) {
+        const auto _layer = layer_id() + 1;
+        if (_layer > 0 && _layer < m_config.slow_down_layers) {
+            const auto first_layer_speed = (path_attr.role==ExtrusionRole::Perimeter||path_attr.role==ExtrusionRole::ExternalPerimeter) ? m_config.get_abs_value("first_layer_speed") :
+                                                                       m_config.get_abs_value("first_layer_infill_speed");
+            if (first_layer_speed < speed) {
+                speed = std::min(speed, Slic3r::lerp(first_layer_speed, speed, (double) _layer / m_config.slow_down_layers));
+            }
+        }
+    }
+    
+    
 
     std::pair<float, float> dynamic_speed_and_fan_speed{-1, -1};
     if (path_attr.overhang_attributes.has_value()) {

@@ -465,6 +465,13 @@ private:
 
     // On the first printing layer. This flag triggers first layer speeds.
     bool                                on_first_layer() const { return m_layer != nullptr && m_layer->id() == 0; }
+    //w25
+    int layer_id() const
+    {
+        if (m_layer == nullptr)
+            return -1;
+        return m_layer->id();
+    }
     // To control print speed of 1st object layer over raft interface.
     bool                                object_layer_over_raft() const { return m_object_layer_over_raft; }
 

@@ -251,7 +251,9 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "first_layer_travel_speed"
             //B37
             || opt_key == "first_layer_infill_speed"
-            || opt_key == "z_offset") {
+            || opt_key == "z_offset"
+            //w25
+            || opt_key == "slow_down_layers") {
             steps.emplace_back(psWipeTower);
             steps.emplace_back(psSkirtBrim);
         } else if (opt_key == "filament_soluble") {
