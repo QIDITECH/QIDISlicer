@@ -309,6 +309,18 @@ void PrintConfigDef::init_common_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(0.));
 
+    //w26
+    def           = this->add("elefant_foot_compensation_layers", coInt);
+    def->label    = L("Elephant foot compensation layers");
+    def->category = L("Advanced");
+    def->tooltip  = L("The number of layers on which the elephant foot compensation will be active. "
+                     "The first layer will be shrunk by the elephant foot compensation value, then "
+                     "the next layers will be linearly shrunk less, up to the layer indicated by this value.");
+    def->sidetext = L("layers");
+    def->min      = 1;
+    def->mode     = comAdvanced;
+    def->set_default_value(new ConfigOptionInt(1));	
+
     def = this->add("thumbnails", coString);
     def->label = L("G-code thumbnails");
     def->tooltip = L("Picture sizes to be stored into a .gcode / .bgcode and .sl1 / .sl1s files, in the following format: \"XxY/EXT, XxY/EXT, ...\"\n"
@@ -4598,6 +4610,8 @@ void PrintConfigDef::init_sla_params()
         "support_pillar_diameter", "branchingsupport_pillar_diameter",
         "relative_correction_x", "relative_correction_y", "relative_correction_z", 
         "elefant_foot_compensation",
+        //w26
+        "elefant_foot_compensation_layers",
         // int
         "support_points_density_relative"
         }) {

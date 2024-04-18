@@ -739,6 +739,8 @@ bool PrintObject::invalidate_state_by_config_options(
             steps.emplace_back(posSlice);
 		} else if (
                opt_key == "elefant_foot_compensation"
+            //w26
+            || opt_key == "elefant_foot_compensation_layers"
             || opt_key == "support_material_contact_distance" 
             //w12
             || opt_key == "xy_size_compensation"

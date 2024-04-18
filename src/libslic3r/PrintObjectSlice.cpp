@@ -775,7 +775,8 @@ void PrintObject::slice_volumes()
         	0.f;
         // Uncompensated slices for the first layer in case the Elephant foot compensation is applied.
         std::vector<ExPolygons> lslices_elfoot_uncompensated;
-        lslices_elfoot_uncompensated.resize(elephant_foot_compensation_scaled > 0 ? std::min(1, (int)m_layers.size()) : 0);
+        //w26
+        lslices_elfoot_uncompensated.resize(elephant_foot_compensation_scaled > 0 ? std::min(m_config.elefant_foot_compensation_layers.value, (int)m_layers.size()) : 0);
 	    tbb::parallel_for(
 	        tbb::blocked_range<size_t>(0, m_layers.size()),
             //w12
@@ -785,8 +786,8 @@ void PrintObject::slice_volumes()
 	                m_print->throw_if_canceled();
 	                Layer *layer = m_layers[layer_id];
 	                //w24
-                    float elfoot = elephant_foot_compensation_scaled > 0 && layer_id < 1 ? 
-                        elephant_foot_compensation_scaled - (elephant_foot_compensation_scaled / 1) * layer_id : 
+                    float elfoot = elephant_foot_compensation_scaled > 0 && layer_id < m_config.elefant_foot_compensation_layers.value ? 
+                        elephant_foot_compensation_scaled - (elephant_foot_compensation_scaled / m_config.elefant_foot_compensation_layers.value) * layer_id : 
                         0.f;
 	                if (layer->m_regions.size() == 1) {
 	                    LayerRegion *layerm = layer->m_regions.front();

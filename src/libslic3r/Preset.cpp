@@ -485,6 +485,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"only_one_wall_first_layer"
     //w25
     ,"slow_down_layers"
+    //w26
+    ,"elefant_foot_compensation_layers"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

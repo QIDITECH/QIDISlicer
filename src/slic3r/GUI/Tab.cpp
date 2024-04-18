@@ -1691,6 +1691,8 @@ void TabPrint::build()
         optgroup->append_single_option_line("xy_hole_compensation");
         optgroup->append_single_option_line("xy_contour_compensation");
         optgroup->append_single_option_line("elefant_foot_compensation", "elephant-foot-compensation_114487");
+        //w26
+        optgroup->append_single_option_line("elefant_foot_compensation_layers");
 
         optgroup = page->new_optgroup(L("Arachne perimeter generator"));
         optgroup->append_single_option_line("wall_transition_angle");
@@ -3010,6 +3012,8 @@ void TabPrinter::build_sla()
     optgroup->append_line(line);
     optgroup->append_single_option_line("absolute_correction");
     optgroup->append_single_option_line("elefant_foot_compensation");
+    //w26
+    optgroup->append_single_option_line("elefant_foot_compensation_layers");
     optgroup->append_single_option_line("elefant_foot_min_width");
     optgroup->append_single_option_line("gamma_correction");
     
@@ -5610,6 +5614,7 @@ std::vector<std::pair<std::string, std::vector<std::string>>> material_overrides
     {"Corrections", {
         "relative_correction",
         "elefant_foot_compensation"
+
     }}
 };
 
