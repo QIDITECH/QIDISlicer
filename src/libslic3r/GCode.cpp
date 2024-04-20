@@ -3478,7 +3478,7 @@ std::string GCodeGenerator::_extrude(
     Vec2d prev = GCodeFormatter::quantize(prev_exact);
     auto  it   = path.begin();
     auto  end  = path.end();
-        for (++ it; it != end; ++ it) {
+    for (++ it; it != end; ++ it) {
         Vec2d p_exact = this->point_to_gcode(it->point);
         Vec2d p = GCodeFormatter::quantize(p_exact);
         assert(p != prev);
@@ -3503,19 +3503,19 @@ std::string GCodeGenerator::_extrude(
             if (radius == 0) {
                 // Extrude line segment.
                 if (const double line_length = (p - prev).norm(); line_length > 0)
-            gcode += m_writer.extrude_to_xy(p, e_per_mm * line_length, comment);
-    } else {
+                    gcode += m_writer.extrude_to_xy(p, e_per_mm * line_length, comment);
+            } else {
                 double angle = Geometry::ArcWelder::arc_angle(prev.cast<double>(), p.cast<double>(), double(radius));
                 assert(angle > 0);
                 const double line_length = angle * std::abs(radius);
                 const double dE = e_per_mm * line_length;
                 assert(dE > 0);
                 gcode += m_writer.extrude_to_xy_G2G3IJ(p, ij, it->ccw(), dE, comment);
-        }
+            }
             prev             = p;
             prev_exact = p_exact;
-            }
         }
+    }
 
     if (m_enable_cooling_markers)
         gcode += path_attr.role.is_bridge() ? ";_BRIDGE_FAN_END\n" : ";_EXTRUDE_END\n";
