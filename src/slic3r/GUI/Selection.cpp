@@ -1249,7 +1249,8 @@ void Selection::scale_to_fit_print_volume(const BuildVolume& volume)
         // check whether the top layer exceeds the maximum height of the print volume
         // and, in case, reduce the scale accordingly
         const auto [slicing_parameters, profile] = wxGetApp().plater()->canvas3D()->get_layers_height_data(get_object_idx());
-        auto layers = generate_object_layers(slicing_parameters, profile);
+        //w27
+        auto layers = generate_object_layers(slicing_parameters, profile,false);
         auto layers_it = layers.rbegin();
         while (layers_it != layers.rend() && *layers_it > volume.bounding_volume().max.z()) {
             ++layers_it;

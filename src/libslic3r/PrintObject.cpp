@@ -745,7 +745,9 @@ bool PrintObject::invalidate_state_by_config_options(
             //w12
             || opt_key == "xy_size_compensation"
             || opt_key == "xy_hole_compensation"
-            || opt_key == "xy_contour_compensation") {
+            || opt_key == "xy_contour_compensation"
+            //w27
+            || opt_key == "precise_z_height" ) {
             steps.emplace_back(posSlice);
         } else if (opt_key == "support_material") {
             steps.emplace_back(posSupportMaterial);

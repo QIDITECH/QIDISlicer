@@ -578,7 +578,8 @@ std::string Print::validate(std::vector<std::string>* warnings) const
     for (size_t print_object_idx = 0; print_object_idx < m_objects.size(); ++ print_object_idx) {
         const PrintObject &print_object = *m_objects[print_object_idx];
         //FIXME It is quite expensive to generate object layers just to get the print height!
-        if (auto layers = generate_object_layers(print_object.slicing_parameters(), layer_height_profile(print_object_idx));
+        //w27
+        if (auto layers = generate_object_layers(print_object.slicing_parameters(), layer_height_profile(print_object_idx),print_object.config().precise_z_height.value);
             ! layers.empty() && layers.back() > this->config().max_print_height + EPSILON) {
             return
                 // Test whether the last slicing plane is below or above the print volume.

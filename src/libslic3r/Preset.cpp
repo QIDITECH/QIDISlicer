@@ -487,6 +487,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"slow_down_layers"
     //w26
     ,"elefant_foot_compensation_layers"
+    //w27
+    ,"precise_z_height"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

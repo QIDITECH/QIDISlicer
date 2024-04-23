@@ -601,6 +601,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat,               filter_top_gap_infill))
     //w23
     ((ConfigOptionBool, only_one_wall_first_layer))
+    //w27
+    ((ConfigOptionBool, precise_z_height))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(

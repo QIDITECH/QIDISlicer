@@ -321,6 +321,15 @@ void PrintConfigDef::init_common_params()
     def->mode     = comAdvanced;
     def->set_default_value(new ConfigOptionInt(1));	
 
+    //w27
+    def          = this->add("precise_z_height", coBool);
+    def->label   = L("Precise Z height");
+    def->tooltip = L("Enable this to get precise z height of object after slicing. "
+                     "It will get the precise object height by fine-tuning the layer heights of the last few layers. "
+                     "Note that this is an experimental parameter.");
+    def->mode    = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(0));
+
     def = this->add("thumbnails", coString);
     def->label = L("G-code thumbnails");
     def->tooltip = L("Picture sizes to be stored into a .gcode / .bgcode and .sl1 / .sl1s files, in the following format: \"XxY/EXT, XxY/EXT, ...\"\n"
