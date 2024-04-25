@@ -317,8 +317,8 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     toggle_field("support_material_bottom_contact_distance", have_support_material && ! have_support_soluble);
     toggle_field("support_material_closing_radius", have_support_material && support_material_style == smsSnug);
     //w28
-    bool can_remove_bridge = have_support_material && !config->opt_bool("dont_support_bridges");
-    toggle_field("max_bridge_length", can_remove_bridge);
+    bool can_remove_bridge = have_support_material && !config->opt_bool("dont_support_bridges") ;
+    toggle_field("max_bridge_length", can_remove_bridge && support_material_style == smsOrganic);
 
     const bool has_organic_supports = support_material_style == smsOrganic && 
                                      (config->opt_bool("support_material") || 

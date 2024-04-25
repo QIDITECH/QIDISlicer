@@ -205,7 +205,7 @@ static std::vector<std::pair<TreeSupportSettings, std::vector<size_t>>> group_me
     auto                     enforcer_overhang_offset = scaled<double>(config.support_tree_tip_diameter.value);
     //w28
     double max_bridge_length        = scale_(config.max_bridge_length.value);
-    bool                     bridge_break             = config.max_bridge_length.value > 0;
+    bool   bridge_break      = (config.max_bridge_length.value > 0) && (config.support_material_style == smsOrganic);
 
     //w28
     size_t num_overhang_layers = support_auto ? num_object_layers : std::min(num_object_layers, std::max(size_t(support_enforce_layers), enforcers_layers.size()));

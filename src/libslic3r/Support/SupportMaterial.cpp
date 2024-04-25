@@ -1145,7 +1145,7 @@ static inline std::tuple<Polygons, Polygons, Polygons, float> detect_overhangs(
     float        no_interface_offset = 0.f;
     //w28
     double       max_bridge_length   = scale_(object_config.max_bridge_length.value);
-    bool         bridge_break        = object_config.max_bridge_length.value > 0;
+    bool   bridge_break      = (object_config.max_bridge_length.value > 0) && (object_config.support_material_style == smsOrganic);
 
     if (layer_id == 0) 
     {
