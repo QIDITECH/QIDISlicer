@@ -113,6 +113,47 @@ void Polyline::simplify(double tolerance)
     this->points = MultiPoint::douglas_peucker(this->points, tolerance);
 }
 
+//w28
+Polylines Polyline::equally_spaced_lines(double distance) const
+{
+    Polylines lines;
+    Polyline  line;
+    line.append(this->first_point());
+    double len = 0;
+
+    for (Points::const_iterator it = this->points.begin() + 1; it != this->points.end(); ++it) {
+        Vec2d  p1             = line.points.back().cast<double>();
+        Vec2d  v              = it->cast<double>() - p1;
+        double segment_length = v.norm();
+        len += segment_length;
+        if (len < distance)
+            continue;
+        if (len == distance) {
+            line.append(*it);
+            lines.emplace_back(line);
+
+            line.clear();
+            line.append(*it);
+            len = 0;
+            continue;
+        }
+        double take = distance; 
+        line.append((p1 + v * (take / v.norm())).cast<coord_t>());
+        lines.emplace_back(line);
+
+        line.clear();
+        line.append(lines.back().last_point());
+        --it;
+        len = -take;
+    }
+    if (line.size() == 1) {
+        line.append(this->last_point());
+        if (line.first_point() != line.last_point())
+            lines.emplace_back(line);
+    }
+    return lines;
+}
+
 #if 0
 // This method simplifies all *lines* contained in the supplied area
 template <class T>

@@ -81,6 +81,8 @@ public:
 
     using iterator = Points::iterator;
     using const_iterator = Points::const_iterator;
+    //w28
+    Polylines equally_spaced_lines(double distance) const;
 };
 
 inline bool operator==(const Polyline &lhs, const Polyline &rhs) { return lhs.points == rhs.points; }

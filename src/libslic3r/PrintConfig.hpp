@@ -512,6 +512,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionEnum<BrimType>,      brim_type))
     ((ConfigOptionFloat,               brim_width))
     ((ConfigOptionBool,                dont_support_bridges))
+    //w28
+    ((ConfigOptionFloat,                max_bridge_length))
     ((ConfigOptionFloat,               elefant_foot_compensation))
     //w26
     ((ConfigOptionInt,                 elefant_foot_compensation_layers))

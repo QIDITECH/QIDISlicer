@@ -489,6 +489,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"elefant_foot_compensation_layers"
     //w27
     ,"precise_z_height"
+    //w28
+    ,"max_bridge_length"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

@@ -120,6 +120,104 @@ void remove_bridges_from_contacts(
     #endif /* SLIC3R_DEBUG */
 }
 
+//w28
+void remove_bridges_from_contacts_select_area(
+    const PrintConfig &print_config, const Layer &lower_layer, const LayerRegion &layerm, float fw, Polygons &contact_polygons,const double max_bridge_length)
+{
+    Polygons bridges;
+    {
+        Polygons lower_grown_slices =
+            expand(lower_layer.lslices,
+                   // FIXME to mimic the decision in the perimeter generator, we should use half the external perimeter width.
+                   0.5f * float(scale_(print_config.nozzle_diameter.get_at(layerm.region().config().perimeter_extruder - 1))),
+                   SUPPORT_SURFACES_OFFSET_PARAMETERS);
+#if 0
+        Polylines overhang_perimeters = layerm.perimeters.as_polylines();
+        for (Polyline &polyline : overhang_perimeters)
+            polyline.points[0].x += 1;
+        overhang_perimeters = diff_pl(overhang_perimeters, lower_grown_slices);
+#else
+        Polylines overhang_perimeters = diff_pl(layerm.perimeters().as_polylines(), lower_grown_slices);
+#endif
+        Flow perimeter_bridge_flow = layerm.bridging_flow(frPerimeter);
+        const float w = float(std::max(perimeter_bridge_flow.scaled_width(), perimeter_bridge_flow.scaled_spacing())) ;
+        for (Polyline &polyline : overhang_perimeters)
+            if (polyline.is_straight()) {
+                polyline.extend_start(fw);
+                polyline.extend_end(fw);
+                Point pts[2]       = {polyline.first_point(), polyline.last_point()};
+                bool  supported[2] = {false, false};
+                for (size_t i = 0; i < lower_layer.lslices.size() && !(supported[0] && supported[1]); ++i)
+                    for (int j = 0; j < 2; ++j)
+                        if (!supported[j] && lower_layer.lslices_ex[i].bbox.contains(pts[j]) && lower_layer.lslices[i].contains(pts[j]))
+                            supported[j] = true;
+                if (supported[0] && supported[1]) {
+                    Polylines lines;
+                    if (polyline.length() > max_bridge_length + 10) {
+                        // equally divide the polyline
+                        float len = polyline.length() / ceil(polyline.length() / max_bridge_length);
+                        lines     = polyline.equally_spaced_lines(len);
+                        for (auto &line : lines) {
+                            line.clip_start(fw);
+                            line.clip_end(fw);
+                        }
+                    } else
+                        lines.push_back(polyline);
+                    polygons_append(bridges, offset(lines, 0.5f * w + 10.f));
+                }
+            }
+        bridges = union_(bridges);
+
+        for (const Surface &surface : layerm.fill_surfaces().surfaces)
+            if (surface.surface_type == stBottomBridge && surface.bridge_angle != -1) {
+                auto bbox      = get_extents(surface.expolygon);
+                auto bbox_size = bbox.size();
+                if (bbox_size[0] < max_bridge_length && bbox_size[1] < max_bridge_length)
+                    polygons_append(bridges, surface.expolygon);
+                else {
+                    Polygons  holes;
+                    coord_t   x0      = bbox.min.x();
+                    coord_t   x1      = bbox.max.x();
+                    coord_t   y0      = bbox.min.y();
+                    coord_t   y1      = bbox.max.y();
+                    const int grid_lw = int(w ); 
+                    Vec2f bridge_direction{cos(surface.bridge_angle), sin(surface.bridge_angle)};
+                    if (fabs(bridge_direction(0)) >
+                        fabs(bridge_direction(1))) { 
+                        int step = bbox_size(0) / ceil(bbox_size(0) / max_bridge_length);
+                        for (int x = x0 + step; x < x1; x += step) {
+                            Polygon poly;
+                            poly.points = {Point(x - grid_lw, y0), Point(x + grid_lw, y0), Point(x + grid_lw, y1), Point(x - grid_lw, y1)};
+                            holes.emplace_back(poly);
+                        }
+                    } else {
+                        int step = bbox_size(1) / ceil(bbox_size(1) / max_bridge_length);
+                        for (int y = y0 + step; y < y1; y += step) {
+                            Polygon poly;
+                            poly.points = {Point(x0, y - grid_lw), Point(x0, y + grid_lw), Point(x1, y + grid_lw), Point(x1, y - grid_lw)};
+                            holes.emplace_back(poly);
+                        }
+                    }
+                    auto expoly = diff_ex(surface.expolygon, holes);
+                    polygons_append(bridges, expoly);
+                }
+            }
+    }
+    bridges = diff(bridges,
+                   offset(layerm.unsupported_bridge_edges(), scale_(SUPPORT_MATERIAL_MARGIN), SUPPORT_SURFACES_OFFSET_PARAMETERS));
+    contact_polygons = diff(contact_polygons, bridges, ApplySafetyOffset::Yes);
+
+#ifdef SLIC3R_DEBUG
+    static int iRun = 0;
+    SVG::export_expolygons(debug_out_path("support-top-contacts-remove-bridges-run%d.svg", iRun++),
+                           {{{union_ex(offset(layerm.unsupported_bridge_edges(), scale_(SUPPORT_MATERIAL_MARGIN),
+                                              SUPPORT_SURFACES_OFFSET_PARAMETERS))},
+                             {"unsupported_bridge_edges", "orange", 0.5f}},
+                            {{union_ex(contact_polygons)}, {"contact_polygons", "blue", 0.5f}},
+                            {{union_ex(bridges)}, {"bridges", "red", "black", "", scaled<coord_t>(0.1f), 0.5f}}});
+#endif /* SLIC3R_DEBUG */
+}
+
 // Convert some of the intermediate layers into top/bottom interface layers as well as base interface layers.
 std::pair<SupportGeneratorLayersPtr, SupportGeneratorLayersPtr> generate_interface_layers(
     const PrintObjectConfig           &config,

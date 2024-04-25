@@ -1143,6 +1143,9 @@ static inline std::tuple<Polygons, Polygons, Polygons, float> detect_overhangs(
         M_PI * double(object_config.support_material_threshold.value + 1) / 180. : // +1 makes the threshold inclusive
         0.;
     float        no_interface_offset = 0.f;
+    //w28
+    double       max_bridge_length   = scale_(object_config.max_bridge_length.value);
+    bool         bridge_break        = object_config.max_bridge_length.value > 0;
 
     if (layer_id == 0) 
     {
@@ -1275,7 +1278,9 @@ static inline std::tuple<Polygons, Polygons, Polygons, float> detect_overhangs(
             if (object_config.dont_support_bridges)
                 //FIXME Expensive, potentially not precise enough. Misses gap fill extrusions, which bridge.
                 remove_bridges_from_contacts(print_config, lower_layer, *layerm, fw, diff_polygons);
-
+            //w28
+            if (!object_config.dont_support_bridges && bridge_break)
+                remove_bridges_from_contacts_select_area(print_config, lower_layer, *layerm, fw, diff_polygons, max_bridge_length);
             if (diff_polygons.empty())
                 continue;
 
