@@ -15,6 +15,9 @@
 #include "../Utils.hpp"
 #include "../ExPolygon.hpp"
 #include "../PrintConfig.hpp"
+//w29
+#include "../ExtrusionEntity.hpp"
+#include "../ExtrusionEntityCollection.hpp"
 
 namespace Slic3r {
 
@@ -63,6 +66,11 @@ struct FillParams
     bool        use_arachne     { false };
     // Layer height for Concentric infill with Arachne.
     coordf_t    layer_height    { 0.f };
+    //w29
+    Flow     flow;
+    ExtrusionRole extrusion_role{ExtrusionRole::None};
+    bool          using_internal_flow{false};
+    //bool          can_reverse{true};
 };
 static_assert(IsTriviallyCopyable<FillParams>::value, "FillParams class is not POD (and it should be - see constructor).");
 
@@ -116,6 +124,13 @@ public:
     // Perform the fill.
     virtual Polylines fill_surface(const Surface *surface, const FillParams &params);
     virtual ThickPolylines fill_surface_arachne(const Surface *surface, const FillParams &params);
+    //w29
+    virtual void           fill_surface_extrusion(const Surface *surface, const FillParams &params, Polylines  &polylines,ThickPolylines &thick_polylines);
+    void variable_width(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out);
+    ExtrusionPaths thick_polyline_to_extrusion_paths_2(const ThickPolyline &thick_polyline,
+                                                       ExtrusionRole        role,
+                                                       const Flow &         flow,
+                                                       const float          tolerance);
 
 protected:
     Fill() :

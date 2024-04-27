@@ -376,6 +376,8 @@ inline void extrusion_entities_append_paths(ExtrusionEntitiesPtr &dst, Polylines
     polylines.clear();
 }
 
+
+
 inline void extrusion_entities_append_loops(ExtrusionEntitiesPtr &dst, Polygons &&loops, const ExtrusionAttributes &attributes)
 {
     dst.reserve(dst.size() + loops.size());

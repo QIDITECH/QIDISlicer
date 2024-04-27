@@ -20,6 +20,8 @@
 //w21
 #include "../ShortestPath.hpp"
 //w11
+//w29
+#include "FillConcentricInternal.hpp"
 
 #include "LayerRegion.hpp"
 
@@ -125,9 +127,10 @@ struct SurfaceFill {
 //w11
 static bool is_narrow_infill_area(const ExPolygon &expolygon)
 {
+    //w29
     ExPolygons offsets = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD));
-	ExPolygons offsets_min = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD_MIN));
-    if (offsets.empty() && !offsets_min.empty())
+	//ExPolygons offsets_min = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD_MIN));
+    if (offsets.empty() )
         return true;
 
     return false;
@@ -340,34 +343,39 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
     // Use ipEnsuring pattern for all internal Solids.
 	//w11
     if (layer.object()->config().detect_narrow_internal_solid_infill) {
-        for (size_t i = 0; i < surface_fills.size(); i++) {
+        size_t surface_fills_size = surface_fills.size();
+        for (size_t i = 0; i < surface_fills_size; i++) {
             if (surface_fills[i].surface.surface_type != stInternalSolid)
                 continue;
-
-            size_t expolygons_size = surface_fills[i].expolygons.size();
+            //w29
+            size_t              expolygons_size = surface_fills[i].expolygons.size();
             std::vector<size_t> narrow_expolygons_index;
             narrow_expolygons_index.reserve(expolygons_size);
-
             for (size_t j = 0; j < expolygons_size; j++)
                 if (is_narrow_infill_area(surface_fills[i].expolygons[j]))
                     narrow_expolygons_index.push_back(j);
 
-            if (narrow_expolygons_index.size() == expolygons_size) {
-                surface_fills[i].params.pattern = ipConcentricInternal;
+            if (narrow_expolygons_index.size() == 0) {
+                continue;
+            } else if (narrow_expolygons_index.size() == expolygons_size) {
+                surface_fills[i].params.pattern = ipConcentric;
             } else {
-                surface_fills[i].params.pattern = ipEnsuring;
-            }
-			//w21
-            if (narrow_expolygons_index.size() != expolygons_size && narrow_expolygons_index.size() != expolygons_size) {
+                params         = surface_fills[i].params;
+                params.pattern = ipConcentric;
+                surface_fills.emplace_back(params);
+                surface_fills.back().region_id             = surface_fills[i].region_id;
+                surface_fills.back().surface.surface_type  = stInternalSolid;
+                surface_fills.back().surface.thickness     = surface_fills[i].surface.thickness;
                 surface_fills.back().region_id_group       = surface_fills[i].region_id_group;
                 surface_fills.back().no_overlap_expolygons = surface_fills[i].no_overlap_expolygons;
-			}
-        }
-    } else {
-        for (size_t surface_fill_id = 0; surface_fill_id < surface_fills.size(); ++surface_fill_id)
-            if (SurfaceFill &fill = surface_fills[surface_fill_id]; fill.surface.surface_type == stInternalSolid) {
-                fill.params.pattern = ipEnsuring;
+                for (size_t j = 0; j < narrow_expolygons_index.size(); j++) {
+                    surface_fills.back().expolygons.emplace_back(std::move(surface_fills[i].expolygons[narrow_expolygons_index[j]]));
+                }
+                for (int j = narrow_expolygons_index.size() - 1; j >= 0; j--) {
+                    surface_fills[i].expolygons.erase(surface_fills[i].expolygons.begin() + narrow_expolygons_index[j]);
+                }
             }
+        }
     }
     return surface_fills;
 }
@@ -525,14 +533,19 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         f->print_config        = &this->object()->print()->config();
         f->print_object_config = &this->object()->config();
 
-        if (surface_fill.params.pattern == ipLightning)
-            dynamic_cast<FillLightning::Filler*>(f.get())->generator = lightning_generator;
-
-        if (surface_fill.params.pattern == ipEnsuring) {
-            auto *fill_ensuring = dynamic_cast<FillEnsuring *>(f.get());
-            assert(fill_ensuring != nullptr);
-            fill_ensuring->print_region_config = &m_regions[surface_fill.region_id]->region().config();
-        }
+        //w29
+        if (surface_fill.params.pattern == ipConcentricInternal) {
+            FillConcentricInternal *fill_concentric = dynamic_cast<FillConcentricInternal *>(f.get());
+            assert(fill_concentric != nullptr);
+            fill_concentric->print_config        = &this->object()->print()->config();
+            fill_concentric->print_object_config = &this->object()->config();
+        } else if (surface_fill.params.pattern == ipConcentric) {
+            FillConcentric *fill_concentric = dynamic_cast<FillConcentric *>(f.get());
+            assert(fill_concentric != nullptr);
+            fill_concentric->print_config        = &this->object()->print()->config();
+            fill_concentric->print_object_config = &this->object()->config();
+        } else if (surface_fill.params.pattern == ipLightning)
+            dynamic_cast<FillLightning::Filler *>(f.get())->generator = lightning_generator;
 
         // calculate flow spacing for infill pattern generation
         bool using_internal_flow = ! surface_fill.surface.is_solid() && ! surface_fill.params.bridge;
@@ -562,62 +575,59 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.anchor_length_max = surface_fill.params.anchor_length_max;
         params.resolution        = resolution;
 		//w14
-        params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentricInternal;
+        params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentric;
         params.layer_height      = layerm.layer()->height;
+        //w29
+        params.flow              = surface_fill.params.flow;
+        params.extrusion_role    = surface_fill.params.extrusion_role;
+        params.using_internal_flow = !surface_fill.surface.is_solid() && !surface_fill.params.bridge;
 
         for (ExPolygon &expoly : surface_fill.expolygons) {
-			// Spacing is modified by the filler to indicate adjustments. Reset it for each expolygon.
-			f->spacing = surface_fill.params.spacing;
-			//w21
+            // Spacing is modified by the filler to indicate adjustments. Reset it for each expolygon.
+            f->spacing = surface_fill.params.spacing;
+            // w21
             f->no_overlap_expolygons = intersection_ex(surface_fill.no_overlap_expolygons, ExPolygons() = {expoly}, ApplySafetyOffset::Yes);
-			surface_fill.surface.expolygon = std::move(expoly);
+            surface_fill.surface.expolygon = std::move(expoly);
             Polylines      polylines;
             ThickPolylines thick_polylines;
-//w14
-            if (this->object()->config().detect_narrow_internal_solid_infill &&
-                   (surface_fill.params.pattern == ipConcentricInternal || surface_fill.params.pattern == ipEnsuring)) {
-                layerm.region().config().infill_overlap.percent ?
-                    f->overlap = layerm.region().config().perimeter_extrusion_width * layerm.region().config().infill_overlap.value / 100 * (-1) :
-                    f->overlap = float(layerm.region().config().infill_overlap.value);
+            // w14
+            //w29
+            /* if (this->object()->config().detect_narrow_internal_solid_infill &&
+                (surface_fill.params.pattern == ipConcentricInternal || surface_fill.params.pattern == ipEnsuring)) {
+                layerm.region().config().infill_overlap.percent ? f->overlap = layerm.region().config().perimeter_extrusion_width *
+                                                                               layerm.region().config().infill_overlap.value / 100 * (-1) :
+                                                                  f->overlap = float(layerm.region().config().infill_overlap.value);
             } else
-                f->overlap = 0;
-
-            try {
-                if (params.use_arachne) {
-                    thick_polylines = f->fill_surface_arachne(&surface_fill.surface, params);
-					//w21
-                    //if (f->layer_id % 2 == 0 && surface_fill.params.pattern == ipConcentricInternal)
-                     //   std::reverse(thick_polylines.begin(), thick_polylines.end());
-                }
-                else {
-                    polylines = f->fill_surface(&surface_fill.surface, params);
-                }
-			} catch (InfillFailedException &) {
-			}
+                f->overlap = 0;*/
+            //w29
+            f->fill_surface_extrusion(&surface_fill.surface, params, polylines, thick_polylines);
             if (!polylines.empty() || !thick_polylines.empty()) {
                 // calculate actual flow from spacing (which might have been adjusted by the infill
-		        // pattern generator)
-		        double flow_mm3_per_mm = surface_fill.params.flow.mm3_per_mm();
-		        double flow_width      = surface_fill.params.flow.width();
-		        if (using_internal_flow) {
-		            // if we used the internal flow we're not doing a solid infill
-		            // so we can safely ignore the slight variation that might have
-		            // been applied to f->spacing
-		        } else {
-		            Flow new_flow   = surface_fill.params.flow.with_spacing(float(f->spacing));
-		        	flow_mm3_per_mm = new_flow.mm3_per_mm();
-		        	flow_width      = new_flow.width();
-		        }
-		        // Save into layer.
+                // pattern generator)
+                double flow_mm3_per_mm = surface_fill.params.flow.mm3_per_mm();
+                double flow_width      = surface_fill.params.flow.width();
+                if (using_internal_flow) {
+                    // if we used the internal flow we're not doing a solid infill
+                    // so we can safely ignore the slight variation that might have
+                    // been applied to f->spacing
+                } else {
+                    Flow new_flow   = surface_fill.params.flow.with_spacing(float(f->spacing));
+                    flow_mm3_per_mm = new_flow.mm3_per_mm();
+                    flow_width      = new_flow.width();
+                }
+                // Save into layer.
                 ExtrusionEntityCollection *eec        = new ExtrusionEntityCollection();
-				auto fill_begin = uint32_t(layerm.fills().size());
-		        // Only concentric fills are not sorted.
-		        eec->no_sort = f->no_sort();
+                auto                       fill_begin = uint32_t(layerm.fills().size());
+                // Only concentric fills are not sorted.
+                eec->no_sort = f->no_sort();
                 if (params.use_arachne) {
                     for (const ThickPolyline &thick_polyline : thick_polylines) {
                         Flow new_flow = surface_fill.params.flow.with_spacing(float(f->spacing));
 
-                        ExtrusionMultiPath multi_path = PerimeterGenerator::thick_polyline_to_multi_path(thick_polyline, surface_fill.params.extrusion_role, new_flow, scaled<float>(0.05), float(SCALED_EPSILON));
+                        ExtrusionMultiPath multi_path = PerimeterGenerator::thick_polyline_to_multi_path(thick_polyline,
+                                                                                                         surface_fill.params.extrusion_role,
+                                                                                                         new_flow, scaled<float>(0.05),
+                                                                                                         float(SCALED_EPSILON));
                         // Append paths to collection.
                         if (!multi_path.empty()) {
                             if (multi_path.paths.front().first_point() == multi_path.paths.back().last_point())
@@ -633,15 +643,14 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                         delete eec;
                     thick_polylines.clear();
                 } else {
-                    extrusion_entities_append_paths(
-                        eec->entities, std::move(polylines),
-						ExtrusionAttributes{ surface_fill.params.extrusion_role,
-							ExtrusionFlow{ flow_mm3_per_mm, float(flow_width), surface_fill.params.flow.height() } 
-						});
-					//w21
-					if (surface_fill.params.pattern == ipMonotonicLines && surface_fill.surface.surface_type == stTop) {
+                    extrusion_entities_append_paths(eec->entities, std::move(polylines),
+                                                    ExtrusionAttributes{surface_fill.params.extrusion_role,
+                                                                        ExtrusionFlow{flow_mm3_per_mm, float(flow_width),
+                                                                                      surface_fill.params.flow.height()}});
+                    // w21
+                    if (surface_fill.params.pattern == ipMonotonicLines && surface_fill.surface.surface_type == stTop) {
                         ExPolygons unextruded_areas = diff_ex(f->no_overlap_expolygons, union_ex(eec->polygons_covered_by_spacing(10)));
-                        ExPolygons gapfill_areas = union_ex(unextruded_areas);
+                        ExPolygons gapfill_areas    = union_ex(unextruded_areas);
                         if (!f->no_overlap_expolygons.empty())
                             gapfill_areas = intersection_ex(gapfill_areas, f->no_overlap_expolygons);
                         if (gapfill_areas.size() > 0 && params.density >= 1) {
@@ -650,7 +659,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                             double     max      = 2. * new_flow.scaled_spacing();
                             ExPolygons gaps_ex  = diff_ex(opening_ex(gapfill_areas, float(min / 2.)),
                                                          offset2_ex(gapfill_areas, -float(max / 2.), float(max / 2. + ClipperSafetyOffset)));
-                            Points ordering_points;
+                            Points     ordering_points;
                             ordering_points.reserve(gaps_ex.size());
                             ExPolygons gaps_ex_sorted;
                             gaps_ex_sorted.reserve(gaps_ex.size());
@@ -674,7 +683,8 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                                                                }),
                                                 polylines.end());
 
-                                variable_width_gap(polylines, ExtrusionRole::GapFill, surface_fill.params.flow, gap_fill.entities,filter_gap_infill_value);
+                                variable_width_gap(polylines, ExtrusionRole::GapFill, surface_fill.params.flow, gap_fill.entities,
+                                                   filter_gap_infill_value);
 
                                 eec->append(std::move(gap_fill.entities));
                             }
@@ -683,46 +693,49 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                     layerm.m_fills.entities.push_back(eec);
                 }
                 insert_fills_into_islands(*this, uint32_t(surface_fill.region_id), fill_begin, uint32_t(layerm.fills().size()));
-		    }
-		}
+            }
+        }
+        
     }
 
 	for (LayerSlice &lslice : this->lslices_ex)
-		for (LayerIsland &island : lslice.islands) {
-			if (! island.thin_fills.empty()) {
-				// Copy thin fills into fills packed as a collection.
-				// Fills are always stored as collections, the rest of the pipeline (wipe into infill, G-code generator) relies on it.
-				LayerRegion				  &layerm	  = *this->get_region(island.perimeters.region());
-				ExtrusionEntityCollection &collection = *(new ExtrusionEntityCollection());
-				layerm.m_fills.entities.push_back(&collection);
-				collection.entities.reserve(island.thin_fills.size());
-				for (uint32_t fill_id : island.thin_fills)
-					collection.entities.push_back(layerm.thin_fills().entities[fill_id]->clone());
-	    		island.add_fill_range({ island.perimeters.region(), { uint32_t(layerm.m_fills.entities.size() - 1), uint32_t(layerm.m_fills.entities.size()) } });
-			}
-			// Sort the fills by region ID.
-			std::sort(island.fills.begin(), island.fills.end(), [](auto &l, auto &r){ return l.region() < r.region() || (l.region() == r.region() && *l.begin() < *r.begin()); });
-			// Compress continuous fill ranges of the same region.
-			{
-				size_t k = 0;
-				for (size_t i = 0; i < island.fills.size();) {
-					uint32_t region_id = island.fills[i].region();
-					uint32_t begin     = *island.fills[i].begin();
-					uint32_t end       = *island.fills[i].end();
-					size_t   j         = i + 1;
-					for (; j < island.fills.size() && island.fills[j].region() == region_id && *island.fills[j].begin() == end; ++ j)
-						end = *island.fills[j].end();
-					island.fills[k ++] = { region_id, { begin, end } };
-					i = j;
-				}
-				island.fills.erase(island.fills.begin() + k, island.fills.end());
-			}
-		}
+        for (LayerIsland &island : lslice.islands) {
+            if (!island.thin_fills.empty()) {
+                // Copy thin fills into fills packed as a collection.
+                // Fills are always stored as collections, the rest of the pipeline (wipe into infill, G-code generator) relies on it.
+                LayerRegion &              layerm     = *this->get_region(island.perimeters.region());
+                ExtrusionEntityCollection &collection = *(new ExtrusionEntityCollection());
+                layerm.m_fills.entities.push_back(&collection);
+                collection.entities.reserve(island.thin_fills.size());
+                for (uint32_t fill_id : island.thin_fills)
+                    collection.entities.push_back(layerm.thin_fills().entities[fill_id]->clone());
+                island.add_fill_range(
+                    {island.perimeters.region(), {uint32_t(layerm.m_fills.entities.size() - 1), uint32_t(layerm.m_fills.entities.size())}});
+            }
+            // Sort the fills by region ID.
+            std::sort(island.fills.begin(), island.fills.end(),
+                      [](auto &l, auto &r) { return l.region() < r.region() || (l.region() == r.region() && *l.begin() < *r.begin()); });
+            // Compress continuous fill ranges of the same region.
+            {
+                size_t k = 0;
+                for (size_t i = 0; i < island.fills.size();) {
+                    uint32_t region_id = island.fills[i].region();
+                    uint32_t begin     = *island.fills[i].begin();
+                    uint32_t end       = *island.fills[i].end();
+                    size_t   j         = i + 1;
+                    for (; j < island.fills.size() && island.fills[j].region() == region_id && *island.fills[j].begin() == end; ++j)
+                        end = *island.fills[j].end();
+                    island.fills[k++] = {region_id, {begin, end}};
+                    i                 = j;
+                }
+                island.fills.erase(island.fills.begin() + k, island.fills.end());
+            }
+        }
 
 #ifndef NDEBUG
-	for (LayerRegion *layerm : m_regions)
-	    for (const ExtrusionEntity *e : layerm->fills())
-    	    assert(dynamic_cast<const ExtrusionEntityCollection*>(e) != nullptr);
+    for (LayerRegion *layerm : m_regions)
+        for (const ExtrusionEntity *e : layerm->fills())
+            assert(dynamic_cast<const ExtrusionEntityCollection *>(e) != nullptr);
 #endif
 }
 //w21
