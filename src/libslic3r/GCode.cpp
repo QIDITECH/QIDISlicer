@@ -3251,7 +3251,9 @@ std::string GCodeGenerator::_extrude(
 {
     std::string gcode;
     const std::string_view description_bridge = path_attr.role.is_bridge() ? " (bridge)"sv : ""sv;
-
+    //w30
+    bool                   is_first_or_bottom_layer = (path_attr.role == ExtrusionRole::TopSolidInfill) || (this->on_first_layer());
+    bool                   is_first                 = this->on_first_layer();
     const bool has_active_instance{m_label_objects.has_active_instance()};
     if (m_writer.multiple_extruders && has_active_instance) {
         gcode += m_label_objects.maybe_change_instance(m_writer);
@@ -3332,6 +3334,13 @@ std::string GCodeGenerator::_extrude(
 
     // calculate extrusion length per distance unit
     double e_per_mm = m_writer.extruder()->e_per_mm3() * path_attr.mm3_per_mm;
+    //w30
+    if (is_first_or_bottom_layer) {
+        if (is_first)
+            e_per_mm *=  m_config.bottom_solid_infill_flow_ratio ;
+        else
+            e_per_mm *= m_config.top_solid_infill_flow_ratio ;
+    }
     if (m_writer.extrusion_axis().empty())
         // gcfNoExtrusion
         e_per_mm = 0;

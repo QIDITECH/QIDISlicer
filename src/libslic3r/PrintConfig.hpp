@@ -668,6 +668,9 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat,                top_solid_min_thickness))
     ((ConfigOptionFloatOrPercent,       top_solid_infill_speed))
     ((ConfigOptionBool,                 wipe_into_infill))
+    //w30
+    ((ConfigOptionFloat, top_solid_infill_flow_ratio))
+    ((ConfigOptionFloat, bottom_solid_infill_flow_ratio))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(

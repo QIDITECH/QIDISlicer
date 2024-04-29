@@ -600,6 +600,26 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(1));
 
+    //w30
+    def          = this->add("top_solid_infill_flow_ratio", coFloat);
+    def->label   = L("Top surface flow ratio");
+    def->category = L("Advanced");
+    def->tooltip = L("This factor affects the amount of material for top solid infill. "
+                     "You can decrease it slightly to have smooth surface finish");
+    def->min     = 0;
+    def->max     = 2;
+    def->mode     = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(1));
+
+    def          = this->add("bottom_solid_infill_flow_ratio", coFloat);
+    def->label   = L("Bottom surface flow ratio");
+    def->category = L("Advanced");
+    def->tooltip = L("This factor affects the amount of material for bottom solid infill");
+    def->min     = 0;
+    def->max     = 2;
+    def->mode     = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(1));
+
     def = this->add("bridge_speed", coFloat);
     def->label = L("Bridges");
     def->category = L("Speed");
@@ -5063,6 +5083,12 @@ std::string validate(const FullPrintConfig &cfg)
     // --bridge-flow-ratio
     if (cfg.bridge_flow_ratio <= 0)
         return "Invalid value for --bridge-flow-ratio";
+
+    //w30
+    if (cfg.top_solid_infill_flow_ratio <= 0)
+        return "Invalid value for --top-solid-infill-flow-ratio";
+    if (cfg.bottom_solid_infill_flow_ratio <= 0)
+        return "Invalid value for --bottom-solid-infill-flow-ratio";
 
     // extruder clearance
     if (cfg.extruder_clearance_radius <= 0)

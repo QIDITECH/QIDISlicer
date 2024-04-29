@@ -491,6 +491,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"precise_z_height"
     //w28
     ,"max_bridge_length"
+    //w30
+    ,"top_solid_infill_flow_ratio", "bottom_solid_infill_flow_ratio"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

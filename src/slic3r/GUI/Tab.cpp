@@ -1681,6 +1681,9 @@ void TabPrint::build()
 
         optgroup = page->new_optgroup(L("Flow"));
         optgroup->append_single_option_line("bridge_flow_ratio");
+        //w30
+        optgroup->append_single_option_line("top_solid_infill_flow_ratio");
+        optgroup->append_single_option_line("bottom_solid_infill_flow_ratio");
 
         optgroup = page->new_optgroup(L("Slicing"));
         optgroup->append_single_option_line("slice_closing_radius");
