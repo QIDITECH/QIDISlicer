@@ -493,6 +493,8 @@ static std::vector<std::string> s_Preset_print_options {
     ,"max_bridge_length"
     //w30
     ,"top_solid_infill_flow_ratio", "bottom_solid_infill_flow_ratio"
+    //w31
+    ,"make_overhang_printable", "make_overhang_printable_angle", "make_overhang_printable_hole_size"
 };
 
 static std::vector<std::string> s_Preset_filament_options {

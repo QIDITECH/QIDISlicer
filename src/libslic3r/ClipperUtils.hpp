@@ -447,6 +447,33 @@ Slic3r::Polylines  diff_pl(const Slic3r::Polylines &subject, const Slic3r::ExPol
 Slic3r::Polylines  diff_pl(const Slic3r::Polylines &subject, const Slic3r::ExPolygons &clip);
 Slic3r::Polylines  diff_pl(const Slic3r::Polygons &subject, const Slic3r::Polygons &clip);
 
+//w31
+inline Slic3r::ExPolygons diff_ex(const Slic3r::ExPolygon& subject, const Slic3r::ExPolygon& clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No)
+{
+    Slic3r::ExPolygons subject_temp;
+    Slic3r::ExPolygons clip_temp;
+
+    subject_temp.push_back(subject);
+    clip_temp.push_back(clip);
+    return diff_ex(subject_temp, clip_temp);
+}
+
+inline Slic3r::ExPolygons diff_ex(const Slic3r::ExPolygon& subject, const Slic3r::ExPolygons& clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No)
+{
+    Slic3r::ExPolygons subject_temp;
+    subject_temp.push_back(subject);
+
+    return diff_ex(subject_temp, clip, do_safety_offset);
+}
+
+inline Slic3r::ExPolygons diff_ex(const Slic3r::ExPolygons& subject, const Slic3r::ExPolygon& clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No)
+{
+    Slic3r::ExPolygons clip_temp;
+    clip_temp.push_back(clip);
+
+    return diff_ex(subject, clip_temp, do_safety_offset);
+}
+
 inline Slic3r::Lines diff_ln(const Slic3r::Lines &subject, const Slic3r::Polygons &clip)
 {
     return _clipper_ln(ClipperLib::ctDifference, subject, clip);
@@ -473,6 +500,11 @@ Slic3r::ExPolygons intersection_ex(const Slic3r::Surfaces &subject, const Slic3r
 Slic3r::ExPolygons intersection_ex(const Slic3r::Surfaces &subject, const Slic3r::ExPolygons &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
 Slic3r::ExPolygons intersection_ex(const Slic3r::Surfaces &subject, const Slic3r::Surfaces &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
 Slic3r::ExPolygons intersection_ex(const Slic3r::SurfacesPtr &subject, const Slic3r::ExPolygons &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
+//w31
+Slic3r::ExPolygons intersection_ex(const Slic3r::ExPolygon& subject, const Slic3r::ExPolygon& clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
+Slic3r::ExPolygons intersection_ex(const Slic3r::ExPolygons& subject, const Slic3r::ExPolygon& clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
+Slic3r::ExPolygons intersection_ex(const Slic3r::ExPolygon& subject, const Slic3r::ExPolygons& clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
+
 Slic3r::Polylines  intersection_pl(const Slic3r::Polylines &subject, const Slic3r::Polygon &clip);
 Slic3r::Polylines  intersection_pl(const Slic3r::Polyline &subject, const Slic3r::ExPolygon &clip);
 Slic3r::Polylines  intersection_pl(const Slic3r::Polylines &subject, const Slic3r::ExPolygon &clip);
@@ -512,6 +544,9 @@ Slic3r::ExPolygons union_ex(const Slic3r::Surfaces &subject);
 // If the contours are not intersecting, their orientation shall not be modified by union_pt().
 ClipperLib::PolyTree union_pt(const Slic3r::Polygons &subject);
 ClipperLib::PolyTree union_pt(const Slic3r::ExPolygons &subject);
+
+//w31
+Slic3r::ExPolygons xor_ex(const Slic3r::ExPolygons &subject, const Slic3r::ExPolygon &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
 
 Slic3r::Polygons union_pt_chained_outside_in(const Slic3r::Polygons &subject);
 

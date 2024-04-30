@@ -760,7 +760,9 @@ void PrintObject::slice_volumes()
         BOOST_LOG_TRIVIAL(debug) << "Slicing volumes - MMU segmentation";
         apply_mm_segmentation(*this, [print]() { print->throw_if_canceled(); });
     }
-
+    //w31
+    this->apply_conical_overhang();
+    m_print->throw_if_canceled();
 
     BOOST_LOG_TRIVIAL(debug) << "Slicing volumes - make_slices in parallel - begin";
     {
@@ -907,6 +909,77 @@ void PrintObject::slice_volumes()
 
     m_print->throw_if_canceled();
     BOOST_LOG_TRIVIAL(debug) << "Slicing volumes - make_slices in parallel - end";
+}
+//w31
+void PrintObject::apply_conical_overhang()
+{
+    BOOST_LOG_TRIVIAL(info) << "Make overhang printable...";
+
+    if (m_layers.empty()) {
+        return;
+    }
+    
+    const double conical_overhang_angle = this->config().make_overhang_printable_angle;
+    if (conical_overhang_angle == 90.0) {
+        return;
+    }
+    const double angle_radians = conical_overhang_angle * M_PI / 180.;
+    const double max_hole_area = this->config().make_overhang_printable_hole_size; 
+    const double tan_angle     = tan(angle_radians);  
+    BOOST_LOG_TRIVIAL(info) << "angle " << angle_radians << " maxHoleArea " << max_hole_area << " tan_angle " << tan_angle;
+    const coordf_t layer_thickness           = m_config.layer_height.value;
+    const coordf_t max_dist_from_lower_layer = tan_angle * layer_thickness; 
+    BOOST_LOG_TRIVIAL(info) << "layer_thickness " << layer_thickness << " max_dist_from_lower_layer " << max_dist_from_lower_layer;
+
+    const coordf_t scaled_max_dist_from_lower_layer = -float(scale_(max_dist_from_lower_layer));
+    const coordf_t scaled_max_hole_area             = float(scale_(scale_(max_hole_area)));
+
+    for (auto i = m_layers.rbegin() + 1; i != m_layers.rend(); ++i) {
+        m_print->throw_if_canceled();
+        Layer *layer       = *i;
+        Layer *upper_layer = layer->upper_layer;
+
+        if (upper_layer->empty()) {
+            continue;
+        }
+        
+        if (std::all_of(layer->m_regions.begin(), layer->m_regions.end(),
+                        [](const LayerRegion *r) { return r->slices().empty() || !r->region().config().make_overhang_printable; })) {
+            continue;
+        }
+        auto upper_poly = upper_layer->merged(float(SCALED_EPSILON));
+        upper_poly      = union_ex(upper_poly);
+
+        if (scaled_max_hole_area > 0.0) {
+           
+            auto current_poly = layer->merged(float(SCALED_EPSILON));
+            current_poly      = union_ex(current_poly);
+
+            for (auto layer_polygon : current_poly) {
+                for (auto hole : layer_polygon.holes) {
+                    if (std::abs(hole.area()) < scaled_max_hole_area) {
+                        ExPolygon hole_poly(hole);
+                        auto      hole_with_above = intersection_ex(upper_poly, hole_poly);
+                        if (!hole_with_above.empty()) {
+                            auto hole_difference = xor_ex(hole_with_above, hole_poly);
+                            if (hole_difference.empty()) {
+                                upper_poly = diff_ex(upper_poly, hole_poly);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        upper_poly = offset_ex(upper_poly, scaled_max_dist_from_lower_layer);
+        for (size_t region_id = 0; region_id < this->num_printing_regions(); ++region_id) {
+            if (!upper_layer->m_regions[region_id]->region().config().make_overhang_printable) {
+                continue;
+            }
+            auto p = intersection_ex(upper_layer->m_regions[region_id]->slices().surfaces, upper_poly);
+            ExPolygons layer_polygons = to_expolygons(layer->m_regions[region_id]->slices().surfaces);
+            layer->m_regions[region_id]->m_slices.set(union_ex(layer_polygons, p), stInternal);
+        }
+    }
 }
 //w12
 ExPolygons PrintObject::_shrink_contour_holes(double contour_delta, double hole_delta, const ExPolygons &polys) const
