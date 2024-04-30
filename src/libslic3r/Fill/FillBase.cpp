@@ -23,6 +23,8 @@
 #include "FillEnsuring.hpp"
 //w29
 #include "FillConcentricInternal.hpp"
+//w32
+#include "FillCrossHatch.hpp"
 
 #include <boost/log/trivial.hpp>
 
@@ -57,6 +59,8 @@ Fill* Fill::new_from_type(const InfillPattern type)
     //w14
     //w29
     case ipConcentricInternal:  return new FillConcentricInternal();
+    //w32
+    case ipCrossHatch:          return new FillCrossHatch();
     default: throw Slic3r::InvalidArgument("unknown type");
     }
 }

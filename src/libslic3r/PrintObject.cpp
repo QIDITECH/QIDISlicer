@@ -2115,6 +2115,8 @@ void PrintObject::bridge_over_infill()
         switch (dominant_pattern) {
         case ipHilbertCurve: bridging_angle += 0.25 * PI; break;
         case ipOctagramSpiral: bridging_angle += (1.0 / 16.0) * PI; break;
+        //w32
+        case ipCrossHatch: return (bridging_angle + 45.0) * 2.0 * M_PI / 360.;
         default: break;
         }
 
