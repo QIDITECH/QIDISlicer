@@ -1898,6 +1898,18 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<IroningType>(IroningType::TopSurfaces));
 
+    //w33
+    def                = this->add("ironing_pattern", coEnum);
+    def->label         = L("Ironing Pattern");
+    def->category      = L("Ironing");
+    def->tooltip       = L("Ironing Type");
+    def->set_enum<InfillPattern>({
+        { "concentric",        L("Concentric") },
+        { "zig-za",    L("Rectilinear") }
+    });
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<InfillPattern>(ipRectilinear));
+
     def = this->add("ironing_flowrate", coPercent);
     def->label = L("Flow rate");
     def->category = L("Ironing");

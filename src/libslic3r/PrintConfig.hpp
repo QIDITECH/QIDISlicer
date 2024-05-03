@@ -650,6 +650,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     // Ironing options
     ((ConfigOptionBool,                 ironing))
     ((ConfigOptionEnum<IroningType>,    ironing_type))
+    //w33
+    ((ConfigOptionEnum<InfillPattern>,  ironing_pattern))
     ((ConfigOptionPercent,              ironing_flowrate))
     ((ConfigOptionFloat,                ironing_spacing))
     ((ConfigOptionFloat,                ironing_speed))

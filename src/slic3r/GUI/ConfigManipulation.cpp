@@ -342,7 +342,8 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
         toggle_field(el, have_raft);
 
     bool has_ironing = config->opt_bool("ironing");
-    for (auto el : { "ironing_type", "ironing_flowrate", "ironing_spacing", "ironing_speed" })
+    //w33
+    for (auto el : {"ironing_type", "ironing_flowrate", "ironing_spacing", "ironing_speed", "ironing_pattern"})
     	toggle_field(el, has_ironing);
 
     bool have_sequential_printing = config->opt_bool("complete_objects");
