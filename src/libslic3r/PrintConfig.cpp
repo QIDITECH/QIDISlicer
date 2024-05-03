@@ -1904,8 +1904,8 @@ void PrintConfigDef::init_fff_params()
     def->category      = L("Ironing");
     def->tooltip       = L("Ironing Type");
     def->set_enum<InfillPattern>({
-        { "concentric",        L("Concentric") },
-        { "zig-za",    L("Rectilinear") }
+        { "rectilinear",    L("Rectilinear") },
+        { "concentric",        L("Concentric") }
     });
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionEnum<InfillPattern>(ipRectilinear));
