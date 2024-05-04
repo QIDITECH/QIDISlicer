@@ -328,10 +328,11 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
                                     "support_tree_tip_diameter", "support_tree_branch_distance", "support_tree_top_rate" })
         toggle_field(key, has_organic_supports);
 
+    //w34
     for (auto el : { "support_material_bottom_interface_layers", "support_material_interface_spacing", "support_material_interface_extruder",
-                    "support_material_interface_speed", "support_material_interface_contact_loops" })
+                    "support_material_interface_speed", "support_material_interface_contact_loops","support_material_synchronize_layers" })
         toggle_field(el, have_support_material && have_support_interface);
-    toggle_field("support_material_synchronize_layers", have_support_soluble);
+    //toggle_field("support_material_synchronize_layers", have_support_soluble);
 
     toggle_field("perimeter_extrusion_width", have_perimeters || have_skirt || have_brim);
     toggle_field("support_material_extruder", have_support_material || have_skirt);
