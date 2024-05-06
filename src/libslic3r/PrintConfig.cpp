@@ -3225,9 +3225,7 @@ void PrintConfigDef::init_fff_params()
     def->label = L("Synchronize with object layers");
     def->category = L("Support material");
     // TRN PrintSettings : "Synchronize with object layers"
-    def->tooltip = L("Synchronize support layers with the object print layers. This is useful "
-                   "with multi-material printers, where the extruder switch is expensive. "
-                   "This option is only available when top contact Z distance is set to zero.");
+    def->tooltip = L("If not checked, support layers to use layer heights that are independent of the object layer.");
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBool(false));
 
