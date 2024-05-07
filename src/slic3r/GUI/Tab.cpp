@@ -1474,10 +1474,6 @@ void TabPrint::build()
         optgroup->append_single_option_line("top_area_threshold");
         //w23
         optgroup->append_single_option_line("only_one_wall_first_layer");
-        //w31
-        optgroup->append_single_option_line("make_overhang_printable");
-        optgroup->append_single_option_line("make_overhang_printable_angle");
-        optgroup->append_single_option_line("make_overhang_printable_hole_size");
 
         optgroup = page->new_optgroup(L("Fuzzy skin (experimental)"));
         category_path = "fuzzy-skin_246186/#";

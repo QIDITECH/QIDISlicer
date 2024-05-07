@@ -270,8 +270,6 @@ public:
             && this->config().brim_width.value > 0.
             && ! this->has_raft();
     }
-    //w31
-    void apply_conical_overhang();
     // This is the *total* layer count (including support layers)
     // this value is not supposed to be compared with Layer::id
     // since they have different semantics.

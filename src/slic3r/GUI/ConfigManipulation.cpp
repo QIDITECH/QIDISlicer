@@ -380,10 +380,6 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     bool is_top_one_wall = config->opt_enum<TopOneWallType>("top_one_wall_type") != TopOneWallType::Disable;
     toggle_field("top_area_threshold", is_top_one_wall);
 
-    //w31
-    bool have_make_overhang_printable = config->opt_bool("make_overhang_printable");
-    toggle_field("make_overhang_printable_angle", have_make_overhang_printable);
-    toggle_field("make_overhang_printable_hole_size", have_make_overhang_printable);
 }
 
 void ConfigManipulation::toggle_print_sla_options(DynamicPrintConfig* config)

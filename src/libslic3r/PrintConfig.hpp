@@ -607,9 +607,6 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool, only_one_wall_first_layer))
     //w27
     ((ConfigOptionBool, precise_z_height))
-    //w31
-    ((ConfigOptionFloat,              make_overhang_printable_angle))
-    ((ConfigOptionFloat,              make_overhang_printable_hole_size))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(
@@ -678,8 +675,6 @@ PRINT_CONFIG_CLASS_DEFINE(
     //w30
     ((ConfigOptionFloat, top_solid_infill_flow_ratio))
     ((ConfigOptionFloat, bottom_solid_infill_flow_ratio))
-    //w31
-    ((ConfigOptionBool, make_overhang_printable))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(
