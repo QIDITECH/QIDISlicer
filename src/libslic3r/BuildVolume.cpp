@@ -339,6 +339,7 @@ BuildVolume::ObjectState BuildVolume::volume_state_bbox(const BoundingBoxf3& vol
         else if (tem_build_volume.intersects(volume_bbox)) {
             is_contain   = false;
             is_intersect = true;
+            break;
             }
     }
     if (m_max_print_height == 0.0)
@@ -369,32 +370,33 @@ bool BuildVolume::all_paths_inside(const GCodeProcessorResult& paths, const Boun
             build_volume.max.z() = std::numeric_limits<double>::max();
         if (ignore_bottom)
             build_volume.min.z() = -std::numeric_limits<double>::max();
-        std::vector<BoundingBox3Base<Vec3d>> exclude_build_volume;
+        // B66
+        Points pts;
+        for (const GCodeProcessorResult::MoveVertex &move : paths.moves) {
+            if (move.type == EMoveType::Extrude && move.extrusion_role != GCodeExtrusionRole::Custom && move.width != 0.0f &&
+                move.height != 0.0f)
+                pts.emplace_back(Point(scale_(move.position.x()), scale_(move.position.y())));
+        }
+
+        if ((build_volume.contains(paths_bbox))) {
+            if (m_exclude_bed_shape.size() > 0) {
+                Slic3r::Polygon convex_hull_2d = Slic3r::Geometry::convex_hull(std::move(pts));
         for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
             std::vector<Vec2d> tem_exclude_bed_shap;
-            for (int j = 1; j < 5; j++)
+                    for (int j = 1; j < 6; j++)
                 tem_exclude_bed_shap.push_back(m_exclude_bed_shape[i + j]);
             BoundingBoxf            tem_bboxf         = get_extents(tem_exclude_bed_shap);
             auto                    tem_exclude_bboxf = BoundingBoxf3{to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height)};
-            BoundingBox3Base<Vec3d> tem_build_volume  = tem_exclude_bboxf.inflated(SceneEpsilon);
-            exclude_build_volume.push_back(tem_build_volume);
-        }
-
-        bool is_contain   = false;
-        bool is_intersect = false;
-
-        for (const auto &tem_build_volume : exclude_build_volume) {
-            if (tem_build_volume.contains(paths_bbox)) {
-                is_contain   = true;
-                is_intersect = false;
+                    Slic3r::Polygon p = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
+                    if (intersection({p}, {convex_hull_2d}).empty() == false) {
+                        return false;
                 break;
-            } else if (tem_build_volume.intersects(paths_bbox)) {
-                is_contain   = false;
-                is_intersect = true;
+                    }
+                }
             }
         }
 
-        return (build_volume.contains(paths_bbox) && !is_contain && !is_intersect);
+        return build_volume.contains(paths_bbox);
     }
     case Type::Circle:
     {

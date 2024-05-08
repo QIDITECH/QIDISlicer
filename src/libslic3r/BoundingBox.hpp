@@ -31,7 +31,29 @@ public:
         : BoundingBoxBase(points.begin(), points.end())
     {}
 
-    void reset() { this->defined = false; this->min = PointType::Zero(); this->max = PointType::Zero(); }
+    void reset()
+    {
+        this->defined = false;
+        this->min     = PointType::Zero();
+        this->max     = PointType::Zero();
+    }
+    // B66
+    Polygon polygon(bool is_scaled = false) const
+    {
+        Polygon polygon;
+        polygon.points.clear();
+        polygon.points.resize(4);
+        double scale_factor  = 1 / (is_scaled ? SCALING_FACTOR : 1);
+        polygon.points[0](0) = this->min(0) * scale_factor;
+        polygon.points[0](1) = this->min(1) * scale_factor;
+        polygon.points[1](0) = this->max(0) * scale_factor;
+        polygon.points[1](1) = this->min(1) * scale_factor;
+        polygon.points[2](0) = this->max(0) * scale_factor;
+        polygon.points[2](1) = this->max(1) * scale_factor;
+        polygon.points[3](0) = this->min(0) * scale_factor;
+        polygon.points[3](1) = this->max(1) * scale_factor;
+        return polygon;
+    };
     void merge(const PointType &point);
     void merge(const PointsType &points);
     void merge(const BoundingBoxBase<PointType, PointsType> &bb);
