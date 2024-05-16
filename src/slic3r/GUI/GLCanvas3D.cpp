@@ -619,10 +619,10 @@ void GLCanvas3D::LayersEditing::generate_layer_height_texture()
         m_layers_texture.data.assign(m_layers_texture.width * m_layers_texture.height * 5, 0);
     }
 
-    //w27
     bool level_of_detail_2nd_level = true;
     m_layers_texture.cells = Slic3r::generate_layer_height_texture(
         *m_slicing_parameters, 
+        //w27
         Slic3r::generate_object_layers(*m_slicing_parameters, m_layer_height_profile,false), 
 		m_layers_texture.data.data(), m_layers_texture.height, m_layers_texture.width, level_of_detail_2nd_level);
 	m_layers_texture.valid = true;

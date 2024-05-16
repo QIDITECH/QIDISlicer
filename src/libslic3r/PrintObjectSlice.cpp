@@ -774,6 +774,7 @@ void PrintObject::slice_volumes()
             float(scale_(m_config.elefant_foot_compensation.value)) :
         	0.f;
         // Uncompensated slices for the first layer in case the Elephant foot compensation is applied.
+        //w24   
         std::vector<ExPolygons> lslices_elfoot_uncompensated;
         //w26
         lslices_elfoot_uncompensated.resize(elephant_foot_compensation_scaled > 0 ? std::min(m_config.elefant_foot_compensation_layers.value, (int)m_layers.size()) : 0);
@@ -786,6 +787,7 @@ void PrintObject::slice_volumes()
 	                m_print->throw_if_canceled();
 	                Layer *layer = m_layers[layer_id];
 	                //w24
+                    //w26
                     float elfoot = elephant_foot_compensation_scaled > 0 && layer_id < m_config.elefant_foot_compensation_layers.value ? 
                         elephant_foot_compensation_scaled - (elephant_foot_compensation_scaled / m_config.elefant_foot_compensation_layers.value) * layer_id : 
                         0.f;
@@ -795,15 +797,18 @@ void PrintObject::slice_volumes()
 		                    //w24
                             ExPolygons expolygons_to_compensate = to_expolygons(std::move(layerm->slices().surfaces));
                             if (xy_contour_scaled > 0 || xy_hole_scaled > 0) {
+                                //w24
                                 expolygons_to_compensate = _shrink_contour_holes(std::max(0.f, xy_contour_scaled),
                                                                    std::max(0.f, xy_hole_scaled),
                                                                    expolygons_to_compensate);
                             }
                             if (xy_contour_scaled < 0 || xy_hole_scaled < 0) {
+                                //w24
                                 expolygons_to_compensate = _shrink_contour_holes(std::min(0.f, xy_contour_scaled),
                                                                    std::min(0.f, xy_hole_scaled),
                                                                    expolygons_to_compensate);
                             }
+                            //w24
                             lslices_elfoot_uncompensated[layer_id] = expolygons_to_compensate;
 							layerm->m_slices.set(
 								union_ex(
@@ -817,12 +822,11 @@ void PrintObject::slice_volumes()
                              if (xy_contour_scaled != 0.0f || xy_hole_scaled != 0.0f) {
                                 ExPolygons expolygons = to_expolygons(std::move(layerm->m_slices.surfaces));
                                 if (xy_contour_scaled > 0 || xy_hole_scaled > 0) {
-                                    expolygons = _shrink_contour_holes(std::max(0.f, xy_contour_scaled),
-                                                                       std::max(0.f, xy_hole_scaled),
+                                    expolygons = _shrink_contour_holes(std::max(0.f, xy_contour_scaled), std::max(0.f, xy_hole_scaled),
                                                                        expolygons);
                                 }
                                 if (xy_contour_scaled < 0 || xy_hole_scaled < 0) {
-                                    expolygons = _shrink_contour_holes(std::min(0.f, xy_contour_scaled),
+                                    expolygons = _shrink_contour_holes(std::min(0.f, xy_contour_scaled), std::min(0.f, xy_hole_scaled),
                                                                        std::min(0.f, xy_hole_scaled),
                                                                        expolygons);
                                 }
@@ -856,6 +860,7 @@ void PrintObject::slice_volumes()
                             ExPolygons trimming;
                             static const float eps = float(scale_(m_config.slice_closing_radius.value) * 1.5);
                             if (elfoot > 0.f) {
+                                //w24
                                 ExPolygons expolygons_to_compensate = offset_ex(layer->merged(eps), -eps);
                                 lslices_elfoot_uncompensated[layer_id] = expolygons_to_compensate;
                                 trimming = Slic3r::elephant_foot_compensation(expolygons_to_compensate,
@@ -864,9 +869,7 @@ void PrintObject::slice_volumes()
                                 trimming = layer->merged(float(SCALED_EPSILON));
                             }
                             if (min_growth < 0.0f)
-                                trimming = _shrink_contour_holes(std::min(0.f, xy_contour_scaled),
-                                                                 std::min(0.f, xy_hole_scaled),
-                                                                 trimming);
+                                trimming = _shrink_contour_holes(std::min(0.f, xy_contour_scaled), std::min(0.f, xy_hole_scaled), trimming);
                             for (size_t region_id = 0; region_id < layer->regions().size(); ++region_id) {
                                 ExPolygons contour_exp = to_expolygons(std::move(layer->regions()[region_id]->m_slices.surfaces));
 

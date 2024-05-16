@@ -125,7 +125,7 @@ void Fill::fill_surface_extrusion(const Surface *surface, const FillParams &para
 
     
 }
-
+//w29
 void Fill::variable_width(const ThickPolylines &polylines, ExtrusionRole role, const Flow &flow, std::vector<ExtrusionEntity *> &out)
 {
     const float tolerance = float(scale_(0.05));
@@ -141,6 +141,7 @@ void Fill::variable_width(const ThickPolylines &polylines, ExtrusionRole role, c
         }
     }
 }
+//w29
 ExtrusionPaths Fill::thick_polyline_to_extrusion_paths_2(const ThickPolyline &thick_polyline,
                                                    ExtrusionRole        role,
                                                    const Flow &         flow,
