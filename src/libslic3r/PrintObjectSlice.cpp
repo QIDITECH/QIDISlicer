@@ -827,7 +827,6 @@ void PrintObject::slice_volumes()
                                 }
                                 if (xy_contour_scaled < 0 || xy_hole_scaled < 0) {
                                     expolygons = _shrink_contour_holes(std::min(0.f, xy_contour_scaled), std::min(0.f, xy_hole_scaled),
-                                                                       std::min(0.f, xy_hole_scaled),
                                                                        expolygons);
                                 }
                                 layerm->m_slices.set(std::move(expolygons), stInternal);
