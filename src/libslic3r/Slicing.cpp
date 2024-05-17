@@ -125,6 +125,7 @@ SlicingParameters SlicingParameters::create_from_config(
         if (params.gap_object_support <= 0)
             params.gap_object_support = params.gap_support_object;
 
+        //w34
         if (object_config.support_material_synchronize_layers) {
             params.gap_raft_object = std::round(params.gap_raft_object / object_config.layer_height + EPSILON) * object_config.layer_height;
             params.gap_object_support = std::round(params.gap_object_support / object_config.layer_height + EPSILON) *

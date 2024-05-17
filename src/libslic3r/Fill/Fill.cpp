@@ -343,6 +343,7 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
     // Use ipEnsuring pattern for all internal Solids.
 	//w11
     if (layer.object()->config().detect_narrow_internal_solid_infill) {
+        //w29
         size_t surface_fills_size = surface_fills.size();
         for (size_t i = 0; i < surface_fills_size; i++) {
             if (surface_fills[i].surface.surface_type != stInternalSolid)
@@ -354,12 +355,13 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
             for (size_t j = 0; j < expolygons_size; j++)
                 if (is_narrow_infill_area(surface_fills[i].expolygons[j]))
                     narrow_expolygons_index.push_back(j);
-
+            //w29
             if (narrow_expolygons_index.size() == 0) {
                 continue;
             } else if (narrow_expolygons_index.size() == expolygons_size) {
                 surface_fills[i].params.pattern = ipConcentric;
             } else {
+                //w29
                 params         = surface_fills[i].params;
                 params.pattern = ipConcentric;
                 surface_fills.emplace_back(params);
@@ -575,6 +577,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.anchor_length_max = surface_fill.params.anchor_length_max;
         params.resolution        = resolution;
 		//w14
+        //w29
         params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentric;
         params.layer_height      = layerm.layer()->height;
         //w29
@@ -643,6 +646,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                         delete eec;
                     thick_polylines.clear();
                 } else {
+                    //w29
                     extrusion_entities_append_paths(eec->entities, std::move(polylines),
                                                     ExtrusionAttributes{surface_fill.params.extrusion_role,
                                                                         ExtrusionFlow{flow_mm3_per_mm, float(flow_width),
@@ -699,43 +703,41 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
     }
 
 	for (LayerSlice &lslice : this->lslices_ex)
-        for (LayerIsland &island : lslice.islands) {
-            if (!island.thin_fills.empty()) {
-                // Copy thin fills into fills packed as a collection.
-                // Fills are always stored as collections, the rest of the pipeline (wipe into infill, G-code generator) relies on it.
-                LayerRegion &              layerm     = *this->get_region(island.perimeters.region());
-                ExtrusionEntityCollection &collection = *(new ExtrusionEntityCollection());
-                layerm.m_fills.entities.push_back(&collection);
-                collection.entities.reserve(island.thin_fills.size());
-                for (uint32_t fill_id : island.thin_fills)
-                    collection.entities.push_back(layerm.thin_fills().entities[fill_id]->clone());
-                island.add_fill_range(
-                    {island.perimeters.region(), {uint32_t(layerm.m_fills.entities.size() - 1), uint32_t(layerm.m_fills.entities.size())}});
-            }
-            // Sort the fills by region ID.
-            std::sort(island.fills.begin(), island.fills.end(),
-                      [](auto &l, auto &r) { return l.region() < r.region() || (l.region() == r.region() && *l.begin() < *r.begin()); });
-            // Compress continuous fill ranges of the same region.
-            {
-                size_t k = 0;
-                for (size_t i = 0; i < island.fills.size();) {
-                    uint32_t region_id = island.fills[i].region();
-                    uint32_t begin     = *island.fills[i].begin();
-                    uint32_t end       = *island.fills[i].end();
-                    size_t   j         = i + 1;
-                    for (; j < island.fills.size() && island.fills[j].region() == region_id && *island.fills[j].begin() == end; ++j)
-                        end = *island.fills[j].end();
-                    island.fills[k++] = {region_id, {begin, end}};
-                    i                 = j;
-                }
-                island.fills.erase(island.fills.begin() + k, island.fills.end());
-            }
-        }
+		for (LayerIsland &island : lslice.islands) {
+			if (! island.thin_fills.empty()) {
+				// Copy thin fills into fills packed as a collection.
+				// Fills are always stored as collections, the rest of the pipeline (wipe into infill, G-code generator) relies on it.
+				LayerRegion				  &layerm	  = *this->get_region(island.perimeters.region());
+				ExtrusionEntityCollection &collection = *(new ExtrusionEntityCollection());
+				layerm.m_fills.entities.push_back(&collection);
+				collection.entities.reserve(island.thin_fills.size());
+				for (uint32_t fill_id : island.thin_fills)
+					collection.entities.push_back(layerm.thin_fills().entities[fill_id]->clone());
+	    		island.add_fill_range({ island.perimeters.region(), { uint32_t(layerm.m_fills.entities.size() - 1), uint32_t(layerm.m_fills.entities.size()) } });
+			}
+			// Sort the fills by region ID.
+			std::sort(island.fills.begin(), island.fills.end(), [](auto &l, auto &r){ return l.region() < r.region() || (l.region() == r.region() && *l.begin() < *r.begin()); });
+			// Compress continuous fill ranges of the same region.
+			{
+				size_t k = 0;
+				for (size_t i = 0; i < island.fills.size();) {
+					uint32_t region_id = island.fills[i].region();
+					uint32_t begin     = *island.fills[i].begin();
+					uint32_t end       = *island.fills[i].end();
+					size_t   j         = i + 1;
+					for (; j < island.fills.size() && island.fills[j].region() == region_id && *island.fills[j].begin() == end; ++ j)
+						end = *island.fills[j].end();
+					island.fills[k ++] = { region_id, { begin, end } };
+					i = j;
+				}
+				island.fills.erase(island.fills.begin() + k, island.fills.end());
+			}
+		}
 
 #ifndef NDEBUG
-    for (LayerRegion *layerm : m_regions)
-        for (const ExtrusionEntity *e : layerm->fills())
-            assert(dynamic_cast<const ExtrusionEntityCollection *>(e) != nullptr);
+	for (LayerRegion *layerm : m_regions)
+	    for (const ExtrusionEntity *e : layerm->fills())
+    	    assert(dynamic_cast<const ExtrusionEntityCollection*>(e) != nullptr);
 #endif
 }
 //w21
@@ -1100,11 +1102,13 @@ void Layer::make_ironing()
 	// Layer::id() returns layer ID including raft layers, subtract them to make the infill direction independent
 	// from raft.
 	//FIXME ironing does not take fill angle into account. Shall it? Does it matter?
+    //w33
 	//fill.layer_id 			 = this->id() - this->object()->get_layer(0)->id();
     //fill.z 					 = this->print_z;
     //fill.overlap 			 = 0;
     fill_params.density 	 = 1.;
     fill_params.monotonic    = true;
+    //w33
     InfillPattern         f_pattern = ipRectilinear;
     std::unique_ptr<Fill> f         = std::unique_ptr<Fill>(Fill::new_from_type(f_pattern));
     f->set_bounding_box(this->object()->bounding_box());

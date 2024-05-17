@@ -3225,6 +3225,7 @@ void PrintConfigDef::init_fff_params()
     def->label = L("Synchronize with object layers");
     def->category = L("Support material");
     // TRN PrintSettings : "Synchronize with object layers"
+    //w34
     def->tooltip = L("If not checked, support layers to use layer heights that are independent of the object layer.");
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBool(false));

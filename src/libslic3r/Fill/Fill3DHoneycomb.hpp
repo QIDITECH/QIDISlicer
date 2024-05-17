@@ -16,6 +16,7 @@ public:
     ~Fill3DHoneycomb() override {}
 
 	// require bridge flow since most of this pattern hangs in air
+	//w36
     
 
 protected:

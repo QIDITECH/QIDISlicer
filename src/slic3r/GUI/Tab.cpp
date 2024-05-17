@@ -5626,7 +5626,6 @@ std::vector<std::pair<std::string, std::vector<std::string>>> material_overrides
     {"Corrections", {
         "relative_correction",
         "elefant_foot_compensation"
-
     }}
 };
 

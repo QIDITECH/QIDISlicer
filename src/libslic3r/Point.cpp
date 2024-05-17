@@ -90,7 +90,7 @@ int Point::nearest_point_index(const Points &points) const
         p.push_back(&*it);
     return this->nearest_point_index(p);
 }
-
+//w29
 int Point::nearest_point_index(const PointConstPtrs &points) const
 {
     int    idx      = -1;
@@ -118,7 +118,7 @@ int Point::nearest_point_index(const PointConstPtrs &points) const
 
     return idx;
 }
-
+//w29
 int Point::nearest_point_index(const PointPtrs &points) const
 {
     PointConstPtrs p;

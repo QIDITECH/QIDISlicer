@@ -6,15 +6,18 @@
 
 namespace Slic3r {
 
+//w36
 template <typename T> int sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
+//w36
 static coordf_t triWave(coordf_t pos, coordf_t gridSize)
 {
   float t = (pos / (gridSize * 2.)) + 0.25; 
   t = t - (int)t; 
   return((1. - abs(t * 8. - 4.)) * (gridSize / 4.) + (gridSize / 4.));
 }
+//w36
 static coordf_t troctWave(coordf_t pos, coordf_t gridSize, coordf_t Zpos)
 {
     coordf_t Zcycle     = triWave(Zpos, gridSize);
@@ -22,6 +25,7 @@ static coordf_t troctWave(coordf_t pos, coordf_t gridSize, coordf_t Zpos)
     coordf_t y          = triWave(pos, gridSize);
     return ((abs(y) > abs(perpOffset)) ? (sgn(y) * perpOffset) : (y * sgn(perpOffset)));
 }
+//w36
 static std::vector<coordf_t> getCriticalPoints(coordf_t Zpos, coordf_t gridSize)
 {
     std::vector<coordf_t> res        = {0.};
@@ -50,22 +54,27 @@ Credits: David Eccles (gringer).
 // basic printing line (i.e. Y points for columns, X points for rows)
 // Note: a negative offset only causes a change in the perpendicular
 // direction
+//w36
 static std::vector<coordf_t> colinearPoints(const coordf_t Zpos, coordf_t gridSize, std::vector<coordf_t> critPoints,
 					     const size_t baseLocation, size_t gridLength)
 {
+    //w36
     std::vector<coordf_t> points;
+    //w36
     points.push_back(baseLocation);
     for (coordf_t cLoc = baseLocation; cLoc < gridLength; cLoc += (gridSize * 2)) {
         for (size_t pi = 0; pi < critPoints.size(); pi++) {
             points.push_back(baseLocation + cLoc + critPoints[pi]);
         }
     }
+    //w36
     points.push_back(gridLength);
     return points;
 }
 
 // Generate an array of points for the dimension that is perpendicular to
 // the basic printing line (i.e. X points for columns, Y points for rows)
+//w36
 static std::vector<coordf_t> perpendPoints(const coordf_t        Zpos,
                                            coordf_t              gridSize,
                                            std::vector<coordf_t> critPoints,
@@ -74,7 +83,9 @@ static std::vector<coordf_t> perpendPoints(const coordf_t        Zpos,
                                            size_t                offsetBase,
                                            coordf_t              perpDir)
 {
+    //w36
     std::vector<coordf_t> points;
+    //w36
     points.push_back(offsetBase);
     for (coordf_t cLoc = baseLocation; cLoc < gridLength; cLoc += gridSize * 2) {
         for (size_t pi = 0; pi < critPoints.size(); pi++) {
@@ -82,6 +93,7 @@ static std::vector<coordf_t> perpendPoints(const coordf_t        Zpos,
             points.push_back(offsetBase + (offset * perpDir));
         }
     }
+    //w36
     points.push_back(offsetBase);
     return points;
 }
@@ -110,8 +122,10 @@ static inline Pointfs zip(const std::vector<coordf_t> &x, const std::vector<coor
 // horizontal slice of a truncated regular octahedron with edge length 1.
 // curveType specifies which lines to print, 1 for vertical lines
 // (columns), 2 for horizontal lines (rows), and 3 for both.
+//w36
 static std::vector<Pointfs> makeActualGrid(coordf_t Zpos, coordf_t gridSize, size_t boundsX, size_t boundsY)
 {
+    //w36
     std::vector<Pointfs>  points;
     std::vector<coordf_t> critPoints = getCriticalPoints(Zpos, gridSize);
     coordf_t              zCycle     = fmod(Zpos + gridSize / 2, gridSize * 2.) / (gridSize * 2.);
@@ -143,14 +157,17 @@ static std::vector<Pointfs> makeActualGrid(coordf_t Zpos, coordf_t gridSize, siz
 // Generate a set of curves (array of array of 2d points) that describe a
 // horizontal slice of a truncated regular octahedron with a specified
 // grid square size.
+//w36
 static Polylines makeGrid(coordf_t z, coordf_t gridSize, coordf_t boundWidth, coordf_t boundHeight, bool fillEvenly)
 {
+    //w36
     std::vector<Pointfs> polylines = makeActualGrid(z, gridSize, boundWidth, boundHeight);
     Polylines            result;
     result.reserve(polylines.size());
     for (std::vector<Pointfs>::const_iterator it_polylines = polylines.begin(); it_polylines != polylines.end(); ++it_polylines) {
         result.push_back(Polyline());
         Polyline &polyline = result.back();
+        //w36
         for (Pointfs::const_iterator it = it_polylines->begin(); it != it_polylines->end(); ++it)
             polyline.points.push_back(Point(coord_t((*it)(0)), coord_t((*it)(1))));
     }
@@ -165,13 +182,16 @@ void Fill3DHoneycomb::_fill_surface_single(
     Polylines                       &polylines_out)
 {
     // no rotation is supported for this infill pattern
+    //w36
     auto infill_angle = float(this->angle);
     if (std::abs(infill_angle) >= EPSILON)
         expolygon.rotate(-infill_angle);
     BoundingBox bb = expolygon.contour.bounding_box();
+    //w36
     // align bounding box to a multiple of our honeycomb grid module
     // (a module is 2*$distance since one $distance half-module is
     // growing while the other $distance half-module is shrinking)
+    //w36
     coordf_t zScale = sqrt(2);
     coordf_t gridSize = (scale_(this->spacing) * ((zScale + 1.) / 2.) / params.density);
 

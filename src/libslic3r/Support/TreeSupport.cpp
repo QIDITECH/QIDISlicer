@@ -207,10 +207,10 @@ static std::vector<std::pair<TreeSupportSettings, std::vector<size_t>>> group_me
     double max_bridge_length        = scale_(config.max_bridge_length.value);
     bool   bridge_break      = (config.max_bridge_length.value > 0) && (config.support_material_style == smsOrganic);
 
-    //w28
     size_t num_overhang_layers = support_auto ? num_object_layers : std::min(num_object_layers, std::max(size_t(support_enforce_layers), enforcers_layers.size()));
     tbb::parallel_for(tbb::blocked_range<LayerIndex>(1, num_overhang_layers),
         [&print_object, &config, &print_config, &enforcers_layers, &blockers_layers, 
+        //w28
          support_auto, support_enforce_layers, support_threshold_auto, tan_threshold, enforcer_overhang_offset, num_raft_layers, &throw_on_cancel, &out,bridge_break,max_bridge_length]
         (const tbb::blocked_range<LayerIndex> &range) {
         for (LayerIndex layer_id = range.begin(); layer_id < range.end(); ++ layer_id) {
