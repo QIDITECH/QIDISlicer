@@ -2100,7 +2100,8 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
                             const auto        opt       = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
                             host_type = opt != nullptr ? opt->value : htOctoPrint;
-                            wxStringTokenizer tokenizer3((wxString::FromUTF8(it->get_full_name(preset_name)).Lower()), wxT("*"),
+                            //B67
+                            wxStringTokenizer tokenizer3((wxString::FromUTF8(it->get_full_name(preset_name))), wxT("*"),
                                                          wxTOKEN_RET_EMPTY_ALL);
                             printer_name = tokenizer3.GetNextToken();
                         }
