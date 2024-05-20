@@ -87,6 +87,8 @@ public:
     // Called by GLVolumeCollection::check_outside_state() after an object is manipulated with gizmos for example.
     // Called for a rectangular bed:
     ObjectState  volume_state_bbox(const BoundingBoxf3& volume_bbox, bool ignore_bottom = true) const;
+    // B66
+    BuildVolume::ObjectState check_outside(Polygon hull) const;
 
     // 2) Test called on G-code paths.
     // Using BedEpsilon for all tests.

@@ -888,6 +888,16 @@ const BoundingBoxf3& ModelObject::bounding_box_approx() const
     return m_bounding_box_approx;
 }
 
+// B66
+Polygon ModelInstance::convex_hull_2d()
+{
+    Polygon convex_hull;
+    { 
+        const Transform3d &trafo_instance = get_matrix();
+        convex_hull                       = get_object()->convex_hull_2d(trafo_instance);
+    }
+    return convex_hull;
+}
 // Returns the bounding box of the transformed instances.
 // This bounding box is approximate and not snug.
 const BoundingBoxf3& ModelObject::bounding_box_exact() const

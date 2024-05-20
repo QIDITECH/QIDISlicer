@@ -1158,6 +1158,8 @@ public:
     const Transform3d& get_matrix() const { return m_transformation.get_matrix(); }
     Transform3d get_matrix_no_offset() const { return m_transformation.get_matrix_no_offset(); }
 
+    // B66
+    Polygon convex_hull_2d();
     bool is_printable() const { return object->printable && printable && (print_volume_state == ModelInstancePVS_Inside); }
 
     void invalidate_object_bounding_box() { object->invalidate_bounding_box(); }

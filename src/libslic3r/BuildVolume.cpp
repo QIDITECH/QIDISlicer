@@ -311,47 +311,42 @@ BuildVolume::ObjectState BuildVolume::object_state(const indexed_triangle_set& i
     }
 }
 
-//B52
+// B52 //B66
 BuildVolume::ObjectState BuildVolume::volume_state_bbox(const BoundingBoxf3& volume_bbox, bool ignore_bottom) const
 {
     assert(m_type == Type::Rectangle);
     BoundingBox3Base<Vec3d> build_volume = this->bounding_volume().inflated(SceneEpsilon);
-    std::vector<BoundingBox3Base<Vec3d>> exclude_build_volume;
+    if (m_max_print_height == 0.0)
+        build_volume.max.z() = std::numeric_limits<double>::max();
+    if (ignore_bottom)
+        build_volume.min.z() = -std::numeric_limits<double>::max();
+
+    return build_volume.max.z() <= -SceneEpsilon ? ObjectState::Below :
+           build_volume.contains(volume_bbox)    ? ObjectState::Inside :
+           build_volume.intersects(volume_bbox)  ? ObjectState::Colliding :
+                                                   ObjectState::Outside;
+}
+
+// B66
+BuildVolume::ObjectState BuildVolume::check_outside(Polygon hull) const
+{
+    if (m_exclude_bed_shape.size() > 0) {
     for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
         std::vector<Vec2d> tem_exclude_bed_shap;
         for (int j = 1; j < 6; j++)
             tem_exclude_bed_shap.push_back(m_exclude_bed_shape[i + j]);
         BoundingBoxf tem_bboxf = get_extents(tem_exclude_bed_shap);
         auto                    tem_exclude_bboxf = BoundingBoxf3{to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height)};
-        BoundingBox3Base<Vec3d> tem_build_volume  = tem_exclude_bboxf.inflated(SceneEpsilon);
-        exclude_build_volume.push_back(tem_build_volume);
-    }
-
-    bool is_contain = false;
-    bool is_intersect = false;
-
-    for (const auto &tem_build_volume : exclude_build_volume) {
-        if (tem_build_volume.contains(volume_bbox)) {
-            is_contain=true;
-            is_intersect = false;
+            Slic3r::Polygon p                 = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
+            if (intersection({p}, {hull}).empty() == false) {
+                return ObjectState::Colliding;
             break;
         }
-        else if (tem_build_volume.intersects(volume_bbox)) {
-            is_contain   = false;
-            is_intersect = true;
-            break;
             }
+        return ObjectState::Inside;
+    } else {
+        return ObjectState::Inside;
     }
-    if (m_max_print_height == 0.0)
-        build_volume.max.z() = std::numeric_limits<double>::max();
-    if (ignore_bottom)
-        build_volume.min.z() = -std::numeric_limits<double>::max();
-    return build_volume.max.z() <= - SceneEpsilon ? ObjectState::Below :
-           is_contain                               ? ObjectState::Outside :
-           is_intersect                          ? ObjectState::Outside :
-           build_volume.contains(volume_bbox) ? ObjectState::Inside : 
-           build_volume.intersects(volume_bbox)     ? ObjectState::Colliding :
-                                                      ObjectState::Outside;
 }
 
 //B52
