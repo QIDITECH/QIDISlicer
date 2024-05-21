@@ -84,7 +84,8 @@ public:
     std::string travel_to_z(double z, const std::string_view comment = {});
     std::string extrude_to_xy(const Vec2d &point, double dE, const std::string_view comment = {});
     std::string extrude_to_xy_G2G3IJ(const Vec2d &point, const Vec2d &ij, const bool ccw, double dE, const std::string_view comment);
-//    std::string extrude_to_xyz(const Vec3d &point, double dE, const std::string_view comment = {});
+    //w37
+    std::string extrude_to_xyz(const Vec3d &point, double dE, const std::string_view comment = {});
     std::string retract(bool before_wipe = false);
     std::string retract_for_toolchange(bool before_wipe = false);
     std::string unretract();

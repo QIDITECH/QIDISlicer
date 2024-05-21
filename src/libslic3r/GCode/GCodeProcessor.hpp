@@ -596,7 +596,10 @@ namespace Slic3r {
         SeamsDetector m_seams_detector;
         OptionsZCorrector m_options_z_corrector;
         size_t m_last_default_color_id;
-        bool m_spiral_vase_active;
+        //w37
+        //bool m_spiral_vase_active;
+        bool  m_detect_layer_based_on_tag{false};
+        int   m_seams_count;
         float m_kissslicer_toolchange_time_correction;
 #if ENABLE_GCODE_VIEWER_STATISTICS
         std::chrono::time_point<std::chrono::high_resolution_clock> m_start_time;
@@ -676,6 +679,10 @@ namespace Slic3r {
         std::vector<std::pair<EMoveType, float>> get_moves_time(PrintEstimatedStatistics::ETimeMode mode) const;
         std::vector<std::pair<GCodeExtrusionRole, float>> get_roles_time(PrintEstimatedStatistics::ETimeMode mode) const;
         std::vector<float> get_layers_time(PrintEstimatedStatistics::ETimeMode mode) const;
+        //w37
+        void detect_layer_based_on_tag(bool enabled) {
+            m_detect_layer_based_on_tag = enabled;
+        }
 
     private:
         void apply_config(const DynamicPrintConfig& config);

@@ -884,6 +884,16 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "seam_gap"
             || opt_key == "seam_preferred_direction"
             || opt_key == "seam_preferred_direction_jitter"
+            //w37
+            || opt_key == "seam_slope_type"
+            || opt_key == "seam_slope_conditional"
+            || opt_key == "scarf_angle_threshold"
+            || opt_key == "seam_slope_start_height"
+            || opt_key == "seam_slope_entire_loop"
+            || opt_key == "seam_slope_min_length"
+            || opt_key == "seam_slope_steps"
+            || opt_key == "seam_slope_inner_walls"
+
             || opt_key == "support_material_speed"
             || opt_key == "support_material_interface_speed"
             || opt_key == "bridge_speed"
