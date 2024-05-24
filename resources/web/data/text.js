@@ -66,6 +66,7 @@ var LangText={
 		"l44": "Different filaments have different maximum volume speed.",
 		"l45": "Nozzle material, caliber, printing temperature, etc., will affect the maximum volume speed.",
 		"l46": "During the test, the printing speed will increase layer by layer. When there is a hole or missing wire on the surface of the model, it indicates that the layer has reached the maximum volume speed, and the maximum volume speed is calculated according to the ratio of height.",
+		"l47": "Or you can find a solution through WIKI.",
 	},
 	"zh_CN": {
 		"t1": "用户指南",
@@ -134,6 +135,7 @@ var LangText={
 		"l44": "不同线材的最大体积速度各不相同。",
 		"l45": "喷嘴材质、口径、打印温度、等都会影响最大体积速度。",
 		"l46": "测试时打印速度会逐层增加，当模型表面出现空洞或缺丝时，说明该层已达到最大体积速度，根据高度比例算出最大体积速度。",
+		"l47": "或者你可以通过WIKI来找到解决方案。",
 	},
 	"ja": {
 		"t1": "ユーザーガイド",
@@ -202,6 +204,7 @@ var LangText={
 		"l44": "最大体積速度は線材によって異なります。",
 		"l45": "ノズルの材質、口径、印刷温度などが最大体積速度に影響します。",
 		"l46": "テスト時の印刷速度は層ごとに増加します。模型の表面に穴ができたり、糸が欠けたりした場合、その層が最大体積速度に達したことを示し、高さの割合から最大体積速度を算出します。",
+		"l47": "WIKIで解決策を見つけることもできます.",
 	},
 	"fr": {
 		"t1": "Guide de l'utilisateur",
@@ -270,6 +273,7 @@ var LangText={
 		"l44": "Différents filaments ont une vitesse de volume maximale différente.",
 		"l45": "Le matériau de la buse, le calibre, la température d’impression, etc., affecteront la vitesse de volume maximum.",
 		"l46": "Pendant l’essai, la vitesse d’impression augmentera couche par couche. Quand il y a un trou ou un fil manquant sur la surface du modèle, cela indique que la couche a atteint la vitesse volumique maximale, et la vitesse volumique maximale est calculée selon le rapport de la hauteur.",
+		"l47": "Ou vous pouvez trouver une solution via WIKI.",
 	},
 	"de": {
 		"t1": "Benutzerhandbuch",
@@ -338,6 +342,7 @@ var LangText={
 		"l44": "Es gibt eine vielzahl Von lichtern mit maximale geschwindigkeit.",
 		"l45": "Die düsen, der durchmesser, die drucktemperatur all das beeinflusst die maximale geschwindigkeit.",
 		"l46": "Bei den tests wird die druckgeschwindigkeit etage für etage erhöht Wenn eine öffnung Oder keine linie in der oberfläche eines modells angezeigt wird, zeigt sie an, dass sie die höchstgeschwindigkeit erreicht hat und dass die höchste geschwindigkeit nach höhe angegeben wird.",
+		"l47": "Oder Sie finden eine Lösung über WIKI.",
 	},
 	"be": {
 		"t1": "Кіраўніцтва карыстальніка",
@@ -406,6 +411,7 @@ var LangText={
 		"l44": "Различные нити накала имеют разную максимальную объемную скорость.",
 		"l45": "Материал сопла, калибр, температура печати и т.д., повлияет на максимальную объемную скорость.",
 		"l46": "Во время теста скорость печати будет увеличиваться слой за слоем. Если на поверхности модели имеется отверстие или недостающая проволока, это указывает на то, что слой достиг максимальной объемной скорости, а максимальная объемная скорость рассчитывается в соответствии с отношением высоты.",
+		"l47": "Или вы можете найти решение через WIKI.",
 	},
 };
 
