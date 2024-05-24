@@ -1470,17 +1470,6 @@ void TabPrint::build()
         optgroup->append_single_option_line("seam_gap", category_path + "seam-gap");
         optgroup->append_single_option_line("staggered_inner_seams", category_path + "staggered-inner-seams");
 
-        //w37
-        optgroup->append_single_option_line("seam_slope_type");
-        optgroup->append_single_option_line("seam_slope_conditional");
-        optgroup->append_single_option_line("scarf_angle_threshold");
-        optgroup->append_single_option_line("seam_slope_start_height");
-        optgroup->append_single_option_line("seam_slope_entire_loop");
-        optgroup->append_single_option_line("seam_slope_min_length");
-        //optgroup->append_single_option_line("seam_slope_steps");
-        optgroup->append_single_option_line("seam_slope_inner_walls");
-
-
         optgroup->append_single_option_line("external_perimeters_first", category_path + "external-perimeters-first");
         optgroup->append_single_option_line("gap_fill_enabled", category_path + "fill-gaps");
         optgroup->append_single_option_line("perimeter_generator");

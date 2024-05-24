@@ -166,9 +166,6 @@ public:
 
     std::optional<Point> last_position;
 
-    //w37
-    double sum_lift_z_ext = 0;
-    double sum_lift_z     = 0;
 
 private:
     class GCodeOutputStream {
@@ -271,45 +268,6 @@ private:
     std::string     extrude_multi_path(const ExtrusionMultiPath &multipath, bool reverse, const GCode::SmoothPathCache &smooth_path_cache, const std::string_view description, double speed = -1.);
     std::string     extrude_path(const ExtrusionPath &path, bool reverse, const GCode::SmoothPathCache &smooth_path_cache, const std::string_view description, double speed = -1.);
 
-    //w37
-    void set_step_path(GCode::SmoothPath &path, const int steps)
-    {
-        double max_line_length =0;
-        double nums_line       = 0;
-        int    p1_i_index=-1;
-        int    p1_j_index=-1;
-        Line   max_line;
-        for (int i = 0; i < path.size(); i++) {
-            nums_line += path[i].path.size() - 1;
-        }
-        while (nums_line < steps) {
-            for (int i = 0; i < path.size(); i++) {
-                for (int j = 0; j < path[i].path.size() - 1; j++) {
-                    Point p1 = path[i].path[j].point;
-                    Point p2 = path[i].path[j + 1].point;
-                    Line  cur_l(p1, p2);
-                    if (cur_l.length() > max_line_length) {
-                        max_line_length = cur_l.length();
-                        p1_i_index      = i;
-                        p1_j_index      = j;
-                        max_line        = cur_l;
-                    }
-                }
-            }
-            if (p1_i_index >= 0 && p1_j_index >= 0) {
-                Point midpt = max_line.midpoint();
-                Geometry::ArcWelder::Segment temp_val;
-                temp_val.point = midpt;
-                path[p1_i_index].path.insert(path[p1_i_index].path.begin() +1+ p1_j_index, temp_val);
-            }
-            nums_line = 0;
-            for (int i = 0; i < path.size(); i++) {
-                nums_line += path[i].path.size() - 1;
-            }
-        }
-        
-
-    }
     struct InstanceToPrint
     {
         InstanceToPrint(size_t object_layer_to_print_id, const PrintObject &print_object, size_t instance_id) :
@@ -500,9 +458,8 @@ private:
 
     // Back-pointer to Print (const).
     const Print*                        m_print;
-    //w37
     std::string                         _extrude(
-        const ExtrusionAttributes &attribs, const Geometry::ArcWelder::Path &path, const std::string_view description, double speed = -1,double ratio = 0);
+        const ExtrusionAttributes &attribs, const Geometry::ArcWelder::Path &path, const std::string_view description, double speed = -1);
     void                                print_machine_envelope(GCodeOutputStream &file, const Print &print);
     void                                _print_first_layer_bed_temperature(GCodeOutputStream &file, const Print &print, const std::string &gcode, unsigned int first_printing_extruder_id, bool wait);
     void                                _print_first_layer_extruder_temperatures(GCodeOutputStream &file, const Print &print, const std::string &gcode, unsigned int first_printing_extruder_id, bool wait);

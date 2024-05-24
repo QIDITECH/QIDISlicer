@@ -367,16 +367,6 @@ public:
     Model*                  get_model() { return m_model; }
     const Model*            get_model() const { return m_model; }
 
-    //w37
-    int                           get_backup_id() const;
-    template<typename T> const T *get_config_value(const DynamicPrintConfig &global_config, const std::string &config_option)
-    {
-        if (config.has(config_option))
-            return static_cast<const T *>(config.option(config_option));
-        else
-            return global_config.option<T>(config_option);
-    }
-
     ModelVolume*            add_volume(const TriangleMesh &mesh);
     ModelVolume*            add_volume(TriangleMesh &&mesh, ModelVolumeType type = ModelVolumeType::MODEL_PART);
     ModelVolume*            add_volume(const ModelVolume &volume, ModelVolumeType type = ModelVolumeType::INVALID);

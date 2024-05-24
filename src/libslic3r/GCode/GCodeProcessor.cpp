@@ -668,14 +668,8 @@ for (size_t i = 0; i < static_cast<size_t>(PrintEstimatedStatistics::ETimeMode::
     m_result.max_print_height = config.max_print_height;
 
     const ConfigOptionBool* spiral_vase = config.option<ConfigOptionBool>("spiral_vase");
-    //w37
     if (spiral_vase != nullptr)
-         m_detect_layer_based_on_tag = spiral_vase->value;//m_spiral_vase_active = spiral_vase->value;
-
-    //w37
-    const ConfigOptionBool *has_scarf_joint_seam = config.option<ConfigOptionBool>("has_scarf_joint_seam");
-    if (has_scarf_joint_seam != nullptr)
-        m_detect_layer_based_on_tag = m_detect_layer_based_on_tag || has_scarf_joint_seam->value;
+        m_spiral_vase_active = spiral_vase->value;
 
     const ConfigOptionFloat* z_offset = config.option<ConfigOptionFloat>("z_offset");
     if (z_offset != nullptr)
@@ -956,14 +950,8 @@ void GCodeProcessor::apply_config(const DynamicPrintConfig& config)
         m_result.max_print_height = max_print_height->value;
 
     const ConfigOptionBool* spiral_vase = config.option<ConfigOptionBool>("spiral_vase");
-    //w37
     if (spiral_vase != nullptr)
-        m_detect_layer_based_on_tag = spiral_vase->value;//m_spiral_vase_active = spiral_vase->value;
-
-    //w37
-    const ConfigOptionBool *has_scarf_joint_seam = config.option<ConfigOptionBool>("has_scarf_joint_seam");
-    if (has_scarf_joint_seam != nullptr)
-        m_detect_layer_based_on_tag = m_detect_layer_based_on_tag || has_scarf_joint_seam->value;
+        m_spiral_vase_active = spiral_vase->value;
 
     const ConfigOptionFloat* z_offset = config.option<ConfigOptionFloat>("z_offset");
     if (z_offset != nullptr)
@@ -1034,11 +1022,7 @@ void GCodeProcessor::reset()
 
     m_options_z_corrector.reset();
 
-    //w37
-    //m_spiral_vase_active = false;
-    m_detect_layer_based_on_tag = false;
-    m_seams_count                           = 0;
-
+    m_spiral_vase_active = false;
     m_kissslicer_toolchange_time_correction = 0.0f;
 
     m_single_extruder_multi_material = false;
@@ -2005,14 +1989,12 @@ void GCodeProcessor::process_tags(const std::string_view comment, bool producers
     // layer change tag
     if (comment == reserved_tag(ETags::Layer_Change)) {
         ++m_layer_id;
-        //w37
-        if (m_detect_layer_based_on_tag) { // if (m_spiral_vase_active) {
+        if (m_spiral_vase_active) {
             if (m_result.moves.empty() || m_result.spiral_vase_layers.empty())
                 // add a placeholder for layer height. the actual value will be set inside process_G1() method
                 m_result.spiral_vase_layers.push_back({ FLT_MAX, { 0, 0 } });
             else {
-                //w37
-                const size_t move_id = m_result.moves.size() - 1 - m_seams_count;//const size_t move_id = m_result.moves.size() - 1;
+                const size_t move_id = m_result.moves.size() - 1;
                 if (!m_result.spiral_vase_layers.empty())
                     m_result.spiral_vase_layers.back().second.second = move_id;
                 // add a placeholder for layer height. the actual value will be set inside process_G1() method
@@ -2898,8 +2880,7 @@ void GCodeProcessor::process_G1(const std::array<std::optional<double>, 4>& axes
         m_seams_detector.set_first_vertex(m_result.moves.back().position - m_extruder_offsets[m_extruder_id]);
     }
 
-    //w37
-    if (m_detect_layer_based_on_tag && !m_result.spiral_vase_layers.empty()) {//if (m_spiral_vase_active && !m_result.spiral_vase_layers.empty()) {
+    if (m_spiral_vase_active && !m_result.spiral_vase_layers.empty()) {
         if (m_result.spiral_vase_layers.back().first == FLT_MAX && delta_pos[Z] >= 0.0)
             // replace layer height placeholder with correct value
             m_result.spiral_vase_layers.back().first = static_cast<float>(m_end_position[Z]);
@@ -4455,11 +4436,6 @@ void GCodeProcessor::store_move_vertex(EMoveType type, bool internal_only)
         static_cast<float>(m_result.moves.size()),
         internal_only
     });
-
-    //w37
-    if (type == EMoveType::Seam) {
-        m_seams_count++;
-    }
 
     // stores stop time placeholders for later use
     if (type == EMoveType::Color_change || type == EMoveType::Pause_Print) {

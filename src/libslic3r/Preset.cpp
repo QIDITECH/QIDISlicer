@@ -495,9 +495,6 @@ static std::vector<std::string> s_Preset_print_options {
     ,"top_solid_infill_flow_ratio", "bottom_solid_infill_flow_ratio"
     //w33
     ,"ironing_pattern"
-    //w37
-    ,"seam_slope_type", "seam_slope_conditional", "scarf_angle_threshold", "seam_slope_start_height", "seam_slope_entire_loop", "seam_slope_min_length",
-    "seam_slope_steps", "seam_slope_inner_walls"
     //w38
     ,"overhang_reverse","overhang_reverse_threshold"};
 

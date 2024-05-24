@@ -326,8 +326,6 @@ public:
             append(dst, p.polyline.points);
     }
     double total_volume() const override { double volume =0.; for (const auto& path : paths) volume += path.total_volume(); return volume; }
-    //w37
-    bool check_seam_point_angle(double angle_threshold = 0.174, double min_arm_length = 0.025) const;
     //w38
     bool make_clockwise();
     bool make_counter_clockwise();

@@ -9,8 +9,6 @@
 #include <limits>
 #include <sstream>
 
-//w37
-#include "libslic3r/Utils.hpp"
 
 namespace Slic3r {
     
@@ -353,48 +351,5 @@ double ExtrusionLoop::min_mm3_per_mm() const
     return min_mm3_per_mm;
 }
 
-//w37
-bool ExtrusionLoop::check_seam_point_angle(double angle_threshold, double min_arm_length) const
-{
-    // go through all the points in the loop and check if the angle between two segments(AB and BC) is less than the threshold
-    size_t idx_prev = 0;
-    size_t idx_curr = 0;
-    size_t idx_next = 0;
-
-    float distance_to_prev = 0;
-    float distance_to_next = 0;
-
-    const auto    _polygon = polygon();
-    const Points &points   = _polygon.points;
-
-    std::vector<float> lengths{};
-    for (size_t point_idx = 0; point_idx < points.size() - 1; ++point_idx) {
-        lengths.push_back((unscale(points[point_idx]) - unscale(points[point_idx + 1])).norm());
-    }
-    lengths.push_back(std::max((unscale(points[0]) - unscale(points[points.size() - 1])).norm(), 0.1));
-
-    // push idx_prev far enough back as initialization
-    while (distance_to_prev < min_arm_length) {
-        idx_prev = Slic3r::prev_idx_modulo(idx_prev, points.size());
-        distance_to_prev += lengths[idx_prev];
-    }
-
-    // push idx_next forward as far as needed
-    while (distance_to_next < min_arm_length) {
-        distance_to_next += lengths[idx_next];
-        idx_next = Slic3r::next_idx_modulo(idx_next, points.size());
-    }
-
-    // Calculate angle between idx_prev, idx_curr, idx_next.
-    const Point &p0 = points[idx_prev];
-    const Point &p1 = points[idx_curr];
-    const Point &p2 = points[idx_next];
-    const auto   a  = angle(p0 - p1, p2 - p1);
-    if (a > 0 ? a < angle_threshold : a > -angle_threshold) {
-        return false;
-    }
-
-    return true;
-}
 
 }
