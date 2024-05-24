@@ -496,7 +496,7 @@ static std::vector<std::string> s_Preset_print_options {
     //w33
     ,"ironing_pattern"
     //w38
-    ,"overhang_reverse","overhang_reverse_threshold"};
+    ,"overhang_reverse","overhang_reverse_internal_only","overhang_reverse_threshold"};
 
 static std::vector<std::string> s_Preset_filament_options {
     "filament_colour", "filament_diameter", "filament_type", "filament_soluble", "filament_notes", "filament_max_volumetric_speed",

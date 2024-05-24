@@ -1228,14 +1228,24 @@ void PerimeterGenerator::add_infill_contour_for_arachne(ExPolygons infill_contou
 
 
 //w38
-static void reorient_perimeters(ExtrusionEntityCollection &entities, bool steep_overhang_contour, bool steep_overhang_hole)
+static void reorient_perimeters(ExtrusionEntityCollection &entities, bool steep_overhang_contour, bool steep_overhang_hole, bool reverse_internal_only)
 {
     if (steep_overhang_hole || steep_overhang_contour) {
         for (auto entity : entities) {
             if (entity->is_loop()) {
                 ExtrusionLoop *eloop = static_cast<ExtrusionLoop *>(entity);
                 bool need_reverse = ((eloop->loop_role() & elrHole) == elrHole) ? steep_overhang_hole : steep_overhang_contour;
-                if (need_reverse) {
+                bool           isExternal   = false;
+                if (reverse_internal_only) {
+                    for (auto path : eloop->paths) {
+                        if (path.role().is_external_perimeter()) {
+                            isExternal = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (need_reverse && !isExternal) {
                     eloop->make_clockwise();
                 }
             }
@@ -1453,7 +1463,7 @@ void PerimeterGenerator::process_arachne(
     if (ExtrusionEntityCollection extrusion_coll = traverse_extrusions(params, lower_slices_polygons_cache, ordered_extrusions,
                                                                        steep_overhang_contour, steep_overhang_hole);
         !extrusion_coll.empty()) {
-        reorient_perimeters(extrusion_coll, steep_overhang_contour, steep_overhang_hole);
+        reorient_perimeters(extrusion_coll, steep_overhang_contour, steep_overhang_hole, params.config.overhang_reverse_internal_only);
         out_loops.append(extrusion_coll);
     }
 
@@ -1797,7 +1807,7 @@ void PerimeterGenerator::process_with_one_wall_arachne(
     if (ExtrusionEntityCollection extrusion_coll = traverse_extrusions(params, lower_slices_polygons_cache, ordered_extrusions,
                                                                        steep_overhang_contour, steep_overhang_hole);
         !extrusion_coll.empty()) {
-        reorient_perimeters(extrusion_coll, steep_overhang_contour, steep_overhang_hole);
+        reorient_perimeters(extrusion_coll, steep_overhang_contour, steep_overhang_hole, params.config.overhang_reverse_internal_only);
         out_loops.append(extrusion_coll);
     }
 
@@ -2194,7 +2204,7 @@ void PerimeterGenerator::process_classic(
         bool                      steep_overhang_contour = false;
         bool                      steep_overhang_hole    = false;
         ExtrusionEntityCollection entities = traverse_loops_classic(params, lower_layer_polygons_cache, contours.front(), thin_walls,steep_overhang_contour, steep_overhang_hole);
-        reorient_perimeters(entities, steep_overhang_contour, steep_overhang_hole);
+        reorient_perimeters(entities, steep_overhang_contour, steep_overhang_hole, params.config.overhang_reverse_internal_only);
         // if brim will be printed, reverse the order of perimeters so that
         // we continue inwards after having finished the brim
         // TODO: add test for perimeter order

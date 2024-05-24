@@ -2317,6 +2317,18 @@ void PrintConfigDef::init_fff_params()
     def->mode       = comAdvanced;
     def->set_default_value(new ConfigOptionBool(false));
 
+    def             = this->add("overhang_reverse_internal_only", coBool);
+    def->label      = L("Reverse only internal perimeters");
+    def->category   = L("Layers and Perimeters");
+    def->tooltip    = L("Apply the reverse perimeters logic only on internal perimeters. \n\nThis setting greatly reduces part stresses as "
+                     "they are now distributed in alternating directions. This should reduce part warping while also maintaining external "
+                     "wall quality. This feature can be very useful for warp prone material, like ABS/ASA, and also for elastic filaments, "
+                     "like TPU and Silk PLA. It can also help reduce warping on floating regions over supports.\n\nFor this setting to be "
+                     "the most effective, it is recomended to set the Reverse Threshold to 0 so that all internal walls print in "
+                     "alternating directions on odd layers irrespective of their overhang degree.");
+    def->mode       = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
+
     //w38
     def              = this->add("overhang_reverse_threshold", coFloatOrPercent);
     def->label       = L("Reverse threshold");

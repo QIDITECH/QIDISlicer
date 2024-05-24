@@ -385,6 +385,7 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     bool has_overhang_reverse     = config->opt_bool("overhang_reverse");
     bool allow_overhang_reverse   = has_detect_overhang_wall && !has_spiral_vase;
     toggle_field("overhang_reverse", allow_overhang_reverse);
+    toggle_field("overhang_reverse_internal_only", allow_overhang_reverse && has_overhang_reverse);
     toggle_field("overhang_reverse_threshold", allow_overhang_reverse && has_overhang_reverse);
 }
 

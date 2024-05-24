@@ -1462,6 +1462,7 @@ void TabPrint::build()
 
         //w38
         optgroup->append_single_option_line("overhang_reverse");
+        optgroup->append_single_option_line("overhang_reverse_internal_only");
         optgroup->append_single_option_line("overhang_reverse_threshold");
 
         optgroup = page->new_optgroup(L("Advanced"));

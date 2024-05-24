@@ -876,7 +876,11 @@ bool PrintObject::invalidate_state_by_config_options(
             //w17
             || opt_key == "top_area_threshold"
             //w23
-            || opt_key == "only_one_wall_first_layer") {
+            || opt_key == "only_one_wall_first_layer"
+            //w38
+            || opt_key == "overhang_reverse"
+            || opt_key == "overhang_reverse_internal_only"
+            || opt_key == "overhang_reverse_threshold") {
             steps.emplace_back(posSlice);
         } else if (
                opt_key == "seam_position"

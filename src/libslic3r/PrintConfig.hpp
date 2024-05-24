@@ -678,6 +678,7 @@ PRINT_CONFIG_CLASS_DEFINE(
 
     //w38
     ((ConfigOptionBool,                 overhang_reverse))
+    ((ConfigOptionBool, overhang_reverse_internal_only))
     ((ConfigOptionFloatOrPercent,       overhang_reverse_threshold))
 )
 
