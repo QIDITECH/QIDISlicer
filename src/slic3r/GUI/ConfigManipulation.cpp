@@ -391,6 +391,13 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     toggle_field("seam_slope_steps", has_seam_slope);
     toggle_field("seam_slope_inner_walls", has_seam_slope);
     toggle_field("seam_slope_min_length", !config->opt_bool("seam_slope_entire_loop"));
+
+    //w38
+    bool has_detect_overhang_wall = config->opt_bool("overhangs");
+    bool has_overhang_reverse     = config->opt_bool("overhang_reverse");
+    bool allow_overhang_reverse   = has_detect_overhang_wall && !has_spiral_vase;
+    toggle_field("overhang_reverse", allow_overhang_reverse);
+    toggle_field("overhang_reverse_threshold", allow_overhang_reverse && has_overhang_reverse);
 }
 
 void ConfigManipulation::toggle_print_sla_options(DynamicPrintConfig* config)

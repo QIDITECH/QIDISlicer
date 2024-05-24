@@ -2950,18 +2950,29 @@ std::string GCodeGenerator::extrude_loop(const ExtrusionLoop &loop_src, const GC
 {
 
     // Extrude all loops CCW.
-    bool  is_hole = loop_src.is_clockwise();
+    //w38
+    //bool  is_hole = loop_src.is_clockwise();
+    ExtrusionLoop new_loop_src = loop_src;
+    bool is_hole = (new_loop_src.loop_role() & elrHole) == elrHole;
+
+    //w38
+    if (m_config.spiral_vase && !is_hole) {
+        // if spiral vase, we have to ensure that all contour are in the same orientation.
+        new_loop_src.make_counter_clockwise();
+    }
     Point seam_point = this->last_position.has_value() ? *this->last_position : Point::Zero();
     //w37
     if ((!m_config.spiral_vase && comment_is_perimeter(description)) || (this->config().seam_slope_type == SeamScarfType::None) &&comment_is_perimeter(description) ) {
         assert(m_layer != nullptr);
-        seam_point = m_seam_placer.place_seam(m_layer, loop_src, m_config.external_perimeters_first, seam_point);
+        //w38
+        seam_point = m_seam_placer.place_seam(m_layer, new_loop_src, m_config.external_perimeters_first, seam_point);
     }
     
         // Because the G-code export has 1um resolution, don't generate segments shorter than 1.5 microns,
         // thus empty path segments will not be produced by G-code export.
+    //w38
     GCode::SmoothPath smooth_path = smooth_path_cache.resolve_or_fit_split_with_seam(
-        loop_src, is_hole, m_scaled_resolution, seam_point, scaled<double>(0.0015));
+        new_loop_src, is_hole, m_scaled_resolution, seam_point, scaled<double>(0.0015));
 
     // Clip the path to avoid the extruder to get exactly on the first point of the loop;
     // if polyline was shorter than the clipping distance we'd get a null polyline, so
@@ -2975,7 +2986,8 @@ std::string GCodeGenerator::extrude_loop(const ExtrusionLoop &loop_src, const GC
     assert(validate_smooth_path(smooth_path, ! m_enable_loop_clipping));
 
     // Apply the small perimeter speed.
-    if (loop_src.paths.front().role().is_perimeter() && loop_src.length() <= SMALL_PERIMETER_LENGTH && speed == -1)
+    //w38
+    if (new_loop_src.paths.front().role().is_perimeter() && new_loop_src.length() <= SMALL_PERIMETER_LENGTH && speed == -1)
         speed = m_config.small_perimeter_speed.get_abs_value(m_config.perimeter_speed);
 
     // Extrude along the smooth path.
@@ -2985,7 +2997,8 @@ std::string GCodeGenerator::extrude_loop(const ExtrusionLoop &loop_src, const GC
     double      ext_length   = 0;
     double      inner_length = 0;
     double      start_height = 0;
-    bool enable_seam_slope        = loop_src.check_seam_point_angle(m_config.scarf_angle_threshold.value * M_PI / 180.0);
+    //w38
+    bool        enable_seam_slope = new_loop_src.check_seam_point_angle(m_config.scarf_angle_threshold.value * M_PI / 180.0);
     if (this->config().seam_slope_start_height.percent)
         start_height = this->config().seam_slope_start_height * this->config().layer_height / 100;
     else
@@ -3077,7 +3090,8 @@ std::string GCodeGenerator::extrude_loop(const ExtrusionLoop &loop_src, const GC
 
         // Wipe will hide the seam.
         m_wipe.set_path(std::move(smooth_path));
-    } else if (loop_src.paths.back().role().is_external_perimeter() && m_layer != nullptr && m_config.perimeters.value > 1) {
+    }//w38 
+    else if (new_loop_src.paths.back().role().is_external_perimeter() && m_layer != nullptr && m_config.perimeters.value > 1) {
 
         // Only wipe inside if the wipe along the perimeter is disabled.
         // Make a little move inwards before leaving loop.

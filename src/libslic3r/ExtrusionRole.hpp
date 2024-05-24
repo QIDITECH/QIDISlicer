@@ -95,9 +95,13 @@ struct ExtrusionRole : public ExtrusionRoleModifiers
 
 // Special flags describing loop
 enum ExtrusionLoopRole {
-    elrDefault,
-    elrContourInternalPerimeter,
-    elrSkirt,
+    //w38
+    elrDefault = 0x0,
+    // Loop for the hole, not for the contour
+    elrHole = 0x1,
+    // Loop that is the most closest to infill
+    elrInternal = 0x2,
+    elrSkirt    = 0x4,
 };
 
 // Be careful when editing this list as many parts of the code depend

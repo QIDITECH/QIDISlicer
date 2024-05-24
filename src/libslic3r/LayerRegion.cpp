@@ -114,6 +114,8 @@ void LayerRegion::make_perimeters(
     Polygons          lower_layer_polygons_cache;
     //w16
     Polygons          upper_layer_polygons_cache;
+    //w38
+    params.lower_slices = lower_slices;
 
     for (const Surface &surface : slices) {
         auto perimeters_begin      = uint32_t(m_perimeters.size());

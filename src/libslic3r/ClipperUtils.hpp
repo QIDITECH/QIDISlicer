@@ -326,9 +326,23 @@ namespace ClipperUtils {
     [[nodiscard]] ZPoints   clip_clipper_polygon_with_subject_bbox(const ZPoints &src, const BoundingBox &bbox);
     void                    clip_clipper_polygon_with_subject_bbox(const Polygon &src, const BoundingBox &bbox, Polygon &out);
     [[nodiscard]] Polygon   clip_clipper_polygon_with_subject_bbox(const Polygon &src, const BoundingBox &bbox);
+    
+    //w38
+    [[nodiscard]] Polygons  clip_clipper_polygons_with_subject_bbox(const ExPolygon &  src,
+                                                                    const BoundingBox &bbox,
+                                                                    const bool         get_entire_polygons);
     [[nodiscard]] Polygons  clip_clipper_polygons_with_subject_bbox(const Polygons &src, const BoundingBox &bbox);
     [[nodiscard]] Polygons  clip_clipper_polygons_with_subject_bbox(const ExPolygon &src, const BoundingBox &bbox);
-}
+    
+    //w38
+    [[nodiscard]] Polygons clip_clipper_polygons_with_subject_bbox(const ExPolygons & src,
+                                                                   const BoundingBox &bbox,
+                                                                   const bool         get_entire_polygons);
+    [[nodiscard]] Polygon   clip_clipper_polygon_with_subject_bbox(const Polygon &    src,
+                                                                   const BoundingBox &bbox,
+                                                                   const bool         get_entire_polygons);
+    void clip_clipper_polygon_with_subject_bbox(const Points &src, const BoundingBox &bbox, Points &out, const bool get_entire_polygons);
+    }
 
 // offset Polygons
 // Wherever applicable, please use the expand() / shrink() variants instead, they convey their purpose better.

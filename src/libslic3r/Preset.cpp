@@ -498,7 +498,8 @@ static std::vector<std::string> s_Preset_print_options {
     //w37
     ,"seam_slope_type", "seam_slope_conditional", "scarf_angle_threshold", "seam_slope_start_height", "seam_slope_entire_loop", "seam_slope_min_length",
     "seam_slope_steps", "seam_slope_inner_walls"
-};
+    //w38
+    ,"overhang_reverse","overhang_reverse_threshold"};
 
 static std::vector<std::string> s_Preset_filament_options {
     "filament_colour", "filament_diameter", "filament_type", "filament_soluble", "filament_notes", "filament_max_volumetric_speed",

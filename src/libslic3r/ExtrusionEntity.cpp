@@ -115,6 +115,22 @@ Polyline ExtrusionMultiPath::as_polyline() const
     }
     return out;
 }
+//w38
+bool ExtrusionLoop::make_clockwise()
+{
+    bool was_ccw = this->polygon().is_counter_clockwise();
+    if (was_ccw)
+        this->reverse_loop();
+    return was_ccw;
+}
+
+bool ExtrusionLoop::make_counter_clockwise()
+{
+    bool was_cw = this->polygon().is_clockwise();
+    if (was_cw)
+        this->reverse_loop();
+    return was_cw;
+}
 
 double ExtrusionLoop::area() const
 {

@@ -693,6 +693,10 @@ PRINT_CONFIG_CLASS_DEFINE(
     //w30
     ((ConfigOptionFloat, top_solid_infill_flow_ratio))
     ((ConfigOptionFloat, bottom_solid_infill_flow_ratio))
+
+    //w38
+    ((ConfigOptionBool,                 overhang_reverse))
+    ((ConfigOptionFloatOrPercent,       overhang_reverse_threshold))
 )
 
 PRINT_CONFIG_CLASS_DEFINE(

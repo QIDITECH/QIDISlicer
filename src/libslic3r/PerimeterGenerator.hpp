@@ -39,7 +39,9 @@ struct Parameters {
             scaled_resolution(scaled<double>(print_config.gcode_resolution.value)),
             mm3_per_mm(perimeter_flow.mm3_per_mm()),
             ext_mm3_per_mm(ext_perimeter_flow.mm3_per_mm()), 
-            mm3_per_mm_overhang(overhang_flow.mm3_per_mm())
+            mm3_per_mm_overhang(overhang_flow.mm3_per_mm()),
+            //w38
+            lower_slices(lower_slices)
         {
         }
 
@@ -53,6 +55,8 @@ struct Parameters {
     const PrintRegionConfig     &config;
     const PrintObjectConfig     &object_config;
     const PrintConfig           &print_config;
+    //w38
+    const ExPolygons *           lower_slices;
 
     // Derived parameters
     bool                         spiral_vase;
