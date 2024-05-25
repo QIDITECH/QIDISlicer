@@ -1708,6 +1708,7 @@ void TabPrint::build()
         optgroup->append_single_option_line("elefant_foot_compensation_layers");
         //w27
         optgroup->append_single_option_line("precise_z_height");
+        optgroup->append_single_option_line("precise_outer_wall", "Precise-wall");
 
         optgroup = page->new_optgroup(L("Arachne perimeter generator"));
         optgroup->append_single_option_line("wall_transition_angle");
@@ -3032,6 +3033,8 @@ void TabPrinter::build_sla()
     optgroup->append_single_option_line("elefant_foot_min_width");
     //w27
     optgroup->append_single_option_line("precise_z_height");
+    //w39
+    optgroup->append_single_option_line("precise_outer_wall", "Precise-wall");
 
     optgroup->append_single_option_line("gamma_correction");
     

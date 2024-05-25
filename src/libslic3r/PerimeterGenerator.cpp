@@ -1298,15 +1298,27 @@ void PerimeterGenerator::process_arachne(
     // extra perimeters for each one
     // detect how many perimeters must be generated for this island
     int        loop_number = params.config.perimeters + surface.extra_perimeters - 1; // 0-indexed loops
-    ExPolygons last        = offset_ex(surface.expolygon.simplify_p(params.scaled_resolution), - float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
+    //w39
+    //ExPolygons last        = offset_ex(surface.expolygon.simplify_p(params.scaled_resolution), - float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
+    double     surface_simplify_resolution = (params.print_config.arc_fitting != ArcFittingType::Disabled &&
+                                          params.config.fuzzy_skin == FuzzySkinType::None) ?
+                                                 0.2 * scale_(params.print_config.resolution) :
+                                                 params.print_config.resolution;
+    auto       apply_precise_outer_wall = params.config.precise_outer_wall && !params.config.external_perimeters_first;
+    ExPolygons last = apply_precise_outer_wall? offset_ex(surface.expolygon.simplify_p(surface_simplify_resolution),
+                                 -float(ext_perimeter_width - ext_perimeter_spacing) ) :offset_ex(surface.expolygon.simplify_p(params.scaled_resolution),
+                                -float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
+    coord_t    wall_0_inset             = 0;
+    if (apply_precise_outer_wall)
+        wall_0_inset = -coord_t(ext_perimeter_width / 2 - ext_perimeter_spacing / 2);
     Polygons   last_p      = to_polygons(last);
 
     //w16
     //w23
     if ((upper_slices == nullptr && params.object_config.top_one_wall_type == TopOneWallType::Onlytopmost)||(params.object_config.only_one_wall_first_layer && layer_id == 0))
         loop_number = 0;
-
-    Arachne::WallToolPaths wallToolPaths(last_p, ext_perimeter_spacing, perimeter_spacing, coord_t(loop_number + 1), 0, params.layer_height, params.object_config, params.print_config);
+    //w39
+    Arachne::WallToolPaths wallToolPaths(last_p, ext_perimeter_spacing, perimeter_spacing, coord_t(loop_number + 1), wall_0_inset, params.layer_height, params.object_config, params.print_config);
     std::vector<Arachne::VariableWidthLines> perimeters = wallToolPaths.getToolPaths();
     loop_number = int(perimeters.size()) - 1;
 
@@ -1583,7 +1595,20 @@ void PerimeterGenerator::process_with_one_wall_arachne(
     //w23
     if (params.object_config.only_one_wall_first_layer && layer_id == 0)
         loop_number = 0;
-    ExPolygons last        = offset_ex(surface.expolygon.simplify_p(params.scaled_resolution), - float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
+    //w39
+    //ExPolygons last        = offset_ex(surface.expolygon.simplify_p(params.scaled_resolution), - float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
+    double     surface_simplify_resolution = (params.print_config.arc_fitting != ArcFittingType::Disabled &&
+                                          params.config.fuzzy_skin == FuzzySkinType::None) ?
+                                                 0.2 * scale_(params.print_config.resolution) :
+                                                 params.print_config.resolution;
+    auto       apply_precise_outer_wall    = params.config.precise_outer_wall && !params.config.external_perimeters_first;
+    ExPolygons last                        = apply_precise_outer_wall ? offset_ex(surface.expolygon.simplify_p(surface_simplify_resolution),
+                                                           -float(ext_perimeter_width - ext_perimeter_spacing)) :
+                                                                        offset_ex(surface.expolygon.simplify_p(params.scaled_resolution),
+                                                           -float(ext_perimeter_width / 2. - ext_perimeter_spacing / 2.));
+    coord_t    wall_0_inset                = 0;
+    if (apply_precise_outer_wall)
+        wall_0_inset = -coord_t(ext_perimeter_width / 2 - ext_perimeter_spacing / 2);
     Polygons   last_p      = to_polygons(last);
 
     int remain_loops = -1;
@@ -1593,8 +1618,8 @@ void PerimeterGenerator::process_with_one_wall_arachne(
 
         loop_number = 0;
     }
-
-    Arachne::WallToolPaths wallToolPaths(last_p, ext_perimeter_spacing, perimeter_spacing, coord_t(loop_number + 1), 0, params.layer_height, params.object_config, params.print_config);
+    //w39
+    Arachne::WallToolPaths wallToolPaths(last_p, ext_perimeter_spacing, perimeter_spacing, coord_t(loop_number + 1), wall_0_inset, params.layer_height, params.object_config, params.print_config);
     std::vector<Arachne::VariableWidthLines> perimeters = wallToolPaths.getToolPaths();
     loop_number = int(perimeters.size()) - 1;
 
@@ -1952,7 +1977,13 @@ void PerimeterGenerator::process_classic(
     // external perimeters
     coord_t ext_perimeter_width     = params.ext_perimeter_flow.scaled_width();
     coord_t ext_perimeter_spacing   = params.ext_perimeter_flow.scaled_spacing();
-    coord_t ext_perimeter_spacing2  = scaled<coord_t>(0.5f * (params.ext_perimeter_flow.spacing() + params.perimeter_flow.spacing()));
+    coord_t ext_perimeter_spacing2; //= scaled<coord_t>(0.5f * (params.ext_perimeter_flow.spacing() + params.perimeter_flow.spacing()));
+    //w39
+    if (params.config.precise_outer_wall && !params.config.external_perimeters_first)
+        ext_perimeter_spacing2 = scaled<coord_t>(0.5f * (params.ext_perimeter_flow.width() + params.perimeter_flow.width()));
+    else
+        ext_perimeter_spacing2 = scaled<coord_t>(0.5f * (params.ext_perimeter_flow.spacing() + params.perimeter_flow.spacing()));
+
     // solid infill
     coord_t solid_infill_spacing    = params.solid_infill_flow.scaled_spacing();
     

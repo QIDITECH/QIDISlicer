@@ -852,7 +852,9 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "fuzzy_skin_point_dist"
             || opt_key == "overhangs"
             || opt_key == "thin_walls"
-            || opt_key == "thick_bridges") {
+            || opt_key == "thick_bridges"
+            //w39
+            || opt_key == "precise_outer_wall") {
             steps.emplace_back(posPerimeters);
             steps.emplace_back(posSupportMaterial);
         } else if (opt_key == "bridge_flow_ratio") {

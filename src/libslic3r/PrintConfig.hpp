@@ -680,7 +680,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                 overhang_reverse))
     ((ConfigOptionBool, overhang_reverse_internal_only))
     ((ConfigOptionFloatOrPercent,       overhang_reverse_threshold))
-)
+    //w39
+    ((ConfigOptionBool, precise_outer_wall)))
 
 PRINT_CONFIG_CLASS_DEFINE(
     MachineEnvelopeConfig,

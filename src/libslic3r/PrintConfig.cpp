@@ -332,6 +332,13 @@ void PrintConfigDef::init_common_params()
     def->mode    = comAdvanced;
     def->set_default_value(new ConfigOptionBool(0));
 
+    //w39
+    def           = this->add("precise_outer_wall", coBool);
+    def->label    = L("Precise wall");
+    def->tooltip  = L("Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting "
+                     "will only take effect if the wall sequence is configured to Inner-Outer");
+    def->set_default_value(new ConfigOptionBool{false});
+
     def = this->add("thumbnails", coString);
     def->label = L("G-code thumbnails");
     def->tooltip = L("Picture sizes to be stored into a .gcode / .bgcode and .sl1 / .sl1s files, in the following format: \"XxY/EXT, XxY/EXT, ...\"\n"
