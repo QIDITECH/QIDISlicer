@@ -691,8 +691,8 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
                     // or the end of the extrusions to make one continuous line. Also, we prefer a non-overhang
                     // starting point.
                     //w38
-                    ExtrusionLoop extrusion_loop(std::move(paths), pg_extrusion.is_contour ? elrDefault : elrHole);
-                    extrusion_loop.make_counter_clockwise();
+                    //ExtrusionLoop extrusion_loop(std::move(paths), pg_extrusion.is_contour ? elrDefault : elrHole);
+                    //extrusion_loop.make_counter_clockwise();
                     struct PointInfo
                     {
                         size_t occurrence  = 0;
