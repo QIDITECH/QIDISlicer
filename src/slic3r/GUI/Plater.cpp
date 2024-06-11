@@ -5815,6 +5815,25 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
                              speed_first_layer, (pa_wall_length - 6 * line_spacing) / 1.4142 * e_per_mm);
         }
     }
+
+    const int max_fan_speed = round(filament_config->opt_int("max_fan_speed", 0) * 2.55);
+    gcode << "\nM106 S" << max_fan_speed;
+
+    const bool seal = filament_config->opt_bool("seal_print");
+    if (seal)
+    {
+        const int auxiliary_fan = round(filament_config->opt_int("enable_auxiliary_fan", 0) * 2.55);
+        gcode << "\nM106 P2 S" << auxiliary_fan;
+    }
+    else
+    {
+        const int auxiliary_fan_unseal = round(filament_config->opt_int("enable_auxiliary_fan_unseal", 0) * 2.55);
+        gcode << "\nM106 P2 S" << auxiliary_fan_unseal;
+    }
+
+    const int volume_fan_speed = round(filament_config->opt_int("enable_volume_fan", 0) * 2.55);
+    gcode << "\nM106 P3 S" << volume_fan_speed;
+
     for (int m = 2; m <= 4; m++) {
         gcode << move_to(pa_layer_height * m);
         for (int n = 1; n <= count + 1; n++) {
@@ -5829,6 +5848,7 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
         }
     }
     gcode << "\n";
+    gcode << "\nM107\nM106 P2 S0\nM106 P3 S0\n";
 
     auto pa_end_gcode = printer_config->opt_string("end_gcode");
     gcode << pa_end_gcode;
