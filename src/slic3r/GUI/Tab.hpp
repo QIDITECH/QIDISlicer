@@ -410,6 +410,8 @@ protected:
 	void			build_preset_description_line(ConfigOptionsGroup* optgroup);
 	void			update_preset_description_line();
 	void			update_frequently_changed_parameters();
+//Y26
+	void			update_frequently_filament_changed_parameters();
 	void			fill_icon_descriptions();
 	void			set_tooltips_text();
 

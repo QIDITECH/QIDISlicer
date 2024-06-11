@@ -529,6 +529,13 @@ void PrintConfigDef::init_fff_params()
     def->max = 65;
     def->set_default_value(new ConfigOptionInts { 0 });
 
+//Y26
+    def = this->add("seal_print", coBool);
+    def->label = L("Seal");
+    def->tooltip = L("Sealing box printing will be more stable and reliable, but the heat dissipation of the model will be poor. "
+                   "Determine whether to unpack and print according to the actual situation.");
+    def->set_default_value(new ConfigOptionBool(true));
+
     def = this->add("before_layer_gcode", coString);
     def->label = L("Before layer change G-code");
     def->tooltip = L("This custom code is inserted at every layer change, right before the Z move. "
@@ -2199,15 +2206,24 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBool(false));
 
-    //B15
+    //B15//Y26
     def = this->add("enable_auxiliary_fan", coInts);
-    def->label = L("Rapid Cooling Fan Speed");
-    def->tooltip = L("This setting represents the  PWM your rapid cooling fan needs to work.");
+    def->label = L("Seal");
+    def->tooltip = L("This setting represents the PWM your rapid cooling fan needs to work when the printing is sealing.");
     def->sidetext = L("%");
     def->min = 0;
     def->max = 100;
     def->mode = comExpert;
-    def->set_default_value(new ConfigOptionInts { 35 });
+    def->set_default_value(new ConfigOptionInts { 100 });
+
+    def = this->add("enable_auxiliary_fan_unseal", coInts);
+    def->label = L("Unseal");
+    def->tooltip = L("This setting represents the PWM your rapid cooling fan needs to work when the printing is unsealing.");
+    def->sidetext = L("%");
+    def->min = 0;
+    def->max = 100;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionInts { 0 });
 
     //B25
     def = this->add("enable_volume_fan", coInts);

@@ -1121,6 +1121,14 @@ void Tab::on_value_change(const std::string& opt_key, const boost::any& value)
         og_freq_chng_params->set_value("brim", val);
     }
 
+//Y26
+    if (opt_key == "seal_print")
+    {
+        ConfigOptionsGroup* og_filament_chng_params = wxGetApp().sidebar().og_filament_chng_params();
+        DynamicPrintConfig* filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
+        og_filament_chng_params->set_value("seal_print", filament_config->opt_bool("seal_print"));
+    }
+
     if (opt_key == "wipe_tower" || opt_key == "single_extruder_multi_material" || opt_key == "extruders_count" )
         update_wiping_button_visibility();
 
@@ -1407,6 +1415,18 @@ void Tab::update_frequently_changed_parameters()
     {
         og_freq_chng_params->set_value("brim", bool(m_config->opt_float("brim_width") > 0.0));
         update_wiping_button_visibility();
+    }
+}
+
+//Y26
+void Tab::update_frequently_filament_changed_parameters()
+{
+    ConfigOptionsGroup* og_filament_chng_params = wxGetApp().sidebar().og_filament_chng_params();
+    const bool is_fff = supports_printer_technology(ptFFF);
+
+    if (is_fff)
+    {
+        og_filament_chng_params->set_value("seal_print", m_config->opt_bool("seal_print"));
     }
 }
 
@@ -2230,6 +2250,8 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("first_layer_bed_temperature"));
         line.append_option(optgroup->get_option("bed_temperature"));
         optgroup->append_line(line);
+        //Y26
+        optgroup->append_single_option_line("seal_print");
         //B24
         optgroup->append_single_option_line("volume_temperature");
 
@@ -2254,9 +2276,11 @@ void TabFilament::build()
         optgroup->append_line(line);
 
         optgroup->append_single_option_line("bridge_fan_speed", category_path + "fan-settings");
-        //B15
-        // optgroup->append_single_option_line("auxiliary_fan_speed", category_path + "fan-settings");
-        optgroup->append_single_option_line("enable_auxiliary_fan", category_path + "fan-settings");
+        //B15//Y26
+        line = { L("Rapido Cooling Fan Speed"), "" };
+        line.append_option(optgroup->get_option("enable_auxiliary_fan"));
+        line.append_option(optgroup->get_option("enable_auxiliary_fan_unseal"));
+        optgroup->append_line(line);
         //B25
         optgroup->append_single_option_line("enable_volume_fan", category_path + "fan-settings");
         optgroup->append_single_option_line("disable_fan_first_layers", category_path + "fan-settings");
@@ -2441,14 +2465,23 @@ void TabFilament::toggle_options()
         bool dynamic_fan_speeds = m_config->opt_bool("enable_dynamic_fan_speeds", 0);
         for (int i = 0; i < 4; i++) {
         toggle_option("overhang_fan_speed_"+std::to_string(i),dynamic_fan_speeds);
-//Y16
+//Y16//Y26
         bool auxiliary_fan = printer_config->opt_bool("auxiliary_fan");
-        toggle_option("enable_auxiliary_fan", auxiliary_fan);
+        bool seal_print = m_config->opt_bool("seal_print");
+        toggle_option("enable_auxiliary_fan", auxiliary_fan && seal_print);
+        toggle_option("enable_auxiliary_fan_unseal", auxiliary_fan && !seal_print);
 
         bool chamber_fan = printer_config->opt_bool("chamber_fan");
         toggle_option("enable_volume_fan", chamber_fan);
 
-        int auxiliary_fan_speed = m_config->opt_int("enable_auxiliary_fan", 0);
+        int auxiliary_fan_speed;
+        if (seal_print && auxiliary_fan)
+            auxiliary_fan_speed = m_config->opt_int("enable_auxiliary_fan", 0);
+        else if (!seal_print && auxiliary_fan)
+            auxiliary_fan_speed = m_config->opt_int("enable_auxiliary_fan_unseal", 0);
+        else
+            auxiliary_fan_speed = 0;
+
         if (auxiliary_fan_speed == 0)
             toggle_option("disable_rapid_cooling_fan_first_layers", false);
         else
@@ -2478,9 +2511,14 @@ void TabFilament::toggle_options()
         bool pa = m_config->opt_bool("enable_advance_pressure", 0);
         toggle_option("advance_pressure", pa);
         toggle_option("smooth_time", pa);
-//Y16
-        bool chamber_temp = printer_config->opt_bool("chamber_temperature");
+//Y16//Y26
+        bool chamber_temp = printer_config->opt_bool("chamber_temperature") && m_config->opt_bool("seal_print");
         toggle_option("volume_temperature", chamber_temp);
+        if (!chamber_temp) {
+            DynamicPrintConfig new_conf = *m_config;
+            new_conf.set_key_value("volume_temperature", new ConfigOptionInts{0});
+            load_config(new_conf);
+        }
     }
 }
 
@@ -3802,6 +3840,9 @@ void Tab::load_current_preset()
             on_presets_changed();
             if (m_type == Preset::TYPE_SLA_PRINT || m_type == Preset::TYPE_PRINT)
                 update_frequently_changed_parameters();
+//Y26
+            else if (m_type == Preset::TYPE_FILAMENT)
+                update_frequently_filament_changed_parameters();
         }
 
         m_opt_status_value = (m_presets->get_selected_preset_parent() ? osSystemValue : 0) | osInitValue;

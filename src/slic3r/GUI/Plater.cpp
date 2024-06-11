@@ -345,6 +345,8 @@ class FreqChangedParams : public OG_Settings
     wxButton*       m_wiping_dialog_button{ nullptr };
     wxSizer*        m_sizer {nullptr};
 
+//Y26
+    std::shared_ptr<ConfigOptionsGroup> m_og_filament;
     std::shared_ptr<ConfigOptionsGroup> m_og_sla;
     std::vector<ScalableButton*>        m_empty_buttons;
 public:
@@ -354,6 +356,8 @@ public:
     wxButton*       get_wiping_dialog_button() { return m_wiping_dialog_button; }
     wxSizer*        get_sizer() override;
     ConfigOptionsGroup* get_og(const bool is_fff);
+//Y26
+    ConfigOptionsGroup* get_og_filament();
     void            Show(const bool is_fff) override;
 
     void            msw_rescale();
@@ -363,12 +367,16 @@ public:
 void FreqChangedParams::msw_rescale()
 {
     m_og->msw_rescale();
+//Y26
+    m_og_filament->msw_rescale();
     m_og_sla->msw_rescale();
 }
 
 void FreqChangedParams::sys_color_changed()
 {
     m_og->sys_color_changed();
+//Y26
+    m_og_filament->sys_color_changed();
     m_og_sla->sys_color_changed();
 
     for (auto btn: m_empty_buttons)
@@ -624,8 +632,38 @@ FreqChangedParams::FreqChangedParams(wxWindow* parent) :
     choice = dynamic_cast<Choice*>(m_og_sla->get_field("pad"));
     choice->suppress_scroll();
 
+    //Y26
+    m_og_filament = std::make_shared<ConfigOptionsGroup>(parent, "");
+    DynamicPrintConfig* filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
+
+    m_og_filament->set_config(filament_config);
+    m_og_filament->hide_labels();
+
+    m_og_filament->m_on_change = [filament_config, this](t_config_option_key opt_key, boost::any value) {
+        Tab* tab_filament = wxGetApp().get_tab(Preset::TYPE_FILAMENT);
+        if (!tab_filament) return;
+
+        if (opt_key == "seal_print") {
+            tab_filament->update_dirty();
+            tab_filament->reload_config();
+            tab_filament->update();
+        }
+    };
+
+    line = Line { "", "" };
+
+    option = m_og_filament->get_option("seal_print");
+    option.opt.label = L("Seal");
+    line.append_option(option);
+    line.append_widget(empty_widget);
+
+    m_og_filament->append_line(line);
+    m_og_filament->activate();
+
     m_sizer = new wxBoxSizer(wxVERTICAL);
     m_sizer->Add(m_og->sizer, 0, wxEXPAND);
+//Y26
+    m_sizer->Add(m_og_filament->sizer, 0, wxEXPAND);
     m_sizer->Add(m_og_sla->sizer, 0, wxEXPAND);
 }
 
@@ -639,6 +677,8 @@ void FreqChangedParams::Show(const bool is_fff)
 {
     const bool is_wdb_shown = m_wiping_dialog_button->IsShown();
     m_og->Show(is_fff);
+//Y26
+    m_og_filament->Show(is_fff);
     m_og_sla->Show(!is_fff);
 
     // correct showing of the FreqChangedParams sizer when m_wiping_dialog_button is hidden
@@ -649,6 +689,12 @@ void FreqChangedParams::Show(const bool is_fff)
 ConfigOptionsGroup* FreqChangedParams::get_og(const bool is_fff)
 {
     return is_fff ? m_og.get() : m_og_sla.get();
+}
+
+//Y26
+ConfigOptionsGroup* FreqChangedParams::get_og_filament()
+{
+    return m_og_filament.get();
 }
 
 // Sidebar / private
@@ -1326,6 +1372,12 @@ wxPanel* Sidebar::presets_panel()
 ConfigOptionsGroup* Sidebar::og_freq_chng_params(const bool is_fff)
 {
     return p->frequently_changed_parameters->get_og(is_fff);
+}
+
+//Y26
+ConfigOptionsGroup* Sidebar::og_filament_chng_params()
+{
+    return p->frequently_changed_parameters->get_og_filament();
 }
 
 wxButton* Sidebar::get_wiping_dialog_button()
@@ -5847,7 +5899,6 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
             }
         }
     }
-    gcode << "\n";
     gcode << "\nM107\nM106 P2 S0\nM106 P3 S0\n";
 
     auto pa_end_gcode = printer_config->opt_string("end_gcode");

@@ -837,6 +837,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionBool,               chamber_temperature))
     //B24
     ((ConfigOptionInts,               volume_temperature))
+    //Y26
+    ((ConfigOptionBool,               seal_print))
     ((ConfigOptionFloat,              bridge_acceleration))
     ((ConfigOptionInts,               bridge_fan_speed))
     ((ConfigOptionBools,              enable_dynamic_fan_speeds))
@@ -854,6 +856,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               enable_volume_fan))
     //B15
     ((ConfigOptionInts,               enable_auxiliary_fan))
+    //Y26
+    ((ConfigOptionInts,               enable_auxiliary_fan_unseal))
     ((ConfigOptionFloat,              default_acceleration))
     ((ConfigOptionInts,               disable_fan_first_layers))
     //B39

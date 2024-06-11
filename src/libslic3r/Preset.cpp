@@ -518,6 +518,8 @@ static std::vector<std::string> s_Preset_filament_options {
     "filament_vendor", "compatible_prints", "compatible_prints_condition", "compatible_printers", "compatible_printers_condition", "inherits",
     //B15
     "enable_auxiliary_fan",
+    //Y26
+    "enable_auxiliary_fan_unseal",
     //B24
     "volume_temperature",
     //B25
@@ -532,6 +534,8 @@ static std::vector<std::string> s_Preset_filament_options {
     "disable_rapid_cooling_fan_first_layers",
     //Y23
     "filament_shrink",
+    //Y26
+    "seal_print",
     //w15
     "filament_wipe_distance"
 };

@@ -102,6 +102,8 @@ public:
     wxPanel*                presets_panel();
 
     ConfigOptionsGroup*     og_freq_chng_params(const bool is_fff);
+//Y26
+    ConfigOptionsGroup*     og_filament_chng_params();
     wxButton*               get_wiping_dialog_button();
     void                    update_objects_list_extruder_column(size_t extruders_count);
     void                    show_info_sizer();

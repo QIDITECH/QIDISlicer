@@ -799,8 +799,12 @@ std::string CoolingBuffer::apply_layer_cooldown(
     auto change_extruder_set_fan = [this, layer_id, layer_time, &new_gcode, &bridge_fan_control, &bridge_fan_speed]() {
 #define EXTRUDER_CONFIG(OPT) m_config.OPT.get_at(m_current_extruder)
         int min_fan_speed = EXTRUDER_CONFIG(min_fan_speed);
-        //B15
-        int enable_auxiliary_fan = EXTRUDER_CONFIG(enable_auxiliary_fan);
+        //B15//Y26
+        int enable_auxiliary_fan;
+        if (m_config.opt_bool("seal_print"))
+            enable_auxiliary_fan = EXTRUDER_CONFIG(enable_auxiliary_fan);
+        else
+            enable_auxiliary_fan = EXTRUDER_CONFIG(enable_auxiliary_fan_unseal);
         //B25
         int enable_volume_fan = EXTRUDER_CONFIG(enable_volume_fan);
         int fan_speed_new = EXTRUDER_CONFIG(fan_always_on) ? min_fan_speed : 0;
