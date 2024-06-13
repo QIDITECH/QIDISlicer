@@ -5985,6 +5985,7 @@ void Plater::calib_max_volumetric_speed(const double StartVS, double EndVS, doub
     }
 
     DynamicPrintConfig new_config;
+    new_config.set_key_value("resonance_avoidance", new ConfigOptionBool(false));
     new_config.set_key_value("max_layer_height", new ConfigOptionFloats{vs_layer_height});
     new_config.set_key_value("layer_height", new ConfigOptionFloat(vs_layer_height));
     new_config.set_key_value("first_layer_height", new ConfigOptionFloatOrPercent(vs_layer_height, false));
