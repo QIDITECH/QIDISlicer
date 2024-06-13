@@ -2736,6 +2736,12 @@ void TabPrinter::build_fff()
         Option option(def, "extruders_count");
         optgroup->append_single_option_line(option);
         optgroup->append_single_option_line("single_extruder_multi_material");
+//Y27
+        optgroup->append_single_option_line("resonance_avoidance");
+        Line line = { L("Resonance Avoidance Speed"), "" };
+        line.append_option(optgroup->get_option("min_resonance_avoidance_speed"));
+        line.append_option(optgroup->get_option("max_resonance_avoidance_speed"));
+        optgroup->append_line(line);
 
         optgroup->m_on_change = [this, optgroup_wk = ConfigOptionsGroupWkp(optgroup)](t_config_option_key opt_key, boost::any value) {
             auto optgroup_sh = optgroup_wk.lock();
@@ -3607,6 +3613,10 @@ void TabPrinter::toggle_options()
         toggle_option("toolchange_gcode", have_multiple_extruders);
     if (m_active_page->title() == "General") {
         toggle_option("single_extruder_multi_material", have_multiple_extruders);
+//Y27
+        bool resonance_avoidance = m_config->opt_bool("resonance_avoidance");
+        toggle_option("min_resonance_avoidance_speed", resonance_avoidance);
+        toggle_option("max_resonance_avoidance_speed", resonance_avoidance);
 
         bool is_marlin_flavor = flavor == gcfMarlinLegacy || flavor == gcfMarlinFirmware;
         // Disable silent mode for non-marlin firmwares.

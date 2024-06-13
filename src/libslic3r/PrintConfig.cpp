@@ -2996,6 +2996,30 @@ void PrintConfigDef::init_fff_params()
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionBool(false));
 
+//Y27
+    def = this->add("resonance_avoidance", coBool);
+    def->label = L("Resonance avoidance");
+    def->tooltip = L("By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided. "
+                     "Turn this option off when testing ringing.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(true));
+
+    def = this->add("min_resonance_avoidance_speed", coFloat);
+    def->label = L("Min");
+    def->tooltip = L("Minimum speed of resonance avoidance.");
+    def->sidetext = L("mm/s");
+    def->min = 0;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionFloat(70));
+
+    def = this->add("max_resonance_avoidance_speed", coFloat);
+    def->label = L("Max");
+    def->tooltip = L("Maximum speed of resonance avoidance.");
+    def->sidetext = L("mm/s");
+    def->min = 0;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionFloat(115));
+
     def = this->add("single_extruder_multi_material_priming", coBool);
     def->label = L("Prime all printing extruders");
     def->tooltip = L("If enabled, all printing extruders will be primed at the front edge of the print bed at the start of the print.");

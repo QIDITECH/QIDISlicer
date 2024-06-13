@@ -535,7 +535,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionInt,                 raft_layers))
     ((ConfigOptionEnum<SeamPosition>,  seam_position))
     //Y21
-    ((ConfigOptionPercent,            seam_gap))
+    ((ConfigOptionPercent,             seam_gap))
     ((ConfigOptionBool,                staggered_inner_seams))
 //  ((ConfigOptionFloat,               seam_preferred_direction))
 //  ((ConfigOptionFloat,               seam_preferred_direction_jitter))
@@ -785,6 +785,10 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                single_extruder_multi_material))
     //Y25
     ((ConfigOptionBool,                wipe_device))
+    //Y27
+    ((ConfigOptionBool,                resonance_avoidance))
+    ((ConfigOptionFloat,               min_resonance_avoidance_speed))
+    ((ConfigOptionFloat,               max_resonance_avoidance_speed))
     ((ConfigOptionBool,                single_extruder_multi_material_priming))
     ((ConfigOptionBool,                wipe_tower_no_sparse_layers))
     ((ConfigOptionString,              toolchange_gcode))

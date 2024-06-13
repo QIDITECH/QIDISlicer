@@ -565,6 +565,8 @@ static std::vector<std::string> s_Preset_printer_options {
     "bed_exclude_area",
 //Y25
     "wipe_device",
+//Y27
+    "resonance_avoidance", "min_resonance_avoidance_speed", "max_resonance_avoidance_speed",
 //Y16
     "chamber_temperature", "auxiliary_fan", "chamber_fan"
 };
