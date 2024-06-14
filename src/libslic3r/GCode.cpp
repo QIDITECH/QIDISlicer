@@ -3429,7 +3429,7 @@ std::string GCodeGenerator::_extrude(
     speed = cap_speed(speed, path_attr.mm3_per_mm, m_config, m_writer.extruder()->id());
 //Y27
     if (path_attr.role == ExtrusionRole::ExternalPerimeter && m_config.opt_bool("resonance_avoidance")) {
-        if (speed < m_config.opt_float("max_resonance_avoidance_speed")) {
+        if (speed <= m_config.opt_float("max_resonance_avoidance_speed")) {
             speed = std::min(speed, m_config.opt_float("min_resonance_avoidance_speed"));
         }
     }
