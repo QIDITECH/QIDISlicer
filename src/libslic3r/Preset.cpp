@@ -536,6 +536,8 @@ static std::vector<std::string> s_Preset_filament_options {
     "filament_shrink",
     //Y26
     "seal_print",
+    //Y28
+    "dont_slow_down_outer_wall",
     //w15
     "filament_wipe_distance"
 };

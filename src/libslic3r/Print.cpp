@@ -83,6 +83,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "disable_fan_first_layers",
         //B39
         "disable_rapid_cooling_fan_first_layers",
+        //Y28
+        "dont_slow_down_outer_wall",
         "duplicate_distance",
         "end_gcode",
         "end_filament_gcode",

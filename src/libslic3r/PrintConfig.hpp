@@ -900,6 +900,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               min_fan_speed))
     ((ConfigOptionFloats,             min_layer_height))
     ((ConfigOptionFloat,              max_print_height))
+    //Y28
+    ((ConfigOptionBools,              dont_slow_down_outer_wall))
     ((ConfigOptionFloats,             min_print_speed))
     ((ConfigOptionFloat,              min_skirt_length))
     ((ConfigOptionString,             notes))

@@ -2244,6 +2244,17 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloats { 0.07 });
 
+//Y28
+    def = this->add("dont_slow_down_outer_wall", coBools);
+    def->label = L("Don't slow down outer walls");
+    def->tooltip = L("If enabled, this setting will ensure external perimeters are not slowed down to meet the minimum layer time. "
+                     "This is particularly helpful in the below scenarios:\n\n "
+                     "1. To avoid changes in shine when printing glossy filaments \n"
+                     "2. To avoid changes in external wall speed which may create slight wall artefacts that appear like z banding \n"
+                     "3. To avoid printing at speeds which cause VFAs (fine artefacts) on the external walls\n\n");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBools { true });
+
     def = this->add("min_print_speed", coFloats);
     def->label = L("Min print speed");
     def->tooltip = L("Slic3r will not scale speed down below this speed.");
