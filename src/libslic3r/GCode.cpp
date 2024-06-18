@@ -3420,15 +3420,19 @@ std::string GCodeGenerator::_extrude(
         dynamic_speed_and_fan_speed = ExtrusionProcessor::calculate_overhang_speed(path_attr, this->m_config, m_writer.extruder()->id(),
                                                                                    external_perim_reference_speed, speed);
     }
-
+//Y27
+    bool dont_speed_down_by_overhang = true;
     if (dynamic_speed_and_fan_speed.first > -1) {
-        speed = dynamic_speed_and_fan_speed.first;
+        if (speed != dynamic_speed_and_fan_speed.first) {
+            dont_speed_down_by_overhang = false;
+            speed = dynamic_speed_and_fan_speed.first;
+        }
     }
 
     // cap speed with max_volumetric_speed anyway (even if user is not using autospeed)
     speed = cap_speed(speed, path_attr.mm3_per_mm, m_config, m_writer.extruder()->id());
 //Y27
-    if (path_attr.role == ExtrusionRole::ExternalPerimeter && m_config.opt_bool("resonance_avoidance")) {
+    if (path_attr.role == ExtrusionRole::ExternalPerimeter && m_config.opt_bool("resonance_avoidance" ) && dont_speed_down_by_overhang) {
         if (speed <= m_config.opt_float("max_resonance_avoidance_speed")) {
             speed = std::min(speed, m_config.opt_float("min_resonance_avoidance_speed"));
         }
