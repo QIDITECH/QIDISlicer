@@ -466,39 +466,42 @@ static std::vector<std::string> s_Preset_print_options {
     "wipe_tower_width", "wipe_tower_cone_angle", "wipe_tower_rotation_angle", "wipe_tower_brim_width", "wipe_tower_bridging", "single_extruder_multi_material_priming", "mmu_segmented_region_max_width",
     "mmu_segmented_region_interlocking_depth", "wipe_tower_extruder", "wipe_tower_no_sparse_layers", "wipe_tower_extra_flow", "wipe_tower_extra_spacing", "compatible_printers", "compatible_printers_condition", "inherits",
     "perimeter_generator", "wall_transition_length", "wall_transition_filter_deviation", "wall_transition_angle",
-    "wall_distribution_count", "min_feature_size", "min_bead_width"
+    "wall_distribution_count", "min_feature_size", "min_bead_width",
     //B36
-    ,"first_layer_travel_speed"
+    "first_layer_travel_speed",
     //B37
-    ,"first_layer_infill_speed"
+    "first_layer_infill_speed",
     //w11
-    ,"detect_narrow_internal_solid_infill"
+    "detect_narrow_internal_solid_infill",
     //Y21
-    ,"seam_gap"
+    "seam_gap",
     //w16
-    , "top_one_wall_type"
+    "top_one_wall_type",
     //w17
-    ,"top_area_threshold"
+    "top_area_threshold",
     //w21
-    ,"filter_top_gap_infill"
+    "filter_top_gap_infill",
     //w23
-    ,"only_one_wall_first_layer"
+    "only_one_wall_first_layer",
     //w25
-    ,"slow_down_layers"
+    "slow_down_layers",
     //w26
-    ,"elefant_foot_compensation_layers"
+    "elefant_foot_compensation_layers",
     //w27
-    ,"precise_z_height"
+    "precise_z_height",
     //w28
-    ,"max_bridge_length"
+    "max_bridge_length",
     //w30
-    ,"top_solid_infill_flow_ratio", "bottom_solid_infill_flow_ratio"
+    "top_solid_infill_flow_ratio", "bottom_solid_infill_flow_ratio",
     //w33
-    ,"ironing_pattern"
+    "ironing_pattern",
     //w38
-    ,"overhang_reverse","overhang_reverse_internal_only","overhang_reverse_threshold"
+    "overhang_reverse", "overhang_reverse_internal_only", "overhang_reverse_threshold",
     //w39
-    ,"precise_outer_wall"};
+    "precise_outer_wall",
+    //Y27
+    "resonance_avoidance", "min_resonance_avoidance_speed", "max_resonance_avoidance_speed"
+};
 
 static std::vector<std::string> s_Preset_filament_options {
     "filament_colour", "filament_diameter", "filament_type", "filament_soluble", "filament_notes", "filament_max_volumetric_speed",
@@ -567,8 +570,6 @@ static std::vector<std::string> s_Preset_printer_options {
     "bed_exclude_area",
 //Y25
     "wipe_device",
-//Y27
-    "resonance_avoidance", "min_resonance_avoidance_speed", "max_resonance_avoidance_speed",
 //Y16
     "chamber_temperature", "auxiliary_fan", "chamber_fan"
 };

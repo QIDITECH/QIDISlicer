@@ -626,6 +626,10 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloatOrPercent,       overhang_speed_1))
     ((ConfigOptionFloatOrPercent,       overhang_speed_2))
     ((ConfigOptionFloatOrPercent,       overhang_speed_3))
+    //Y27
+    ((ConfigOptionBool,                resonance_avoidance))
+    ((ConfigOptionFloat,               min_resonance_avoidance_speed))
+    ((ConfigOptionFloat,               max_resonance_avoidance_speed))
     ((ConfigOptionBool,                 external_perimeters_first))
     ((ConfigOptionBool,                 extra_perimeters))
     ((ConfigOptionBool,                 extra_perimeters_on_overhangs))
@@ -785,10 +789,6 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                single_extruder_multi_material))
     //Y25
     ((ConfigOptionBool,                wipe_device))
-    //Y27
-    ((ConfigOptionBool,                resonance_avoidance))
-    ((ConfigOptionFloat,               min_resonance_avoidance_speed))
-    ((ConfigOptionFloat,               max_resonance_avoidance_speed))
     ((ConfigOptionBool,                single_extruder_multi_material_priming))
     ((ConfigOptionBool,                wipe_tower_no_sparse_layers))
     ((ConfigOptionString,              toolchange_gcode))

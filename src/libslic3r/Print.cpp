@@ -228,10 +228,6 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "single_extruder_multi_material"
             //Y25
             || opt_key == "wipe_device"
-            //Y27
-            || opt_key == "resonance_avoidance"
-            || opt_key == "min_resonance_avoidance_speed"
-            || opt_key == "max_resonance_avoidance_speed"
             || opt_key == "temperature"
             || opt_key == "idle_temperature"
             || opt_key == "wipe_tower"

@@ -456,6 +456,9 @@ private:
     // Processor
     GCodeProcessor                      m_processor;
 
+//Y27
+    bool                                m_resonance_avoidance;
+
     // Back-pointer to Print (const).
     const Print*                        m_print;
     std::string                         _extrude(

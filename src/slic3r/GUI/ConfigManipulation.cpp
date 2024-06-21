@@ -253,6 +253,11 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
         toggle_field("overhang_speed_" + std::to_string(i), config->opt_bool("enable_dynamic_overhang_speeds"));
     }
 
+//Y27
+    bool resonance_avoidance = config->opt_bool("resonance_avoidance");
+    toggle_field("min_resonance_avoidance_speed", resonance_avoidance);
+    toggle_field("max_resonance_avoidance_speed", resonance_avoidance);
+
     bool have_infill = config->option<ConfigOptionPercent>("fill_density")->value > 0;
     // infill_extruder uses the same logic as in Print::extruders()
     for (auto el : { "fill_pattern", "infill_every_layers", "infill_only_where_needed",
