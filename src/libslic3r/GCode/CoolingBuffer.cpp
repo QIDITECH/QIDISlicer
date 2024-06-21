@@ -817,14 +817,10 @@ std::string CoolingBuffer::apply_layer_cooldown(
         //B25
         int enable_volume_fan = EXTRUDER_CONFIG(enable_volume_fan);
         int fan_speed_new = EXTRUDER_CONFIG(fan_always_on) ? min_fan_speed : 0;
-
         std::pair<int, int> custom_fan_speed_limits{fan_speed_new, 100 };
         int disable_fan_first_layers = EXTRUDER_CONFIG(disable_fan_first_layers);
-
         //B39
         int disable_rapid_cooling_fan_first_layers = EXTRUDER_CONFIG(disable_rapid_cooling_fan_first_layers);
-
-
         // Is the fan speed ramp enabled?
         int full_fan_speed_layer = EXTRUDER_CONFIG(full_fan_speed_layer);
         if (disable_fan_first_layers <= 0 && full_fan_speed_layer > 0) {
@@ -875,20 +871,17 @@ std::string CoolingBuffer::apply_layer_cooldown(
                 new_gcode += fan_gcode.str();
             }
         }
-        //B25
-        if (int(layer_id) == disable_fan_first_layers) {
-            int volume_fan_speed_new = 255 * enable_volume_fan / 100;
-            if (volume_fan_speed_new != m_volume_fan_speed) {
-                std::ostringstream fan_gcode;
-                m_volume_fan_speed = volume_fan_speed_new;
-                fan_gcode << "M106 P3 S" << volume_fan_speed_new << "\n";
-                new_gcode += fan_gcode.str();
-            }
-        }
-
         if (fan_speed_new != m_fan_speed) {
             m_fan_speed = fan_speed_new;
             new_gcode  += GCodeWriter::set_fan(m_config.gcode_flavor, m_config.gcode_comments, m_fan_speed);
+        }
+        //B25
+        int volume_fan_speed_new = 255 * enable_volume_fan / 100;
+        if (volume_fan_speed_new != m_volume_fan_speed) {
+            std::ostringstream fan_gcode;
+            m_volume_fan_speed = volume_fan_speed_new;
+            fan_gcode << "M106 P3 S" << volume_fan_speed_new << "\n";
+            new_gcode += fan_gcode.str();
         }
         custom_fan_speed_limits.first = std::min(custom_fan_speed_limits.first, custom_fan_speed_limits.second);
         return custom_fan_speed_limits;
