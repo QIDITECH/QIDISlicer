@@ -2277,7 +2277,7 @@ void PrintConfigDef::init_fff_params()
                      "2. To avoid changes in external wall speed which may create slight wall artefacts that appear like z banding \n"
                      "3. To avoid printing at speeds which cause VFAs (fine artefacts) on the external walls\n\n");
     def->mode = comExpert;
-    def->set_default_value(new ConfigOptionBools { true });
+    def->set_default_value(new ConfigOptionBools { false });
 
     def = this->add("min_print_speed", coFloats);
     def->label = L("Min print speed");
