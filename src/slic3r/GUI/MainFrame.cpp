@@ -753,9 +753,9 @@ void MainFrame::init_tabpanel()
     m_tabpanel->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, [this](wxBookCtrlEvent& e) {
 #endif
         //B45
-        #if defined(__WIN32__) || defined(__WXMAC__)
-                m_printer_view->PauseButton();
-        #endif 
+        // #if defined(__WIN32__) || defined(__WXMAC__)
+        //         m_printer_view->PauseButton();
+        // #endif 
         if (int old_selection = e.GetOldSelection();
             old_selection != wxNOT_FOUND && old_selection < static_cast<int>(m_tabpanel->GetPageCount())) {
             Tab* old_tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(old_selection));
@@ -2178,7 +2178,7 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
             }
 
             #if defined(__WIN32__) || defined(__WXMAC__)
-                m_printer_view->ResumeButton();
+                // m_printer_view->ResumeButton();
                 //B63
                 m_printer_view->SetFocus();
             #endif 
