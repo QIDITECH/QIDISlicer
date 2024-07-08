@@ -3076,13 +3076,7 @@ void TabPrinter::build_sla()
     optgroup->append_line(line);
     optgroup->append_single_option_line("absolute_correction");
     optgroup->append_single_option_line("elefant_foot_compensation");
-    //w26
-    optgroup->append_single_option_line("elefant_foot_compensation_layers");
     optgroup->append_single_option_line("elefant_foot_min_width");
-    //w27
-    optgroup->append_single_option_line("precise_z_height");
-    //w39
-    optgroup->append_single_option_line("precise_outer_wall", "Precise-wall");
 
     optgroup->append_single_option_line("gamma_correction");
     
