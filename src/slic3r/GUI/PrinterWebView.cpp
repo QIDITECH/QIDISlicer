@@ -186,7 +186,9 @@ PrinterWebView::PrinterWebView(wxWindow *parent)
     titlesizer->AddStretchSpacer();
     wxBoxSizer *buttonsizer = new wxBoxSizer(wxHORIZONTAL); 
 
-    m_isSimpleMode = wxGetApp().app_config->get_bool("machine_list_minification");
+    #if defined(__WIN32__) || defined(__WXMAC__)
+        m_isSimpleMode = wxGetApp().app_config->get_bool("machine_list_minification");
+    #endif
 
 
     buttonPanel->SetSizer(buttonSizer);
