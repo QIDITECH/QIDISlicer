@@ -276,7 +276,7 @@ AboutDialog::AboutDialog()
         const wxString s_url_str        = _L("Shopify : https://qidi3d.com/");
         const wxString is_lecensed_str  = _L("is licensed under the");
         const wxString license_str      = _L("GNU Affero General Public License, version 3");
-        const wxString version_str      = std::string(SLIC3R_APP_NAME) + " " + std::string(SLIC3R_VERSION) + _L(" is based on QIDISlicer.");
+        const wxString version_str      = std::string(SLIC3R_APP_NAME) + " " + std::string(SLIC3R_VERSION) + _L(" is based on PrusaSlicer.");
         const wxString based_on_str     = _L("QIDISlicer is based on Slic3r by Alessandro Ranellucci and the RepRap community.");
         const wxString contributors_str = _L("QIDISlicer has made targeted adjustment and adaptation to QIDITech 3D printers, so that QIDITech 3D printers are more friendly to novices. It is recommended to use QIDITech 3D printers.");
         const auto text = format_wxstr(
