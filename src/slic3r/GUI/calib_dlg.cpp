@@ -24,7 +24,7 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     // Settings
     wxStaticBoxSizer *settings_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _L("Settings"));
 
-    auto extrusion_multiplier_text = new wxStaticText(this, wxID_ANY, _L("Extrusion Multiplier: "), wxDefaultPosition, wxSize(230, -1), wxALIGN_LEFT);
+    auto extrusion_multiplier_text = new wxStaticText(this, wxID_ANY, _L("Extrusion Multiplier:"), wxDefaultPosition, wxSize(230, -1), wxALIGN_LEFT);
     settings_sizer->Add(extrusion_multiplier_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     // extru
@@ -99,7 +99,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     // start PA
     auto start_PA_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto start_pa_text = new wxStaticText(this, wxID_ANY, _L("Start PA: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
+    auto start_pa_text = new wxStaticText(this, wxID_ANY, _L("Start PA:"), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     start_PA_sizer->Add(start_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     m_tcStartPA = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.0), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
@@ -114,7 +114,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     // end PA
     auto end_PA_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto end_pa_text = new wxStaticText(this, wxID_ANY, _L("End PA: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
+    auto end_pa_text = new wxStaticText(this, wxID_ANY, _L("End PA:"), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     end_PA_sizer->Add(end_pa_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     m_tcEndPA = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.04), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
@@ -129,7 +129,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     // PA step
     auto PA_step_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto PA_step_text = new wxStaticText(this, wxID_ANY, _L("PA step: "), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
+    auto PA_step_text = new wxStaticText(this, wxID_ANY, _L("PA step:"), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT);
     PA_step_sizer->Add(PA_step_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     m_tcPAStep = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.002), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
@@ -144,6 +144,15 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
     v_sizer->Add(0, 5, 0, wxEXPAND, 5);
     v_sizer->Add(settings_sizer, 0, wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
     v_sizer->Add(0, 5, 0, wxEXPAND, 5);
+
+    // Note
+    auto note_sizer = new wxBoxSizer(wxHORIZONTAL);
+    std::string note_message = _u8L("Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model.");
+    auto note_text = new wxStaticText(this, wxID_ANY, note_message, wxDefaultPosition, wxSize(240, -1), wxALIGN_LEFT);
+    note_text->Wrap(note_text->GetClientSize().x);
+    note_sizer->Add(note_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
+
+    v_sizer->Add(note_sizer, 0, wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
 
     m_btnStart = new wxButton(this, wxID_ANY, _L("OK"));
     m_btnStart->Bind(wxEVT_BUTTON, &PA_Calibration_Dlg::on_start, this);
@@ -218,7 +227,7 @@ MVS_Calibration_Dlg::MVS_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     // start VS
     auto start_VS_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto start_VS_text = new wxStaticText(this, wxID_ANY, _L("Start Volumetric Speed: "), wxDefaultPosition, wxSize(160, -1), wxALIGN_LEFT);
+    auto start_VS_text = new wxStaticText(this, wxID_ANY, _L("Start Volumetric Speed:"), wxDefaultPosition, wxSize(160, -1), wxALIGN_LEFT);
     start_VS_sizer->Add(start_VS_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     m_tcStartVS = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(5), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
@@ -233,7 +242,7 @@ MVS_Calibration_Dlg::MVS_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     // end VS
     auto end_VS_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto end_VS_text = new wxStaticText(this, wxID_ANY, _L("End Volumetric Speed: "), wxDefaultPosition, wxSize(160, -1), wxALIGN_LEFT);
+    auto end_VS_text = new wxStaticText(this, wxID_ANY, _L("End Volumetric Speed:"), wxDefaultPosition, wxSize(160, -1), wxALIGN_LEFT);
     end_VS_sizer->Add(end_VS_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     m_tcEndVS = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(15), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
@@ -248,7 +257,7 @@ MVS_Calibration_Dlg::MVS_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     // VS step
     auto VS_step_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    auto VS_step_text = new wxStaticText(this, wxID_ANY, _L("Volumetric Speed step: "), wxDefaultPosition, wxSize(160, -1), wxALIGN_LEFT);
+    auto VS_step_text = new wxStaticText(this, wxID_ANY, _L("Volumetric Speed step:"), wxDefaultPosition, wxSize(160, -1), wxALIGN_LEFT);
     VS_step_sizer->Add(VS_step_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);
 
     m_tcVSStep = new wxTextCtrl(this, wxID_ANY, wxString::FromDouble(0.1), wxDefaultPosition, wxSize(100, -1), wxBORDER_SIMPLE);
