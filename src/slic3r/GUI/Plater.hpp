@@ -295,6 +295,8 @@ public:
 
     //B61
     ThumbnailData get_thumbnailldate();
+    //B64
+    ThumbnailData get_thumbnailldate_send();
     void export_gcode(bool prefer_removable);
     void export_stl_obj(bool extended = false, bool selection_only = false);
     void export_amf();
@@ -542,6 +544,9 @@ private:
     void allow_snapshots();
 
     friend class SuppressBackgroundProcessingUpdate;
+    //B64
+    std::thread m_sendThread;
+    std::chrono::system_clock::time_point m_time_p;
 };
 
 class SuppressBackgroundProcessingUpdate

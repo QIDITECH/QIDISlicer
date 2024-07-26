@@ -22,6 +22,8 @@
 #include "Moonraker.hpp"
 #include "../GUI/PrintHostDialogs.hpp"
 
+// B64
+#include <boost/thread.hpp>
 namespace fs = boost::filesystem;
 using boost::optional;
 using Slic3r::GUI::PrintHostQueueDialog;
@@ -65,6 +67,8 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
     }
 }
 
+//B64
+PrintHost *PrintHost::get_print_host_url(std::string url, std::string local_ip) { return new Moonraker(url, local_ip); }
 wxString PrintHost::format_error(const std::string &body, const std::string &error, unsigned status) const
 {
     if (status != 0) {
@@ -81,6 +85,9 @@ struct PrintHostJobQueue::priv
     // XXX: comment on how bg thread works
 
     PrintHostJobQueue *q;
+    //B64
+    std::vector<PrintHostJob> vec_jobs;
+    std::vector<size_t>       vec_jobs_id;
 
     Channel<PrintHostJob> channel_jobs;
     Channel<size_t> channel_cancels;
@@ -95,6 +102,8 @@ struct PrintHostJobQueue::priv
 
     priv(PrintHostJobQueue *q) : q(q) {}
 
+    //B64
+    void emit_waittime(int waittime, size_t id);
     void emit_progress(int progress);
     void emit_error(wxString error);
     void emit_cancel(size_t id);
@@ -105,6 +114,8 @@ struct PrintHostJobQueue::priv
     void progress_fn(Http::Progress progress, bool &cancel);
     void error_fn(wxString error);
     void info_fn(wxString tag, wxString status);
+    //B64
+    bool cancel_fn();
     void remove_source(const fs::path &path);
     void remove_source();
     void perform_job(PrintHostJob the_job);
@@ -121,6 +132,12 @@ PrintHostJobQueue::~PrintHostJobQueue()
     if (p) { p->stop_bg_thread(); }
 }
 
+//B64
+void PrintHostJobQueue::priv::emit_waittime(int waittime, size_t id)
+{
+    auto evt = new PrintHostQueueDialog::Event(GUI::EVT_PRINTHOST_WAIT, queue_dialog->GetId(), id, waittime, 0);
+    wxQueueEvent(queue_dialog, evt);
+}
 void PrintHostJobQueue::priv::emit_progress(int progress)
 {
     auto evt = new PrintHostQueueDialog::Event(GUI::EVT_PRINTHOST_PROGRESS, queue_dialog->GetId(), job_id, progress);
@@ -164,6 +181,7 @@ void PrintHostJobQueue::priv::stop_bg_thread()
     }
 }
 
+//B64
 void PrintHostJobQueue::priv::bg_thread_main()
 {
     // bg thread entry point
@@ -172,6 +190,11 @@ void PrintHostJobQueue::priv::bg_thread_main()
         // Pick up jobs from the job channel:
         while (! bg_exit) {
             auto job = channel_jobs.pop();   // Sleeps in a cond var if there are no jobs
+            //B64 // y1
+            if (!vec_jobs.empty())
+                vec_jobs.erase(vec_jobs.begin());
+            if (!vec_jobs_id.empty())
+                vec_jobs_id.erase(vec_jobs_id.begin());
             if (job.empty()) {
                 // This happens when the thread is being stopped
                 break;
@@ -204,6 +227,7 @@ void PrintHostJobQueue::priv::bg_thread_main()
     }
 }
 
+//B64
 void PrintHostJobQueue::priv::progress_fn(Http::Progress progress, bool &cancel)
 {
     if (cancel) {
@@ -244,9 +268,45 @@ void PrintHostJobQueue::priv::progress_fn(Http::Progress progress, bool &cancel)
             emit_progress(gui_progress);
             prev_progress = gui_progress;
         }
+        for (int i = 0; i < vec_jobs.size(); i++) {
+            std::chrono::system_clock::time_point curr_time = std::chrono::system_clock::now();
+            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(curr_time - vec_jobs[i].create_time);
+            emit_waittime((vec_jobs[i].sendinginterval - (diff.count() / 1000)) > 0 ?
+                              (vec_jobs[i].sendinginterval - (diff.count() / 1000)) :
+                              0,
+                          vec_jobs_id[i]);
+        }
     }
 }
 
+//B64
+bool PrintHostJobQueue::priv::cancel_fn()
+{
+    bool cancel = false;
+    if (channel_cancels.size_hint() > 0) {
+        // Lock both queues
+        auto cancels = channel_cancels.lock_rw();
+        auto jobs    = channel_jobs.lock_rw();
+
+        for (size_t cancel_id : *cancels) {
+            if (cancel_id == job_id) {
+                cancel = true;
+            } else if (cancel_id > job_id) {
+                const size_t idx = cancel_id - job_id - 1;
+                if (idx < jobs->size()) {
+                    jobs->at(idx).cancelled = true;
+                    BOOST_LOG_TRIVIAL(error) << boost::format("PrintHostJobQueue: Job id %1% cancelled") % cancel_id;
+                    emit_cancel(cancel_id);
+                }
+            }
+        }
+        if (!cancel) {
+            cancels->clear();
+        }
+    }
+    return cancel;
+}
+//B64
 void PrintHostJobQueue::priv::error_fn(wxString error)
 {
     // check if transfer was not canceled before error occured - than do not show the error
@@ -298,8 +358,31 @@ void PrintHostJobQueue::priv::remove_source()
     source_to_remove.clear();
 }
 
+//B64
 void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
 {
+     while(true){
+        std::chrono::system_clock::time_point curr_time = std::chrono::system_clock::now();
+        auto                                  diff      = std::chrono::duration_cast<std::chrono::milliseconds>(curr_time - the_job.create_time);
+
+        emit_waittime((the_job.sendinginterval - (diff.count() / 1000)) > 0 ? (the_job.sendinginterval - (diff.count() / 1000)) : 0, job_id);
+
+        for (int i = 0; i < vec_jobs.size(); i++) {
+            emit_waittime((vec_jobs[i].sendinginterval - (diff.count() / 1000)) > 0 ?
+                              (vec_jobs[i].sendinginterval - (diff.count() / 1000)) :
+                              0,
+                          vec_jobs_id[i]);
+        }
+        
+
+        if (diff.count() > (the_job.sendinginterval)* 1000) {
+            BOOST_LOG_TRIVIAL(debug) << "task_manager: diff count = " << diff.count() << " milliseconds";
+            break;
+        }
+        if (this->cancel_fn())
+            break;
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
+     }
     emit_progress(0);   // Indicate the upload is starting
 
     bool success = the_job.printhost->upload(std::move(the_job.upload_data),
@@ -313,15 +396,20 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
     }
 }
 
+//B64
 void PrintHostJobQueue::enqueue(PrintHostJob job)
 {
     p->start_bg_thread();
     p->queue_dialog->append_job(job);
     p->channel_jobs.push(std::move(job));
+     p->vec_jobs.push_back(std::move(job));
+     p->vec_jobs_id.push_back(p->job_id + p->vec_jobs.size());
 }
 
+//B64
 void PrintHostJobQueue::cancel(size_t id)
 {
+    BOOST_LOG_TRIVIAL(debug) << "cancel: " << id;
     p->channel_cancels.push(id);
 }
 

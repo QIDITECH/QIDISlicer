@@ -9,6 +9,7 @@
 class SwitchButton : public BitmapToggleButton
 {
 public:
+	//B64
 	SwitchButton(wxWindow * parent = NULL, const wxString& name = wxEmptyString, wxWindowID id = wxID_ANY);
 
 public:
@@ -26,12 +27,18 @@ public:
 
 	void SysColorChange();
 
+	//B64
+    void SetSize(int size);
+
+
 private:
 	void update() override;
 
 private:
 	ScalableBitmap m_on;
 	ScalableBitmap m_off;
+	//B64
+	int m_size = 300;
 
 	wxString labels[2];
 	StateColor   text_color;

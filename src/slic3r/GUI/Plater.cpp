@@ -134,6 +134,8 @@ using Slic3r::PrintHostJob;
 using Slic3r::GUI::format_wxstr;
 
 static const std::pair<unsigned int, unsigned int> THUMBNAIL_SIZE_3MF = { 256, 256 };
+//B64
+static const std::pair<unsigned int, unsigned int> THUMBNAIL_SIZE_SEND = {128, 160};
 
 namespace Slic3r {
 namespace GUI {
@@ -7811,6 +7813,14 @@ ThumbnailData Plater::get_thumbnailldate() {
     p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_3MF.first, THUMBNAIL_SIZE_3MF.second, thumbnail_params, Camera::EType::Ortho);
     return thumbnail_data;
 }
+//B64
+ThumbnailData Plater::get_thumbnailldate_send()
+{
+    ThumbnailData    thumbnail_data;
+    ThumbnailsParams thumbnail_params = {{}, false, true, true, true};
+    p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_SEND.first, THUMBNAIL_SIZE_SEND.second, thumbnail_params, Camera::EType::Ortho);
+    return thumbnail_data;
+}
 bool Plater::export_3mf(const boost::filesystem::path& output_path)
 {
     if (p->model.objects.empty()) {
@@ -8066,34 +8076,75 @@ void Plater::send_gcode()
                 wxGetApp().preset_bundle->printers.get_edited_preset().config.opt_string("printer_notes"));
         }
 
-       //B53 //B62
+       //B53 //B62 //B64
         auto pppd = dlg.pppd();
-        auto checkbox_states = dlg.checkbox_states();
+        auto checkbox_status = dlg.checkbox_states();
+        auto checkbox_net_status = dlg.checkbox_net_states();
+
+        int count = 0;
+
+
+        std::chrono::system_clock::time_point curr_time = std::chrono::system_clock::now();
+        auto                                  diff = std::chrono::duration_cast<std::chrono::seconds>(curr_time - m_time_p);
         for (int i = 0; i < pppd.size(); i++) {
-            if (checkbox_states[i]) {
-                PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
-                auto          m_collection  = &preset_bundle.printers;
+            if (checkbox_status[i]) {
                 auto          preset_data   = pppd[i];
+                PrintHostJob upload_job(preset_data.cfg_t);
 
-               Preset *preset = m_collection->find_preset(preset_data.preset_name);
-                if (!preset || !preset->is_visible)
-                    continue;
-                wxStringTokenizer tokenizer((preset_data.fullname), "*");
-
-                std::string tem_name = (into_u8(tokenizer.GetNextToken().Trim().mb_str()));
-                auto *      printer  = preset_bundle.physical_printers.find_printer(tem_name);
-
-                if (printer == nullptr)
+                if (upload_job.empty())
                     return;
-                DynamicPrintConfig *cfg_t = &(printer->config);
 
-                PrintHostJob upload_job(cfg_t);
+                upload_job.upload_data.upload_path = dlg.filename();
+                upload_job.upload_data.post_action = dlg.post_action();
+                upload_job.upload_data.group       = dlg.group();
+                upload_job.upload_data.storage     = dlg.storage();
+                upload_job.create_time             = std::chrono::system_clock::now();
+                if (diff.count()<0)
+                    upload_job.sendinginterval         = count / std::stoi(wxGetApp().app_config->get("max_send")) *
+                                                     std::stoi(wxGetApp().app_config->get("sending_interval")) * 60 -
+                                                 diff.count()+4;
+                else
+                    upload_job.sendinginterval = count / std::stoi(wxGetApp().app_config->get("max_send")) *
+                                                     std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
+
+                // Show "Is printer clean" dialog for QIDIConnect - Upload and print.
+                if (std::string(upload_job.printhost->get_name()) == "QIDIConnect" &&
+                    upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+                        GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"),
+                                                _L("Upload and Print"), wxOK | wxCANCEL);
+                        if (dlg.ShowModal() != wxID_OK)
+                    return;
+                }
+
+                std::chrono::seconds seconds_to_add(upload_job.sendinginterval);
+
+                m_time_p = upload_job.create_time + seconds_to_add;
+
+                p->export_gcode(fs::path(), false, std::move(upload_job));
+
+                count++;
+            }
+        }
+#if QDT_RELEASE_TO_PUBLIC
+        auto m_devices = wxGetApp().get_devices();
+        for (int i = 0; i < m_devices.size(); i++) {
+            if (checkbox_net_status[i]) {
+                auto         device = m_devices[i];
+                PrintHostJob upload_job(device.url,device.local_ip);
                 if (upload_job.empty())
                     return;
         upload_job.upload_data.upload_path = dlg.filename();
         upload_job.upload_data.post_action = dlg.post_action();
         upload_job.upload_data.group       = dlg.group();
         upload_job.upload_data.storage     = dlg.storage();
+                upload_job.create_time             = std::chrono::system_clock::now();
+                if (diff.count() < 0)
+                    upload_job.sendinginterval = count / std::stoi(wxGetApp().app_config->get("max_send")) *
+                                                     std::stoi(wxGetApp().app_config->get("sending_interval")) * 60 -
+                                                 diff.count()+4;
+                else
+                    upload_job.sendinginterval = count / std::stoi(wxGetApp().app_config->get("max_send")) *
+                                                 std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
 
         // Show "Is printer clean" dialog for QIDIConnect - Upload and print.
                 if (std::string(upload_job.printhost->get_name()) == "QIDIConnect" &&
@@ -8104,9 +8155,14 @@ void Plater::send_gcode()
                 return;
         }
 
+                std::chrono::seconds seconds_to_add(upload_job.sendinginterval);
+
+                m_time_p = upload_job.create_time + seconds_to_add;
         p->export_gcode(fs::path(), false, std::move(upload_job));
+                count++;
     }
 }
+#endif
     }
 }
 

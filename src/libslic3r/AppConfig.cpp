@@ -211,12 +211,26 @@ void AppConfig::set_defaults()
 
     if (get("sys_menu_enabled").empty())
         set("sys_menu_enabled", "1");
-#endif // _WIN32
 
+#endif // _WIN32
         // B45
     if (get("machine_list_minification").empty())
         set("machine_list_minification", "1");
 
+    //B64
+    if (get("user_token").empty())
+        set("user_token", "");
+
+    if (get("sending_interval").empty()) {
+        set("sending_interval", "5");
+    }
+
+    if (get("max_send").empty()) {
+        set("max_send", "3");
+    }
+
+    if (get("machine_list_net").empty())
+        set("machine_list_net", "0");
     // Remove legacy window positions/sizes
     erase("", "main_frame_maximized");
     erase("", "main_frame_pos");

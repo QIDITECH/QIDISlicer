@@ -11,6 +11,9 @@
 
 #include <libslic3r/enum_bitmask.hpp>
 #include "Http.hpp"
+//B64
+#include <boost/thread.hpp>
+#include <mutex>
 
 class wxArrayString;
 
@@ -72,36 +75,50 @@ public:
     virtual bool get_storage(wxArrayString& /*storage_path*/, wxArrayString& /*storage_name*/) const { return false; }
 
     static PrintHost* get_print_host(DynamicPrintConfig *config);
+    //B64
+    static PrintHost *get_print_host_url(std::string url, std::string local_ip);
 
 protected:
     virtual wxString format_error(const std::string &body, const std::string &error, unsigned status) const;
 };
 
 
+//B64
 struct PrintHostJob
 {
+    //B64
+    std::chrono::system_clock::time_point create_time;
+    int                                   sendinginterval;
     PrintHostUpload upload_data;
     std::unique_ptr<PrintHost> printhost;
     bool cancelled = false;
 
     PrintHostJob() {}
     PrintHostJob(const PrintHostJob&) = delete;
+    //B64
     PrintHostJob(PrintHostJob &&other)
         : upload_data(std::move(other.upload_data))
         , printhost(std::move(other.printhost))
         , cancelled(other.cancelled)
+        , create_time(std::move(other.create_time))
+        , sendinginterval(other.sendinginterval)
     {}
 
     PrintHostJob(DynamicPrintConfig *config)
         : printhost(PrintHost::get_print_host(config))
     {}
 
+    //B64
+    PrintHostJob(std::string url, std::string local_ip) : printhost(PrintHost::get_print_host_url(url,local_ip)) {}
     PrintHostJob& operator=(const PrintHostJob&) = delete;
+    //B64
     PrintHostJob& operator=(PrintHostJob &&other)
     {
         upload_data = std::move(other.upload_data);
         printhost = std::move(other.printhost);
         cancelled = other.cancelled;
+        create_time = std::move(other.create_time);
+        sendinginterval = other.sendinginterval;
         return *this;
     }
 

@@ -135,6 +135,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/MeshUtils.hpp
     GUI/Tab.cpp
     GUI/Tab.hpp
+	GUI/WebUserLoginDialog.cpp
+    GUI/WebUserLoginDialog.hpp
     GUI/ConfigManipulation.cpp
     GUI/ConfigManipulation.hpp
     GUI/Field.cpp
@@ -285,6 +287,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/Widgets/PopupWindow.cpp
     GUI/Widgets/PopupWindow.hpp
     GUI/Widgets/UIColors.hpp
+	GUI/Widgets/DeviceButton.cpp
+    GUI/Widgets/DeviceButton.hpp
     GUI/FileArchiveDialog.cpp
     GUI/FileArchiveDialog.hpp
     GUI/Downloader.cpp
@@ -299,6 +303,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/FixModelByWin10.hpp
     Utils/Moonraker.cpp
     Utils/Moonraker.hpp
+	Utils/QIDINetwork.cpp
+    Utils/QIDINetwork.hpp
     Utils/OctoPrint.cpp
     Utils/OctoPrint.hpp
     Utils/Duet.cpp

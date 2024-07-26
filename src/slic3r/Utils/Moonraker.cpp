@@ -72,6 +72,9 @@ Moonraker::Moonraker(DynamicPrintConfig *config, bool add_port)
     , m_cafile(config->opt_string("printhost_cafile"))
     , m_ssl_revoke_best_effort(config->opt_bool("printhost_ssl_ignore_revoke"))
 {}
+//B64
+Moonraker::Moonraker(std::string host, std::string local_ip)
+    : m_host(host), m_show_ip(local_ip) {}
 
 const char* Moonraker::get_name() const { return "Moonraker"; }
 
@@ -162,7 +165,18 @@ std::string Moonraker::get_status(wxString &msg) const
 
     auto http = Http::get(std::move(url));
     set_auth(http);
-    http.on_error([&](std::string body, std::string error, unsigned status) {
+    //B64
+    http.timeout_connect(2)
+    .on_error([&](std::string body, std::string error, unsigned status) {
+            // y1
+            if(status == 404)
+            {
+                body = ("Network connection fails.");
+                if(body.find("AWS") != std::string::npos)
+                    body += ("Unable to get required resources from AWS server, please check your network settings.");
+                else
+                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+            }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
                                             body;
             print_state = "offline";
@@ -224,6 +238,15 @@ float Moonraker::get_progress(wxString &msg) const
     auto http = Http::get(std::move(url));
     set_auth(http);
     http.on_error([&](std::string body, std::string error, unsigned status) {
+            // y1
+            if(status == 404)
+            {
+                body = ("Network connection fails.");
+                if(body.find("AWS") != std::string::npos)
+                    body += ("Unable to get required resources from AWS server, please check your network settings.");
+                else
+                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+            }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
                                             body;
             res = false;
@@ -286,9 +309,11 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
     std::string url;
     bool res = true;
 
+    //B64
 #ifdef WIN32
     // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
-    if (m_host.find("https://") == 0 || test_msg_or_host_ip.empty() || !GUI::get_app_config()->get_bool("allow_ip_resolve"))
+    if (m_host.find("https://") == 0 || test_msg_or_host_ip.empty() || !GUI::get_app_config()->get_bool("allow_ip_resolve") ||
+        m_host.find("aws") != -1 || m_host.find("aliyun") != -1)
 #endif // _WIN32
     {
         // If https is entered we assume signed ceritificate is being used
@@ -303,7 +328,6 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
         // This new address returns in "test_msg_or_host_ip" variable.
         // Solves troubles of uploades failing with name address.
         // in original address (m_host) replace host for resolved ip 
-        info_fn(L"resolve", test_msg_or_host_ip);
         url = substitute_host(make_url("server/files/upload"), GUI::into_u8(test_msg_or_host_ip));
         BOOST_LOG_TRIVIAL(info) << "Upload address after ip resolve: " << url;
     }
@@ -338,6 +362,15 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
             BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: File uploaded: HTTP %2%: %3%") % name % status % body;
         })
         .on_error([&](std::string body, std::string error, unsigned status) {
+            // y1
+            if(status == 404)
+            {
+                body = ("Network connection fails.");
+                if(body.find("AWS") != std::string::npos)
+                    body += ("Unable to get required resources from AWS server, please check your network settings.");
+                else
+                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+            }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error uploading file: %2%, HTTP %3%, body: `%4%`") % name % error % status % body;
             error_fn(format_error(body, error, status));
             res = false;

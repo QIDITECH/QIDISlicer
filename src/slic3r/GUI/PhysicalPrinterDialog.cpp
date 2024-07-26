@@ -820,6 +820,8 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
     else
         wxGetApp().get_tab(Preset::TYPE_PRINTER)->update_preset_choice();
 
+    //B64
+    wxGetApp().SetPresentChange(true);
     event.Skip();
 }
 

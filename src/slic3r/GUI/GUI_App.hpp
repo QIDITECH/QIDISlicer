@@ -17,6 +17,9 @@
 #include <mutex>
 #include <stack>
 
+//B64
+#include "../Utils/QIDINetwork.hpp"
+#include "slic3r/GUI/WebUserLoginDialog.hpp"
 class wxMenuItem;
 class wxMenuBar;
 class wxTopLevelWindow;
@@ -142,6 +145,13 @@ private:
     wxColour        m_color_selected_btn_bg;
     bool            m_force_colors_update { false };
 #endif
+    //B64
+#if QDT_RELEASE_TO_PUBLIC
+    std::vector<Device> m_devices;
+#endif
+
+    //B64
+    ZUserLogin *login_dlg{nullptr};
     std::vector<std::string>     m_mode_palette;
 
     wxFont		    m_small_font;
@@ -245,6 +255,11 @@ public:
     void            force_menu_update();
 #endif //_MSW_DARK_MODE
 #endif
+    //B64
+#if QDT_RELEASE_TO_PUBLIC
+    std::vector<Device> get_devices() { return m_devices; };
+    void                set_devices(std::vector<Device> devices) { m_devices = devices; };
+#endif
 
     const wxFont&   small_font()            { return m_small_font; }
     const wxFont&   bold_font()             { return m_bold_font; }
@@ -263,6 +278,10 @@ public:
     void            recreate_GUI(const wxString& message);
     void            system_info();
     void            keyboard_shortcuts();
+    //B64
+    void ShowUserLogin(bool show);
+    void SetOnlineLogin(bool status);
+    void SetPresentChange(bool status);
     void            load_project(wxWindow *parent, wxString& input_file) const;
     void            import_model(wxWindow *parent, wxArrayString& input_files) const;
     void            import_zip(wxWindow* parent, wxString& input_file) const;

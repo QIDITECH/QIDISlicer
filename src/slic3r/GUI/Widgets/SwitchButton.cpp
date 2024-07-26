@@ -7,16 +7,18 @@
 #include <wx/dcmemory.h>
 #include <wx/dcclient.h>
 
+//B64
 SwitchButton::SwitchButton(wxWindow* parent, const wxString& name, wxWindowID id)
 	: BitmapToggleButton(parent, name, id)
     , m_on(this, "toggle_on", 28, 16)
-	, m_off(this, "toggle_off", 28, 16)
-    , text_color(std::pair{*wxWHITE, (int) StateColor::Checked}, std::pair{0x6B6B6B, (int) StateColor::Normal})
-	, track_color(0xD9D9D9)
-    , thumb_color(std::pair{0x00AE42, (int) StateColor::Checked}, std::pair{0xD9D9D9, (int) StateColor::Normal})
+    , m_off(this, "toggle_off", 28, 16)
+    , text_color(std::pair{ 0x4479FB, (int) StateColor::Checked}, std::pair{0x6B6B6B, (int) StateColor::Normal})
+    , track_color(0x333337)
+    , thumb_color(std::pair{0x4479FB, (int) StateColor::Checked}, std::pair{0x333337, (int) StateColor::Normal})
 {
 	Rescale();
 }
+
 
 void SwitchButton::SetLabels(wxString const& lbl_on, wxString const& lbl_off)
 {
@@ -47,6 +49,14 @@ void SwitchButton::SetValue(bool value)
 	update();
 }
 
+void SwitchButton::SetSize(int size)
+{
+    m_size = size;
+    update();
+    Rescale();
+}
+
+//B64
 void SwitchButton::Rescale()
 {
 	if (!labels[0].IsEmpty()) {
@@ -72,10 +82,13 @@ void SwitchButton::Rescale()
 			auto size = textSize[1];
 			if (size.x > thumbSize.x) thumbSize.x = size.x;
 			else size.x = thumbSize.x;
-			thumbSize.x += BS * 12;
-			thumbSize.y += BS * 6;
-			trackSize.x = thumbSize.x + size.x + BS * 10;
-			trackSize.y = thumbSize.y + BS * 2;
+			//thumbSize.x += BS * 12 *10;
+			//thumbSize.y += BS * 6;
+            thumbSize.x = m_size/2;
+            thumbSize.y = 25;
+            trackSize.x = m_size;
+			trackSize.y = 30;
+
             auto maxWidth = GetMaxWidth();
 #ifdef __WXOSX__
             maxWidth *= scale;
@@ -91,7 +104,8 @@ void SwitchButton::Rescale()
 			memdc.SelectObject(bmp);
 			memdc.SetBackground(wxBrush(GetBackgroundColour()));
 			memdc.Clear();
-            memdc.SetFont(dc.GetFont());
+            //memdc.SetFont(dc.GetFont());
+            memdc.SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
 			auto state = i == 0 ? StateColor::Enabled : (StateColor::Checked | StateColor::Enabled);
             {
 #ifdef __WXMSW__
@@ -101,15 +115,30 @@ void SwitchButton::Rescale()
 #endif
 				dc2.SetBrush(wxBrush(track_color.colorForStates(state)));
 				dc2.SetPen(wxPen(track_color.colorForStates(state)));
-                dc2.DrawRoundedRectangle(wxRect({0, 0}, trackSize), trackSize.y / 2);
-				dc2.SetBrush(wxBrush(thumb_color.colorForStates(StateColor::Checked | StateColor::Enabled)));
+                dc2.DrawRectangle(wxRect({0, 0}, trackSize));
+                dc2.SetBrush(wxBrush(track_color.colorForStates(state)));
+                dc2.SetPen(wxPen(track_color.colorForStates(state)));
+                dc2.DrawRectangle(wxRect({i == 0 ? BS : (trackSize.x - thumbSize.x - BS), BS}, thumbSize));
+
 				dc2.SetPen(wxPen(thumb_color.colorForStates(StateColor::Checked | StateColor::Enabled)));
-				dc2.DrawRoundedRectangle(wxRect({ i == 0 ? BS : (trackSize.x - thumbSize.x - BS), BS}, thumbSize), thumbSize.y / 2);
+                //dc2.DrawLine(i == 0 ? 2 * BS + (thumbSize.x - textSize[0].x) / 2 :
+                //                      trackSize.x - thumbSize.x + (thumbSize.x - textSize[1].x) / 2,
+                //             thumbSize.y, i == 0 ? thumbSize.x / 2 + textSize[0].x : trackSize.x - thumbSize.x / 2 - 2 * BS + textSize[1].x,
+                //             thumbSize.y);
+
 			}
             memdc.SetTextForeground(text_color.colorForStates(state ^ StateColor::Checked));
             memdc.DrawText(labels[0], {BS + (thumbSize.x - textSize[0].x) / 2, BS + (thumbSize.y - textSize[0].y) / 2});
             memdc.SetTextForeground(text_color.colorForStates(state));
             memdc.DrawText(labels[1], {trackSize.x - thumbSize.x - BS + (thumbSize.x - textSize[1].x) / 2, BS + (thumbSize.y - textSize[1].y) / 2});
+
+			//memdc.SetPen(wxPen(wxColour(68, 121, 251)));
+   //         if (!GetValue())
+   //             memdc.DrawLine(BS + BS * 10 * 7, thumbSize.y, BS + BS * 10 * 10, thumbSize.y);
+   //         else
+   //             memdc.DrawLine(trackSize.x - thumbSize.x + BS * 10 * 7 - BS * 4, thumbSize.y,
+   //                            trackSize.x - thumbSize.x + BS * 10 * 10 - BS * 4, thumbSize.y);
+
 			memdc.SelectObject(wxNullBitmap);
 #ifdef __WXOSX__
             bmp = wxBitmap(bmp.ConvertToImage(), -1, scale);

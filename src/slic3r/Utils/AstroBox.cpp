@@ -127,6 +127,15 @@ bool AstroBox::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Error
             BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: File uploaded: HTTP %2%: %3%") % name % status % body;
         })
         .on_error([&](std::string body, std::string error, unsigned status) {
+            // y1
+            if(status == 404)
+            {
+                body = ("Network connection fails.");
+                if(body.find("AWS") != std::string::npos)
+                    body += ("Unable to get required resources from AWS server, please check your network settings.");
+                else
+                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+            }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error uploading file: %2%, HTTP %3%, body: `%4%`") % name % error % status % body;
             error_fn(format_error(body, error, status));
             res = false;

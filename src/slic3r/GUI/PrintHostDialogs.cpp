@@ -70,8 +70,8 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     auto *label_dir_hint2 = new wxStaticText(this, wxID_ANY, _L("Upload to Printer Host with the following filename:"));
     label_dir_hint2->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 
-    //B61
-    ThumbnailData thumbnail_data = m_plater->get_thumbnailldate();
+    //B61 //B64
+    ThumbnailData thumbnail_data = m_plater->get_thumbnailldate_send();
 
     wxImage image(thumbnail_data.width, thumbnail_data.height);
     image.InitAlpha();
@@ -88,10 +88,19 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     wxStaticBitmap *static_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap);
     //static_bitmap->SetSize(wxSize(20, 20));
     //static_bitmap->SetMinSize(wxSize(100, 100));
-    content_sizer->Add(static_bitmap, 0, wxALL | wxALIGN_CENTER);
 
     wxBoxSizer *row_sizer = new wxBoxSizer(wxHORIZONTAL);
 
+    wxBoxSizer *hbox1 = new wxBoxSizer(wxHORIZONTAL);
+
+    wxBoxSizer *hbox2 = new wxBoxSizer(wxHORIZONTAL);
+
+
+    wxBoxSizer *vbox1 = new wxBoxSizer(wxVERTICAL);
+
+    wxBoxSizer *vbox2 = new wxBoxSizer(wxVERTICAL);
+
+    vbox1->Add(static_bitmap, 0, wxALL | wxALIGN_CENTER);
     // Add add.svg image
     //wxBitmap        add_bitmap(*get_bmp_bundle("add.svg"), wxBITMAP_TYPE_SVG);
     wxStaticBitmap *add_bitmap = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("print_time", 20));
@@ -109,50 +118,199 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     wxStaticText *total_weight_text = new wxStaticText(this, wxID_ANY, wxString::Format("%.4fg", ps.total_weight));
     row_sizer->Add(total_weight_text, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-    content_sizer->Add(row_sizer, 0, wxALIGN_CENTER);
+    vbox1->Add(row_sizer, 0, wxALIGN_CENTER);
     //B61
-    content_sizer->Add(label_dir_hint2);
-    content_sizer->Add(txt_filename, 0, wxEXPAND);
-    content_sizer->Add(label_dir_hint);
-    content_sizer->AddSpacer(VERT_SPACING);
+    vbox2->Add(label_dir_hint2);
+    vbox2->Add(txt_filename, 0, wxEXPAND);
+    vbox2->Add(label_dir_hint);
+    vbox2->AddSpacer(VERT_SPACING);
+
+    auto *label_input_max_send = new wxStaticText(this, wxID_ANY, _L("(It depends on how many devices can undergo heating at the same time.)"));
+    label_input_max_send->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
+
+    auto *label_input_sending_interval = new wxStaticText(this, wxID_ANY, _L("(It depends on how long it takes to complete the heating.)"));
+    label_input_sending_interval->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
+
+
+    wxBoxSizer *max_printer_send =
+        create_item_input(_L("Send"),
+                          _L("printers at the same time."), this,
+                          "", "max_send");
+
+    vbox2->Add(max_printer_send);
+    vbox2->Add(label_input_max_send);
+    vbox2->Add(0, 0, 0, wxEXPAND | wxTOP, 23);
+
+    wxBoxSizer *delay_time = create_item_input(_L("Wait"),
+                                               _L("minute each batch."),
+                                               this, "", "sending_interval");
+
+
+    vbox2->Add(delay_time);
+    vbox2->Add(label_input_sending_interval);
+
+    hbox1->Add(vbox1);
+    hbox1->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+    hbox1->Add(vbox2);
+    content_sizer->Add(0, 0, 0, wxEXPAND | wxTOP, 23);
+
+    content_sizer->Add(hbox1);
+    content_sizer->Add(0, 0, 0, wxEXPAND | wxTOP, 23);
     //B53
     wxBoxSizer *                           checkbox_sizer = new wxBoxSizer(wxVERTICAL);
     PresetBundle &                         preset_bundle  = *wxGetApp().preset_bundle;
 
-    wxButton* select_all_btn = new wxButton(this, wxID_ANY, _L("Select All"));
-    wxGetApp().SetWindowVariantForButton(select_all_btn);
-    checkbox_sizer->Add(select_all_btn, 0, wxEXPAND | wxALL, 5);
-    select_all_btn->Bind(wxEVT_BUTTON, [checkbox_sizer](wxCommandEvent &event) {
-        for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
-            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
-            if (checkbox) {
-                checkbox->SetValue(true);
-            }
-        }
-    });
+    wxScrolledWindow *scroll_macine_list = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(800), FromDIP(300)),
+                                                                wxHSCROLL | wxVSCROLL);
+    scroll_macine_list->SetBackgroundColour(*wxWHITE);
+    scroll_macine_list->SetScrollRate(5, 5);
+    scroll_macine_list->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
+    scroll_macine_list->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
+    wxBoxSizer *sizer_machine_list = new wxBoxSizer(wxVERTICAL);
+    scroll_macine_list->SetSizer(sizer_machine_list);
+    scroll_macine_list->Layout();
 
+    //B64
     const PhysicalPrinterCollection &      ph_printers    = preset_bundle.physical_printers;
     std::vector<PhysicalPrinterPresetData> preset_data;
     for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
         for (const std::string &preset_name : it->get_preset_names()) {
             Preset *preset = wxGetApp().preset_bundle->printers.find_preset(preset_name);
             if (preset != nullptr) {
-                //B62
-                preset_data.push_back({wxString::FromUTF8(it->get_full_name(preset_name)).Lower(), wxString::FromUTF8(preset_name),
-                        wxString::FromUTF8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
-                        preset_name
+                wxStringTokenizer   tokenizer(wxString::FromUTF8(it->get_full_name(preset_name)), "*");
+                wxString            tokenTemp    = tokenizer.GetNextToken().Trim();
+                std::string         tem_name     = into_u8(tokenTemp);
+                auto *            printer      = preset_bundle.physical_printers.find_printer(tem_name);
+                wxString          host         = "";
+                DynamicPrintConfig *cfg_t        = nullptr;
+                if (printer != nullptr) {
+                    host                                 = (printer->config.opt_string("print_host"));
+                    cfg_t            = &(printer->config);
+                }
+                //B62 // y1
+                preset_data.push_back({from_u8(it->get_full_name(preset_name)).Lower(), from_u8(preset_name),
+                                       from_u8(it->get_full_name(preset_name)), ph_printers.is_selected(it, preset_name),
+                                       preset_name, host, cfg_t
                 });
             }
         }
     }
     m_presetData = preset_data;
     for (const PhysicalPrinterPresetData &data : preset_data) {
-        wxCheckBox *checkbox = new wxCheckBox(this, wxID_ANY, _L(data.fullname));
+         wxCheckBox *checkbox = new wxCheckBox(scroll_macine_list, wxID_ANY, " " + data.fullname + "\n IP: " + data.host);
         checkbox->SetValue(data.selected);
-        checkbox_sizer->Add(checkbox, 0, wxEXPAND | wxALL, 5);
+        sizer_machine_list->Add(checkbox, 0, wxEXPAND | wxALL, 5);
     }
 
-    content_sizer->Add(checkbox_sizer);
+    wxBoxSizer *scrool_box_sizer = new wxBoxSizer(wxVERTICAL);
+
+    wxPanel *panel = new wxPanel(this, wxID_ANY);
+    panel->SetBackgroundColour(*wxWHITE);
+
+    wxBoxSizer *box_sizer = new wxBoxSizer(wxHORIZONTAL);
+    panel->SetSizer(box_sizer);
+
+    wxCheckBox *selectcheckbox = new wxCheckBox(panel, wxID_ANY, "");
+
+    selectcheckbox->Bind(wxEVT_CHECKBOX, [sizer_machine_list](wxCommandEvent &event) {
+        bool isChecked = event.IsChecked();
+        for (int i = 0; i < sizer_machine_list->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
+            if (checkbox) {
+                checkbox->SetValue(isChecked);
+            }
+        }
+    });
+
+    wxStaticText *text = new wxStaticText(panel, wxID_ANY, _L("QIDI Slicer's Physical Printer"));
+    text->SetWindowStyle(wxALIGN_CENTER_HORIZONTAL);
+
+    box_sizer->Add(selectcheckbox, 0, wxEXPAND | wxALL, 5);
+    box_sizer->Add(text, 0, wxEXPAND | wxALL, 5);
+
+    wxStaticLine *line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    line->SetForegroundColour(wxColour(220, 220, 220));
+
+    scrool_box_sizer->Add(panel, 0, wxEXPAND);
+    scrool_box_sizer->Add(line, 0, wxEXPAND | wxTOP | wxBOTTOM, 5);
+    scrool_box_sizer->Add(scroll_macine_list);
+
+
+    wxScrolledWindow *scroll_macine_list2 = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(800), FromDIP(300)),
+                                                                wxHSCROLL | wxVSCROLL);
+    scroll_macine_list2->SetBackgroundColour(*wxWHITE);
+    scroll_macine_list2->SetScrollRate(5, 5);
+    scroll_macine_list2->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
+    scroll_macine_list2->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
+    wxBoxSizer *sizer_machine_list2 = new wxBoxSizer(wxVERTICAL);
+    scroll_macine_list2->SetSizer(sizer_machine_list2);
+    scroll_macine_list2->Layout();
+
+#if QDT_RELEASE_TO_PUBLIC
+    auto m_devices = wxGetApp().get_devices();
+     for (const auto &device : m_devices) {
+        wxCheckBox *checkbox = new wxCheckBox(scroll_macine_list2, wxID_ANY, " " + from_u8(device.device_name) + "\n IP: " + device.local_ip);
+        checkbox->SetValue(false);
+        sizer_machine_list2->Add(checkbox, 0, wxEXPAND | wxALL, 5);
+
+    }
+#endif
+
+
+    wxBoxSizer *scrool_box_sizer2 = new wxBoxSizer(wxVERTICAL);
+
+    wxPanel *panel2 = new wxPanel(this, wxID_ANY);
+    panel2->SetBackgroundColour(*wxWHITE);
+
+    wxBoxSizer *box_sizer2 = new wxBoxSizer(wxHORIZONTAL);
+    panel2->SetSizer(box_sizer2);
+
+    wxCheckBox *selectcheckbox2 = new wxCheckBox(panel2, wxID_ANY, "");
+
+    selectcheckbox2->Bind(wxEVT_CHECKBOX, [sizer_machine_list2](wxCommandEvent &event) {
+        bool isChecked = event.IsChecked();
+        for (int i = 0; i < sizer_machine_list2->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
+            if (checkbox) {
+                checkbox->SetValue(isChecked);
+            }
+        }
+    });
+
+    wxStaticText *text2 = new wxStaticText(panel2, wxID_ANY, _L("QIDI Link's Physical Printer"));
+    text2->SetWindowStyle(wxALIGN_CENTER_HORIZONTAL);
+
+    box_sizer2->Add(selectcheckbox2, 0, wxEXPAND | wxALL, 5);
+    box_sizer2->Add(text2, 0, wxEXPAND | wxALL, 5);
+
+    wxStaticLine *line2 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    line2->SetForegroundColour(wxColour(220, 220, 220));
+
+
+
+    scrool_box_sizer2->Add(panel2, 0, wxEXPAND);
+    scrool_box_sizer2->Add(line2, 0, wxEXPAND | wxTOP | wxBOTTOM, 5);
+    scrool_box_sizer2->Add(scroll_macine_list2);
+
+
+    wxStaticBoxSizer *sizer1 = new wxStaticBoxSizer(wxVERTICAL, this, _L(""));
+    sizer1->Add(scrool_box_sizer, 1, wxEXPAND | wxALL, 10);
+
+    wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(wxVERTICAL, this, _L(""));
+    sizer2->Add(scrool_box_sizer2, 1, wxEXPAND | wxALL, 10);
+
+    //hbox2->Add(scrool_box_sizer);
+
+    //hbox2->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+
+    //hbox2->Add(scrool_box_sizer2);
+
+    hbox2->Add(sizer1, 1, wxEXPAND);
+    hbox2->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+    hbox2->Add(sizer2, 1, wxEXPAND);
+
+    content_sizer->Add(hbox2 , 1, wxEXPAND);
+    content_sizer->Add(0, 0, 0, wxEXPAND | wxBOTTOM, 23);
     
     if (combo_groups != nullptr) {
         // Repetier specific: Show a selection of file groups.
@@ -203,19 +361,28 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
         return true;
     };
 
-    //B53
+    //B53 //B64
     auto* btn_ok = add_button(wxID_OK, false, _L("Upload"));
-    btn_ok->Bind(wxEVT_BUTTON, [this, validate_path, checkbox_sizer](wxCommandEvent &) {
+    btn_ok->Bind(wxEVT_BUTTON, [this, validate_path, sizer_machine_list, sizer_machine_list2](wxCommandEvent &) {
         if (validate_path(txt_filename->GetValue())) {
             std::vector<bool> checkbox_states;
 
-            for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
-                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+            for (int i = 0; i < sizer_machine_list->GetItemCount(); i++) {
+                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
                 if (checkbox) {
                     checkbox_states.push_back(checkbox->GetValue());
                 }
             }
             m_checkbox_states  = checkbox_states;
+            checkbox_states.clear();
+
+            for (int i = 0; i < sizer_machine_list2->GetItemCount(); i++) {
+                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
+                if (checkbox) {
+                    checkbox_states.push_back(checkbox->GetValue());
+                }
+            }
+            m_checkbox_net_states = checkbox_states;
             post_upload_action = PrintHostPostUploadAction::None;
             EndDialog(wxID_OK);
         }
@@ -223,10 +390,17 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     txt_filename->SetFocus();
     
     //B53
-    Bind(wxEVT_CHECKBOX, [btn_ok, checkbox_sizer, this](wxCommandEvent &event) {
+    Bind(wxEVT_CHECKBOX, [btn_ok, sizer_machine_list, sizer_machine_list2, this](wxCommandEvent &event) {
         bool any_checkbox_selected = false;
-        for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
-            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+        for (int i = 0; i < sizer_machine_list->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
+            if (checkbox && checkbox->GetValue()) {
+                any_checkbox_selected = true;
+                break;
+            }
+        }
+        for (int i = 0; i < sizer_machine_list2->GetItemCount(); i++) {
+            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
             if (checkbox && checkbox->GetValue()) {
                 any_checkbox_selected = true;
                 break;
@@ -244,29 +418,46 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
             });
     }
 
-    //B53
+    //B53 //B64
     if (post_actions.has(PrintHostPostUploadAction::StartPrint)) {
         auto* btn_print = add_button(wxID_YES, false, _L("Upload and Print"));
-        btn_print->Bind(wxEVT_BUTTON, [this, validate_path, checkbox_sizer](wxCommandEvent &) {
+        btn_print->Bind(wxEVT_BUTTON, [this, validate_path, sizer_machine_list, sizer_machine_list2](wxCommandEvent &) {
             if (validate_path(txt_filename->GetValue())) {
                 std::vector<bool> checkbox_states;
 
-                for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
-                    wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+                for (int i = 0; i < sizer_machine_list->GetItemCount(); i++) {
+                    wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
                     if (checkbox) {
                         checkbox_states.push_back(checkbox->GetValue());
                     }
                 }
                 m_checkbox_states  = checkbox_states;
+                checkbox_states.clear();
+
+                for (int i = 0; i < sizer_machine_list2->GetItemCount(); i++) {
+                    wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
+                    if (checkbox) {
+                        checkbox_states.push_back(checkbox->GetValue());
+                    }
+                }
+                m_checkbox_net_states = checkbox_states;
                 post_upload_action = PrintHostPostUploadAction::StartPrint;
                 EndDialog(wxID_OK);
             }
         });
-        //B53
-        Bind(wxEVT_CHECKBOX, [btn_ok,btn_print, checkbox_sizer, this](wxCommandEvent &event) {
+        //B53 //B64
+        Bind(wxEVT_CHECKBOX, [btn_ok, btn_print, sizer_machine_list, sizer_machine_list2, this](wxCommandEvent &event) {
             bool any_checkbox_selected = false;
-            for (int i = 0; i < checkbox_sizer->GetItemCount(); i++) {
-                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(checkbox_sizer->GetItem(i)->GetWindow());
+            for (int i = 0; i < sizer_machine_list->GetItemCount(); i++) {
+                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
+                if (checkbox && checkbox->GetValue()) {
+                    any_checkbox_selected = true;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < sizer_machine_list2->GetItemCount(); i++) {
+                wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
                 if (checkbox && checkbox->GetValue()) {
                     any_checkbox_selected = true;
                     break;
@@ -340,7 +531,54 @@ std::string PrintHostSendDialog::storage() const
         return {};
     return boost::nowide::narrow(m_paths[combo_storage->GetSelection()]);
 }
+//B64
+wxBoxSizer *PrintHostSendDialog::create_item_input(
+    wxString str_before, wxString str_after, wxWindow *parent, wxString tooltip, std::string param)
+{
+    wxBoxSizer *sizer_input = new wxBoxSizer(wxHORIZONTAL);
+    auto        input_title = new wxStaticText(parent, wxID_ANY, str_before);
+    input_title->SetForegroundColour(wxColour(38, 46, 48));
+    input_title->SetFont(::Label::Body_13);
+    input_title->SetToolTip(tooltip);
+    input_title->Wrap(-1);
 
+    auto       input = new ::TextInput(parent, wxEmptyString, wxEmptyString, wxEmptyString, wxDefaultPosition, wxSize(FromDIP(50), -1),
+                                 wxTE_PROCESS_ENTER);
+    StateColor input_bg(std::pair<wxColour, int>(wxColour("#F0F0F1"), StateColor::Disabled),
+                        std::pair<wxColour, int>(*wxWHITE, StateColor::Enabled));
+    input->SetBackgroundColor(input_bg);
+    input->GetTextCtrl()->SetValue(wxGetApp().app_config->get(param));
+    wxTextValidator validator(wxFILTER_DIGITS);
+    input->GetTextCtrl()->SetValidator(validator);
+
+    auto second_title = new wxStaticText(parent, wxID_ANY, str_after, wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
+    second_title->SetForegroundColour(wxColour(38, 46, 48));
+    second_title->SetFont(::Label::Body_13);
+    second_title->SetToolTip(tooltip);
+    second_title->Wrap(-1);
+
+    //sizer_input->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+    sizer_input->Add(input_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
+    sizer_input->Add(input, 0, wxALIGN_CENTER_VERTICAL, 0);
+    sizer_input->Add(0, 0, 0, wxEXPAND | wxLEFT, 3);
+    sizer_input->Add(second_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
+
+    input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, param, input](wxCommandEvent &e) {
+        auto value = input->GetTextCtrl()->GetValue();
+        wxGetApp().app_config->set(param, std::string(value.mb_str()));
+        wxGetApp().app_config->save();
+        e.Skip();
+    });
+
+    input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, param, input](wxFocusEvent &e) {
+        auto value = input->GetTextCtrl()->GetValue();
+        wxGetApp().app_config->set(param, std::string(value.mb_str()));
+        wxGetApp().app_config->save();
+        e.Skip();
+    });
+
+    return sizer_input;
+}
 void PrintHostSendDialog::EndModal(int ret)
 {
     if (ret == wxID_OK) {
@@ -367,6 +605,8 @@ void PrintHostSendDialog::EndModal(int ret)
 
     MsgDialog::EndModal(ret);
 }
+//B64
+wxDEFINE_EVENT(EVT_PRINTHOST_WAIT, PrintHostQueueDialog::Event);
 
 wxDEFINE_EVENT(EVT_PRINTHOST_PROGRESS, PrintHostQueueDialog::Event);
 wxDEFINE_EVENT(EVT_PRINTHOST_ERROR,    PrintHostQueueDialog::Event);
@@ -384,6 +624,10 @@ PrintHostQueueDialog::Event::Event(wxEventType eventType, int winid, size_t job_
     , progress(progress)
 {}
 
+//B64
+PrintHostQueueDialog::Event::Event(wxEventType eventType, int winid, size_t job_id, int waittime, int progress)
+    : wxEvent(winid, eventType), job_id(job_id), waittime(waittime), progress(progress)
+{}
 PrintHostQueueDialog::Event::Event(wxEventType eventType, int winid, size_t job_id, wxString error)
     : wxEvent(winid, eventType)
     , job_id(job_id)
@@ -402,8 +646,10 @@ wxEvent *PrintHostQueueDialog::Event::Clone() const
     return new Event(*this);
 }
 
+//B64
 PrintHostQueueDialog::PrintHostQueueDialog(wxWindow *parent)
     : DPIDialog(parent, wxID_ANY, _L("Print host upload queue"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+    , on_wait_evt(this, EVT_PRINTHOST_WAIT, &PrintHostQueueDialog::on_wait, this)
     , on_progress_evt(this, EVT_PRINTHOST_PROGRESS, &PrintHostQueueDialog::on_progress, this)
     , on_error_evt(this, EVT_PRINTHOST_ERROR, &PrintHostQueueDialog::on_error, this)
     , on_cancel_evt(this, EVT_PRINTHOST_CANCEL, &PrintHostQueueDialog::on_cancel, this)
@@ -606,13 +852,38 @@ void PrintHostQueueDialog::on_progress(Event &evt)
     }
 }
 
+//B64
+void PrintHostQueueDialog::on_wait(Event &evt)
+{
+    wxCHECK_RET(evt.job_id < (size_t) job_list->GetItemCount(), "Out of bounds access to job list");
+    wxVariant nm, hst;
+    job_list->GetValue(nm, evt.job_id, COL_FILENAME);
+    job_list->GetValue(hst, evt.job_id, COL_HOST);
+    wxGetApp().notification_manager()->set_upload_job_notification_waittime(evt.job_id + 1, boost::nowide::narrow(nm.GetString()),
+                                                                                  boost::nowide::narrow(hst.GetString()),
+                                                                                  evt.waittime);
+}
 void PrintHostQueueDialog::on_error(Event &evt)
 {
     wxCHECK_RET(evt.job_id < (size_t)job_list->GetItemCount(), "Out of bounds access to job list");
 
     set_state(evt.job_id, ST_ERROR);
-
-    auto errormsg = format_wxstr("%1%\n%2%", _L("Error uploading to print host") + ":", evt.status);
+    // y1
+    std::string response_msg = into_u8(evt.status);
+    size_t pos_404      = evt.status.find("HTTP 404:");
+    wxString code_msg     = "";
+    if (pos_404 != std::string::npos) {
+        code_msg = _L("Network connection fails.");
+        size_t isAws = response_msg.find("AWS");
+        if(isAws != std::string::npos)
+            code_msg += _L("Unable to get required resources from AWS server, please check your network settings.");
+        else
+            code_msg += _L("Unable to get required resources from ESC server, please check your network settings.");
+    } 
+    else
+        code_msg = _L("Network connection times out. Please check the device network Settings.");
+    
+    auto     errormsg = format_wxstr("%1%\n%2%", _L("Error uploading to print host") + ":", code_msg);
     job_list->SetValue(wxVariant(0), evt.job_id, COL_PROGRESS);
     job_list->SetValue(wxVariant(errormsg), evt.job_id, COL_ERRORMSG);    // Stashes the error message into a hidden column for later
 

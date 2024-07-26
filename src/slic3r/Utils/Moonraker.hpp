@@ -21,6 +21,8 @@ class Moonraker : public PrintHost
 public:
     //B55
     Moonraker(DynamicPrintConfig *config, bool add_port);
+    //B64
+    Moonraker(std::string host,std::string local_ip);
     ~Moonraker() override = default;
 
     const char* get_name() const override;
@@ -37,7 +39,7 @@ public:
     bool has_auto_discovery() const override { return true; }
     bool can_test() const override { return true; }
     PrintHostPostUploadActions get_post_upload_actions() const override { return PrintHostPostUploadAction::StartPrint; }
-    std::string get_host() const override { return m_host; }
+    std::string                get_host() const override { return m_show_ip != "" ? m_show_ip : m_host; }
     const std::string& get_apikey() const { return m_apikey; }
     const std::string& get_cafile() const { return m_cafile; }
 
@@ -49,6 +51,8 @@ protected:
     virtual bool validate_version_text(const boost::optional<std::string> &version_text) const;
     virtual bool upload_inner_with_host(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const;
 */
+    //B64
+    std::string m_show_ip;
     std::string m_host;
     std::string m_apikey;
     std::string m_cafile;

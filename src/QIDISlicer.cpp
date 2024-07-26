@@ -26,6 +26,8 @@
 #include <cstring>
 #include <iostream>
 #include <math.h>
+//B64
+#include "nlohmann/json.hpp"
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/args.hpp>

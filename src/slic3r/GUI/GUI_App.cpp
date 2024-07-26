@@ -1884,7 +1884,8 @@ void GUI_App::check_printer_presets()
 void GUI_App::recreate_GUI(const wxString& msg_name)
 {
     m_is_recreating_gui = true;
-
+    // y1
+    mainframe->m_printer_view->StopStatusThread();
     mainframe->shutdown();
 
     wxProgressDialog dlg(msg_name, msg_name, 100, nullptr, wxPD_AUTO_HIDE);
@@ -1934,6 +1935,35 @@ void GUI_App::keyboard_shortcuts()
     dlg.ShowModal();
 }
 
+//B64
+void GUI_App::ShowUserLogin(bool show)
+{
+    // QDS: User Login Dialog
+    if (show) {
+        try {
+            if (!login_dlg)
+                login_dlg = new ZUserLogin();
+            else {
+                delete login_dlg;
+                login_dlg = new ZUserLogin();
+            }
+            login_dlg->ShowModal();
+        } catch (std::exception &e) {
+            ;
+        }
+    } else {
+        if (login_dlg)
+            login_dlg->EndModal(wxID_OK);
+    }
+}
+
+void GUI_App::SetOnlineLogin(bool status)
+{
+    mainframe->m_printer_view->SetLoginStatus(status);
+}
+
+void GUI_App::SetPresentChange(bool status)
+{ mainframe->m_printer_view->SetPresetChanged(status); }
 // static method accepting a wxWindow object as first parameter
 bool GUI_App::catch_error(std::function<void()> cb,
     //                       wxMessageDialog* message_dialog,

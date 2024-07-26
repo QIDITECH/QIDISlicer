@@ -34,7 +34,8 @@ struct PhysicalPrinterPresetData
     wxString fullname;   // full name
     bool     selected;   // is selected
     std::string preset_name;
-    int      checkboxId;
+    wxString    host;
+    DynamicPrintConfig *cfg_t;
 };
 class PrintHostSendDialog : public GUI::MsgDialog
 {
@@ -55,7 +56,12 @@ public:
     std::vector<PhysicalPrinterPresetData> pppd() { return m_presetData; }
     std::vector<bool>                      checkbox_states() { return m_checkbox_states; }
 
+    //B64
+    std::vector<bool> checkbox_net_states() { return m_checkbox_net_states; }
     virtual void EndModal(int ret) override;
+    //B64
+    wxBoxSizer *create_item_input(
+        wxString str_before, wxString str_after, wxWindow *parent, wxString tooltip, std::string param);
 private:
     wxTextCtrl *txt_filename;
     wxComboBox *combo_groups;
@@ -67,6 +73,8 @@ private:
     //B53
     std::vector<PhysicalPrinterPresetData> m_presetData;
     std::vector<bool>                      m_checkbox_states;
+    //B64
+    std::vector<bool> m_checkbox_net_states;
     //B61
     Plater *m_plater{nullptr};
 };
@@ -82,11 +90,15 @@ public:
         int progress = 0;    // in percent
         wxString tag;
         wxString status;
+        //B64
+        int waittime = 0;
 
         Event(wxEventType eventType, int winid, size_t job_id);
         Event(wxEventType eventType, int winid, size_t job_id, int progress);
         Event(wxEventType eventType, int winid, size_t job_id, wxString error);
         Event(wxEventType eventType, int winid, size_t job_id, wxString tag, wxString status);
+        //B64
+        Event(wxEventType eventType, int winid, size_t job_id, int waittime,int progress);
 
         virtual wxEvent *Clone() const;
     };
@@ -139,6 +151,8 @@ private:
     wxButton *btn_error;
     wxDataViewListCtrl *job_list;
     // Note: EventGuard prevents delivery of progress evts to a freed PrintHostQueueDialog
+    //B64
+    EventGuard on_wait_evt;
     EventGuard on_progress_evt;
     EventGuard on_error_evt;
     EventGuard on_cancel_evt;
@@ -148,6 +162,8 @@ private:
     void set_state(int idx, JobState);
     void on_list_select();
     void on_progress(Event&);
+    //B64
+    void on_wait(Event &);
     void on_error(Event&);
     void on_cancel(Event&);
     void on_info(Event&);
@@ -157,6 +173,8 @@ private:
     bool load_user_data(int, std::vector<int>&);
 };
 
+//B64
+wxDECLARE_EVENT(EVT_PRINTHOST_WAIT, PrintHostQueueDialog::Event);
 wxDECLARE_EVENT(EVT_PRINTHOST_PROGRESS, PrintHostQueueDialog::Event);
 wxDECLARE_EVENT(EVT_PRINTHOST_ERROR, PrintHostQueueDialog::Event);
 wxDECLARE_EVENT(EVT_PRINTHOST_CANCEL, PrintHostQueueDialog::Event);

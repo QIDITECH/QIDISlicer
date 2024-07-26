@@ -1408,6 +1408,16 @@ void NotificationManager::PrintHostUploadNotification::set_percentage(float perc
 	}
 }
 
+//B64
+void NotificationManager::PrintHostUploadNotification::set_waittime(int waittime)
+{
+    if (m_uj_state != UploadJobState::PB_CANCELLED) {
+        m_waittime          = waittime;
+        m_uj_state          = UploadJobState::PB_WAIT;
+        m_has_cancel_button = true;
+        init();
+    }
+}
 void NotificationManager::PrintHostUploadNotification::complete() 
 { 
 	m_uj_state = UploadJobState::PB_COMPLETED; 
@@ -1492,6 +1502,33 @@ void NotificationManager::PrintHostUploadNotification::render_bar(ImGuiWrapper& 
 		ImGui::SetCursorPosX(m_left_indentation);
 		ImGui::SetCursorPosY(win_size_y / 2 + win_size_y / 6 - (m_multiline ? m_line_height / 4 : m_line_height / 2));
 		break;
+	//B64
+    case Slic3r::GUI::NotificationManager::PrintHostUploadNotification::UploadJobState::PB_WAIT: {
+
+        int hours   = m_waittime / 3600;
+        int minutes = (m_waittime % 3600) / 60;
+        int seconds = m_waittime % 60;
+
+        std::string result = std::to_string(hours) + ":";
+
+        if (minutes < 10) {
+            result += "0";
+        }
+        result += std::to_string(minutes) + ":";
+
+        if (seconds < 10) {
+            result += "0";
+        }
+        result += std::to_string(seconds);
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(2) << "Still have to wait: " << result;
+        text = stream.str();
+
+        // text = _u8L("WAIT");
+        ImGui::SetCursorPosX(m_left_indentation);
+        ImGui::SetCursorPosY(win_size_y / 2 + win_size_y / 6 - (m_multiline ? m_line_height / 4 : m_line_height / 2));
+        break;
+    }
 	case Slic3r::GUI::NotificationManager::PrintHostUploadNotification::UploadJobState::PB_COMPLETED:
 	case Slic3r::GUI::NotificationManager::PrintHostUploadNotification::UploadJobState::PB_COMPLETED_WITH_WARNING:
 		// whole text with both "COMPLETED" and status message is generated in generate_text()
@@ -2320,6 +2357,22 @@ void NotificationManager::set_upload_job_notification_percentage(int id, const s
 			}
 		}
 	}
+}
+//B64
+void NotificationManager::set_upload_job_notification_waittime(int id, const std::string &filename, const std::string &host, int waittime)
+{
+    for (std::unique_ptr<PopNotification> &notification : m_pop_notifications) {
+        if (notification->get_type() == NotificationType::PrintHostUpload) {
+            PrintHostUploadNotification *phun = dynamic_cast<PrintHostUploadNotification *>(notification.get());
+            if (phun->compare_job_id(id)) {
+                phun->set_waittime(waittime);
+                if (phun->get_host() != host)
+                    phun->set_host(host);
+                wxGetApp().plater()->get_current_canvas3D()->schedule_extra_frame(0);
+                break;
+            }
+        }
+    }
 }
 void NotificationManager::set_upload_job_notification_host(int id, const std::string& host)
 {

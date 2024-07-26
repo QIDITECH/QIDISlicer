@@ -217,6 +217,8 @@ public:
 	// print host upload
 	void push_upload_job_notification(int id, float filesize, const std::string& filename, const std::string& host, float percentage = 0);
 	void set_upload_job_notification_percentage(int id, const std::string& filename, const std::string& host, float percentage);
+	//B64
+    void set_upload_job_notification_waittime(int id, const std::string &filename, const std::string &host, int waittime);
 	void set_upload_job_notification_host(int id, const std::string& host);
 	void set_upload_job_notification_status(int id, const std::string& status);
 	void set_upload_job_notification_comp_on_100(int id, bool comp);
@@ -487,6 +489,8 @@ private:
 		void			render_minimize_button(ImGuiWrapper& imgui,
 			const float win_pos_x, const float win_pos_y) override {}
 		float				m_percentage {0.0f};
+		//B64
+        int                 m_waittime{0};
 		
 		bool				m_has_cancel_button {false};
 		bool                m_render_percentage {false};
@@ -583,6 +587,7 @@ private:
 	class PrintHostUploadNotification : public ProgressBarNotification
 	{
 	public:
+		//B64
 		enum class UploadJobState
 		{
 			PB_PROGRESS,
@@ -590,7 +595,8 @@ private:
 			PB_CANCELLED,
 			PB_COMPLETED,
 			PB_COMPLETED_WITH_WARNING,
-			PB_RESOLVING
+			PB_RESOLVING,
+			PB_WAIT
 		};
 		PrintHostUploadNotification(const NotificationData& n, NotificationIDProvider& id_provider, wxEvtHandler* evt_handler, float percentage, int job_id, float filesize, const std::string& filename, const std::string& host)
 			:ProgressBarNotification(n, id_provider, evt_handler)
@@ -615,6 +621,8 @@ private:
 		void				set_complete_on_100(bool val) { m_complete_on_100 = val; }
 		void                complete();
 		void                complete_with_warning();
+		//B64
+        void set_waittime(int waittime);
 	protected:
 		void        init() override;
 		void		count_spaces() override;
