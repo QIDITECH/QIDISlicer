@@ -22,4 +22,3 @@ deps/build-linux/*
 .pkg_cache
 CMakeUserPresets.json
 /resources/profiles
-/src/slic3r/Utils/qidi/*
