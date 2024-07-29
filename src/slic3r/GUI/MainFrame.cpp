@@ -63,7 +63,7 @@
 #include "../Utils/PrintHost.hpp"
 
 //B64
-#include "../Utils/QIDINetwork.hpp"
+#include "../Utils/qidi/QIDINetwork.hpp"
 namespace Slic3r {
 namespace GUI {
 wxDEFINE_EVENT(EVT_LOAD_URL, wxCommandEvent);

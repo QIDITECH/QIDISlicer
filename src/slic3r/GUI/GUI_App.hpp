@@ -18,7 +18,7 @@
 #include <stack>
 
 //B64
-#include "../Utils/QIDINetwork.hpp"
+#include "../Utils/qidi/QIDINetwork.hpp"
 #include "slic3r/GUI/WebUserLoginDialog.hpp"
 class wxMenuItem;
 class wxMenuBar;

@@ -24,7 +24,7 @@
 
 #include <sstream>
 #include <slic3r/GUI/Widgets/WebView.hpp>
-#include "../Utils/QIDINetwork.hpp"
+#include "../Utils/qidi/QIDINetwork.hpp"
 #include <nlohmann/json.hpp>
 
 

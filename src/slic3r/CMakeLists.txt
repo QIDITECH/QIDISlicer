@@ -303,8 +303,8 @@ set(SLIC3R_GUI_SOURCES
     Utils/FixModelByWin10.hpp
     Utils/Moonraker.cpp
     Utils/Moonraker.hpp
-	Utils/QIDINetwork.cpp
-    Utils/QIDINetwork.hpp
+	Utils/qidi/QIDINetwork.cpp
+    Utils/qidi/QIDINetwork.hpp
     Utils/OctoPrint.cpp
     Utils/OctoPrint.hpp
     Utils/Duet.cpp
