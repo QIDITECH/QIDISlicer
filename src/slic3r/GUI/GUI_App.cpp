@@ -1957,6 +1957,16 @@ void GUI_App::ShowUserLogin(bool show)
     }
 }
 
+// y2
+void GUI_App::shutdown()
+{
+    if (login_dlg != nullptr) {
+        BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": destroy login dialog");
+        delete login_dlg;
+        login_dlg = nullptr;
+    }
+}
+
 void GUI_App::SetOnlineLogin(bool status)
 {
     mainframe->m_printer_view->SetLoginStatus(status);

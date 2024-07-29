@@ -878,7 +878,7 @@ void PrintHostQueueDialog::on_error(Event &evt)
         if(isAws != std::string::npos)
             code_msg += _L("Unable to get required resources from AWS server, please check your network settings.");
         else
-            code_msg += _L("Unable to get required resources from ESC server, please check your network settings.");
+            code_msg += _L("Unable to get required resources from Aliyun server, please check your network settings.");
     } 
     else
         code_msg = _L("Network connection times out. Please check the device network Settings.");

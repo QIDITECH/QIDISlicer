@@ -175,7 +175,7 @@ std::string Moonraker::get_status(wxString &msg) const
                 if(body.find("AWS") != std::string::npos)
                     body += ("Unable to get required resources from AWS server, please check your network settings.");
                 else
-                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
             }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
                                             body;
@@ -245,7 +245,7 @@ float Moonraker::get_progress(wxString &msg) const
                 if(body.find("AWS") != std::string::npos)
                     body += ("Unable to get required resources from AWS server, please check your network settings.");
                 else
-                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
             }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
                                             body;
@@ -369,7 +369,7 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
                 if(body.find("AWS") != std::string::npos)
                     body += ("Unable to get required resources from AWS server, please check your network settings.");
                 else
-                    body += ("Unable to get required resources from ESC server, please check your network settings.");
+                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
             }
             BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error uploading file: %2%, HTTP %3%, body: `%4%`") % name % error % status % body;
             error_fn(format_error(body, error, status));

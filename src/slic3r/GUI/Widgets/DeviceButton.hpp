@@ -101,6 +101,7 @@ private:
 
     wxString m_name_text;
     wxString m_ip_text;
+    wxString m_icon_text;
     wxString m_state_text = "standby";
     wxString m_progress_text = "(0%)";
     bool     m_isSimpleMode = true;

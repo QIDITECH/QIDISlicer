@@ -45,6 +45,7 @@ DeviceButton::DeviceButton(wxWindow *parent,
                              wxString  ip_text)
     : DeviceButton(name_text,ip_text)
 {
+    m_icon_text = icon;
     Create(parent, text, icon, style, iconSize);
 }
 
@@ -250,7 +251,9 @@ void DeviceButton::render(wxDC &dc)
 
     if (GetLabel() == "") {
         dc.DrawBitmap(icon.get_bitmap(), rcContent.x/2+1, rcContent.y/2);
-    } else if (m_ip_text == "") {
+    }
+    // y2
+    else if (m_ip_text == "" && m_name_text == "") {
         //dc.DrawBitmap(icon.get_bitmap(), 10, (GetSize().GetHeight() - icon.get_bitmap().GetHeight()) / 2);
         if (m_isSimpleMode) {
             dc.SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
@@ -327,7 +330,7 @@ void DeviceButton::messureSize()
     wxSize szContent = textSize;
     if (this->active_icon.bmp().IsOk()) {
         if (szContent.y > 0) {
-            //BBS norrow size between text and icon
+            //QDS norrow size between text and icon
             szContent.x += 5;
         }
         wxSize szIcon = this->active_icon.GetSize();
@@ -336,9 +339,10 @@ void DeviceButton::messureSize()
             szContent.y = szIcon.y;
     }
     wxSize size = szContent + paddingSize * 2;
-    if (m_isSimpleMode && m_ip_text != "")
+    // y2
+    if (m_isSimpleMode && m_icon_text.find("_thumbnail") != std::string::npos)
         size.x = 180;
-    else if (m_ip_text != "")
+    else if (m_icon_text.find("_thumbnail") != std::string::npos)
         size.x = 290;
     if (minSize.GetHeight() > 0)
         size.SetHeight(minSize.GetHeight());

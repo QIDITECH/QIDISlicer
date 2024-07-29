@@ -677,6 +677,8 @@ void MainFrame::shutdown()
     // to avoid any manipulations with them from App->wxEVT_IDLE after of the mainframe closing 
     wxGetApp().tabs_list.clear();
     wxGetApp().plater_ = nullptr;
+    // y2
+    wxGetApp().shutdown();
 }
 
 GalleryDialog* MainFrame::gallery_dialog()

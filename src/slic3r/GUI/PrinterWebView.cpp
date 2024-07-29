@@ -339,6 +339,10 @@ void PrinterWebView::SetPresetChanged(bool status) {
                         model_id = "my_printer";
                     else
                         model_id = preset->config.opt_string("printer_model");
+                } 
+                // y2
+                else {
+                    model_id = "my_printer";
                 }
                 const DynamicPrintConfig *cfg_t = &(it->config);
 
@@ -449,10 +453,23 @@ void PrinterWebView::AddButton(const wxString &    device_name,
 #if QDT_RELEASE_TO_PUBLIC
 void PrinterWebView::AddNetButton(const Device device)
 {
+    // y2
+    const Preset preset = wxGetApp().preset_bundle->prints.get_edited_preset();
+    bool isQIDI = false;
+    auto models = preset.vendor->models;
+    for (auto model : models) {
+        std::string model_id = model.id;
+        if (device.device_name.find(model_id) != std::string::npos) {
+            isQIDI = true;
+            break;
+        }
+    }
+
     std::size_t found = device.device_name.find('@');
     wxString    Machine_Name;
     wxString    device_name;
-    if (found != std::string::npos) {
+    // y2
+    if (found != std::string::npos && isQIDI) {
         std::string extracted = device.device_name.substr(found + 1);
         Machine_Name          = Machine_Name.Format("%s%s", extracted, "_thumbnail");
         device_name           = device_name.Format("%s", device.device_name.substr(0, found));
