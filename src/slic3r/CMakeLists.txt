@@ -303,8 +303,6 @@ set(SLIC3R_GUI_SOURCES
     Utils/FixModelByWin10.hpp
     Utils/Moonraker.cpp
     Utils/Moonraker.hpp
-	QIDI/QIDINetwork.cpp
-    QIDI/QIDINetwork.hpp
     Utils/OctoPrint.cpp
     Utils/OctoPrint.hpp
     Utils/Duet.cpp
@@ -348,6 +346,13 @@ set(SLIC3R_GUI_SOURCES
 )
 
 find_package(NanoSVG REQUIRED)
+
+if(QDT_RELEASE_TO_PUBLIC)
+	list(APPEND SLIC3R_GUI_SOURCES
+			QIDI/QIDINetwork.cpp
+			QIDI/QIDINetwork.hpp
+		)
+endif ()
 
 if (APPLE)
     list(APPEND SLIC3R_GUI_SOURCES
