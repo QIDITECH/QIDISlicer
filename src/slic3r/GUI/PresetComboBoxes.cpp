@@ -364,19 +364,31 @@ void PresetComboBox::update(std::string select_preset_name)
 }
 
 void PresetComboBox::edit_physical_printer()
-{
+{   
+    //y3
+    std::set<std::string> m_exit_host = wxGetApp().getExitHost();
     if (!m_preset_bundle->physical_printers.has_selection())
         return;
-
-    PhysicalPrinterDialog dlg(this->GetParent(),this->GetString(this->GetSelection()));
-    if (dlg.ShowModal() == wxID_OK)
+    PhysicalPrinter &ph_printer = m_preset_bundle->physical_printers.get_selected_printer();
+    std::string      ph_host    = ph_printer.config.opt_string("print_host");
+    m_exit_host.erase(ph_host);
+    PhysicalPrinterDialog dlg(this->GetParent(), this->GetString(this->GetSelection()), m_exit_host);
+    if (dlg.ShowModal() == wxID_OK) 
+    {
         update();
+        wxGetApp().SetPresentChange(true);
+    }
+        
 }
 
 void PresetComboBox::add_physical_printer()
-{
-    if (PhysicalPrinterDialog(this->GetParent(), wxEmptyString).ShowModal() == wxID_OK)
+{   
+    //y3
+    std::set<std::string> m_exit_host = wxGetApp().getExitHost();
+    if (PhysicalPrinterDialog(this->GetParent(), wxEmptyString, m_exit_host).ShowModal() == wxID_OK) {
         update();
+        wxGetApp().SetPresentChange(true);
+    }
 }
 
 void PresetComboBox::open_physical_printer_url()
@@ -409,6 +421,8 @@ bool PresetComboBox::del_physical_printer(const wxString& note_string/* = wxEmpt
         return false;
 
     m_preset_bundle->physical_printers.delete_selected_printer();
+    //y3
+    wxGetApp().SetPresentChange(true);
 
     this->update();
 
@@ -775,7 +789,9 @@ void PlaterPresetComboBox::show_add_menu()
 
     append_menu_item(menu, wxID_ANY, _L("Add physical printer"), "",
         [this](wxCommandEvent&) {
-            PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString);
+            //y3
+            std::set<std::string> m_exit_host = wxGetApp().getExitHost();
+            PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString, m_exit_host);
             if (dlg.ShowModal() == wxID_OK)
                 update();
         }, "edit_uni", menu, []() { return true; }, wxGetApp().plater());

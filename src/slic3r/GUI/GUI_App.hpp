@@ -409,6 +409,11 @@ public:
 
     void            open_wifi_config_dialog(bool forced, const wxString& drive_path = {});
     bool            get_wifi_config_dialog_shown() const { return m_wifi_config_dialog_shown; }
+
+    //y3
+    void            setExitHost(std::set<std::string> exit_host) { m_exit_host = exit_host; };
+    std::set<std::string> getExitHost() { return m_exit_host; };
+
 private:
     bool            on_init_inner();
 	void            init_app_config();
@@ -433,6 +438,8 @@ private:
     bool            m_datadir_redefined { false }; 
 
     bool                    m_wifi_config_dialog_shown { false };
+    //y3
+    std::set<std::string>   m_exit_host;
 };
 
 DECLARE_APP(GUI_App)

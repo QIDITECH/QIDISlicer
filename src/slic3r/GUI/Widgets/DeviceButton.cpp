@@ -26,7 +26,7 @@ END_EVENT_TABLE()
 DeviceButton::DeviceButton(wxString name_text, wxString ip_text) : paddingSize(10, 8), m_name_text(name_text), m_ip_text(ip_text)
 {
     background_color = StateColor(
-        std::make_pair(0xF0F0F0, (int) StateColor::Disabled),
+        std::make_pair(0x262629, (int) StateColor::Disabled),
         std::make_pair(0x37EE7C, (int) StateColor::Hovered | StateColor::Checked),
         std::make_pair(0x00AE42, (int) StateColor::Checked),
         std::make_pair(*wxLIGHT_GREY, (int) StateColor::Hovered), 
@@ -47,6 +47,14 @@ DeviceButton::DeviceButton(wxWindow *parent,
 {
     m_icon_text = icon;
     Create(parent, text, icon, style, iconSize);
+}
+
+//y3
+DeviceButton::DeviceButton(wxWindow *parent, wxString icon, long style)
+{
+    paddingSize     = wxSize(12, 6);
+    wxSize iconSize = wxSize(20, 20);
+    Create(parent, "", icon, style, iconSize);
 }
 
 bool DeviceButton::Create(wxWindow *parent, wxString text, wxString icon, long style, wxSize iconSize /* = wxSize(16, 16)*/)
@@ -164,14 +172,14 @@ void DeviceButton::SetIsSelected(bool isSelected)
 {
     m_isSelected = isSelected;
     if (m_isSelected) {
-        StateColor calc_btn_bg(std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Pressed),
-                               std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Hovered),
-                               std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Normal));
+        StateColor calc_btn_bg(std::pair<wxColour, int>(wxColour(147, 147, 150), StateColor::Pressed),
+                               std::pair<wxColour, int>(wxColour(100, 100, 105), StateColor::Hovered),
+                               std::pair<wxColour, int>(wxColour(100, 100, 105), StateColor::Normal));
         SetBackgroundColor(calc_btn_bg);
     } else {
-        StateColor calc_btn_bg(std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Pressed),
-                               std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Hovered),
-                               std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Normal));
+        StateColor calc_btn_bg(std::pair<wxColour, int>(wxColour(118, 118, 121), StateColor::Pressed),
+                               std::pair<wxColour, int>(wxColour(76, 76, 80), StateColor::Hovered),
+                               std::pair<wxColour, int>(wxColour(67, 67, 71), StateColor::Normal));
         SetBackgroundColor(calc_btn_bg);
     }
     Refresh();
@@ -250,7 +258,7 @@ void DeviceButton::render(wxDC &dc)
     wxString    m_name_text     = wxString::FromUTF8(tempName_string);
 
     if (GetLabel() == "") {
-        dc.DrawBitmap(icon.get_bitmap(), rcContent.x/2+1, rcContent.y/2);
+        dc.DrawBitmap(icon.get_bitmap(), rcContent.x/2+1, rcContent.y/2-2);     //y3
     }
     // y2
     else if (m_ip_text == "" && m_name_text == "") {

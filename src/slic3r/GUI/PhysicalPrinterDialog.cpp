@@ -46,11 +46,11 @@ PresetForPrinter::PresetForPrinter(PhysicalPrinterDialog* parent, const std::str
     m_parent(parent)
 {
     m_sizer = new wxBoxSizer(wxVERTICAL);
-
-    m_delete_preset_btn = new ScalableButton(parent, wxID_ANY, "cross");
-    m_delete_preset_btn->SetFont(wxGetApp().normal_font());
-    m_delete_preset_btn->SetToolTip(_L("Delete this preset from this printer device"));
-    m_delete_preset_btn->Bind(wxEVT_BUTTON, &PresetForPrinter::DeletePreset, this);
+    //y4
+    //m_delete_preset_btn = new ScalableButton(parent, wxID_ANY, "cross");
+    //m_delete_preset_btn->SetFont(wxGetApp().normal_font());
+    //m_delete_preset_btn->SetToolTip(_L("Delete this preset from this printer device"));
+    //m_delete_preset_btn->Bind(wxEVT_BUTTON, &PresetForPrinter::DeletePreset, this);
 
     m_presets_list = new PresetComboBox(parent, Preset::TYPE_PRINTER);
     m_presets_list->set_printer_technology(parent->get_printer_technology());
@@ -88,7 +88,7 @@ PresetForPrinter::PresetForPrinter(PhysicalPrinterDialog* parent, const std::str
 
     wxBoxSizer* preset_sizer = new wxBoxSizer(wxHORIZONTAL);
     preset_sizer->Add(m_presets_list        , 1, wxEXPAND);
-    preset_sizer->Add(m_delete_preset_btn   , 0, wxEXPAND | wxLEFT, BORDER_W);
+    // preset_sizer->Add(m_delete_preset_btn   , 0, wxEXPAND | wxLEFT, BORDER_W);
 
     wxBoxSizer* name_sizer = new wxBoxSizer(wxHORIZONTAL);
     name_sizer->Add(m_info_line, 0, wxEXPAND);
@@ -101,7 +101,7 @@ PresetForPrinter::PresetForPrinter(PhysicalPrinterDialog* parent, const std::str
 PresetForPrinter::~PresetForPrinter()
 {
     m_presets_list->Destroy();
-    m_delete_preset_btn->Destroy();
+    // m_delete_preset_btn->Destroy();
     m_info_line->Destroy();
     m_full_printer_name->Destroy();
 }
@@ -126,7 +126,7 @@ std::string PresetForPrinter::get_preset_name()
 
 void PresetForPrinter::SuppressDelete()
 {
-    m_delete_preset_btn->Enable(false);
+    //m_delete_preset_btn->Enable(false);
     
     // this case means that now we have only one related preset for the printer
     // So, allow any selection
@@ -136,8 +136,8 @@ void PresetForPrinter::SuppressDelete()
 
 void PresetForPrinter::AllowDelete()
 {
-    if (!m_delete_preset_btn->IsEnabled())
-        m_delete_preset_btn->Enable();
+    //if (!m_delete_preset_btn->IsEnabled())
+    //    m_delete_preset_btn->Enable();
 
     m_presets_list->set_printer_technology(m_parent->get_printer_technology());
     m_presets_list->update();
@@ -146,7 +146,7 @@ void PresetForPrinter::AllowDelete()
 void PresetForPrinter::on_sys_color_changed()
 {
     m_presets_list->sys_color_changed();
-    m_delete_preset_btn->sys_color_changed();
+    // m_delete_preset_btn->sys_color_changed();
 }
 
 
@@ -154,7 +154,8 @@ void PresetForPrinter::on_sys_color_changed()
 //          PhysicalPrinterDialog
 //------------------------------------------
 
-PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow* parent, wxString printer_name) :
+//y3
+PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow *parent, wxString printer_name, std::set<std::string> exit_host) :
     DPIDialog(parent, wxID_ANY, _L("Physical Printer"), wxDefaultPosition, wxSize(45 * wxGetApp().em_unit(), -1), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_printer("", wxGetApp().preset_bundle->physical_printers.default_config())
 {
@@ -170,15 +171,18 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow* parent, wxString printer_
     else {
         std::string full_name = into_u8(printer_name);
         printer_name = from_u8(PhysicalPrinter::get_short_name(full_name));
+        old_name = into_u8(printer_name);
         new_printer = false;
     }
 
+    m_exit_host = exit_host;
+
     wxStaticText* label_top = new wxStaticText(this, wxID_ANY, _L("Descriptive name for the printer") + ":");
 
-    m_add_preset_btn = new ScalableButton(this, wxID_ANY, "add_copies");
+   /* m_add_preset_btn = new ScalableButton(this, wxID_ANY, "add_copies");
     m_add_preset_btn->SetFont(wxGetApp().normal_font());
     m_add_preset_btn->SetToolTip(_L("Add preset for this printer device")); 
-    m_add_preset_btn->Bind(wxEVT_BUTTON, &PhysicalPrinterDialog::AddPreset, this);
+    m_add_preset_btn->Bind(wxEVT_BUTTON, &PhysicalPrinterDialog::AddPreset, this);*/
 
     m_printer_name    = new ::TextInput(this,printer_name);
     wxGetApp().UpdateDarkUI(m_printer_name);
@@ -219,7 +223,7 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow* parent, wxString printer_
 
     wxBoxSizer* nameSizer = new wxBoxSizer(wxHORIZONTAL);
     nameSizer->Add(m_printer_name, 1, wxEXPAND);
-    nameSizer->Add(m_add_preset_btn, 0, wxEXPAND | wxLEFT, BORDER_W);
+    // nameSizer->Add(m_add_preset_btn, 0, wxEXPAND | wxLEFT, BORDER_W);
 
     m_presets_sizer = new wxBoxSizer(wxVERTICAL);
     for (PresetForPrinter* preset : m_presets)
@@ -722,7 +726,7 @@ void PhysicalPrinterDialog::on_dpi_changed(const wxRect& suggested_rect)
 
 void PhysicalPrinterDialog::on_sys_color_changed()
 {
-    m_add_preset_btn->sys_color_changed();
+    //m_add_preset_btn->sys_color_changed();
     m_printhost_browse_btn->sys_color_changed();
     m_printhost_test_btn->sys_color_changed();
     if (m_printhost_cafile_browse_btn)
@@ -734,6 +738,21 @@ void PhysicalPrinterDialog::on_sys_color_changed()
 
 void PhysicalPrinterDialog::OnOK(wxEvent& event)
 {
+
+    //y3
+    std::string now_host = boost::any_cast<std::string>(m_optgroup->get_field("print_host")->get_value());
+    if (now_host.empty()) {
+        MessageDialog msg_wingow(nullptr, _L("The host or IP or URL cannot be empty."), "", wxICON_WARNING | wxOK);
+        msg_wingow.ShowModal();
+        return;
+    }
+    if (m_exit_host.find(now_host) != m_exit_host.end()) {
+        MessageDialog msg_wingow(nullptr, _L("A device with the same host (IP or URL) already exists, please re-enter."), "",
+                                 wxICON_WARNING | wxOK);
+        msg_wingow.ShowModal();
+        return;
+    }
+
     wxString printer_name = m_printer_name->GetValue();
     if (printer_name.IsEmpty() || printer_name == m_default_name) {
         warning_catcher(this, _L("You have to enter a printer name."));
@@ -759,17 +778,21 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
     }
     PhysicalPrinterCollection& printers = wxGetApp().preset_bundle->physical_printers;
     const PhysicalPrinter* existing = printers.find_printer(into_u8(printer_name), false);
-    if (existing && into_u8(printer_name) != printers.get_selected_printer_name())
+    if (existing && into_u8(printer_name) != printers.get_selected_printer_name() && into_u8(printer_name) != old_name)
     {
+
+        //y3
         wxString msg_text = from_u8((boost::format(_u8L("Printer with name \"%1%\" already exists.")) % existing->name/*printer_name*/).str());
-        msg_text += "\n" + _L("Replace?");
-        //wxMessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxYES | wxNO);
-        MessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxYES | wxNO);
+        //msg_text += "\n" + _L("Replace?");
+        ////wxMessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxYES | wxNO);
+        //MessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxYES | wxNO);
+        MessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxOK);
+        dialog.ShowModal();
+        return;
+        //if (dialog.ShowModal() == wxID_NO)
+        //    return;
 
-        if (dialog.ShowModal() == wxID_NO)
-            return;
-
-        m_printer.name = existing->name;
+        //m_printer.name = existing->name;
     }
 
     std::set<std::string> repeat_presets;
@@ -821,7 +844,9 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
         wxGetApp().get_tab(Preset::TYPE_PRINTER)->update_preset_choice();
 
     //B64
-    wxGetApp().SetPresentChange(true);
+    // wxGetApp().SetPresentChange(true);
+    m_machine_name = into_u8(printer_name);
+    m_machine_host = now_host;
     event.Skip();
 }
 
@@ -866,5 +891,9 @@ void PhysicalPrinterDialog::DeletePreset(PresetForPrinter* preset_for_printer)
 
     update_host_type(true);
 }
+
+//y3
+std::string PhysicalPrinterDialog::get_name() { return m_machine_name; }
+std::string PhysicalPrinterDialog::get_host() { return m_machine_host; }
 
 }}    // namespace Slic3r::GUI

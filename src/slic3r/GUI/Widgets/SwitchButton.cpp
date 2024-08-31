@@ -85,9 +85,10 @@ void SwitchButton::Rescale()
 			//thumbSize.x += BS * 12 *10;
 			//thumbSize.y += BS * 6;
             thumbSize.x = m_size/2;
-            thumbSize.y = 25;
+			//y3
+            thumbSize.y = 30;
             trackSize.x = m_size;
-			trackSize.y = 30;
+			trackSize.y = 35;
 
             auto maxWidth = GetMaxWidth();
 #ifdef __WXOSX__
@@ -105,7 +106,7 @@ void SwitchButton::Rescale()
 			memdc.SetBackground(wxBrush(GetBackgroundColour()));
 			memdc.Clear();
             //memdc.SetFont(dc.GetFont());
-            memdc.SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+            memdc.SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
 			auto state = i == 0 ? StateColor::Enabled : (StateColor::Checked | StateColor::Enabled);
             {
 #ifdef __WXMSW__
@@ -119,18 +120,19 @@ void SwitchButton::Rescale()
                 dc2.SetBrush(wxBrush(track_color.colorForStates(state)));
                 dc2.SetPen(wxPen(track_color.colorForStates(state)));
                 dc2.DrawRectangle(wxRect({i == 0 ? BS : (trackSize.x - thumbSize.x - BS), BS}, thumbSize));
-
-				dc2.SetPen(wxPen(thumb_color.colorForStates(StateColor::Checked | StateColor::Enabled)));
-                //dc2.DrawLine(i == 0 ? 2 * BS + (thumbSize.x - textSize[0].x) / 2 :
-                //                      trackSize.x - thumbSize.x + (thumbSize.x - textSize[1].x) / 2,
-                //             thumbSize.y, i == 0 ? thumbSize.x / 2 + textSize[0].x : trackSize.x - thumbSize.x / 2 - 2 * BS + textSize[1].x,
-                //             thumbSize.y);
+				//y3
+				dc2.SetPen(wxPen(thumb_color.colorForStates(StateColor::Checked | StateColor::Enabled), 3));
+                dc2.DrawLine(i == 0 ? 1 : trackSize.x / 2 + 2 * BS, thumbSize.y - 1, i == 0 ? trackSize.x / 2 - 2 * BS : trackSize.x,
+                             thumbSize.y - 1);
+                dc2.SetPen(wxPen(wxColour(66, 66, 69), 1));
+                dc2.DrawLine(trackSize.x / 2, 1, trackSize.x / 2, thumbSize.y - 1);
+                dc2.DrawLine(0, thumbSize.y, trackSize.x, thumbSize.y);
 
 			}
             memdc.SetTextForeground(text_color.colorForStates(state ^ StateColor::Checked));
-            memdc.DrawText(labels[0], {BS + (thumbSize.x - textSize[0].x) / 2, BS + (thumbSize.y - textSize[0].y) / 2});
+            memdc.DrawText(labels[0], {BS + (thumbSize.x - textSize[0].x) / 2 - 7, BS + (thumbSize.y - textSize[0].y) / 2 - 4 * BS});
             memdc.SetTextForeground(text_color.colorForStates(state));
-            memdc.DrawText(labels[1], {trackSize.x - thumbSize.x - BS + (thumbSize.x - textSize[1].x) / 2, BS + (thumbSize.y - textSize[1].y) / 2});
+            memdc.DrawText(labels[1], {trackSize.x - thumbSize.x - BS + (thumbSize.x - textSize[1].x) / 2 - 4, BS + (thumbSize.y - textSize[1].y) / 2 - 4 * BS});
 
 			//memdc.SetPen(wxPen(wxColour(68, 121, 251)));
    //         if (!GetValue())

@@ -2102,37 +2102,38 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
         //B64            
             m_printer_view->SetPauseThread(false);
 
-
-            if (const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config(); cfg) {
-                const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
-                wxString               host          = pp.config.opt_string("print_host");
-                //B55
-                //B45
-                if (host.empty()) {
-                    tem_host = "";
-                    host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
-                } else {
-                //B55
-                    const auto opt           = cfg->option<ConfigOptionEnum<PrintHostType>>("host_type");
-                    const auto host_type     = opt != nullptr ? opt->value : htOctoPrint;
-                    if (!host.Lower().starts_with("http"))
-                        host = wxString::Format("http://%s", host);
-                    if (host_type == htMoonraker) {
-                        if (!host.Lower().ends_with("10088"))
-                            host = wxString::Format("%s:10088", host);
-                    }
-                }
-                //B55
-                if (tem_host != host) {
-                    //B45
-                    m_printer_view->load_url(host);
-                    tem_host = host;
-                }
-            } else {
-                tem_host     = "";
-                wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
-                m_printer_view->load_url(url);
-            }
+            //y3
+            //if (const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config(); cfg) {
+            //    const PhysicalPrinter &pp            = preset_bundle.physical_printers.get_selected_printer();
+            //    wxString               host          = pp.config.opt_string("print_host");
+            //    //B55
+            //    //B45
+            //    if (host.empty()) {
+            //        tem_host = "";
+            //        host     = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+            //    } else {
+            //    //B55
+            //        const auto opt           = cfg->option<ConfigOptionEnum<PrintHostType>>("host_type");
+            //        const auto host_type     = opt != nullptr ? opt->value : htOctoPrint;
+            //        if (!host.Lower().starts_with("http"))
+            //            host = wxString::Format("http://%s", host);
+            //        if (host_type == htMoonraker) {
+            //            if (!host.Lower().ends_with("10088"))
+            //                host = wxString::Format("%s:10088", host);
+            //        }
+            //    }
+            //    //B55
+            //    if (tem_host != host) {
+            //        //B45
+            //        m_printer_view->load_url(host);
+            //        tem_host = host;
+            //    }
+            //} else {
+            //    tem_host     = "";
+            //    wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+            //    m_printer_view->load_url(url);
+            //}
+            m_printer_view->Layout();
         }
         // B30
         if (m_tabpanel->GetSelection() != (int) new_selection && m_tabpanel->GetSelection() < 4)

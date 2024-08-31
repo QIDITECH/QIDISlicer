@@ -31,6 +31,8 @@ public:
                   wxSize    iconSize = wxSize(16, 16),
                   wxString  name_text = "",
                   wxString  ip_text   = "");
+    //y3
+    DeviceButton(wxWindow *parent, wxString icon, long style);
 
     bool Create(wxWindow* parent, wxString text, wxString icon = "", long style = 0, wxSize iconSize = wxSize(16, 16));
 

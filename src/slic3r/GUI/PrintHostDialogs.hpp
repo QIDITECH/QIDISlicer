@@ -25,6 +25,25 @@ class wxDataViewListCtrl;
 namespace Slic3r {
 
 namespace GUI {
+//y4
+class SendCheckBox : public wxCheckBox
+{
+public:
+    SendCheckBox(wxWindow *parent, wxWindowID id, const wxString &label, const wxPoint &pos = wxDefaultPosition)
+        : wxCheckBox(parent, id, label, pos)
+    {}
+
+    void SetState(bool value)
+    {
+        wxCheckBox::SetValue(value);
+        wxCommandEvent event(wxEVT_CHECKBOX, GetId());
+        event.SetEventObject(this);
+        event.SetInt(value);
+        GetEventHandler()->ProcessEvent(event);
+    }
+};
+
+
 
 //B53 //B62
 struct PhysicalPrinterPresetData
@@ -62,6 +81,10 @@ public:
     //B64
     wxBoxSizer *create_item_input(
         wxString str_before, wxString str_after, wxWindow *parent, wxString tooltip, std::string param);
+    //y4
+    std::string NormalizeVendor(const std::string &str);
+    void        OnCheckBoxClicked(wxCommandEvent &event);
+
 private:
     wxTextCtrl *txt_filename;
     wxComboBox *combo_groups;
@@ -77,6 +100,9 @@ private:
     std::vector<bool> m_checkbox_net_states;
     //B61
     Plater *m_plater{nullptr};
+    //y4
+    std::vector<SendCheckBox*> unSelectedBoxes;
+    std::vector<SendCheckBox*> SelectedBoxes;
 };
 
 

@@ -79,12 +79,17 @@ class PhysicalPrinterDialog : public DPIDialog
     wxString            m_stored_host;
     PrintHostType       m_last_host_type;
     bool                m_opened_as_connect {false};
+    //y3
+    std::string         m_machine_name;
+    std::string         m_machine_host;
+
     void build_printhost_settings(ConfigOptionsGroup* optgroup);
     void OnOK(wxEvent& event);
     void AddPreset(wxEvent& event);
 
 public:
-    PhysicalPrinterDialog(wxWindow* parent, wxString printer_name);
+    //y3
+    PhysicalPrinterDialog(wxWindow *parent, wxString printer_name, std::set<std::string> exit_host);
     ~PhysicalPrinterDialog();
 
     void        update(bool printer_change = false);
@@ -98,9 +103,19 @@ public:
     PrinterTechnology   get_printer_technology();
 
     void        DeletePreset(PresetForPrinter* preset_for_printer);
+    //y3
+    std::string get_name();
+    std::string get_host();
+
+
 protected:
     void on_dpi_changed(const wxRect& suggested_rect) override;
     void on_sys_color_changed() override;
+
+private:
+    //y3
+    std::set<std::string> m_exit_host;
+    std::string           old_name;
 
 };
 

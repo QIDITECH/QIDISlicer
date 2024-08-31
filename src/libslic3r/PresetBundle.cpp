@@ -2047,4 +2047,17 @@ void copy_bed_model_and_texture_if_needed(DynamicPrintConfig& config)
     do_copy(config.option<ConfigOptionString>("bed_custom_model"), "model");
 }
 
+// y3
+std::set<std::string> PresetBundle::get_vendors()
+{
+    std::set<std::string> qidiVendors;
+    for (auto vendor_profile : vendors) {
+        for (auto vendor_model : vendor_profile.second.models) {
+            std::string vendor_name = vendor_model.name;
+            qidiVendors.emplace(vendor_name);
+        }
+    }
+    return qidiVendors;
+}
+
 } // namespace Slic3r

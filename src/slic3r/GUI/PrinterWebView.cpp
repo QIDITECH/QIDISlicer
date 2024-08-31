@@ -56,7 +56,7 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
     init_scroll_window(this);
 
     wxPanel *titlePanel = new wxPanel(this, wxID_ANY);
-    titlePanel->SetBackgroundColour(wxColour(30, 30, 32));
+    titlePanel->SetBackgroundColour(wxColour(38, 38, 41));
 
     wxPanel *menuPanel = new wxPanel(titlePanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBU_LEFT | wxTAB_TRAVERSAL);
     menuPanel->SetSizer(menuPanelSizer);
@@ -75,9 +75,10 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
     titlePanel->SetSizer(buttonSizer);
 
     toggleBar = new SwitchButton(menuPanel);
-    toggleBar->SetSize(300);
+    toggleBar->SetSize(327);
     toggleBar->SetMaxSize({em_unit(this) * 40, -1});
-    toggleBar->SetLabels(_L("Slicer"), _L("Link"));
+    //y3
+    toggleBar->SetLabels(_L("Local"), _L("Link"));
     toggleBar->SetValue(m_isNetMode);
     toggleBar->Bind(wxEVT_TOGGLEBUTTON, [this](wxCommandEvent &evt) {
         bool is_checked = evt.GetInt();
@@ -87,10 +88,22 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
         if (!m_isNetMode) {
             wxGetApp().app_config->set("machine_list_net", "0");
             ShowLocalPrinterButton();
+            //y3
+            if (into_u8(m_web).find("missing_connection") != std::string::npos) {
+                wxString url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                load_disconnect_url(url);
+            }
         } else {
             wxGetApp().app_config->set("machine_list_net", "1");
             ShowNetPrinterButton();
+            if (into_u8(m_web).find("missing_connection") != std::string::npos) {
+                wxString url = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
+                load_disconnect_url(url);
+            }
         }
+        leftScrolledWindow->Scroll(0, 0);
+        UpdateLayout();
+        UpdateState();
     });
 
     menuPanelSizer->Add(toggleBar);
@@ -114,7 +127,11 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
     leftallsizer->Add(titlePanel, wxSizerFlags(0).Expand());
     leftallsizer->Add(leftScrolledWindow, wxSizerFlags(1).Expand());
 
+    wxPanel* line_area = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(1,10));
+    line_area->SetBackgroundColour(wxColor(66, 66, 69));
+
     allsizer->Add(leftallsizer, wxSizerFlags(0).Expand());
+    allsizer->Add(line_area, 0, wxEXPAND);
     allsizer->Add(m_browser, wxSizerFlags(1).Expand().Border(wxALL, 0));
 
     // Zoom
@@ -129,7 +146,7 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
     if (m_isSimpleMode) {
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-right-s-line", 20));
         devicesizer->SetMinSize(wxSize(190, -1));
-        toggleBar->SetSize(190);
+        toggleBar->SetSize(237);
         leftScrolledWindow->SetMinSize(wxSize(190, -1));
         devicesizer->Layout();
         leftScrolledWindow->Layout();
@@ -155,12 +172,12 @@ wxBoxSizer *PrinterWebView::init_login_bar(wxPanel *Panel)
                           std::pair<wxColour, int>(wxColour(68, 121, 251), StateColor::Hovered),
                           std::pair<wxColour, int>(wxColour(198, 198, 200), StateColor::Normal));
 
-    StateColor btn_bg(std::pair<wxColour, int>(wxColour(30, 30, 32), StateColor::Disabled),
-                      std::pair<wxColour, int>(wxColour(30, 30, 32), StateColor::Pressed),
-                      std::pair<wxColour, int>(wxColour(30, 30, 32), StateColor::Hovered),
-                      std::pair<wxColour, int>(wxColour(30, 30, 32), StateColor::Normal));
+    StateColor btn_bg(std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Disabled),
+                      std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Pressed),
+                      std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Hovered),
+                      std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Normal));
 
-    login_button = new DeviceButton(Panel, "Login/Register", "", wxBU_LEFT);
+    login_button = new DeviceButton(Panel, _L("Login/Register"), "", wxBU_LEFT);
     login_button->SetTextColor(text_color);
     login_button->SetBackgroundColor(btn_bg);
     login_button->SetBorderColor(btn_bg);
@@ -178,33 +195,37 @@ wxBoxSizer *PrinterWebView::init_menu_bar(wxPanel *Panel)
     wxBoxSizer *buttonsizer = new wxBoxSizer(wxHORIZONTAL);
 
     StateColor add_btn_bg(std::pair<wxColour, int>(wxColour(57, 57, 61), StateColor::Disabled),
-                          std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Pressed),
-                          std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Hovered),
-                          std::pair<wxColour, int>(wxColour(76, 76, 79), StateColor::Normal));
+                          std::pair<wxColour, int>(wxColour(138, 138, 141), StateColor::Pressed),
+                          std::pair<wxColour, int>(wxColour(85, 85, 90), StateColor::Hovered),
+                          std::pair<wxColour, int>(wxColour(74, 74, 79), StateColor::Normal));
 
     // B63
-    add_button = new DeviceButton(Panel, "", "add_machine_list_able", wxBU_LEFT);
+    add_button = new DeviceButton(Panel, "add_machine_list_able", wxBU_LEFT);
     add_button->SetBackgroundColor(add_btn_bg);
+    add_button->SetBorderColor(wxColour(57, 51, 55));
     add_button->SetCanFocus(false);
     buttonsizer->Add(add_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
     add_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnAddButtonClick, this);
 
-    // B63
-    delete_button = new DeviceButton(Panel, "", "delete_machine_list_able", wxBU_LEFT);
+    // B63 //y3
+    delete_button = new DeviceButton(Panel, "delete_machine_list_able", wxBU_LEFT);
     delete_button->SetBackgroundColor(add_btn_bg);
+    delete_button->SetBorderColor(wxColour(57, 51, 55));
     delete_button->SetCanFocus(false);
     buttonsizer->Add(delete_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
     delete_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnDeleteButtonClick, this);
 
     // B63
-    edit_button = new DeviceButton(Panel, "", "edit_machine_list_able", wxBU_LEFT);
+    edit_button = new DeviceButton(Panel, "edit_machine_list_able", wxBU_LEFT);
     edit_button->SetBackgroundColor(add_btn_bg);
+    edit_button->SetBorderColor(wxColour(57, 51, 55));
     edit_button->SetCanFocus(false);
     buttonsizer->Add(edit_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
     edit_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnEditButtonClick, this);
 
-    refresh_button = new DeviceButton(Panel, "", "refresh_machine_list_able", wxBU_LEFT);
+    refresh_button = new DeviceButton(Panel, "refresh_machine_list_able", wxBU_LEFT);
     refresh_button->SetBackgroundColor(add_btn_bg);
+    refresh_button->SetBorderColor(wxColour(57, 51, 55));
     refresh_button->SetCanFocus(false);
     buttonsizer->Add(refresh_button, wxSizerFlags().Align(wxALIGN_LEFT).CenterVertical().Border(wxALL, 2));
     refresh_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnRefreshButtonClick, this);
@@ -217,15 +238,15 @@ wxBoxSizer *PrinterWebView::init_menu_bar(wxPanel *Panel)
 
     if (m_isSimpleMode)
         text_static->Hide();
-
-    arrow_button = new wxButton(Panel, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20), wxBORDER_NONE);
+    //y3
+    arrow_button = new RoundButton(Panel, wxID_ANY, "", wxDefaultPosition, wxSize(35, 35));
     arrow_button->SetBackgroundColour(Panel->GetBackgroundColour());
     arrow_button->SetForegroundColour(Panel->GetBackgroundColour());
-    arrow_button->SetMinSize(wxSize(40, -1));
     if (m_isSimpleMode)
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-right-s-line", 20));
     else
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-left-s-line", 20));
+    buttonsizer->AddStretchSpacer(1);
     buttonsizer->Add(arrow_button, wxSizerFlags().Align(wxALIGN_RIGHT).CenterVertical().Border(wxALL, 2));
     arrow_button->Bind(wxEVT_BUTTON, &PrinterWebView::OnZoomButtonClick, this);
 
@@ -235,7 +256,7 @@ wxBoxSizer *PrinterWebView::init_menu_bar(wxPanel *Panel)
 }
 void PrinterWebView::init_scroll_window(wxPanel* Panel) {
     leftScrolledWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL | wxVSCROLL);
-    leftScrolledWindow->SetBackgroundColour(wxColour(30, 30, 32));
+    leftScrolledWindow->SetBackgroundColour(wxColour(38, 38, 41));
     leftScrolledWindow->SetSizer(devicesizer);
     leftScrolledWindow->SetScrollRate(10, 10);
     leftScrolledWindow->SetMinSize(wxSize(300, -1));
@@ -323,7 +344,7 @@ void PrinterWebView::SetPresetChanged(bool status) {
         m_stopThread = false;
         DeleteButton();
         DeleteNetButton();
-
+        m_exit_host.clear();
         //ShowLocalPrinterButton();
         PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
 
@@ -348,16 +369,25 @@ void PrinterWebView::SetPresetChanged(bool status) {
 
                 const auto        opt       = cfg_t->option<ConfigOptionEnum<PrintHostType>>("host_type");
                 auto       host_type = opt != nullptr ? opt->value : htOctoPrint;
-
+                //y3
+                bool is_selected = false;
+                if (!select_machine_name.empty())
+                    if (select_machine_name == it->get_short_name(full_name)) {
+                        is_selected         = true;
+                        select_machine_name = "";
+                    }
                  //BOOST_LOG_TRIVIAL(error) << preset_name;
                  //BOOST_LOG_TRIVIAL(error) << full_name;
                  //BOOST_LOG_TRIVIAL(error) << (it->get_short_name(full_name));
                  //BOOST_LOG_TRIVIAL(error) << (it->get_preset_name(full_name));
                  //BOOST_LOG_TRIVIAL(error) << model_id;
-                 AddButton((it->get_short_name(full_name)), host, model_id, full_name, ph_printers.is_selected(it, preset_name),
+                AddButton((it->get_short_name(full_name)), host, model_id, full_name, is_selected,
                            (host_type == htMoonraker));
+                 m_exit_host.insert(host);
             }
         }
+        wxGetApp().setExitHost(m_exit_host);
+
 #if QDT_RELEASE_TO_PUBLIC
         auto m_devices = wxGetApp().get_devices();
 
@@ -365,14 +395,55 @@ void PrinterWebView::SetPresetChanged(bool status) {
             AddNetButton(device);
         }
 #endif
-
-        if (GetNetMode()) {
-            ShowNetPrinterButton();
-        } else {
-            ShowLocalPrinterButton();
-        }
+        //y3
+         if (webisNetMode == isNetWeb) {
+             ShowNetPrinterButton();
+             for (DeviceButton* button : m_net_buttons) {
+                 if (m_ip == (button->getIPLabel())) {
+                     button->SetIsSelected(true);
+                     wxCommandEvent event(wxEVT_BUTTON, button->GetId());
+                     wxPostEvent(button, event);
+                     break;
+                 }
+             }
+             toggleBar->SetValue(true);
+             m_isNetMode = true;
+         } else if (webisNetMode == isLocalWeb) {
+             ShowLocalPrinterButton();
+             if (m_exit_host.find(into_u8(m_ip)) != m_exit_host.end()) 
+             {
+                 for (DeviceButton* button : m_buttons) {
+                     if (m_ip == (button->getIPLabel())) {
+                         button->SetIsSelected(true);
+                         break;
+                     }
+                 }
+                 toggleBar->SetValue(false);
+                 m_isNetMode = false;
+             } else {
+                 wxString m_host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                 load_disconnect_url(m_host);
+             }
+         }
+         else
+         {
+             if (m_isNetMode)
+             {
+                 ShowNetPrinterButton();
+                 wxString m_host = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
+                 load_disconnect_url(m_host);
+             }
+             else
+             {
+                 ShowLocalPrinterButton();
+                 wxString m_host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+                 load_disconnect_url(m_host);
+             }
+         }
 
         CreatThread();
+        UpdateState();
+        UpdateLayout();
     }
 }
 void PrinterWebView::SetLoginStatus(bool status) { 
@@ -393,17 +464,15 @@ void PrinterWebView::SetLoginStatus(bool status) {
         m_isloginin = true;
         UpdateState();
     } else {
-        login_button->SetLabel("Login/Register");
+        login_button->SetLabel(_L("Login/Register"));
 #if QDT_RELEASE_TO_PUBLIC
         std::vector<Device> devices;
         wxGetApp().set_devices(devices);
 #endif
-
+        //y3
+        if (webisNetMode == isNetWeb)
+            webisNetMode = isDisconnect;
         SetPresetChanged(true);
-        m_isNetMode = false;
-        toggleBar->SetValue(m_isNetMode);
-        ShowLocalPrinterButton();
-        wxGetApp().app_config->set("machine_list_net", "0");
         UpdateState();
     }
 }
@@ -426,12 +495,13 @@ void PrinterWebView::AddButton(const wxString &    device_name,
 {
     wxString Machine_Name = Machine_Name.Format("%s%s", machine_type, "_thumbnail");
 
-    StateColor mac_btn_bg(std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Pressed),
-                    std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Hovered),
-                    std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Normal));
+    StateColor mac_btn_bg(std::pair<wxColour, int>(wxColour(147, 147, 150), StateColor::Pressed),
+                    std::pair<wxColour, int>(wxColour(76, 76, 80), StateColor::Hovered),
+                    std::pair<wxColour, int>(wxColour(67, 67, 71), StateColor::Normal));
 
     DeviceButton *machine_button = new DeviceButton(leftScrolledWindow, fullname, Machine_Name, wxBU_LEFT, wxSize(80, 80), device_name, ip);
     machine_button->SetBackgroundColor(mac_btn_bg);
+    machine_button->SetBorderColor(wxColour(67, 67, 71));
     machine_button->SetCanFocus(false);
     machine_button->SetIsSimpleMode(m_isSimpleMode);
     wxString formattedHost = ip;
@@ -449,37 +519,69 @@ void PrinterWebView::AddButton(const wxString &    device_name,
     devicesizer->Add(machine_button, wxSizerFlags().Border(wxALL, 1).Expand());
     devicesizer->Layout();
     m_buttons.push_back(machine_button);
+
+    if(isSelected)
+        load_url(formattedHost);
 }
+
+//y3
+std::string PrinterWebView::NormalizeVendor(const std::string& str) 
+{
+    std::string normalized;
+    for (char c : str) {
+        if (std::isalnum(c)) {
+            normalized += std::tolower(c);
+        }
+    }
+    return normalized;
+}
+
 #if QDT_RELEASE_TO_PUBLIC
 void PrinterWebView::AddNetButton(const Device device)
 {
-    // y2
-    const Preset preset = wxGetApp().preset_bundle->prints.get_edited_preset();
-    bool isQIDI = false;
-    auto models = preset.vendor->models;
-    for (auto model : models) {
-        std::string model_id = model.id;
-        if (device.device_name.find(model_id) != std::string::npos) {
-            isQIDI = true;
-            break;
-        }
-    }
+    //y3
+    std::set<std::string> qidi_printers = wxGetApp().preset_bundle->get_vendors();
 
-    std::size_t found = device.device_name.find('@');
-    wxString    Machine_Name;
-    wxString    device_name;
-    // y2
-    if (found != std::string::npos && isQIDI) {
-        std::string extracted = device.device_name.substr(found + 1);
-        Machine_Name          = Machine_Name.Format("%s%s", extracted, "_thumbnail");
-        device_name           = device_name.Format("%s", device.device_name.substr(0, found));
-    } else {
-        Machine_Name = Machine_Name.Format("%s%s", "my_printer", "_thumbnail");
-        device_name  = device_name.Format("%s", device.device_name);
-    }
-    StateColor     mac_btn_bg(std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Pressed),
-                          std::pair<wxColour, int>(wxColour(26, 26, 28), StateColor::Hovered),
-                          std::pair<wxColour, int>(wxColour(38, 38, 41), StateColor::Normal));
+     wxString    Machine_Name;
+     wxString    device_name;
+     if (!device.machine_type.empty()) 
+     {
+         device_name = device.device_name;
+         std::string extracted = device.machine_type;
+         for (std::string machine_vendor : qidi_printers)
+         {
+             if (NormalizeVendor(machine_vendor) == NormalizeVendor(extracted))
+             {
+                 Machine_Name = Machine_Name.Format("%s%s", machine_vendor, "_thumbnail");
+                 break;
+             }
+         }
+     }
+     else
+     {
+         device_name = device.device_name;
+         std::size_t found = device.device_name.find('@');
+         if (found != std::string::npos)
+         {
+            std::string extracted = device.device_name.substr(found + 1);
+            for (std::string machine_vendor : qidi_printers)
+            {
+                if (NormalizeVendor(machine_vendor) == NormalizeVendor(extracted))
+                {
+                    Machine_Name = Machine_Name.Format("%s%s", machine_vendor, "_thumbnail");
+                    break;
+                }
+            }
+         }
+     }
+
+     if (Machine_Name.empty())
+     {
+         Machine_Name = Machine_Name.Format("%s%s", "my_printer", "_thumbnail");
+     }
+    StateColor     mac_btn_bg(std::pair<wxColour, int>(wxColour(147, 147, 150), StateColor::Pressed),
+                          std::pair<wxColour, int>(wxColour(76, 76, 80), StateColor::Hovered),
+                          std::pair<wxColour, int>(wxColour(67, 67, 71), StateColor::Normal));
     QIDINetwork m_qidinetwork;
 
 
@@ -488,6 +590,7 @@ void PrinterWebView::AddNetButton(const Device device)
 
                                                     device_name, device.local_ip);
     machine_button->SetBackgroundColor(mac_btn_bg);
+    machine_button->SetBorderColor(wxColour(67, 67, 71));
     machine_button->SetCanFocus(false);
     machine_button->SetIsSimpleMode(m_isSimpleMode);
 
@@ -598,7 +701,7 @@ void PrinterWebView::OnZoomButtonClick(wxCommandEvent &event)
         staticBitmap->SetBitmap(ScalableBitmap(this, "user_dark", wxSize(60, 60)).get_bitmap());
         login_button->SetIsSimpleMode(m_isSimpleMode);
         wxGetApp().app_config->set("machine_list_minification", "0");
-        toggleBar->SetSize(300);
+        toggleBar->SetSize(327);
         devicesizer->SetMinSize(wxSize(300, -1));
         leftScrolledWindow->SetMinSize(wxSize(300, -1));
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-left-s-line", 20));
@@ -614,7 +717,7 @@ void PrinterWebView::OnZoomButtonClick(wxCommandEvent &event)
         login_button->SetIsSimpleMode(m_isSimpleMode);
 
         wxGetApp().app_config->set("machine_list_minification", "1");
-        toggleBar->SetSize(190);
+        toggleBar->SetSize(237);
         arrow_button->SetBitmap(*get_bmp_bundle("arrow-right-s-line", 20));
         devicesizer->SetMinSize(wxSize(190, -1));
         leftScrolledWindow->SetMinSize(wxSize(190, -1));
@@ -676,6 +779,12 @@ void PrinterWebView::OnLoginButtonClick(wxCommandEvent &event)
 {
     // B64
     wxGetApp().ShowUserLogin(true);
+    devicesizer->Layout();
+
+    leftScrolledWindow->Layout();
+
+    allsizer->Layout();
+    UpdateLayout();
     
 //    if (m_isloginin) {
 //        wxGetApp().app_config->set("user_token", "");
@@ -702,12 +811,13 @@ void PrinterWebView::OnLoginButtonClick(wxCommandEvent &event)
 }
 void PrinterWebView::OnAddButtonClick(wxCommandEvent &event)
 {
-    PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString);
+    PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString, m_exit_host);
     if (dlg.ShowModal() == wxID_OK) {
         if (m_handlerl) {
             m_handlerl(event);
         }
-        // SetPresetChanged(true);
+        select_machine_name = dlg.get_name();
+        SetPresetChanged(true);
         UpdateLayout();
         Refresh();
     }
@@ -733,10 +843,8 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event)
 
                 preset_bundle.physical_printers.delete_selected_printer();
 
+                webisNetMode = isDisconnect;
                 SetPresetChanged(true);
-
-                wxString host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
-                load_url(host);
 
                 UpdateLayout();
                 Refresh();
@@ -771,10 +879,8 @@ void PrinterWebView::OnDeleteButtonClick(wxCommandEvent &event)
                     }
                 }
 #endif
-
+                webisNetMode = isDisconnect;
                 SetPresetChanged(true);
-                wxString host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
-                load_url(host);
 
                 UpdateLayout();
                 Refresh();
@@ -790,13 +896,24 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event)
 {
     for (DeviceButton *button : m_buttons) {
         if ((button->GetIsSelected())) {
-            // y1
-            PhysicalPrinterDialog dlg(this->GetParent(), button->GetLabel());
+            // y1 //y3
+            m_exit_host.erase(into_u8(button->getIPLabel()));
+            PhysicalPrinterDialog dlg(this->GetParent(), button->GetLabel(), m_exit_host);
             if (dlg.ShowModal() == wxID_OK) {
                 if (m_handlerl) {
                     m_handlerl(event);
                 }
-                // SetPresetChanged(true);
+            m_ip = dlg.get_host();
+            wxString url;
+            if (!m_ip.Lower().starts_with("http"))
+                url = wxString::Format("http://%s", m_ip);
+
+            if (!url.Lower().ends_with("10088"))
+                url = wxString::Format("%s:10088", url);
+
+            load_url(url);
+
+            SetPresetChanged(true);
             }
             break;
         }
@@ -875,19 +992,30 @@ void PrinterWebView::OnScroll(wxScrollWinEvent &event)
     UpdateLayout();
     event.Skip();
 }
+
+//y3
+void PrinterWebView::load_disconnect_url(wxString& url)
+{
+    webisNetMode = isDisconnect;
+    m_web = url;
+    m_ip = "";
+    m_browser->LoadURL(url);
+    UpdateState();
+}
+
 void PrinterWebView::load_url(wxString &url)
 {
     if (m_browser == nullptr || m_web == url)
         return;
-    // m_web = url;
+    m_web = url;
     m_browser->LoadURL(url);
-
+    webisNetMode = isLocalWeb;
     // B55
     if (url.Lower().starts_with("http"))
         url.Remove(0, 7);
     if (url.Lower().ends_with("10088"))
         url.Remove(url.length() - 6);
-
+    m_ip = url;
     for (DeviceButton *button : m_net_buttons) {
         button->SetIsSelected(false);
     }
@@ -904,7 +1032,9 @@ void PrinterWebView::load_net_url(std::string url, std::string ip)
 {
     if (m_browser == nullptr || m_web == url)
         return;
-    // m_web = url;
+    m_web = url;
+    m_ip = ip;
+    webisNetMode = isNetWeb;
     m_browser->LoadURL(url);
 
     for (DeviceButton *button : m_buttons) {
@@ -921,57 +1051,58 @@ void PrinterWebView::load_net_url(std::string url, std::string ip)
 }
 void PrinterWebView::UpdateState()
 {
-    m_select_type = "null";
-    add_button->SetIcon("add_machine_list_able");
-    add_button->Enable(true);
-    add_button->Refresh();
-    delete_button->SetIcon("delete_machine_list_disable");
-    delete_button->Enable(false);
-    delete_button->Refresh();
-    edit_button->SetIcon("edit_machine_list_disable");
-    edit_button->Enable(false);
-    edit_button->Refresh();
-    refresh_button->SetIcon("refresh_machine_list_disable");
-    refresh_button->Enable(false);
-    refresh_button->Refresh();
-    login_button->Refresh();
-
-    for (DeviceButton *button : m_buttons) {
-        if (button->GetIsSelected()) {
-            m_select_type = "local";
-            add_button->SetIcon("add_machine_list_able");
-            add_button->Enable(true);
-            add_button->Refresh();
-            delete_button->SetIcon("delete_machine_list_able");
-            delete_button->Enable(true);
-            delete_button->Refresh();
-            edit_button->SetIcon("edit_machine_list_able");
-            edit_button->Enable(true);
-            edit_button->Refresh();
-            refresh_button->SetIcon("refresh_machine_list_able");
-            refresh_button->Enable(true);
-            refresh_button->Refresh();
-            login_button->Refresh();
-        }
-    }
-    for (DeviceButton *button : m_net_buttons) {
-        if (button->GetIsSelected()) {
-            m_select_type = "net";
-            add_button->SetIcon("add_machine_list_disable");
-            add_button->Enable(false);
-            add_button->Refresh();
-            delete_button->SetIcon("delete_machine_list_able");
-            delete_button->Enable(true);
-            delete_button->Refresh();
-            edit_button->SetIcon("edit_machine_list_disable");
-            edit_button->Enable(false);
-            edit_button->Refresh();
-            refresh_button->SetIcon("refresh_machine_list_able");
-            refresh_button->Enable(true);
-            refresh_button->Refresh();
-            login_button->Refresh();
-        }
-    }
+    //y3
+    StateColor add_btn_bg(std::pair<wxColour, int>(wxColour(57, 57, 61), StateColor::Disabled),
+                            std::pair<wxColour, int>(wxColour(138, 138, 141), StateColor::Pressed),
+                             std::pair<wxColour, int>(wxColour(85, 85, 90), StateColor::Hovered),
+                             std::pair<wxColour, int>(wxColour(74, 74, 79), StateColor::Normal));
+    if (!m_isNetMode){
+         m_select_type = "local";
+         add_button->SetIcon("add_machine_list_able");
+         add_button->Enable(true);
+         add_button->Refresh();
+         delete_button->SetIcon("delete_machine_list_disable");
+         delete_button->Enable(false);
+         delete_button->Refresh();
+         edit_button->SetIcon("edit_machine_list_disable");
+         edit_button->Enable(false);
+         edit_button->Refresh();
+         refresh_button->SetIcon("refresh_machine_list_able");
+         refresh_button->Enable(true);
+         refresh_button->Refresh();
+         login_button->Refresh();
+         for (DeviceButton* button : m_buttons) {
+             if (button->GetIsSelected()) {
+                 delete_button->SetIcon("delete_machine_list_able");
+                 delete_button->Enable(true);
+                 delete_button->Refresh();
+                 edit_button->SetIcon("edit_machine_list_able");
+                 edit_button->Enable(true);
+                 edit_button->Refresh();
+             }
+         }
+     }else{
+         m_select_type = "net";
+         add_button->SetIcon("add_machine_list_disable");
+         add_button->Enable(false);
+         add_button->Refresh();
+         delete_button->SetIcon("delete_machine_list_disable");
+         delete_button->Enable(false);
+         delete_button->Refresh();
+         edit_button->SetIcon("edit_machine_list_disable");
+         edit_button->Enable(false);
+         edit_button->Refresh();
+         refresh_button->SetIcon("refresh_machine_list_able");
+         refresh_button->Enable(true);
+         refresh_button->Refresh();
+         login_button->Refresh();
+         for (DeviceButton* button : m_net_buttons) {
+             if (button->GetIsSelected()) {
+                 delete_button->SetIcon("delete_machine_list_able");
+                 delete_button->Enable(true);
+             }
+         }
+     }
 }
 void PrinterWebView::OnClose(wxCloseEvent &evt) { this->Hide(); }
 void PrinterWebView::RunScript(const wxString &javascript)

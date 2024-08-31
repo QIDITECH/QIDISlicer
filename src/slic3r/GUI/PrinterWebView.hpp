@@ -48,9 +48,13 @@
 namespace Slic3r {
 namespace GUI {
 
-
-
-
+//y3
+enum WebState
+{
+    isDisconnect,
+    isLocalWeb,
+    isNetWeb
+};
 
 class PrinterWebView : public wxPanel {
 public:
@@ -113,6 +117,10 @@ public:
     std::vector<DeviceButton *> GetButton() { return m_buttons; };
     bool                        GetNetMode() { return m_isNetMode; };
     std::vector<DeviceButton *> GetNetButton() { return m_net_buttons; };
+    //y3
+    std::string NormalizeVendor(const std::string& str);
+    void load_disconnect_url(wxString& url);
+    std::set<std::string> GetExitHost() { return m_exit_host; };
 
 private:
     wxBoxSizer *leftallsizer;
@@ -151,9 +159,71 @@ private:
     bool                                  m_isloginin;
     SwitchButton *                        toggleBar;
     wxStaticBitmap *                      staticBitmap;
+    //y3
+    wxString  m_ip;
+    std::string select_machine_name;
+    WebState webisNetMode = isDisconnect;
+    std::set<std::string> m_exit_host;
 };
 
+//y3
+class RoundButton : public wxButton
+{
+public:
+    RoundButton(wxWindow* parent, wxWindowID id, const wxString& label, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize)
+        : wxButton(parent, id, label, pos, size, wxBORDER_NONE)
+    {
+        m_hovered = false;
+        Bind(wxEVT_ENTER_WINDOW, &RoundButton::OnMouseEnter, this);
+        Bind(wxEVT_LEAVE_WINDOW, &RoundButton::OnMouseLeave, this);
+        Bind(wxEVT_PAINT, &RoundButton::OnPaint, this);
+    }
 
+protected:
+    void OnMouseEnter(wxMouseEvent& event)
+    {
+        m_hovered = true;
+        Refresh();
+    }
+
+    void OnMouseLeave(wxMouseEvent& event)
+    {
+        m_hovered = false;
+        Refresh();
+    }
+
+    void OnPaint(wxPaintEvent& event)
+    {
+        wxPaintDC dc(this);
+
+
+        wxSize size = GetClientSize();
+        int x = size.x;
+        int y = size.y;
+
+        if (m_hovered)
+        {
+            dc.SetBrush(wxBrush(wxColour(60, 60, 63), wxBRUSHSTYLE_SOLID));  
+        }
+        else
+        {
+            dc.SetBrush(wxBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID));  
+        }
+
+        dc.SetPen(wxPen(GetBackgroundColour(), 1, wxPENSTYLE_TRANSPARENT));
+
+
+        wxBitmap img = GetBitmap();
+        wxSize img_size = img.GetSize();
+  
+        int radius = std::max(img_size.x, img_size.y) / 2;
+        dc.DrawCircle(size.x / 2, size.y / 2, radius + 5);
+        dc.DrawBitmap(img, (size.x - img_size.x) / 2, (size.y - img_size.y) / 2);
+    }
+
+private:
+    bool m_hovered;  
+};
 
 } // GUI
 } // Slic3r

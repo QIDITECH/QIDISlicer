@@ -164,8 +164,8 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
                                                                 wxHSCROLL | wxVSCROLL);
     scroll_macine_list->SetBackgroundColour(*wxWHITE);
     scroll_macine_list->SetScrollRate(5, 5);
-    scroll_macine_list->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
-    scroll_macine_list->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
+    scroll_macine_list->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
+    scroll_macine_list->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
     wxBoxSizer *sizer_machine_list = new wxBoxSizer(wxVERTICAL);
     scroll_macine_list->SetSizer(sizer_machine_list);
     scroll_macine_list->Layout();
@@ -195,10 +195,20 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
             }
         }
     }
+    //y4
+    PhysicalPrinter selected_printer = ph_printers.get_selected_printer();
+    std::set<std::string> selected_printer_presets = selected_printer.get_preset_names();
+    std::string           printer_preset                     = *selected_printer_presets.begin();
     m_presetData = preset_data;
     for (const PhysicalPrinterPresetData &data : preset_data) {
-         wxCheckBox *checkbox = new wxCheckBox(scroll_macine_list, wxID_ANY, " " + data.fullname + "\n IP: " + data.host);
-        checkbox->SetValue(data.selected);
+        //y4
+        SendCheckBox *checkbox = new SendCheckBox(scroll_macine_list, wxID_ANY, " " + data.fullname + "\n IP: " + data.host);
+        unSelectedBoxes.push_back(checkbox);
+        checkbox->Bind(wxEVT_CHECKBOX, &PrintHostSendDialog::OnCheckBoxClicked, this);
+        checkbox->SetState(data.selected);
+         if (printer_preset.find(data.preset_name) == std::string::npos) {
+            checkbox->Disable();
+         }
         sizer_machine_list->Add(checkbox, 0, wxEXPAND | wxALL, 5);
     }
 
@@ -211,18 +221,25 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     panel->SetSizer(box_sizer);
 
     wxCheckBox *selectcheckbox = new wxCheckBox(panel, wxID_ANY, "");
-
-    selectcheckbox->Bind(wxEVT_CHECKBOX, [sizer_machine_list](wxCommandEvent &event) {
+    //y4
+    selectcheckbox->Bind(wxEVT_CHECKBOX, [sizer_machine_list, this](wxCommandEvent &event) {
         bool isChecked = event.IsChecked();
         for (int i = 0; i < sizer_machine_list->GetItemCount(); i++) {
-            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
-            if (checkbox) {
-                checkbox->SetValue(isChecked);
+            SendCheckBox *checkbox = dynamic_cast<SendCheckBox *>(sizer_machine_list->GetItem(i)->GetWindow());
+            if ((isChecked && checkbox->IsChecked()) || (!isChecked && !checkbox->IsChecked())) {
+                continue;
             }
+            else if (checkbox && checkbox->IsEnabled()) {
+                checkbox->SetState(isChecked);
+            }
+            checkbox->Refresh();
+            if (SelectedBoxes.size() == 6)
+                break;
         }
+        
     });
 
-    wxStaticText *text = new wxStaticText(panel, wxID_ANY, _L("QIDI Slicer's Physical Printer"));
+    wxStaticText *text = new wxStaticText(panel, wxID_ANY, _L("QIDI Local's Physical Printer"));
     text->SetWindowStyle(wxALIGN_CENTER_HORIZONTAL);
 
     box_sizer->Add(selectcheckbox, 0, wxEXPAND | wxALL, 5);
@@ -235,25 +252,37 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     scrool_box_sizer->Add(line, 0, wxEXPAND | wxTOP | wxBOTTOM, 5);
     scrool_box_sizer->Add(scroll_macine_list);
 
-
     wxScrolledWindow *scroll_macine_list2 = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(800), FromDIP(300)),
                                                                 wxHSCROLL | wxVSCROLL);
     scroll_macine_list2->SetBackgroundColour(*wxWHITE);
     scroll_macine_list2->SetScrollRate(5, 5);
-    scroll_macine_list2->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
-    scroll_macine_list2->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(30)));
-    wxBoxSizer *sizer_machine_list2 = new wxBoxSizer(wxVERTICAL);
+    scroll_macine_list2->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
+    scroll_macine_list2->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
+    wxBoxSizer* sizer_machine_list2 = new wxBoxSizer(wxVERTICAL);
     scroll_macine_list2->SetSizer(sizer_machine_list2);
     scroll_macine_list2->Layout();
 
 #if QDT_RELEASE_TO_PUBLIC
     auto m_devices = wxGetApp().get_devices();
-     for (const auto &device : m_devices) {
-        wxCheckBox *checkbox = new wxCheckBox(scroll_macine_list2, wxID_ANY, " " + from_u8(device.device_name) + "\n IP: " + device.local_ip);
-        checkbox->SetValue(false);
+     for (const auto &device : m_devices) 
+     {
+        //y4
+        SendCheckBox *checkbox = new SendCheckBox(scroll_macine_list2, wxID_ANY,
+                                                " " + from_u8(device.device_name) + "\n IP: " + device.local_ip);
+        unSelectedBoxes.push_back(checkbox);
+        checkbox->Bind(wxEVT_CHECKBOX, &PrintHostSendDialog::OnCheckBoxClicked, this);
+        checkbox->SetState(false);
+        std::string machine_type = device.machine_type;
+        if (machine_type.empty()) 
+        {
+            std::size_t found = device.device_name.find('@');
+            if (found != std::string::npos)
+                machine_type = device.device_name.substr(found + 1);
+        }
+        if (NormalizeVendor(printer_preset).find(NormalizeVendor(machine_type)) == std::string::npos || machine_type.empty())
+            checkbox->Disable();
         sizer_machine_list2->Add(checkbox, 0, wxEXPAND | wxALL, 5);
-
-    }
+     }
 #endif
 
 
@@ -266,15 +295,21 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     panel2->SetSizer(box_sizer2);
 
     wxCheckBox *selectcheckbox2 = new wxCheckBox(panel2, wxID_ANY, "");
-
-    selectcheckbox2->Bind(wxEVT_CHECKBOX, [sizer_machine_list2](wxCommandEvent &event) {
+    //y4
+    selectcheckbox2->Bind(wxEVT_CHECKBOX, [sizer_machine_list2, this](wxCommandEvent &event) {
         bool isChecked = event.IsChecked();
         for (int i = 0; i < sizer_machine_list2->GetItemCount(); i++) {
-            wxCheckBox *checkbox = dynamic_cast<wxCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
-            if (checkbox) {
-                checkbox->SetValue(isChecked);
+            SendCheckBox *checkbox = dynamic_cast<SendCheckBox *>(sizer_machine_list2->GetItem(i)->GetWindow());
+            if ((isChecked && checkbox->IsChecked()) || (!isChecked && !checkbox->IsChecked())) {
+                continue;
+            } else if (checkbox && checkbox->IsEnabled()) {
+                checkbox->SetState(isChecked);
             }
+            checkbox->Refresh();
+            if (SelectedBoxes.size() == 6)
+                break;
         }
+        sizer_machine_list2->Layout();
     });
 
     wxStaticText *text2 = new wxStaticText(panel2, wxID_ANY, _L("QIDI Link's Physical Printer"));
@@ -294,10 +329,13 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
 
 
     wxStaticBoxSizer *sizer1 = new wxStaticBoxSizer(wxVERTICAL, this, _L(""));
-    sizer1->Add(scrool_box_sizer, 1, wxEXPAND | wxALL, 10);
+    sizer1->Add(scrool_box_sizer);
+
 
     wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(wxVERTICAL, this, _L(""));
-    sizer2->Add(scrool_box_sizer2, 1, wxEXPAND | wxALL, 10);
+    sizer2->Add(scrool_box_sizer2);
+
+
 
     //hbox2->Add(scrool_box_sizer);
 
@@ -305,13 +343,13 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
 
     //hbox2->Add(scrool_box_sizer2);
 
-    hbox2->Add(sizer1, 1, wxEXPAND);
+    hbox2->Add(sizer1);
     hbox2->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
-    hbox2->Add(sizer2, 1, wxEXPAND);
+    hbox2->Add(sizer2);
 
     content_sizer->Add(hbox2 , 1, wxEXPAND);
     content_sizer->Add(0, 0, 0, wxEXPAND | wxBOTTOM, 23);
-    
+
     if (combo_groups != nullptr) {
         // Repetier specific: Show a selection of file groups.
         auto *label_group = new wxStaticText(this, wxID_ANY, _L("Group"));
@@ -605,6 +643,39 @@ void PrintHostSendDialog::EndModal(int ret)
 
     MsgDialog::EndModal(ret);
 }
+//y4
+std::string PrintHostSendDialog::NormalizeVendor(const std::string &str)
+{
+    std::string normalized;
+    for (char c : str) {
+        if (std::isalnum(c)) {
+            normalized += std::tolower(c);
+        }
+    }
+    return normalized;
+}
+//y4
+void PrintHostSendDialog::OnCheckBoxClicked(wxCommandEvent &event) 
+{ 
+    SendCheckBox *checkbox = dynamic_cast<SendCheckBox *>(event.GetEventObject());
+    if (checkbox->IsChecked()) {
+        if (SelectedBoxes.size() < 6) {
+            SelectedBoxes.push_back(checkbox);
+            unSelectedBoxes.erase(std::remove(unSelectedBoxes.begin(), unSelectedBoxes.end(), checkbox), unSelectedBoxes.end()); 
+        } else {
+            checkbox->SetValue(false);
+            wxString      msg_text = _L("The max selected printer number is 6.");
+            MessageDialog dialog(nullptr, msg_text, _L("Information"), wxICON_INFORMATION | wxOK);
+            dialog.ShowModal();
+            return;
+        }
+    } else {
+        SelectedBoxes.erase(std::remove(SelectedBoxes.begin(), SelectedBoxes.end(), checkbox), SelectedBoxes.end()); 
+        unSelectedBoxes.push_back(checkbox);
+    }
+}
+
+
 //B64
 wxDEFINE_EVENT(EVT_PRINTHOST_WAIT, PrintHostQueueDialog::Event);
 
