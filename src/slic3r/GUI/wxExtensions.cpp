@@ -443,6 +443,39 @@ wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name_in, int width/* = 16*
     return bmp;
 }
 
+//y5
+wxBitmapBundle *get_bmp_bundle_of_login(const std::string &bmp_name_in,
+                               int                width /* = 16*/,
+                               int                height /* = -1*/,
+                               const std::string &new_color /* = std::string()*/)
+{
+#ifdef __WXGTK2__
+    width *= scale();
+    if (height > 0)
+        height *= scale();
+#endif // __WXGTK2__
+
+    static Slic3r::GUI::BitmapCache cache;
+
+    std::string bmp_name = bmp_name_in;
+
+    if (height < 0)
+        height = width;
+    // Try loading an SVG first, then PNG if SVG is not found:
+    wxBitmapBundle *bmp;
+    if (!bmp_name.empty())
+        bmp = cache.from_png_of_login(bmp_name, width, height);
+    else
+        bmp = cache.from_png("user_dark", width, height);
+    if (bmp == nullptr) {
+        if (!bmp)
+            // Neither SVG nor PNG has been found, raise error
+            throw Slic3r::RuntimeError("Could not load bitmap: " + bmp_name);
+    }
+    return bmp;
+}
+
+
 wxBitmapBundle* get_empty_bmp_bundle(int width, int height)
 {
     static Slic3r::GUI::BitmapCache cache;

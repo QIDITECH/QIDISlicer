@@ -179,7 +179,8 @@ void PresetBundle::setup_directories()
         data_dir / "sla_print", 
         data_dir / "sla_material", 
         data_dir / "printer", 
-        data_dir / "physical_printer" 
+        data_dir / "physical_printer",
+        data_dir / "user"   // y5
 #endif
     };
     for (const boost::filesystem::path &path : paths) {
@@ -253,7 +254,8 @@ void PresetBundle::import_newer_configs(const std::string& from)
         from_data_dir / "sla_print",
         from_data_dir / "sla_material",
         from_data_dir / "printer",
-        from_data_dir / "physical_printer"
+        from_data_dir / "physical_printer",
+        from_data_dir / "user"  //y5
 #endif
     };
     // copy recursively all files

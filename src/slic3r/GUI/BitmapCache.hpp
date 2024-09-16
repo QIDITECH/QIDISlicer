@@ -51,6 +51,8 @@ public:
     static void		nsvgGetDataFromFileWithReplace(const char* filename, std::string& data_str, const std::map<std::string, std::string>& replaces);
 	wxBitmapBundle* from_svg(const std::string& bitmap_name, unsigned target_width, unsigned target_height, const bool dark_mode, const std::string& new_color = "");
 	wxBitmapBundle* from_png(const std::string& bitmap_name, unsigned width, unsigned height);
+	//y5
+    wxBitmapBundle *from_png_of_login(const std::string &bitmap_name, unsigned width, unsigned height);
 	// Load svg from resources/icons. bitmap_key is given without the .svg suffix. SVG will be rasterized to provided height/width.
     wxBitmap* 		load_svg(const std::string &bitmap_key, unsigned width = 0, unsigned height = 0, const bool grayscale = false, const bool dark_mode = false, const std::string& new_color = "");
 

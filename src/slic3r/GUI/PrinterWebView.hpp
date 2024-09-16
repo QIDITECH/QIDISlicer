@@ -164,6 +164,9 @@ private:
     std::string select_machine_name;
     WebState webisNetMode = isDisconnect;
     std::set<std::string> m_exit_host;
+    //y5
+    std::string           m_user_head_name;
+    bool                  m_isfluidd_1;
 };
 
 //y3

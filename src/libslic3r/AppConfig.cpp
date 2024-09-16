@@ -221,6 +221,13 @@ void AppConfig::set_defaults()
     if (get("user_token").empty())
         set("user_token", "");
 
+    //y5
+    if(get("user_head_url").empty())
+        set("user_head_url", "");
+
+    if(get("user_head_name").empty())
+        set("user_head_name", "");
+
     if (get("sending_interval").empty()) {
         set("sending_interval", "5");
     }

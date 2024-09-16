@@ -242,7 +242,8 @@ void Snapshot::export_vendor_configs(AppConfig &config) const
     config.set_vendors(std::move(vendors));
 }
 
-static constexpr auto snapshot_subdirs = { "print", "sla_print", "filament", "sla_material", "printer", "physical_printer", "vendor" };
+//y5
+static constexpr auto snapshot_subdirs = { "print", "sla_print", "filament", "sla_material", "printer", "physical_printer", "vendor", "user" };
 
 // Perform a deep compare of the active print / sla_print / filament / sla_material / printer / physical_printer / vendor directories.
 // Return true if the content of the current print / sla_print / filament / sla_material / printer / physical_printer / vendor directories

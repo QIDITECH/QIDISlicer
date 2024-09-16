@@ -30,6 +30,9 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
     m_isSimpleMode = wxGetApp().app_config->get_bool("machine_list_minification");
     m_isNetMode    = wxGetApp().app_config->get_bool("machine_list_net");
     m_isloginin    = (wxGetApp().app_config->get("user_token") != "");
+    //y5
+    if (m_isloginin)
+        m_user_head_name = wxGetApp().app_config->get("user_head_name");
 
     if (m_isloginin) {
 #if QDT_RELEASE_TO_PUBLIC
@@ -162,10 +165,11 @@ wxBoxSizer *PrinterWebView::init_login_bar(wxPanel *Panel)
 {
     wxBoxSizer *buttonsizer = new wxBoxSizer(wxHORIZONTAL);
 
+    //y5
     if (m_isSimpleMode)
-        staticBitmap = new wxStaticBitmap(Panel, wxID_ANY, ScalableBitmap(this, "user_dark", wxSize(40, 40)).get_bitmap());
-    else
-        staticBitmap = new wxStaticBitmap(Panel, wxID_ANY, ScalableBitmap(this, "user_dark", wxSize(60, 60)).get_bitmap());
+        staticBitmap = new wxStaticBitmap(Panel, wxID_ANY, *get_bmp_bundle_of_login(m_user_head_name, 40, 40));
+    else 
+        staticBitmap = new wxStaticBitmap(Panel, wxID_ANY, *get_bmp_bundle_of_login(m_user_head_name, 60, 60));
 
     StateColor  text_color(std::pair<wxColour, int>(wxColour(57, 57, 61), StateColor::Disabled),
                           std::pair<wxColour, int>(wxColour(68, 121, 251), StateColor::Pressed),
@@ -309,6 +313,7 @@ void PrinterWebView::CreatThread() {
                     break;
                 if (!m_net_buttons.empty()) {
                     BOOST_LOG_TRIVIAL(error) << "machine IP: " << device.local_ip;
+                    //y5
                     std::unique_ptr<PrintHost> printhost(PrintHost::get_print_host_url(device.url, device.local_ip));
                     if (!printhost) {
                         BOOST_LOG_TRIVIAL(error) << ("Could not get a valid Printer Host reference");
@@ -459,6 +464,8 @@ void PrinterWebView::SetLoginStatus(bool status) {
         wxString wxname = from_u8(name);
         login_button->SetLabel(wxname);
         std::vector<Device> m_devices = m_qidinetwork.get_device_list(msg);
+        //y5
+        m_user_head_name              = wxGetApp().app_config->get("user_head_name");
         SetPresetChanged(true);
 #endif
         m_isloginin = true;
@@ -472,6 +479,17 @@ void PrinterWebView::SetLoginStatus(bool status) {
         //y3
         if (webisNetMode == isNetWeb)
             webisNetMode = isDisconnect;
+        //y5
+        std::string head_name = wxGetApp().app_config->get("user_head_name");
+        wxString      head_savePath = (boost::filesystem::path(Slic3r::data_dir()) / "user" / head_name).make_preferred().string();
+        std::ifstream file(head_savePath);
+        if (file.good()) {
+            file.close();
+            remove(head_savePath.c_str());
+        }
+        wxGetApp().app_config->set("user_head_url", "");
+        wxGetApp().app_config->set("user_head_name", "");
+        m_user_head_name = "";
         SetPresetChanged(true);
         UpdateState();
     }
@@ -595,7 +613,25 @@ void PrinterWebView::AddNetButton(const Device device)
     machine_button->SetIsSimpleMode(m_isSimpleMode);
 
     machine_button->Bind(wxEVT_BUTTON, [this, device](wxCommandEvent &event) {
-        std::string formattedHost = "http://" + device.url;
+        //y5
+        std::string formattedHost;
+        if (wxGetApp().app_config->get("dark_color_mode") == "1")
+            formattedHost = device.link_url + "&theme=dark";
+        else
+            formattedHost = device.link_url + "&theme=light";
+
+        std::string formattedHost1 = "http://fluidd_" + formattedHost;
+        std::string formattedHost2 = "http://fluidd2_" + formattedHost;
+        if (formattedHost1 == m_web || formattedHost2 == m_web)
+            return;
+
+        if (m_isfluidd_1) {
+            formattedHost = "http://fluidd_" + formattedHost;
+            m_isfluidd_1  = false;
+        } else {
+            formattedHost = "http://fluidd2_" + formattedHost;
+            m_isfluidd_1  = true;
+        }
         load_net_url(formattedHost, device.local_ip);
     });
 
@@ -698,7 +734,8 @@ void PrinterWebView::OnZoomButtonClick(wxCommandEvent &event)
     m_isSimpleMode = !m_isSimpleMode;
     if (!m_isSimpleMode) {
         text_static->Show();
-        staticBitmap->SetBitmap(ScalableBitmap(this, "user_dark", wxSize(60, 60)).get_bitmap());
+        //y5
+        staticBitmap->SetBitmap(*get_bmp_bundle_of_login(m_user_head_name, 60, 60));
         login_button->SetIsSimpleMode(m_isSimpleMode);
         wxGetApp().app_config->set("machine_list_minification", "0");
         toggleBar->SetSize(327);
@@ -713,7 +750,8 @@ void PrinterWebView::OnZoomButtonClick(wxCommandEvent &event)
         }
     } else {
         text_static->Hide();
-        staticBitmap->SetBitmap(ScalableBitmap(this, "user_dark", wxSize(40, 40)).get_bitmap());
+        //y5
+        staticBitmap->SetBitmap(*get_bmp_bundle_of_login(m_user_head_name, 40, 40));
         login_button->SetIsSimpleMode(m_isSimpleMode);
 
         wxGetApp().app_config->set("machine_list_minification", "1");
@@ -972,6 +1010,11 @@ void PrinterWebView::UpdateLayout()
             button->Refresh();
         }
     }
+    //y5
+    if (!m_isSimpleMode)
+        staticBitmap->SetBitmap(*get_bmp_bundle_of_login(m_user_head_name, 60, 60));
+    else
+        staticBitmap->SetBitmap(*get_bmp_bundle_of_login(m_user_head_name, 40, 40));
 }
 void PrinterWebView::OnScrollup(wxScrollWinEvent &event)
 {

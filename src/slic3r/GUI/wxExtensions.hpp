@@ -51,6 +51,11 @@ int     em_unit(wxWindow* win);
 int     mode_icon_px_size();
 
 wxBitmapBundle* get_bmp_bundle(const std::string& bmp_name, int width = 16, int height = -1, const std::string& new_color_rgb = std::string());
+//y5
+wxBitmapBundle *get_bmp_bundle_of_login(const std::string &bmp_name,
+                                        int                width         = 16,
+                                        int                height        = -1,
+                                        const std::string &new_color_rgb = std::string());
 wxBitmapBundle* get_empty_bmp_bundle(int width, int height);
 wxBitmapBundle* get_solid_bmp_bundle(int width, int height, const std::string& color);
 

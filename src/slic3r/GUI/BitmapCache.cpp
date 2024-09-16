@@ -446,6 +446,49 @@ wxBitmapBundle* BitmapCache::from_png(const std::string& bitmap_name, unsigned w
     return this->insert_bndl(bitmap_key, wxImage_to_wxBitmap_with_alpha(std::move(image)));
 }
 
+//y5
+wxBitmapBundle *BitmapCache::from_png_of_login(const std::string &bitmap_name, unsigned width, unsigned height)
+{
+    std::string bitmap_key = bitmap_name + (height != 0 ? "-h" + std::to_string(height) : "-w" + std::to_string(width));
+
+    auto it = m_bndl_map.find(bitmap_key);
+    if (it != m_bndl_map.end())
+        return it->second;
+
+    wxImage image;
+    std::string imgge_path = (boost::filesystem::path(Slic3r::data_dir()) / "user" / bitmap_name).make_preferred().string();
+    if (!image.LoadFile(imgge_path, wxBITMAP_TYPE_ANY) || image.GetWidth() == 0 ||
+        image.GetHeight() == 0)
+        return nullptr;
+
+    if (height != 0 && unsigned(image.GetHeight()) != height)
+        width = unsigned(0.5f + float(image.GetWidth()) * height / image.GetHeight());
+    else if (width != 0 && unsigned(image.GetWidth()) != width)
+        height = unsigned(0.5f + float(image.GetHeight()) * width / image.GetWidth());
+
+    if (height != 0 && width != 0)
+        image.Rescale(width, height, wxIMAGE_QUALITY_BILINEAR);
+
+    int radius = height / 2;
+    int cx     = image.GetWidth() / 2;
+    int cy     = image.GetHeight() / 2;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < height; ++x) {
+            int dx = x - radius;
+            int dy = y - radius;
+            if (dx * dx + dy * dy <= radius * radius) {
+                image.SetRGB(x, y, image.GetRed(cx + dx, cy + dy), image.GetGreen(cx + dx, cy + dy), image.GetBlue(cx + dx, cy + dy));
+                image.SetAlpha(x, y, 255);
+            } else {
+                image.SetRGB(x, y, 38, 38, 41);
+                image.SetAlpha(x, y, 0);
+            }
+        }
+    }
+    return this->insert_bndl(bitmap_key, wxImage_to_wxBitmap_with_alpha(std::move(image)));
+}
+
+
 wxBitmap* BitmapCache::load_svg(const std::string &bitmap_name, unsigned target_width, unsigned target_height, 
     const bool grayscale/* = false*/, const bool dark_mode/* = false*/, const std::string& new_color /*= ""*/)
 {
