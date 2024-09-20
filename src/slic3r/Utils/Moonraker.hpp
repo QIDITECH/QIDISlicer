@@ -42,6 +42,10 @@ public:
     std::string                get_host() const override { return m_show_ip != "" ? m_show_ip : m_host; }
     const std::string& get_apikey() const { return m_apikey; }
     const std::string& get_cafile() const { return m_cafile; }
+    //y6
+    static void                SetStop(bool isStop) { m_isStop = isStop; };
+    static bool                GetStop() { return m_isStop; };
+    static bool                m_isStop;
 
 protected:
 /*

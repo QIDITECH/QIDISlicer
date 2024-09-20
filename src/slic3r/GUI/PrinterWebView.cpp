@@ -282,7 +282,6 @@ void PrinterWebView::CreatThread() {
                     break;
 
 
-                BOOST_LOG_TRIVIAL(error) << "machine IP: " << (button->getIPLabel());
                 std::unique_ptr<PrintHost> printhost(
                     PrintHost::get_print_host_url((button->getIPLabel()).ToStdString(), (button->getIPLabel()).ToStdString()));
                 if (!printhost) {
@@ -482,13 +481,6 @@ void PrinterWebView::SetLoginStatus(bool status) {
         //y5
         std::string head_name = wxGetApp().app_config->get("user_head_name");
         wxString      head_savePath = (boost::filesystem::path(Slic3r::data_dir()) / "user" / head_name).make_preferred().string();
-        std::ifstream file(head_savePath);
-        if (file.good()) {
-            file.close();
-            remove(head_savePath.c_str());
-        }
-        wxGetApp().app_config->set("user_head_url", "");
-        wxGetApp().app_config->set("user_head_name", "");
         m_user_head_name = "";
         SetPresetChanged(true);
         UpdateState();

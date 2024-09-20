@@ -21,6 +21,9 @@ namespace fs = boost::filesystem;
 namespace pt = boost::property_tree;
 namespace Slic3r {
 
+//y6
+bool Moonraker::m_isStop = false;
+
 namespace {
 #ifdef WIN32
 // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
@@ -165,8 +168,8 @@ std::string Moonraker::get_status(wxString &msg) const
 
     auto http = Http::get(std::move(url));
     set_auth(http);
-    //B64
-    http.timeout_connect(2)
+    //B64 //y6
+    http.timeout_connect(4)
     .on_error([&](std::string body, std::string error, unsigned status) {
             // y1
             if(status == 404)

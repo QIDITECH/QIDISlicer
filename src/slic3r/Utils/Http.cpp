@@ -22,6 +22,7 @@
 #include <libslic3r/Utils.hpp>
 #include <slic3r/GUI/I18N.hpp>
 #include <slic3r/GUI/format.hpp>
+#include "Moonraker.hpp"
 
 namespace fs = boost::filesystem;
 
@@ -225,6 +226,9 @@ int Http::priv::xfercb(void *userp, curl_off_t dltotal, curl_off_t dlnow, curl_o
 {
 	auto self = static_cast<priv*>(userp);
 	bool cb_cancel = false;
+	//y6
+    if (Moonraker::GetStop())
+        cb_cancel = true;
 
 	if (self->progressfn) {
 		Progress progress(dltotal, dlnow, ultotal, ulnow, self->buffer);

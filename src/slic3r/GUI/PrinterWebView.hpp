@@ -45,6 +45,9 @@
 #include <boost/thread.hpp>
 #include "./Widgets/SwitchButton.hpp"
 #include "./Widgets/DeviceButton.hpp"
+
+#include "../Utils/Moonraker.hpp"
+
 namespace Slic3r {
 namespace GUI {
 
@@ -106,9 +109,12 @@ public:
     void StopStatusThread()
     {
         m_stopThread = true;
+        //y6
+        Moonraker::m_isStop = true;
         if (m_statusThread.joinable()) {
             m_statusThread.join();
         }
+        Moonraker::m_isStop = false;
     };
     void SetPauseThread(bool status) { m_pauseThread = status; };
     void SetPresetChanged(bool status);
