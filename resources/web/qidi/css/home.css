@@ -4,6 +4,7 @@ body {
 	align-items: center;
 	/* 让页面占浏览器可视区域的高度 */
 	height: 100vh;
+	background:  #EEEEEE;
 }
 
 #GifBoard {
