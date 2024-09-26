@@ -21,5 +21,4 @@ deps/build-linux/*
 **/.idea/
 .pkg_cache
 CMakeUserPresets.json
-/resources/profiles
 /src/slic3r/QIDI
