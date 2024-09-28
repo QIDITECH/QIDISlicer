@@ -5111,14 +5111,16 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
     DynamicPrintConfig* selected_printer_config = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config();
     const auto print_host_opt = selected_printer_config ? selected_printer_config->option<ConfigOptionString>("print_host") : nullptr;
     const bool send_gcode_shown = print_host_opt != nullptr && !print_host_opt->value.empty();
-    
+
+    auto m_devices = wxGetApp().get_devices();
+    const bool link_has_machine = m_devices.size() > 0;
+
     // when a background processing is ON, export_btn and/or send_btn are showing
     if (get_config_bool("background_processing"))
     {
 	    RemovableDriveManager::RemovableDrivesStatus removable_media_status = wxGetApp().removable_drive_manager()->status();
 		if (sidebar->show_reslice(false) |
-			sidebar->show_export(true) |
-			sidebar->show_send(send_gcode_shown) |
+			sidebar->show_export(true) | sidebar->show_send(send_gcode_shown | link_has_machine) |
 			sidebar->show_export_removable(removable_media_status.has_removable_drives))
 //			sidebar->show_eject(removable_media_status.has_eject))
             sidebar->Layout();
@@ -5130,7 +5132,7 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
 	    	removable_media_status = wxGetApp().removable_drive_manager()->status();
         if (sidebar->show_reslice(ready_to_slice) |
             sidebar->show_export(!ready_to_slice) |
-            sidebar->show_send(send_gcode_shown && !ready_to_slice) |
+            sidebar->show_send((send_gcode_shown | link_has_machine) && !ready_to_slice) |
 			sidebar->show_export_removable(!ready_to_slice && removable_media_status.has_removable_drives))
 //            sidebar->show_eject(!ready_to_slice && removable_media_status.has_eject))
             sidebar->Layout();
@@ -8011,11 +8013,10 @@ void Plater::send_gcode()
 {
     // if physical_printer is selected, send gcode for this printer
     DynamicPrintConfig* physical_printer_config = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config();
-    if (! physical_printer_config || p->model.objects.empty())
-        return;
+    auto       m_devices        = wxGetApp().get_devices();
+    const bool link_has_machine = m_devices.size() > 0;
 
-    PrintHostJob upload_job(physical_printer_config);
-    if (upload_job.empty())
+    if ((!physical_printer_config && !link_has_machine) || p->model.objects.empty())
         return;
 
     // Obtain default output path
@@ -8039,25 +8040,30 @@ void Plater::send_gcode()
 
     // Repetier specific: Query the server for the list of file groups.
     wxArrayString groups;
-    {
-        wxBusyCursor wait;
-        upload_job.printhost->get_groups(groups);
-    }
     // QIDILink specific: Query the server for the list of file groups.
     wxArrayString storage_paths;
     wxArrayString storage_names;
-    {
+    bool          only_link = false;
+    if (physical_printer_config) {
+        PrintHostJob upload_job(physical_printer_config);
+        if (upload_job.empty())
+            return;
         wxBusyCursor wait;
+        upload_job.printhost->get_groups(groups);
+
         try {
             upload_job.printhost->get_storage(storage_paths, storage_names);
-        } catch (const Slic3r::IOError& ex) {
+        } catch (const Slic3r::IOError &ex) {
             show_error(this, ex.what(), false);
             return;
         }
+    } else {
+        only_link = true;
     }
+
      //B61   
-     PrintHostSendDialog dlg(default_output_file, upload_job.printhost->get_post_upload_actions(), groups, storage_paths, storage_names,
-                            this, (this->fff_print().print_statistics()));
+     PrintHostSendDialog dlg(default_output_file, PrintHostPostUploadAction::StartPrint, groups, storage_paths, storage_names, this,
+                            (this->fff_print().print_statistics()), only_link);
 
     if (dlg.ShowModal() == wxID_OK) {
         if (printer_technology() == ptFFF) {

@@ -281,9 +281,13 @@ void PrinterWebView::CreatThread() {
                 if (m_pauseThread)
                     break;
 
-
+                DynamicPrintConfig         cfg_t;
+                cfg_t.set_key_value("print_host", new ConfigOptionString(into_u8(button->getIPLabel())));
+                cfg_t.set_key_value("printhost_apikey", new ConfigOptionString(into_u8(button->GetApikey())));
+                cfg_t.set_key_value("printhost_cafile", new ConfigOptionString(""));
+                cfg_t.set_key_value("printhost_ssl_ignore_revoke", new ConfigOptionBool(false));               
                 std::unique_ptr<PrintHost> printhost(
-                    PrintHost::get_print_host_url((button->getIPLabel()).ToStdString(), (button->getIPLabel()).ToStdString()));
+                    PrintHost::get_print_host(&cfg_t));
                 if (!printhost) {
                     BOOST_LOG_TRIVIAL(error) << ("Could not get a valid Printer Host reference");
                     return;
@@ -291,13 +295,15 @@ void PrinterWebView::CreatThread() {
                 wxString    msg;
                 std::string state    = "standby";
                 float       progress = 0;
-                state                = printhost->get_status(msg);
+                std::pair<std::string, float> state_progress = printhost->get_status_progress(msg);
+
+                state = state_progress.first;
 
                 if ((button->GetStateText()).ToStdString() != state)
                     button->SetStateText(state);
 
                 if (state == "printing") {
-                    progress        = (printhost->get_progress(msg)) * 100;
+                    progress        = state_progress.second * 100;
                     int progressInt = static_cast<int>(progress);
                     button->SetProgressText(wxString::Format(wxT("(%d%%)"), progressInt));
                 }
@@ -321,13 +327,14 @@ void PrinterWebView::CreatThread() {
                     wxString    msg;
                     std::string state    = "standby";
                     float       progress = 0;
-                    state                = printhost->get_status(msg);
+                    std::pair<std::string, float> state_progress = printhost->get_status_progress(msg);
+                    state                                        = state_progress.first;
 
                     if ((m_net_buttons[count]->GetStateText()).ToStdString() != state)
                         m_net_buttons[count]->SetStateText(state);
 
                     if (state == "printing") {
-                        progress        = (printhost->get_progress(msg)) * 100;
+                        progress        = state_progress.second * 100;
                         int progressInt = static_cast<int>(progress);
                         m_net_buttons[count]->SetProgressText(wxString::Format(wxT("(%d%%)"), progressInt));
                     }
@@ -355,6 +362,7 @@ void PrinterWebView::SetPresetChanged(bool status) {
         PhysicalPrinterCollection &ph_printers = preset_bundle.physical_printers;
         for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
             std::string host = (it->config.opt_string("print_host"));
+            wxString    apikey = from_u8(it->config.opt_string("printhost_apikey"));
             for (const std::string &preset_name : it->get_preset_names()) {
                 Preset *    preset    = wxGetApp().preset_bundle->printers.find_preset(preset_name);
                 std::string full_name = it->get_full_name(preset_name);
@@ -385,8 +393,7 @@ void PrinterWebView::SetPresetChanged(bool status) {
                  //BOOST_LOG_TRIVIAL(error) << (it->get_short_name(full_name));
                  //BOOST_LOG_TRIVIAL(error) << (it->get_preset_name(full_name));
                  //BOOST_LOG_TRIVIAL(error) << model_id;
-                AddButton((it->get_short_name(full_name)), host, model_id, full_name, is_selected,
-                           (host_type == htMoonraker));
+                AddButton((it->get_short_name(full_name)), host, model_id, full_name, is_selected, (host_type == htMoonraker), apikey);
                  m_exit_host.insert(host);
             }
         }
@@ -399,47 +406,42 @@ void PrinterWebView::SetPresetChanged(bool status) {
             AddNetButton(device);
         }
 #endif
+        if (m_isNetMode)
+            ShowNetPrinterButton();
+        else
+            ShowLocalPrinterButton();
         //y3
          if (webisNetMode == isNetWeb) {
-             ShowNetPrinterButton();
              for (DeviceButton* button : m_net_buttons) {
                  if (m_ip == (button->getIPLabel())) {
                      button->SetIsSelected(true);
-                     wxCommandEvent event(wxEVT_BUTTON, button->GetId());
-                     wxPostEvent(button, event);
                      break;
                  }
              }
-             toggleBar->SetValue(true);
-             m_isNetMode = true;
-         } else if (webisNetMode == isLocalWeb) {
-             ShowLocalPrinterButton();
+         } 
+         else if (webisNetMode == isLocalWeb) 
+         {
              if (m_exit_host.find(into_u8(m_ip)) != m_exit_host.end()) 
              {
-                 for (DeviceButton* button : m_buttons) {
-                     if (m_ip == (button->getIPLabel())) {
+                 for (DeviceButton* button : m_buttons) 
+                 {
+                     if (m_ip == (button->getIPLabel())) 
+                     {
                          button->SetIsSelected(true);
                          break;
                      }
                  }
-                 toggleBar->SetValue(false);
-                 m_isNetMode = false;
-             } else {
-                 wxString m_host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
-                 load_disconnect_url(m_host);
              }
          }
          else
          {
              if (m_isNetMode)
              {
-                 ShowNetPrinterButton();
                  wxString m_host = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
                  load_disconnect_url(m_host);
              }
              else
              {
-                 ShowLocalPrinterButton();
                  wxString m_host = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
                  load_disconnect_url(m_host);
              }
@@ -501,7 +503,8 @@ void PrinterWebView::AddButton(const wxString &    device_name,
                                const wxString &    machine_type,
                                const wxString &    fullname,
                                bool                isSelected,
-                               bool                isQIDI)
+                               bool                isQIDI,
+                               const wxString &     apikey)
 {
     wxString Machine_Name = Machine_Name.Format("%s%s", machine_type, "_thumbnail");
 
@@ -509,7 +512,7 @@ void PrinterWebView::AddButton(const wxString &    device_name,
                     std::pair<wxColour, int>(wxColour(76, 76, 80), StateColor::Hovered),
                     std::pair<wxColour, int>(wxColour(67, 67, 71), StateColor::Normal));
 
-    DeviceButton *machine_button = new DeviceButton(leftScrolledWindow, fullname, Machine_Name, wxBU_LEFT, wxSize(80, 80), device_name, ip);
+    DeviceButton *machine_button = new DeviceButton(leftScrolledWindow, fullname, Machine_Name, wxBU_LEFT, wxSize(80, 80), device_name, ip, apikey);
     machine_button->SetBackgroundColor(mac_btn_bg);
     machine_button->SetBorderColor(wxColour(67, 67, 71));
     machine_button->SetCanFocus(false);
@@ -607,23 +610,32 @@ void PrinterWebView::AddNetButton(const Device device)
     machine_button->Bind(wxEVT_BUTTON, [this, device](wxCommandEvent &event) {
         //y5
         std::string formattedHost;
-        if (wxGetApp().app_config->get("dark_color_mode") == "1")
-            formattedHost = device.link_url + "&theme=dark";
-        else
-            formattedHost = device.link_url + "&theme=light";
 
-        std::string formattedHost1 = "http://fluidd_" + formattedHost;
-        std::string formattedHost2 = "http://fluidd2_" + formattedHost;
-        if (formattedHost1 == m_web || formattedHost2 == m_web)
-            return;
+        if (device.isSpecialMachine)
+        {
+            if (wxGetApp().app_config->get("dark_color_mode") == "1")
+                formattedHost = device.link_url + "&theme=dark";
+            else
+                formattedHost = device.link_url + "&theme=light";
 
-        if (m_isfluidd_1) {
-            formattedHost = "http://fluidd_" + formattedHost;
-            m_isfluidd_1  = false;
-        } else {
-            formattedHost = "http://fluidd2_" + formattedHost;
-            m_isfluidd_1  = true;
+            std::string formattedHost1 = "http://fluidd_" + formattedHost;
+            std::string formattedHost2 = "http://fluidd2_" + formattedHost;
+            if (formattedHost1 == m_web || formattedHost2 == m_web)
+                return;
+
+            if (m_isfluidd_1) {
+                formattedHost = "http://fluidd_" + formattedHost;
+                m_isfluidd_1  = false;
+            } else {
+                formattedHost = "http://fluidd2_" + formattedHost;
+                m_isfluidd_1  = true;
+            }
+        } 
+        else 
+        {
+            formattedHost = "http://" + device.link_url;
         }
+
         load_net_url(formattedHost, device.local_ip);
     });
 
@@ -1056,7 +1068,7 @@ void PrinterWebView::load_url(wxString &url)
     }
 
     for (DeviceButton *button : m_buttons) {
-        if (url == (button->getIPLabel()))
+        if ((button->getIPLabel()).find(m_ip) != std::string::npos)
             button->SetIsSelected(true);
         else
             button->SetIsSelected(false);

@@ -66,7 +66,8 @@ public:
                         const wxArrayString &          storage_paths,
                         const wxArrayString &          storage_names,
                         Plater *                       plater,
-                        const PrintStatistics &        ps);
+                        const PrintStatistics &        ps,
+                        bool                           onlyLik);
     boost::filesystem::path filename() const;
     PrintHostPostUploadAction post_action() const;
     std::string group() const;

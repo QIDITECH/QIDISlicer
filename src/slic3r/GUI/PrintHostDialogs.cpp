@@ -46,7 +46,8 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
                                          const wxArrayString &      storage_paths,
                                          const wxArrayString &      storage_names,
                                          Plater *                   plater,
-                                         const PrintStatistics &    ps)
+                                         const PrintStatistics &    ps,
+                                         bool                       onlylink)
     : MsgDialog(static_cast<wxWindow *>(wxGetApp().mainframe),
                 _L("Send G-Code to printer host"),
                 _L(""),
@@ -196,9 +197,15 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
         }
     }
     //y4
-    PhysicalPrinter selected_printer = ph_printers.get_selected_printer();
-    std::set<std::string> selected_printer_presets = selected_printer.get_preset_names();
-    std::string           printer_preset                     = *selected_printer_presets.begin();
+    std::string printer_preset = ""; 
+    if (!onlylink) {
+        PhysicalPrinter selected_printer = ph_printers.get_selected_printer();
+        std::set<std::string> selected_printer_presets = selected_printer.get_preset_names();
+        printer_preset                     = *selected_printer_presets.begin();
+    } else {
+        Preset &select_preset = preset_bundle.printers.get_edited_preset();
+        printer_preset        = select_preset.name;
+    }
     m_presetData = preset_data;
     for (const PhysicalPrinterPresetData &data : preset_data) {
         //y4
@@ -939,20 +946,20 @@ void PrintHostQueueDialog::on_error(Event &evt)
     wxCHECK_RET(evt.job_id < (size_t)job_list->GetItemCount(), "Out of bounds access to job list");
 
     set_state(evt.job_id, ST_ERROR);
-    // y1
     std::string response_msg = into_u8(evt.status);
-    size_t pos_404      = evt.status.find("HTTP 404:");
     wxString code_msg     = "";
-    if (pos_404 != std::string::npos) {
-        code_msg = _L("Network connection fails.");
+    if (response_msg.find("HTTP 404:") != std::string::npos) {
         size_t isAws = response_msg.find("AWS");
         if(isAws != std::string::npos)
-            code_msg += _L("Unable to get required resources from AWS server, please check your network settings.");
+            code_msg = _L("HTTP 404. Unable to get required resources from AWS server, please check your network settings.");
         else
-            code_msg += _L("Unable to get required resources from Aliyun server, please check your network settings.");
+            code_msg = _L("HTTP 404. Unable to get required resources from Aliyun server, please check your network settings.");
     } 
+    else if (response_msg.find("HTTP 401:") != std::string::npos)
+        code_msg = _L("HTTP 401: Unauthorized. Please check whether your physical printer has added users. If a user exists, add the "
+                      "APIKEY when adding/editing the printer.");
     else
-        code_msg = _L("Network connection times out. Please check the device network Settings.");
+        code_msg = response_msg;
     
     auto     errormsg = format_wxstr("%1%\n%2%", _L("Error uploading to print host") + ":", code_msg);
     job_list->SetValue(wxVariant(0), evt.job_id, COL_PROGRESS);

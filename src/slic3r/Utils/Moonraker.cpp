@@ -294,6 +294,82 @@ float Moonraker::get_progress(wxString &msg) const
     return process;
 }
 
+std::pair<std::string, float> Moonraker::get_status_progress(wxString &msg) const 
+{
+    // GET /server/info
+
+    // Since the request is performed synchronously here,
+    // it is ok to refer to `msg` from within the closure
+    const char *name = get_name();
+
+    bool        res         = true;
+    std::string print_state = "standby";
+    float       process     = 0;
+    auto        url         = make_url("printer/objects/query?print_stats=state&display_status=progress");
+
+    BOOST_LOG_TRIVIAL(info) << boost::format("%1%: Get version at: %2%") % name % url;
+
+    auto http = Http::get(std::move(url));
+    set_auth(http);
+    // B64 //y6
+    http.timeout_connect(4)
+        .on_error([&](std::string body, std::string error, unsigned status) {
+            // y1
+            if (status == 404) {
+                body = ("Network connection fails.");
+                if (body.find("AWS") != std::string::npos)
+                    body += ("Unable to get required resources from AWS server, please check your network settings.");
+                else
+                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
+            }
+            BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
+                                            body;
+            print_state = "offline";
+            msg         = format_error(body, error, status);
+        })
+        .on_complete([&](std::string body, unsigned) {
+            BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: Got print_stats and process: %2%") % name % body;
+            try {
+                // All successful HTTP requests will return a json encoded object in the form of :
+                // {result: <response data>}
+                std::stringstream ss(body);
+                pt::ptree         ptree;
+                pt::read_json(ss, ptree);
+                if (ptree.front().first != "result") {
+                    msg         = "Could not parse server response";
+                    print_state = "offline";
+                    process     = 0;
+                    return;
+                }
+                if (!ptree.front().second.get_optional<std::string>("status")) {
+                    msg         = "Could not parse server response";
+                    print_state = "offline";
+                    process     = 0;
+                    return;
+                }
+                print_state = ptree.get<std::string>("result.status.print_stats.state");
+                process     = std::stof(ptree.get<std::string>("result.status.display_status.progress"));
+                BOOST_LOG_TRIVIAL(info) << boost::format("%1%: Got state: %2%") % name % print_state;
+                ;
+            } catch (const std::exception &) {
+                print_state = "offline";
+                process     = 0;
+                msg         = "Could not parse server response";
+            }
+        })
+#ifdef _WIN32
+        .ssl_revoke_best_effort(m_ssl_revoke_best_effort)
+        .on_ip_resolve([&](std::string address) {
+            // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
+            // Remember resolved address to be reused at successive REST API call.
+            msg = GUI::from_u8(address);
+        })
+#endif // _WIN32
+        .perform_sync();
+
+    return std::make_pair(print_state, process);
+}
+
 bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const
 {
     // POST /server/files/upload

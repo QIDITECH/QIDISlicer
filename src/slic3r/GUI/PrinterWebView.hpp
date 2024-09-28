@@ -94,7 +94,8 @@ public:
                     const wxString &                           machine_type,
                     const wxString &                           fullname,
                     bool                                       isSelected,
-                   bool                isQIDI);
+                    bool                                         isQIDI,
+                    const wxString &                            apikey);
     void                        DeleteButton();
     void                        UnSelectedButton();
     void ShowNetPrinterButton();

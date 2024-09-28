@@ -56,6 +56,7 @@ public:
     //B45
     virtual std::string                get_status(wxString &curl_msg) const      = 0;
     virtual float                      get_progress(wxString &curl_msg) const    = 0;
+    virtual std::pair<std::string, float>       get_status_progress(wxString &curl_msg) const = 0;
     virtual wxString get_test_ok_msg () const = 0;
     virtual wxString get_test_failed_msg (wxString &msg) const = 0;
     virtual bool upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn) const = 0;

@@ -32,6 +32,7 @@ public:
     //B45
     virtual std::string get_status(wxString &curl_msg) const override;
     virtual float       get_progress(wxString &curl_msg) const override;
+    virtual std::pair<std::string, float>       get_status_progress(wxString &curl_msg) const override;
 
     wxString get_test_ok_msg () const override;
     wxString get_test_failed_msg (wxString &msg) const override;
