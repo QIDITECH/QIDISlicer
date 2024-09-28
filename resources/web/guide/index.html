@@ -363,11 +363,17 @@
 
 		<div class="IntroduceBoard" board="Filaments">
 			<div class="FilamentsTable">
-				<iframe src="filament_table.html" class="table-container" style="width: 100%; height: 1000px; border: none;"></iframe>
+				<iframe id="filamentTableIframe" class="table-container" style="width: 100%; height: 1000px; border: none;"></iframe>
 			</div>
 			<div class="IntroduceTextBold trans" tid="l0"></div>
 			<div class="IntroduceText">https://qidi3d.com/collections/filaments</div>
 		</div>
+		<script>
+			const urlParams = new URLSearchParams(window.location.search);
+			const lang = urlParams.get('lang') || 'en'; 
+			var iframe = document.getElementById('filamentTableIframe');
+			iframe.src = 'filament_table.html?lang=' + lang;
+		</script>
 
 		<div class="IssueBoard" board="IssueReport">
 			<div class="IntroduceTitle trans" tid="t6"></div>
