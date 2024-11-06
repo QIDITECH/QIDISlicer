@@ -205,44 +205,23 @@ struct ExpansionZone {
 * detect bridges.
 * Trim "shells" by the expanded bridges.
 */
-// w36
-/* Surfaces expand_bridges_detect_orientations(
+Surfaces expand_bridges_detect_orientations(
     Surfaces &surfaces,
     std::vector<ExpansionZone>& expansion_zones,
     const float closing_radius
-);*/
-
-//w36
-Surfaces expand_bridges_detect_orientations(Surfaces &                                  surfaces,
-                                            ExPolygons &                                shells,
-                                            const Algorithm::RegionExpansionParameters &expansion_params_into_solid_infill,
-                                            ExPolygons &                                sparse,
-                                            const Algorithm::RegionExpansionParameters &expansion_params_into_sparse_infill,
-                                            const float                                 closing_radius);
+);
 
 /**
 * Extract bridging surfaces from "surfaces", expand them into "shells" using expansion_params.
 * Trim "shells" by the expanded bridges.
 */
-
-// w36
-/* Surfaces expand_merge_surfaces(
+Surfaces expand_merge_surfaces(
     Surfaces &surfaces,
     SurfaceType surface_type,
     std::vector<ExpansionZone>& expansion_zones,
     const float closing_radius,
     const double bridge_angle = -1
-);*/
-
-// w36
-Surfaces expand_merge_surfaces(Surfaces &                                  surfaces,
-                               SurfaceType                                 surface_type,
-                               ExPolygons &                                shells,
-                               const Algorithm::RegionExpansionParameters &expansion_params_into_solid_infill,
-                               ExPolygons &                                sparse,
-                               const Algorithm::RegionExpansionParameters &expansion_params_into_sparse_infill,
-                               const float                                 closing_radius,
-                               const double                                bridge_angle = -1.);
+);
 
 }
 

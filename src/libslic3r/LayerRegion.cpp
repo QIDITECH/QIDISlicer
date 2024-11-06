@@ -618,14 +618,14 @@ Surfaces expand_bridges_detect_orientations(Surfaces &                          
 }
 
 //w36
- Surfaces expand_merge_surfaces(Surfaces &                                  surfaces,
+static Surfaces expand_merge_surfaces(Surfaces &                                  surfaces,
                                       SurfaceType                                 surface_type,
                                       ExPolygons &                                shells,
                                       const Algorithm::RegionExpansionParameters &expansion_params_into_solid_infill,
                                       ExPolygons &                                sparse,
                                       const Algorithm::RegionExpansionParameters &expansion_params_into_sparse_infill,
                                       const float                                 closing_radius,
-                                      const double                                bridge_angle )
+                                      const double                                bridge_angle = -1.)
 {
     using namespace Slic3r::Algorithm;
 
