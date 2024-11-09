@@ -32,7 +32,13 @@ option(SLIC3R_MSVC_PDB          "Generate PDB files on MSVC in Release mode" 1)
 option(SLIC3R_ASAN              "Enable ASan on Clang and GCC" 0)
 option(SLIC3R_UBSAN             "Enable UBSan on Clang and GCC" 0)
 option(SLIC3R_ENABLE_FORMAT_STEP "Enable compilation of STEP file support" ON)
-# If SLIC3R_FHS is 1 -> SLIC3R_DESKTOP_INTEGRATION is always 0, othrewise variable.
+option(SLIC3R_LOG_TO_FILE       "Enable logging into file")
+option(SLIC3R_REPO_URL          "Preset repo URL")
+
+# SLIC3R_OPENGL_ES can be enabled only if SLIC3R_GUI is enabled.
+CMAKE_DEPENDENT_OPTION(SLIC3R_OPENGL_ES "Compile QIDISlicer targeting OpenGL ES" OFF "SLIC3R_GUI" OFF)
+
+# If SLIC3R_FHS is 1 -> SLIC3R_DESKTOP_INTEGRATION is always 0, otherwise variable.
 CMAKE_DEPENDENT_OPTION(SLIC3R_DESKTOP_INTEGRATION "Allow perfoming desktop integration during runtime" 1 "NOT SLIC3R_FHS" 0)
 
 set(OPENVDB_FIND_MODULE_PATH "" CACHE PATH "Path to OpenVDB installation's find modules.")
@@ -57,6 +63,7 @@ set(${PROJECT_NAME}_DEPS_BUILD_DIR "" CACHE PATH "Binary dir of the dependencies
 if (${PROJECT_NAME}_BUILD_DEPS)
     include(deps/autobuild.cmake)
 endif ()
+
 if (APPLE)
     set(CMAKE_FIND_FRAMEWORK LAST)
     set(CMAKE_FIND_APPBUNDLE LAST)
@@ -83,9 +90,19 @@ foreach (_cache_var ${_cache_vars})
     endif ()
 endforeach()
 
+if (SLIC3R_LOG_TO_FILE)
+    add_definitions(-DSLIC3R_LOG_TO_FILE)
+endif ()
+if (SLIC3R_REPO_URL)
+    add_definitions(-DSLIC3R_REPO_URL="${SLIC3R_REPO_URL}")
+endif()
 if (SLIC3R_GUI)
     add_definitions(-DSLIC3R_GUI)
 endif ()
+
+if (SLIC3R_OPENGL_ES)
+    add_definitions(-DSLIC3R_OPENGL_ES)
+endif()
 
 if(SLIC3R_DESKTOP_INTEGRATION)
     add_definitions(-DSLIC3R_DESKTOP_INTEGRATION)
@@ -163,7 +180,6 @@ if(NOT WIN32)
     add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
 endif()
 
-
 # WIN10SDK_PATH is used to point CMake to the WIN10 SDK installation directory.
 # We pick it from environment if it is not defined in another way
 if(WIN32)
@@ -173,8 +189,8 @@ if(WIN32)
         endif()
     endif()
     if(DEFINED WIN10SDK_PATH)
-        if (EXISTS "${WIN10SDK_PATH}/winrt/windows.graphics.printing3d.h")
-            set(WIN10SDK_INCLUDE_PATH "${WIN10SDK_PATH}")
+        if (EXISTS "${WIN10SDK_PATH}/include/winrt/windows.graphics.printing3d.h")
+            set(WIN10SDK_INCLUDE_PATH "${WIN10SDK_PATH}/Include")
         else()
             message("WIN10SDK_PATH is invalid: ${WIN10SDK_PATH}")
             message("${WIN10SDK_PATH}/include/winrt/windows.graphics.printing3d.h was not found")
@@ -221,7 +237,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(Threads REQUIRED)
 
     find_package(DBus REQUIRED)
-    include_directories(${DBUS_INCLUDE_DIRS})
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUXX)
@@ -234,8 +249,7 @@ if (NOT MSVC AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMP
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
     endif ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder" )
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion" )
-	
+
     # On GCC and Clang, no return from a non-void function is a warning only. Here, we make it an error.
     add_compile_options(-Werror=return-type)
 
@@ -315,11 +329,7 @@ if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=partial-availability -Werror=unguarded-availability -Werror=unguarded-availability-new")
 endif ()
 
-# Where all the bundled libraries reside?
-set(LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(LIBDIR_BIN ${CMAKE_CURRENT_BINARY_DIR}/src)
-# For the bundled boost libraries (boost::nowide)
-include_directories(${LIBDIR})
 # For generated header files
 include_directories(${LIBDIR_BIN}/platform)
 
@@ -351,8 +361,10 @@ endif()
 # boost::process was introduced first in version 1.64.0,
 # boost::beast::detail::base64 was introduced first in version 1.66.0
 set(MINIMUM_BOOST_VERSION "1.66.0")
-set(_boost_components "system;filesystem;thread;log;locale;regex;chrono;atomic;date_time;iostreams")
+set(_boost_components "system;filesystem;thread;log;locale;regex;chrono;atomic;date_time;iostreams;nowide")
 find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS ${_boost_components})
+
+find_package(Eigen3 3.3.7 REQUIRED)
 
 add_library(boost_libs INTERFACE)
 add_library(boost_headeronly INTERFACE)
@@ -434,26 +446,18 @@ endif()
 
 ## OPTIONAL packages
 
-# Find eigen3 or use bundled version
-if (NOT SLIC3R_STATIC)
-    find_package(Eigen3 3.3)
-endif ()
-if (NOT EIGEN3_FOUND)
-    set(EIGEN3_FOUND 1)
-    set(EIGEN3_INCLUDE_DIR ${LIBDIR}/eigen/)
-endif ()
-include_directories(BEFORE SYSTEM ${EIGEN3_INCLUDE_DIR})
-
 # Find expat. We have our overriden FindEXPAT which exports libexpat target
 # no matter what.
 find_package(EXPAT REQUIRED)
 
 add_library(libexpat INTERFACE)
 
-if (TARGET EXPAT::EXPAT )
+if (TARGET EXPAT::EXPAT ) # found by a newer Find script
     target_link_libraries(libexpat INTERFACE EXPAT::EXPAT)
-elseif(TARGET expat::expat)
+elseif(TARGET expat::expat) # found by a config script
     target_link_libraries(libexpat INTERFACE expat::expat)
+else() # found by an older Find script
+    target_link_libraries(libexpat INTERFACE ${EXPAT_LIBRARIES})
 endif ()
 
 find_package(PNG REQUIRED)
@@ -594,16 +598,15 @@ function(qidislicer_copy_dlls target)
         COMMAND ${CMAKE_COMMAND} -E copy ${TOP_LEVEL_PROJECT_DIR}/deps/+MPFR/mpfr/lib/win${_bits}/libmpfr-4.dll ${_out_dir}
         COMMENT "Copy mpfr runtime to build tree"
         VERBATIM)
-
 endfunction()
 
-
+add_subdirectory(build-utils)
+add_subdirectory(bundled_deps)
 # libslic3r, QIDISlicer GUI and the QIDISlicer executable.
 add_subdirectory(src)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT QIDISlicer_app_console)
 
 add_dependencies(gettext_make_pot hintsToPot)
-
 
 if(SLIC3R_BUILD_SANDBOXES)
     add_subdirectory(sandboxes)
@@ -640,4 +643,4 @@ else ()
     install(DIRECTORY "${SLIC3R_RESOURCES_DIR}/" DESTINATION "${CMAKE_INSTALL_PREFIX}/resources")
 endif ()
 
-configure_file(${LIBDIR}/platform/unix/fhs.hpp.in ${LIBDIR_BIN}/platform/unix/fhs.hpp)
+configure_file(src/platform/unix/fhs.hpp.in ${LIBDIR_BIN}/platform/unix/fhs.hpp)
