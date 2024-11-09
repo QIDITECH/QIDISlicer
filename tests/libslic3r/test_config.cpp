@@ -2,8 +2,8 @@
 
 #include "libslic3r/Config.hpp"
 #include "libslic3r/PrintConfig.hpp"
-#include "libslic3r/LocalesUtils.hpp"
 
+#include <LocalesUtils.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/string.hpp> 
 #include <cereal/types/vector.hpp> 
@@ -247,6 +247,7 @@ TEST_CASE("Config serialization of multiple values", "[Config]"){
         CHECK(config.option<ConfigOptionStrings>("filament_notes")->values == data.values);
     }
 }
+
 SCENARIO("Generic config validation performs as expected.", "[Config]") {
     GIVEN("A config generated from default options") {
         Slic3r::DynamicPrintConfig config = Slic3r::DynamicPrintConfig::full_print_config();

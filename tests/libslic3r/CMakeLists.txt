@@ -43,8 +43,8 @@ add_executable(${_TEST_NAME}_tests
     test_jump_point_search.cpp
     test_support_spots_generator.cpp
     test_layer_region.cpp
-    ../data/prusaparts.cpp
-    ../data/prusaparts.hpp
+    ../data/qidiparts.cpp
+    ../data/qidiparts.hpp
      test_static_map.cpp
 	)
 

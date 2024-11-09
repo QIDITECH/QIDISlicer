@@ -101,7 +101,8 @@ std::string get_font_filepath() {
     return resource_dir + "fonts/NotoSans-Regular.ttf";
 }
 
-#include "imgui/imstb_truetype.h"
+// Explicit horror include (used to be implicit) - libslic3r "officialy" does not depend on imgui.
+#include "../../bundled_deps/imgui/imgui/imstb_truetype.h" // stbtt_fontinfo
 TEST_CASE("Read glyph C shape from font, stb library calls ONLY", "[Emboss]") {
     std::string font_path = get_font_filepath();
     char  letter   = 'C';
@@ -262,6 +263,7 @@ TEST_CASE("Heal of 'i' in ALIENATO.TTF", "[Emboss]")
     auto a = heal_and_check(polygons);
 
     Polygons scaled_shape = polygons; // copy
+
     double text_shape_scale = 0.001; // Emboss.cpp --> SHAPE_SCALE
     scale(scaled_shape, 1 / text_shape_scale);
     auto b = heal_and_check(scaled_shape);
@@ -310,6 +312,7 @@ TEST_CASE("Heal of overlaping contour", "[Emboss]"){
     ExPolygons shapes = {ExPolygon{contour}};
     CHECK(Emboss::heal_expolygons(shapes));
 }
+
 TEST_CASE("Heal of points close to line", "[Emboss]")
 {
     std::string file_name = "points_close_to_line.svg";
@@ -530,10 +533,10 @@ TEST_CASE("UndoRedo TextConfiguration serialization", "[Emboss]")
     TextConfiguration tc;
     tc.text = "Dovede-li se člověk zasmát sám sobě, nevyjde ze smíchu po celý život.";
     EmbossStyle& es = tc.style;
-    es.name       = "Seneca";
-    es.path       = "Simply the best";
-    es.type       = EmbossStyle::Type::file_path;
-    FontProp &fp  = es.prop;
+    es.name      = "Seneca";
+    es.path      = "Simply the best";
+    es.type      = EmbossStyle::Type::file_path;
+    FontProp &fp = es.prop;
     fp.char_gap  = 3;
     fp.line_gap  = 7;
     fp.boldness  = 2.3f;
@@ -543,8 +546,7 @@ TEST_CASE("UndoRedo TextConfiguration serialization", "[Emboss]")
 
     std::stringstream ss; // any stream can be used
     {
-        cereal::BinaryOutputArchive oarchive(ss); // Create an output archive  
-
+        cereal::BinaryOutputArchive oarchive(ss); // Create an output archive
         oarchive(tc);
     } // archive goes out of scope, ensuring all contents are flushed
 

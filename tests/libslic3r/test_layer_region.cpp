@@ -75,25 +75,12 @@ struct LayerRegionFixture {
 TEST_CASE_METHOD(LayerRegionFixture, "test the surface expansion", "[LayerRegion]") {
     const double custom_angle{1.234f};
 
-    // w36
-    /* const Surfaces result{expand_merge_surfaces(
+    const Surfaces result{expand_merge_surfaces(
         surfaces, stBottomBridge,
         expansion_zones,
         closing_radius,
         custom_angle
-    )};*/
-
-    // w36
-    const Surfaces result{expand_merge_surfaces(
-        surfaces, stBottomBridge,
-        shells,
-        expansion_params_into_solid_infill,
-        sparse,
-        expansion_params_into_sparse_infill,
-        closing_radius
     )};
-
-   
 
     if constexpr (export_svgs) {
         SVG svg("general_expansion.svg", BoundingBox{
@@ -125,13 +112,9 @@ TEST_CASE_METHOD(LayerRegionFixture, "test the surface expansion", "[LayerRegion
 }
 
 TEST_CASE_METHOD(LayerRegionFixture, "test the bridge expansion with the bridge angle detection", "[LayerRegion]") {
-    // w36
     Surfaces result{expand_bridges_detect_orientations(
         surfaces,
-        shells,
-        expansion_params_into_solid_infill,
-        sparse,
-        expansion_params_into_sparse_infill,
+        expansion_zones,
         closing_radius
     )};
 
@@ -148,7 +131,7 @@ TEST_CASE_METHOD(LayerRegionFixture, "test the bridge expansion with the bridge 
     }
 
     REQUIRE(result.size() == 2);
-    CHECK(result.at(0).bridge_angle == Approx(1.5707963268));
+    CHECK(std::fmod(result.at(1).bridge_angle, M_PI) == Approx(0.0));
     CHECK(std::fmod(result.at(1).bridge_angle, M_PI) == Approx(0.0));
     CHECK(result.at(0).expolygon.contour.size() == 22);
     CHECK(result.at(1).expolygon.contour.size() == 14);

@@ -29,6 +29,7 @@ SCENARIO("Origin manipulation", "[GCode]") {
     }
 }
 
+
 TEST_CASE("Wiping speeds", "[GCode]") {
     DynamicPrintConfig config = Slic3r::DynamicPrintConfig::full_print_config();
     config.set_deserialize_strict({
@@ -60,10 +61,11 @@ TEST_CASE("Wiping speeds", "[GCode]") {
     for (const double retract_speed : retract_speeds) {
         INFO("Wipe moves don\'t retract faster than configured speed");
         CHECK(retract_speed < expected_retract_speed);
-            }
+    }
     INFO("No wiping after layer change")
     CHECK(!wiping_on_new_layer);
-        }
+}
+
 bool has_moves_below_z_offset(const DynamicPrintConfig& config) {
 	GCodeReader parser;
     std::string gcode = Slic3r::Test::slice({TestMesh::cube_20x20x20}, config);
@@ -73,10 +75,11 @@ bool has_moves_below_z_offset(const DynamicPrintConfig& config) {
     parser.parse_buffer(gcode, [&] (Slic3r::GCodeReader &self, const Slic3r::GCodeReader::GCodeLine &line) {
         if (line.travel() && line.has_z() && line.z() < configured_offset) {
             moves_below_z_offset++;
-    }
+        }
     });
     return moves_below_z_offset > 0;
-        }
+}
+
 TEST_CASE("Z moves with offset", "[GCode]") {
     DynamicPrintConfig config = Slic3r::DynamicPrintConfig::full_print_config();
     config.set_deserialize_strict({
@@ -103,7 +106,7 @@ std::optional<double> parse_axis(const std::string& line, const std::string& axi
         return std::stod(matchedValue);
     }
     return std::nullopt;
-    }
+}
 
 /**
 * This tests the following behavior:
@@ -138,10 +141,12 @@ TEST_CASE("Extrusion, travels, temeperatures", "[GCode]") {
     Model model;
     Test::init_print({TestMesh::cube_20x20x20}, print, model, config, false, 2);
     std::string gcode = Test::gcode(print);
+
     if constexpr (debug_files) {
         std::ofstream gcode_file{"sequential_print.gcode"};
         gcode_file << gcode;
     }
+
     parser.parse_buffer(gcode, [&] (Slic3r::GCodeReader &self, const Slic3r::GCodeReader::GCodeLine &line) {
         INFO("Unexpected E argument");
         CHECK(!line.has_e());
@@ -159,11 +164,11 @@ TEST_CASE("Extrusion, travels, temeperatures", "[GCode]") {
             const std::optional<double> parsed_temperature = parse_axis(line.raw(), "S");
             if (!parsed_temperature) {
                 FAIL("Failed to parse temperature!");
-        }
+            }
             if (temps.empty() || temps.back() != parsed_temperature) {
                 temps.emplace_back(*parsed_temperature);
             }
-}
+        }
     });
 
     const unsigned layer_count = 20 / 0.4;
@@ -177,7 +182,7 @@ TEST_CASE("Extrusion, travels, temeperatures", "[GCode]") {
     INFO("All travel moves happen within skirt.");
     for (const Point& travel_move : travel_moves) {
         CHECK(convex_hull.contains(travel_move));
-        }
+    }
     INFO("Expected temperature changes");
     CHECK(temps == std::vector<double>{210, 200, 210, 200, 0});
 }
@@ -237,12 +242,13 @@ TEST_CASE("M73s have correct percent values", "[GCode]") {
         config.set_deserialize_strict({
             {" gcode_flavor", "sailfish" },
             {" raft_layers", 3 },
-    });
+        });
+
         Print print;
         Model model;
         Test::init_print({TestMesh::cube_20x20x20}, print, model, config);
         check_m73s(print);
-}
+    }
 
     SECTION("Two copies of single object") {
         config.set_deserialize_strict({
@@ -258,7 +264,7 @@ TEST_CASE("M73s have correct percent values", "[GCode]") {
             std::ofstream gcode_file{"M73_2_copies.gcode"};
             gcode_file << Test::gcode(print);
         }
-        }
+    }
 
     SECTION("Two objects") {
         config.set_deserialize_strict({
@@ -307,8 +313,7 @@ TEST_CASE("M201 for acceleation reset", "[GCode]") {
         if (line.cmd_is("M201") && line.has_x() && line.has_y()) {
             if (line.x() == 1337 && line.y() == 1337) {
                 has_accel = true;
-    }
-
+            }
         }
         if (line.cmd_is("M204") && line.raw().find('S') != std::string::npos) {
             has_m204 = true;

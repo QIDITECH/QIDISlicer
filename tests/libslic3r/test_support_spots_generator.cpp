@@ -5,16 +5,15 @@
 using namespace Slic3r;
 using namespace SupportSpotsGenerator;
 
-
 namespace Rectangle {
-    const float width = 10;
-    const float height = 20;
-    const Polygon polygon = {
-        scaled(Vec2f{-width / 2, -height / 2}),
-        scaled(Vec2f{width / 2, -height / 2}),
-        scaled(Vec2f{width / 2, height / 2}),
-        scaled(Vec2f{-width / 2, height / 2})
-    };
+const float width = 10;
+const float height = 20;
+const Polygon polygon = {
+    scaled(Vec2f{-width / 2, -height / 2}),
+    scaled(Vec2f{width / 2, -height / 2}),
+    scaled(Vec2f{width / 2, height / 2}),
+    scaled(Vec2f{-width / 2, height / 2})
+};
 }
 
 TEST_CASE("Numerical integral over polygon calculation compared with exact solution.", "[SupportSpotsGenerator]") {
@@ -77,7 +76,6 @@ TEST_CASE("Moment values and ratio check.", "[SupportSpotsGenerator]") {
 }
 
 TEST_CASE("Moments calculation for rotated axis.", "[SupportSpotsGenerator]") {
-
     Polygon polygon = {
         scaled(Vec2f{6.362284076172198, 138.9674202217155}),
         scaled(Vec2f{97.48779843751677, 106.08136606617076}),

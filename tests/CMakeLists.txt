@@ -4,9 +4,9 @@
 find_package(Catch2 2.9 REQUIRED)
 
 include(Catch)
+
 set(TEST_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 file(TO_NATIVE_PATH "${TEST_DATA_DIR}" TEST_DATA_DIR)
-
 
 set(CATCH_EXTRA_ARGS "" CACHE STRING "Extra arguments for catch2 test suites.")
 
@@ -27,7 +27,10 @@ add_subdirectory(libslic3r)
 add_subdirectory(fff_print)
 add_subdirectory(sla_print)
 add_subdirectory(cpp17 EXCLUDE_FROM_ALL)    # does not have to be built all the time
+
 if (SLIC3R_GUI)
     add_subdirectory(slic3rutils)
 endif()
+
+
 # add_subdirectory(example)

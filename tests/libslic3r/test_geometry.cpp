@@ -12,7 +12,6 @@
 #include "libslic3r/ShortestPath.hpp"
 
 //#include <random>
-//#include "libnest2d/tools/benchmark.h"
 #include "libslic3r/SVG.hpp"
 
 #include "../data/qidiparts.hpp"
@@ -230,6 +229,7 @@ SCENARIO("Circle Fit, 3 points", "[Geometry]") {
         }
     }
 }
+
 SCENARIO("Circle Fit, TaubinFit with Newton's method", "[Geometry]") {
     GIVEN("A vector of Vec2ds arranged in a half-circle with approximately the same distance R from some point") {
         Vec2d expected_center(-6, 0);
@@ -369,6 +369,7 @@ SCENARIO("Circle Fit, least squares by decomposition or by solving normal equati
         }
     }
 }
+
 TEST_CASE("smallest_enclosing_circle_welzl", "[Geometry]") {
     // Some random points in plane.
     Points pts { 

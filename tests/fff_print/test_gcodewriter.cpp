@@ -6,7 +6,6 @@
 
 using namespace Slic3r;
 
-
 SCENARIO("set_speed emits values with fixed-point output.", "[GCodeWriter]") {
 
     GIVEN("GCodeWriter instance") {

@@ -27,6 +27,7 @@ TEMPLATE_LIST_TEST_CASE("Empty worker should not block when queried for idle", "
 
     REQUIRE(worker.is_idle());
 }
+
 TEMPLATE_LIST_TEST_CASE("Empty worker should not do anything", "[Jobs]", TestClasses) {
     TestType worker{std::make_unique<Progress>()};
 
@@ -58,6 +59,7 @@ TEMPLATE_LIST_TEST_CASE("State should not be idle while running a job", "[Jobs]"
 
     // make sure that the job starts BEFORE the worker.wait_for_idle() is called
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     worker.wait_for_idle();
 
     REQUIRE(worker.is_idle());

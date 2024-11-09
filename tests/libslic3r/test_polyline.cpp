@@ -72,6 +72,7 @@ TEST_CASE_METHOD(PolylineTestCase, "Split at first point", "[Polyline]") {
     CHECK(p1.size() == 1);
     CHECK(p2.size() == 4);
 }
+
 SCENARIO("Simplify polyne, template", "[Polyline]")
 {
     Points polyline{ {0,0}, {1000,0}, {2000,0}, {2000,1000}, {2000,2000}, {1000,2000}, {0,2000}, {0,1000}, {0,0} };
@@ -90,6 +91,7 @@ SCENARIO("Simplify polyne, template", "[Polyline]")
         }
     }
 }
+
 SCENARIO("Simplify polyline", "[Polyline]")
 {
     GIVEN("polyline 1") {
@@ -110,6 +112,7 @@ SCENARIO("Simplify polyline", "[Polyline]")
             }
         }
     }
+
     GIVEN("polyline 3") {
         auto polyline = Polyline{ {0,0}, {100,0}, {50,10} };
         WHEN("simplified with Douglas-Peucker") {
