@@ -32,7 +32,7 @@
 
 #include "stl.h"
 
-#include "libslic3r/LocalesUtils.hpp"
+#include <LocalesUtils.hpp>
 
 #ifndef SEEK_SET
 #error "SEEK_SET not defined"

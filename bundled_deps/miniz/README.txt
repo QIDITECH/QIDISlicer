@@ -16,7 +16,7 @@ knowing the size of the file up front.
 
 Vojtech made the following comments to the pull request above:
 
-The pull request looks good to me in general. We need such a functionality at https://github.com/prusa3d/QIDISlicer so we are going to merge it into our project. Namely, we are exporting potentially huge model files, which are XML encoded, thus the compression ration is quite high and keeping the XML encoded model file in memory is not really practical.
+The pull request looks good to me in general. We need such a functionality at https://github.com/QIDITECH/QIDISlicer so we are going to merge it into our project. Namely, we are exporting potentially huge model files, which are XML encoded, thus the compression ration is quite high and keeping the XML encoded model file in memory is not really practical.
 
 I am a bit uneasy about two things though:
 

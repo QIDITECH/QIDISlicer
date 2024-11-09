@@ -30,7 +30,7 @@
 
 #include "stl.h"
 
-#include "libslic3r/LocalesUtils.hpp"
+#include <LocalesUtils.hpp>
 
 void stl_generate_shared_vertices(stl_file *stl, indexed_triangle_set &its)
 {
