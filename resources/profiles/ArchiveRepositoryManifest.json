@@ -1,0 +1,9 @@
+[{
+	"name": "QIDITechnology",
+	"description": "QIDI FFF printers",
+	"visibility": "",
+	"id": "qidi-fff",
+	"url": "https://github.com/QIDITECH/QIDISlicer/releases/download/QIDITechnology/",
+	"index_url": "https://github.com/QIDITECH/QIDISlicer/releases/download/QIDITechnology/vendor_indices.zip",
+	"selected": 1
+}]
