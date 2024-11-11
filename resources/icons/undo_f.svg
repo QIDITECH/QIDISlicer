@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 23.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
-<g id="undo">
-	<path fill="none" stroke="#4479FB" stroke-width="2.5" stroke-linecap="round" stroke-miterlimit="10" d="M3,11
-		c0.91,1.78,2.76,3,4.89,3c3.04,0,5.5-2.46,5.5-5.5c0-3.04-2.46-5.5-5.5-5.5c-0.17,0-0.34,0.01-0.5,0.03"/>
-	
-		<polygon fill="#4479FB" stroke="#4479FB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" points="
-		7.39,1 7.39,5 4.39,3 	"/>
-</g>
+<!-- Generator: Adobe Illustrator 25.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
+<path style="fill:#4479FB;" d="M8,15.3v-2.7l0.2,0c1.6-0.1,2.8-0.7,3.6-1.7c0.7-0.8,1-1.7,1-2.7C13,6.1,11.8,4.3,10,3.6
+	C9.5,3.4,8.9,3.3,8.3,3.3C7,3.3,5.8,3.8,5,4.6l2,1.2L0.4,9.6V2.1l2.3,1.2C4,1.6,5.8,0.7,7.8,0.7c0.2,0,0.3,0,0.5,0
+	c1.5,0,2.9,0.4,4.2,1.3c2.8,1.9,3.9,5.3,2.8,8.5c-1,2.9-3.8,5-6.7,5L8,15.3z"/>
 </svg>

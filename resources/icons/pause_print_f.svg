@@ -1,29 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 25.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+	 viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
 <g>
+	<path style="fill:#646464;stroke:#4479FB;stroke-miterlimit:10;" d="M8,1C4.1,1,1,4.1,1,8s3.1,7,7,7s7-3.1,7-7S11.9,1,8,1L8,1z"/>
 	<g>
 		<g>
-			<path fill="#4479FB" d="M6,11.7c-0.4,0-0.7-0.3-0.7-0.7V5c0-0.4,0.3-0.7,0.7-0.7S6.7,4.6,6.7,5v6C6.7,11.4,6.4,11.7,6,11.7z"/>
+			<path style="fill:#4479FB;" d="M6,11.7c-0.4,0-0.7-0.3-0.7-0.7V5c0-0.4,0.3-0.7,0.7-0.7S6.7,4.6,6.7,5v6
+				C6.7,11.4,6.4,11.7,6,11.7z"/>
 		</g>
 		<g>
-			<path fill="#4479FB" d="M10,11.7c-0.4,0-0.7-0.3-0.7-0.7V5c0-0.4,0.3-0.7,0.7-0.7s0.7,0.3,0.7,0.7v6C10.7,11.4,10.4,11.7,10,11.7
-				z"/>
+			<path style="fill:#4479FB;" d="M10,11.7c-0.4,0-0.7-0.3-0.7-0.7V5c0-0.4,0.3-0.7,0.7-0.7s0.7,0.3,0.7,0.7v6
+				C10.7,11.4,10.4,11.7,10,11.7z"/>
 		</g>
 	</g>
-	<circle fill="none" stroke="#4479FB" stroke-width="1.1558" stroke-miterlimit="10" cx="8" cy="8" r="6"/>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
 </g>
 </svg>
