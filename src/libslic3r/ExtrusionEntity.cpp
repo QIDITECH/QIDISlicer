@@ -1,17 +1,18 @@
 #include "ExtrusionEntity.hpp"
+
+#include <limits>
+#include <iterator>
+
 #include "ExtrusionEntityCollection.hpp"
-#include "ExPolygon.hpp"
 #include "ClipperUtils.hpp"
 #include "Exception.hpp"
-#include "Extruder.hpp"
 #include "Flow.hpp"
-#include <cmath>
-#include <limits>
-#include <sstream>
-
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/Polyline.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
-    
+
 void ExtrusionPath::intersect_expolygons(const ExPolygons &collection, ExtrusionEntityCollection* retval) const
 {
     this->_inflate_collection(intersection_pl(Polylines{ polyline }, collection), retval);
@@ -350,6 +351,5 @@ double ExtrusionLoop::min_mm3_per_mm() const
         min_mm3_per_mm = std::min(min_mm3_per_mm, path.min_mm3_per_mm());
     return min_mm3_per_mm;
 }
-
 
 }

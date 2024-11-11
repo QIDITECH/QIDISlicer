@@ -1,5 +1,12 @@
 #include "PrincipalComponents2D.hpp"
+
+#include <cmath>
+#include <vector>
+#include <cstdlib>
+
 #include "Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 

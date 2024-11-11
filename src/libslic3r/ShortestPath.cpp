@@ -4,14 +4,24 @@
 	#undef assert
 #endif
 
-#include "clipper.hpp"
+#include <cmath>
+#include <cassert>
+#include <iterator>
+#include <limits>
+#include <algorithm>
+
 #include "ShortestPath.hpp"
 #include "KDTreeIndirect.hpp"
 #include "MutablePriorityQueue.hpp"
 #include "Print.hpp"
-
-#include <cmath>
-#include <cassert>
+#include "libslic3r/ExtrusionEntity.hpp"
+#include "libslic3r/ExtrusionEntityCollection.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/MultiMaterialSegmentation.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/libslic3r.h"
+#include "tcbspan/span.hpp"
 
 namespace Slic3r {
 
@@ -1009,7 +1019,7 @@ std::vector<std::pair<size_t, bool>> chain_segments_greedy2(SegmentEndPointFunc 
 std::vector<std::pair<size_t, bool>> chain_extrusion_entities(const std::vector<ExtrusionEntity*> &entities, const Point *start_near, const bool reversed)
 {
 	auto segment_end_point = [&entities, reversed](size_t idx, bool first_point) -> const Point& { return first_point == reversed ? entities[idx]->last_point() : entities[idx]->first_point(); };
-	auto could_reverse = [&entities](size_t idx) { const ExtrusionEntity *ee = entities[idx]; return ee->is_loop() || ee->can_reverse(); };
+	auto could_reverse 	   = [&entities](size_t idx) { const ExtrusionEntity *ee = entities[idx]; return ee->is_loop() || ee->can_reverse(); };
 	std::vector<std::pair<size_t, bool>> out = chain_segments_greedy_constrained_reversals<Point, decltype(segment_end_point), decltype(could_reverse)>(
 		segment_end_point, could_reverse, entities.size(), start_near);
 	for (std::pair<size_t, bool> &segment : out) {
@@ -1071,6 +1081,7 @@ ExtrusionEntityReferences chain_extrusion_references(const ExtrusionEntityCollec
 	} else
 		return chain_extrusion_references(eec.entities, start_near, reversed);
 }
+
 std::vector<std::pair<size_t, bool>> chain_extrusion_paths(std::vector<ExtrusionPath> &extrusion_paths, const Point *start_near)
 {
 	auto segment_end_point = [&extrusion_paths](size_t idx, bool first_point) -> const Point& { return first_point ? extrusion_paths[idx].first_point() : extrusion_paths[idx].last_point(); };
@@ -1114,10 +1125,6 @@ std::vector<size_t> chain_expolygons(const ExPolygons &expolygons, Point *start_
         ordering_points.push_back(ex.contour.first_point());
     return chain_points(ordering_points);
 }
-
-#ifndef NDEBUG
-	// #define DEBUG_SVG_OUTPUT
-#endif /* NDEBUG */
 
 #ifdef DEBUG_SVG_OUTPUT
 void svg_draw_polyline_chain(const char *name, size_t idx, const Polylines &polylines)

@@ -1,8 +1,9 @@
 #include "ExtrusionEntityCollection.hpp"
-#include "ShortestPath.hpp"
+
 #include <algorithm>
-#include <cmath>
-#include <map>
+#include <limits>
+
+#include "libslic3r/ExtrusionEntity.hpp"
 
 namespace Slic3r {
 
@@ -84,7 +85,6 @@ void ExtrusionEntityCollection::remove(size_t i)
     delete this->entities[i];
     this->entities.erase(this->entities.begin() + i);
 }
-
 
 void ExtrusionEntityCollection::polygons_covered_by_width(Polygons &out, const float scaled_epsilon) const
 {

@@ -149,6 +149,7 @@ public:
 
         return paths;
     }
+    bool is_self_crossing() override { return false; }
 
 protected:
     Fill *clone() const override { return new FillConcentricInternal(*this); };

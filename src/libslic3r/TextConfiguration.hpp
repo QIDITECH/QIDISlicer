@@ -26,7 +26,6 @@ struct FontProp
     // When not set value is zero and is not stored
     std::optional<int> line_gap; // [in font point]
 
-
     // positive value mean wider character shape
     // negative value mean tiner character shape
     // When not set value is zero and is not stored
@@ -36,7 +35,6 @@ struct FontProp
     // negative value mean CCW skew (unItalic)
     // When not set value is zero and is not stored
     std::optional<float> skew; // [ration x:y]
-
 
     // Parameter for True Type Font collections
     // Select index of font in collection
@@ -52,7 +50,7 @@ struct FontProp
     // change pivot of text
     // When not set, center is used and is not stored
     Align align = Align(HorizontalAlign::center, VerticalAlign::center);
-    
+
     //////
     // Duplicit data to wxFontDescriptor
     // used for store/load .3mf file
@@ -179,7 +177,6 @@ struct TextConfiguration
 
     // Embossed text value
     std::string text = "None";
-
 
     // undo / redo stack recovery
     template<class Archive> void serialize(Archive &ar) { ar(style, text); }

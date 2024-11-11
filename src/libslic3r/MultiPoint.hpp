@@ -1,11 +1,25 @@
 #ifndef slic3r_MultiPoint_hpp_
 #define slic3r_MultiPoint_hpp_
 
-#include "libslic3r.h"
+#include <assert.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <algorithm>
 #include <vector>
+#include <Eigen/Geometry>
+#include <initializer_list>
+#include <iterator>
+#include <utility>
+#include <cassert>
+#include <cinttypes>
+#include <cmath>
+#include <cstddef>
+
+#include "libslic3r.h"
 #include "Line.hpp"
 #include "Point.hpp"
+#include "libslic3r/Point.hpp"
 
 namespace Slic3r {
 
@@ -128,6 +142,7 @@ inline Points douglas_peucker(const Points &src, const double tolerance)
     douglas_peucker(src.begin(), src.end(), std::back_inserter(out), tolerance);
     return out;
 }
+
 class MultiPoint
 {
 public:
@@ -248,6 +263,7 @@ inline double length(const Points::const_iterator begin, const Points::const_ite
 inline double length(const Points &pts) {
     return length(pts.begin(), pts.end());
 }
+
 inline double area(const Points &polygon) {
     double area = 0.;
     for (size_t i = 0, j = polygon.size() - 1; i < polygon.size(); j = i ++)

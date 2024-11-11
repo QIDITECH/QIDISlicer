@@ -1,6 +1,10 @@
 
 #include "ArrangeSettingsDb_AppCfg.hpp"
 
+#include "LocalesUtils.hpp"
+#include "libslic3r/AppConfig.hpp"
+#include "libslic3r/Arrange/ArrangeSettingsView.hpp"
+
 namespace Slic3r {
 
 ArrangeSettingsDb_AppCfg::ArrangeSettingsDb_AppCfg(AppConfig *appcfg) : m_appcfg{appcfg}
@@ -41,16 +45,6 @@ void ArrangeSettingsDb_AppCfg::sync()
     std::string en_rot_sla_str =
         m_appcfg->get("arrange", "enable_rotation_sla");
 
-    //    std::string alignment_fff_str =
-    //        m_appcfg->get("arrange", "alignment_fff");
-
-    //    std::string alignment_fff_seqp_str =
-    //        m_appcfg->get("arrange", "alignment_fff_seq_pring");
-
-    //    std::string alignment_sla_str =
-    //        m_appcfg->get("arrange", "alignment_sla");
-
-    // Override default alignment and save save/load it to a temporary slot "alignment_xl"
     std::string alignment_xl_str =
         m_appcfg->get("arrange", "alignment_xl");
 
@@ -100,19 +94,10 @@ void ArrangeSettingsDb_AppCfg::sync()
 
     if (!en_rot_sla_str.empty())
         m_settings_sla.vals.rotations = (en_rot_sla_str == "1" || en_rot_sla_str == "yes");
-
-    //    if (!alignment_sla_str.empty())
-    //        m_arrange_settings_sla.alignment = std::stoi(alignment_sla_str);
-
-    //    if (!alignment_fff_str.empty())
-    //        m_arrange_settings_fff.alignment = std::stoi(alignment_fff_str);
-
-    //    if (!alignment_fff_seqp_str.empty())
-    //        m_arrange_settings_fff_seq_print.alignment = std::stoi(alignment_fff_seqp_str);
     else
         m_settings_sla.vals.rotations = m_settings_sla.defaults.rotations;
 
-    // Override default alignment and save save/load it to a temporary slot "alignment_xl"
+    // Override default alignment and save/load it to a temporary slot "alignment_xl"
     auto arr_alignment = ArrangeSettingsView::to_xl_pivots(alignment_xl_str)
                              .value_or(m_settings_fff.defaults.xl_align);
 

@@ -1,5 +1,5 @@
-#ifndef OPTIMIZER_HPP
-#define OPTIMIZER_HPP
+#ifndef QIDISLICER_OPTIMIZER_HPP
+#define QIDISLICER_OPTIMIZER_HPP
 
 #include <utility>
 #include <tuple>

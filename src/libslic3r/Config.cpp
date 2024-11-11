@@ -1,33 +1,32 @@
 #include "Config.hpp"
-#include "format.hpp"
-#include "Utils.hpp"
-#include "LocalesUtils.hpp"
 
-#include <assert.h>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/config.hpp>
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/nowide/cenv.hpp>
-#include <boost/nowide/cstdio.hpp>
+#include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/fstream.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <boost/format.hpp>
-#include <string.h>
-
 #include <LibBGCode/binarize/binarize.hpp>
-//FIXME for GCodeFlavor and gcfMarlin (for forward-compatibility conversion)
-// This is not nice, likely it would be better to pass the ConfigSubstitutionContext to handle_legacy().
-#include "PrintConfig.hpp"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/multi_index_container.hpp>
+#include <cereal/cereal.hpp>
+#include <core/core.hpp>
+#include <iostream>
+#include <iomanip>
+#include <cstddef>
+#include <set>
+#include <cstdlib>
+#include <cstring>
+
+#include "format.hpp"
+#include "Utils.hpp"
+#include "LocalesUtils.hpp"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Semver.hpp"
 
 namespace Slic3r {
 
@@ -273,6 +272,7 @@ ConfigOption* ConfigOptionDef::create_empty_option() const
 	    case coBool:            return new ConfigOptionBool();
 	    case coBools:           return new ConfigOptionBools();
 	    case coEnum:            return new ConfigOptionEnumGeneric(this->enum_def->m_enum_keys_map);
+	    case coEnums:           return new ConfigOptionEnumsGeneric(this->enum_def->m_enum_keys_map);
 	    default:                throw ConfigurationError(std::string("Unknown option type for option ") + this->label);
 	    }
 	}
@@ -283,7 +283,10 @@ ConfigOption* ConfigOptionDef::create_default_option() const
     if (this->default_value)
         return (this->default_value->type() == coEnum) ?
             // Special case: For a DynamicConfig, convert a templated enum to a generic enum.
-            new ConfigOptionEnumGeneric(this->enum_def->m_enum_keys_map, this->default_value->getInt()) :
+            new ConfigOptionEnumGeneric(this->enum_def->m_enum_keys_map, this->default_value->getInt()) : 
+               (this->default_value->type() == coEnums) ?
+            // Special case: For a DynamicConfig, convert a templated enums to a generic enums.
+            new ConfigOptionEnumsGeneric(this->enum_def->m_enum_keys_map, this->default_value->getInts()) :
             this->default_value->clone();
     return this->create_empty_option();
 }
@@ -312,7 +315,7 @@ void ConfigDef::finalize()
     // Validate & finalize open & closed enums.
     for (std::pair<const t_config_option_key, ConfigOptionDef> &kvp : options) {
         ConfigOptionDef& def = kvp.second;
-        if (def.type == coEnum) {
+        if (def.type == coEnum || def.type == coEnums) {
             assert(def.enum_def);
             assert(def.enum_def->is_valid_closed_enum());
             assert(! def.is_gui_type_enum_open());
@@ -353,6 +356,9 @@ std::ostream& ConfigDef::print_cli_help(std::ostream& out, bool show_defaults, s
         return wrapped.str();
     };
 
+    // List of opt_keys that should be hidden from the CLI help.
+    const std::vector<std::string> silent_options = { "webdev", "single_instance_on_url" };
+
     // get the unique categories
     std::set<std::string> categories;
     for (const auto& opt : this->options) {
@@ -371,6 +377,9 @@ std::ostream& ConfigDef::print_cli_help(std::ostream& out, bool show_defaults, s
         for (const auto& opt : this->options) {
             const ConfigOptionDef& def = opt.second;
 			if (def.category != category || def.cli == ConfigOptionDef::nocli || !filter(def))
+                continue;
+
+            if (std::find(silent_options.begin(), silent_options.end(), opt.second.opt_key) != silent_options.end())
                 continue;
             
             // get all possible variations: --foo, --foobar, -f...
@@ -746,7 +755,7 @@ ConfigSubstitutions ConfigBase::load(const std::string& filename, ForwardCompati
         file_type = EFileType::Ini;
 
     switch (file_type)
-{
+    {
     case EFileType::Ini:         { return this->load_from_ini(filename, compatibility_rule); }
     case EFileType::AsciiGCode:  { return this->load_from_gcode_file(filename, compatibility_rule);}
     case EFileType::BinaryGCode: { return this->load_from_binary_gcode_file(filename, compatibility_rule);}
@@ -888,6 +897,7 @@ size_t ConfigBase::load_from_gcode_string_legacy(ConfigBase& config, const char*
     // Do legacy conversion on a completely loaded dictionary.
     // Perform composite conversions, for example merging multiple keys into one key.
     config.handle_legacy_composite();
+
     return num_key_value_pairs;
 }
 
@@ -1048,8 +1058,8 @@ ConfigSubstitutions ConfigBase::load_from_gcode_file(const std::string &filename
         // Try a heuristics reading the G-code from back.
         ifs.seekg(0, ifs.end);
         auto file_length = ifs.tellg();
-    	auto data_length = std::min<std::fstream::pos_type>(65535, file_length - header_end_pos);
-    	ifs.seekg(file_length - data_length, ifs.beg);
+        auto data_length = std::min<std::fstream::pos_type>(65535, file_length - header_end_pos);
+        ifs.seekg(file_length - data_length, ifs.beg);
         std::vector<char> data(size_t(data_length) + 1, 0);
         ifs.read(data.data(), data_length);
         ifs.close();
@@ -1406,7 +1416,7 @@ t_config_option_keys DynamicConfig::equal(const DynamicConfig &other) const
 
 }
 
-#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/polymorphic.hpp> // IWYU pragma: keep
 CEREAL_REGISTER_TYPE(Slic3r::ConfigOption)
 CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionSingle<double>)
 CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionSingle<int>)
@@ -1446,6 +1456,7 @@ CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionBool)
 CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionBools)
 CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionBoolsNullable)
 CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionEnumGeneric)
+CEREAL_REGISTER_TYPE(Slic3r::ConfigOptionEnumsGeneric)
 CEREAL_REGISTER_TYPE(Slic3r::ConfigBase)
 CEREAL_REGISTER_TYPE(Slic3r::DynamicConfig)
 
@@ -1487,4 +1498,5 @@ CEREAL_REGISTER_POLYMORPHIC_RELATION(Slic3r::ConfigOptionSingle<bool>, Slic3r::C
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Slic3r::ConfigOptionVector<unsigned char>, Slic3r::ConfigOptionBools)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Slic3r::ConfigOptionVector<unsigned char>, Slic3r::ConfigOptionBoolsNullable)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Slic3r::ConfigOptionInt, Slic3r::ConfigOptionEnumGeneric)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Slic3r::ConfigOptionInts, Slic3r::ConfigOptionEnumsGeneric)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Slic3r::ConfigBase, Slic3r::DynamicConfig)

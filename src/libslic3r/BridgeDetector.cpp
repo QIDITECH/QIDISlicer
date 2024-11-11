@@ -1,7 +1,17 @@
 #include "BridgeDetector.hpp"
+
+#include <algorithm>
+#include <cstddef>
+
 #include "ClipperUtils.hpp"
 #include "Geometry.hpp"
-#include <algorithm>
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/Polyline.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 

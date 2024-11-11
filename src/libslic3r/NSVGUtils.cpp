@@ -1,11 +1,19 @@
 #include "NSVGUtils.hpp"
-#include <array>
-#include <charconv> // to_chars
 
-#include <boost/nowide/iostream.hpp>
 #include <boost/nowide/fstream.hpp>
-#include "ClipperUtils.hpp"
+#include <nanosvg/nanosvg.h>
+#include <array>
+#include <algorithm>
+#include <sstream>
+#include <cassert>
+#include <cstring>
+
 #include "Emboss.hpp" // heal for shape
+#include "libslic3r/ClipperUtils.hpp"
+#include "libslic3r/EmbossShape.hpp"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/Polyline.hpp"
 
 namespace {    
 using namespace Slic3r; // Polygon
@@ -169,7 +177,7 @@ size_t get_shapes_count(const NSVGimage &image)
 //         << "width=\"" << size.x() << "mm\" "
 //         << "height=\"" << size.y() << "mm\" "
 //         << "viewBox=\"0 0 " << size.x() << " " << size.y() << "\" >\n";
-//    data << "<!-- Created with PrusaSlicer (https://www.prusa3d.com/prusaslicer/) -->\n";
+//    data << "<!-- Created with QIDISlicer (https://www.qidi3d.com/) -->\n";
 //
 //    std::array<char, 128> buffer;
 //    auto write_point = [&tl, &buffer](std::string &d, const float *p) {
@@ -331,12 +339,12 @@ LinesPath linearize_path(NSVGpath *first_path, const NSVGLineParams &param)
     // multiple use of allocated memmory for points between paths
     Points points;
     for (NSVGpath *path = first_path; path != NULL; path = path->next) {
-                // Flatten path
+        // Flatten path
         Point::coord_type x = to_coor(path->pts[0], param.scale);
         Point::coord_type y = to_coor(path->pts[1], param.scale);
         points.emplace_back(x, y);
         size_t path_size = (path->npts > 1) ? static_cast<size_t>(path->npts - 1) : 0;
-                for (size_t i = 0; i < path_size; i += 3) {
+        for (size_t i = 0; i < path_size; i += 3) {
             const float *p = &path->pts[i * 2];
             if (is_line(p)) {
                 // point p4
@@ -433,7 +441,7 @@ struct DashesParam{
         }
 
         dash_length = dash_array[dash_index] - dash_offset;
-                }
+    }
 };
 
 Polylines to_dashes(const Polyline &polyline, const DashesParam& param)
@@ -450,7 +458,8 @@ Polylines to_dashes(const Polyline &polyline, const DashesParam& param)
             // is first point
             prev_point = point; // copy
             continue;
-                }
+        }
+
         Point diff = point - prev_point;
         float line_segment_length = diff.cast<float>().norm();
         while (dash_length < line_segment_length) {
@@ -468,8 +477,9 @@ Polylines to_dashes(const Polyline &polyline, const DashesParam& param)
                     dash.append(intermediate);
                     dashes.push_back(dash);
                     dash.clear();
+                }
             }
-        }
+
             diff -= move_point;
             line_segment_length -= dash_length;
             prev_point = intermediate;
@@ -478,12 +488,13 @@ Polylines to_dashes(const Polyline &polyline, const DashesParam& param)
             is_line = !is_line;
             dash_index = (dash_index + 1) % param.dash_count;
             dash_length = param.dash_array[dash_index];
-    }
+        }
+
         if (is_line)
             dash.append(prev_point);
         dash_length -= line_segment_length;
         prev_point = point; // copy
-}
+    }
 
     // add last dash
     if (is_line){
@@ -536,4 +547,5 @@ HealedExPolygons stroke_to_expolygons(const LinesPath &lines_path, const NSVGsha
     bool is_non_zero = true;
     return Emboss::heal_polygons(result, is_non_zero, param.max_heal_iteration);
 }
+
 } // namespace

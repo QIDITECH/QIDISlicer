@@ -1,10 +1,15 @@
 #include "MedialAxis.hpp"
 
-#include "clipper.hpp"
-#include "VoronoiOffset.hpp"
-#include "ClipperUtils.hpp"
-
 #include <boost/log/trivial.hpp>
+#include <boost/polygon/polygon.hpp>
+#include <cassert>
+#include <cmath>
+
+#include "VoronoiOffset.hpp"
+#include "libslic3r/ClipperUtils.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/libslic3r.h"
 
 #ifdef SLIC3R_DEBUG
 namespace boost { namespace polygon {
@@ -479,6 +484,7 @@ void MedialAxis::build(ThickPolylines* polylines)
         if (!m_vd.is_valid())
             BOOST_LOG_TRIVIAL(error) << "MedialAxis - Invalid Voronoi diagram even after morphological closing.";
     }
+
     Slic3r::Voronoi::annotate_inside_outside(m_vd, m_lines);
 //    static constexpr double threshold_alpha = M_PI / 12.; // 30 degrees
 //    std::vector<Vec2d> skeleton_edges = Slic3r::Voronoi::skeleton_edges_rough(vd, lines, threshold_alpha);

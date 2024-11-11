@@ -3,10 +3,22 @@
 
 //#define SLIC3R_USE_CLIPPER2
 
+#include <assert.h>
+#include <cstddef>
+#include <iterator>
+#include <utility>
+#include <vector>
+#include <cassert>
+
 #include "libslic3r.h"
 #include "ExPolygon.hpp"
 #include "Polygon.hpp"
 #include "Surface.hpp"
+#include "libslic3r/ClipperUtils.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polyline.hpp"
+#include "libslic3r/BoundingBox.hpp"
 
 #ifdef SLIC3R_USE_CLIPPER2
 
@@ -14,7 +26,8 @@
 
 #else /* SLIC3R_USE_CLIPPER2 */
 
-#include "clipper.hpp"
+#include "libslic3r/clipper.hpp"
+
 // import these wherever we're included
 using Slic3r::ClipperLib::jtMiter;
 using Slic3r::ClipperLib::jtRound;
@@ -29,8 +42,10 @@ class BoundingBox;
 static constexpr const float                        ClipperSafetyOffset     = 10.f;
 
 static constexpr const Slic3r::ClipperLib::JoinType DefaultJoinType         = Slic3r::ClipperLib::jtMiter;
-//FIXME evaluate the default miter limit. 3 seems to be extreme, Cura uses 1.2.
+
 static constexpr const Slic3r::ClipperLib::EndType DefaultEndType           = Slic3r::ClipperLib::etOpenButt;
+
+//FIXME evaluate the default miter limit. 3 seems to be extreme, Cura uses 1.2.
 // Mitter Limit 3 is useful for perimeter generator, where sharp corners are extruded without needing a gap fill.
 // However such a high limit causes issues with large positive or negative offsets, where a sharp corner
 // is extended excessively.
@@ -364,8 +379,10 @@ Slic3r::ExPolygons offset_ex(const Slic3r::ExPolygons &expolygons, const float d
 Slic3r::ExPolygons offset_ex(const Slic3r::Surfaces &surfaces, const float delta, ClipperLib::JoinType joinType = DefaultJoinType, double miterLimit = DefaultMiterLimit);
 Slic3r::ExPolygons offset_ex(const Slic3r::SurfacesPtr &surfaces, const float delta, ClipperLib::JoinType joinType = DefaultJoinType, double miterLimit = DefaultMiterLimit);
 
+// convert stroke to path by offsetting of contour
 Polygons contour_to_polygons(const Polygon &polygon, const float line_width, ClipperLib::JoinType join_type = DefaultJoinType, double miter_limit = DefaultMiterLimit);
 Polygons contour_to_polygons(const Polygons &polygon, const float line_width, ClipperLib::JoinType join_type = DefaultJoinType, double miter_limit = DefaultMiterLimit);
+
 inline Slic3r::Polygons   union_safety_offset   (const Slic3r::Polygons   &polygons)   { return offset   (polygons,   ClipperSafetyOffset); }
 inline Slic3r::Polygons   union_safety_offset   (const Slic3r::ExPolygons &expolygons) { return offset   (expolygons, ClipperSafetyOffset); }
 inline Slic3r::ExPolygons union_safety_offset_ex(const Slic3r::Polygons   &polygons)   { return offset_ex(polygons,   ClipperSafetyOffset); }
@@ -461,7 +478,6 @@ Slic3r::Polylines  diff_pl(const Slic3r::Polylines &subject, const Slic3r::ExPol
 Slic3r::Polylines  diff_pl(const Slic3r::Polylines &subject, const Slic3r::ExPolygons &clip);
 Slic3r::Polylines  diff_pl(const Slic3r::Polygons &subject, const Slic3r::Polygons &clip);
 
-
 inline Slic3r::Lines diff_ln(const Slic3r::Lines &subject, const Slic3r::Polygons &clip)
 {
     return _clipper_ln(ClipperLib::ctDifference, subject, clip);
@@ -488,7 +504,6 @@ Slic3r::ExPolygons intersection_ex(const Slic3r::Surfaces &subject, const Slic3r
 Slic3r::ExPolygons intersection_ex(const Slic3r::Surfaces &subject, const Slic3r::ExPolygons &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
 Slic3r::ExPolygons intersection_ex(const Slic3r::Surfaces &subject, const Slic3r::Surfaces &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
 Slic3r::ExPolygons intersection_ex(const Slic3r::SurfacesPtr &subject, const Slic3r::ExPolygons &clip, ApplySafetyOffset do_safety_offset = ApplySafetyOffset::No);
-
 Slic3r::Polylines  intersection_pl(const Slic3r::Polylines &subject, const Slic3r::Polygon &clip);
 Slic3r::Polylines  intersection_pl(const Slic3r::Polyline &subject, const Slic3r::ExPolygon &clip);
 Slic3r::Polylines  intersection_pl(const Slic3r::Polylines &subject, const Slic3r::ExPolygon &clip);

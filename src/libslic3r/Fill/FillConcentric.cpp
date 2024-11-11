@@ -1,11 +1,19 @@
+#include <algorithm>
+#include <vector>
+#include <cassert>
+#include <cstddef>
+
 #include "../ClipperUtils.hpp"
 #include "../ExPolygon.hpp"
-#include "../Surface.hpp"
-#include "Arachne/WallToolPaths.hpp"
-
+#include "libslic3r/Arachne/WallToolPaths.hpp"
 #include "FillConcentric.hpp"
-
-#include <libslic3r/ShortestPath.hpp>
+#include "libslic3r/Arachne/utils/ExtrusionLine.hpp"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExtrusionEntity.hpp"
+#include "libslic3r/Fill/FillBase.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -49,14 +57,19 @@ void FillConcentric::_fill_surface_single(
     // clip the paths to prevent the extruder from getting exactly on the first point of the loop
     // Keep valid paths only.
     size_t j = iPathFirst;
-    for (size_t i = iPathFirst; i < polylines_out.size(); ++ i) {
+    for (size_t i = iPathFirst; i < polylines_out.size(); ++i) {
         polylines_out[i].clip_end(this->loop_clipping);
         if (polylines_out[i].is_valid()) {
+            if (params.prefer_clockwise_movements)
+                polylines_out[i].reverse();
+
             if (j < i)
                 polylines_out[j] = std::move(polylines_out[i]);
-            ++ j;
+
+            ++j;
         }
     }
+
     if (j < polylines_out.size())
         polylines_out.erase(polylines_out.begin() + int(j), polylines_out.end());
     //TODO: return ExtrusionLoop objects to get better chained paths,
@@ -87,6 +100,7 @@ void FillConcentric::_fill_surface_single(const FillParams              &params,
         for (Arachne::VariableWidthLines &loop : loops) {
             if (loop.empty())
                 continue;
+
             for (const Arachne::ExtrusionLine &wall : loop)
                 all_extrusions.emplace_back(&wall);
         }
@@ -99,8 +113,14 @@ void FillConcentric::_fill_surface_single(const FillParams              &params,
                 continue;
 
             ThickPolyline thick_polyline = Arachne::to_thick_polyline(*extrusion);
-            if (extrusion->is_closed)
+            if (extrusion->is_closed) {
+                // Arachne produces contour with clockwise orientation and holes with counterclockwise orientation.
+                if (const bool extrusion_reverse = params.prefer_clockwise_movements ? !extrusion->is_contour() : extrusion->is_contour(); extrusion_reverse)
+                    thick_polyline.reverse();
+
                 thick_polyline.start_at_index(nearest_point_index(thick_polyline.points, last_pos));
+            }
+
             thick_polylines_out.emplace_back(std::move(thick_polyline));
             last_pos = thick_polylines_out.back().last_point();
         }
@@ -118,7 +138,6 @@ void FillConcentric::_fill_surface_single(const FillParams              &params,
         }
         if (j < thick_polylines_out.size())
             thick_polylines_out.erase(thick_polylines_out.begin() + int(j), thick_polylines_out.end());
-        //reorder_by_shortest_traverse(thick_polylines_out);
     } else {
         Polylines polylines;
         this->_fill_surface_single(params, thickness_layers, direction, expolygon, polylines);

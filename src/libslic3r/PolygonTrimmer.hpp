@@ -1,13 +1,15 @@
 #ifndef slic3r_PolygonTrimmer_hpp_
 #define slic3r_PolygonTrimmer_hpp_
 
-#include "libslic3r.h"
 #include <vector>
 #include <string>
+
+#include "libslic3r.h"
 #include "Line.hpp"
 #include "MultiPoint.hpp"
 #include "Polyline.hpp"
 #include "Polygon.hpp"
+#include "libslic3r/Point.hpp"
 
 namespace Slic3r {
 

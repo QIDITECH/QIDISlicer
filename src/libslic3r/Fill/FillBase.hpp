@@ -5,16 +5,27 @@
 #include <memory.h>
 #include <float.h>
 #include <stdint.h>
+#include <math.h>
+#include <stddef.h>
 #include <stdexcept>
-
 #include <type_traits>
+#include <string>
+#include <utility>
+#include <vector>
+#include <cfloat>
+#include <cmath>
+#include <cstddef>
 
-#include "../libslic3r.h"
-#include "../BoundingBox.hpp"
-#include "../Exception.hpp"
-#include "../Utils.hpp"
-#include "../ExPolygon.hpp"
-#include "../PrintConfig.hpp"
+#include "libslic3r/libslic3r.h"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/Utils.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/Polyline.hpp"
+
 //w29
 #include "../ExtrusionEntity.hpp"
 #include "../ExtrusionEntityCollection.hpp"
@@ -22,6 +33,9 @@
 namespace Slic3r {
 
 class Surface;
+class PrintConfig;
+class PrintObjectConfig;
+
 enum InfillPattern : int;
 
 namespace FillAdaptive {
@@ -66,6 +80,9 @@ struct FillParams
     bool        use_arachne     { false };
     // Layer height for Concentric infill with Arachne.
     coordf_t    layer_height    { 0.f };
+
+    // For infills that produce closed loops to force printing those loops clockwise.
+    bool        prefer_clockwise_movements { false };
     //w29
     Flow     flow;
     ExtrusionRole extrusion_role{ExtrusionRole::None};
@@ -120,6 +137,11 @@ public:
 
     // Do not sort the fill lines to optimize the print head path?
     virtual bool no_sort() const { return false; }
+
+    virtual bool is_self_crossing() = 0;
+
+    // Return true if infill has a consistent pattern between layers.
+    virtual bool has_consistent_pattern() const { return false; }
 
     // Perform the fill.
     virtual Polylines fill_surface(const Surface *surface, const FillParams &params);

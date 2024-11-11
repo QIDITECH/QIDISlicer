@@ -1,20 +1,44 @@
+#include <boost/log/trivial.hpp>
+#include <boost/thread/lock_guard.hpp>
+#include <oneapi/tbb/blocked_range.h>
+#include <oneapi/tbb/parallel_for.h>
+#include <boost/container_hash/hash.hpp>
+#include <utility>
+#include <unordered_set>
+#include <mutex>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <functional>
+#include <limits>
+#include <queue>
+#include <vector>
+#include <cassert>
+#include <cstdlib>
+
 #include "BoundingBox.hpp"
 #include "ClipperUtils.hpp"
 #include "EdgeGrid.hpp"
 #include "Layer.hpp"
 #include "Print.hpp"
-#include "Geometry/VoronoiVisualUtils.hpp"
 #include "Geometry/VoronoiUtils.hpp"
 #include "MutablePolygon.hpp"
-#include "format.hpp"
-
-#include <utility>
-#include <unordered_set>
-
-#include <boost/log/trivial.hpp>
-#include <tbb/parallel_for.h>
-#include <mutex>
-#include <boost/thread/lock_guard.hpp>
+#include "admesh/stl.h"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Flow.hpp"
+#include "libslic3r/Geometry/VoronoiOffset.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Model.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/Surface.hpp"
+#include "libslic3r/TriangleMeshSlicer.hpp"
+#include "libslic3r/TriangleSelector.hpp"
+#include "libslic3r/Utils.hpp"
+#include "libslic3r/libslic3r.h"
+#include "MultiMaterialSegmentation.hpp"
 
 //#define MM_SEGMENTATION_DEBUG_GRAPH
 //#define MM_SEGMENTATION_DEBUG_REGIONS
@@ -138,8 +162,7 @@ BoundingBox get_extents(const std::vector<ColoredLines> &colored_polygons) {
         for (const ColoredLine &colored_line : colored_lines) {
             bbox.merge(colored_line.line.a);
             bbox.merge(colored_line.line.b);
-}
-
+        }
     }
     return bbox;
 }
@@ -181,7 +204,6 @@ static std::vector<std::pair<size_t, size_t>> get_segments(const ColoredLines &p
     }
     return segments;
 }
-
 
 static std::vector<PaintedLine> filter_painted_lines(const Line &line_to_process, const size_t start_idx, const size_t end_idx, const std::vector<PaintedLine> &painted_lines)
 {
@@ -280,9 +302,9 @@ static ColoredLines colorize_line(const Line &line_to_process,
     assert(start_idx < painted_contour.size() && end_idx < painted_contour.size() && start_idx <= end_idx);
     assert(std::all_of(painted_contour.begin() + start_idx, painted_contour.begin() + end_idx + 1, [&painted_contour, &start_idx](const auto &p_line) { return painted_contour[start_idx].line_idx == p_line.line_idx; }));
 
-    const int                filter_eps_value = scale_(0.1f);
+    const int          filter_eps_value = scale_(0.1f);
     ColoredLines       final_lines;
-    const PaintedLine       &first_line = painted_contour[start_idx];
+    const PaintedLine &first_line = painted_contour[start_idx];
     if (double dist_to_start = (first_line.projected_line.a - line_to_process.a).cast<double>().norm(); dist_to_start > filter_eps_value)
         final_lines.push_back({Line(line_to_process.a, first_line.projected_line.a), 0});
     final_lines.push_back({first_line.projected_line, first_line.color});
@@ -487,23 +509,23 @@ static std::vector<ColoredLines> colorize_contours(const std::vector<EdgeGrid::C
         colorized_contours[contour_idx] = colorize_contour(contours[contour_idx], painted_contours[contour_idx]);
     }
 
-        size_t poly_idx = 0;
+    size_t poly_idx = 0;
     for (ColoredLines &color_lines : colorized_contours) {
-            size_t line_idx = 0;
+        size_t line_idx = 0;
         for (size_t color_line_idx = 0; color_line_idx < color_lines.size(); ++color_line_idx) {
             color_lines[color_line_idx].poly_idx       = int(poly_idx);
             color_lines[color_line_idx].local_line_idx = int(line_idx);
-                ++line_idx;
-            }
-            ++poly_idx;
+            ++line_idx;
         }
+        ++poly_idx;
+    }
 
     return colorized_contours;
-    }
+}
 
 // Determines if the line points from the point between two contour lines is pointing inside polygon or outside.
 static inline bool points_inside(const Line &contour_first, const Line &contour_second, const Point &new_point)
-    {
+{
     // TODO: Used in points_inside for decision if line leading thought the common point of two lines is pointing inside polygon or outside
     auto three_points_inward_normal = [](const Point &left, const Point &middle, const Point &right) -> Vec2d {
         assert(left != middle);
@@ -517,12 +539,12 @@ static inline bool points_inside(const Line &contour_first, const Line &contour_
     double side          = inward_normal.dot(edge_norm);
     //    assert(side != 0.);
     return side > 0.;
-    }
+}
 
 enum VD_ANNOTATION : Voronoi::VD::cell_type::color_type {
     VERTEX_ON_CONTOUR = 1,
     DELETED           = 2
-        };
+};
 
 #ifdef MM_SEGMENTATION_DEBUG_GRAPH
 static void export_graph_to_svg(const std::string &path, const Voronoi::VD& vd, const std::vector<ColoredLines>& colored_polygons) {
@@ -553,8 +575,8 @@ static void export_graph_to_svg(const std::string &path, const Voronoi::VD& vd, 
 
         if (edge.color() != VD_ANNOTATION::DELETED)
             svg.draw(Line(from, to), "red", stroke_width);
-                }
-            }
+    }
+}
 #endif // MM_SEGMENTATION_DEBUG_GRAPH
 
 static size_t non_deleted_edge_count(const VD::vertex_type &vertex) {
@@ -603,7 +625,8 @@ static inline Vec2d mk_point_vec2d(const VD::vertex_type *point) {
 static inline Vec2d mk_vector_vec2d(const VD::edge_type *edge) {
     assert(edge != nullptr);
     return mk_point_vec2d(edge->vertex1()) - mk_point_vec2d(edge->vertex0());
-        }
+}
+
 static inline Vec2d mk_flipped_vector_vec2d(const VD::edge_type *edge) {
     assert(edge != nullptr);
     return mk_point_vec2d(edge->vertex0()) - mk_point_vec2d(edge->vertex1());
@@ -684,8 +707,8 @@ static void remove_multiple_edges_in_vertex(const VD::vertex_type &vertex) {
             delete_vertex_deep(vertex_to_delete);
 
         edges_to_check.pop_back();
-                }
-            }
+    }
+}
 
 // Returns list of ExPolygons for each extruder + 1 for default unpainted regions.
 // It iterates through all nodes on the border between two different colors, and from this point,
@@ -701,7 +724,7 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
         size_t contour_line_size = colored_polygons[line.poly_idx].size();
         size_t contour_next_idx  = (line.local_line_idx + 1) % contour_line_size;
         return colored_polygons[line.poly_idx][contour_next_idx];
-                };
+    };
 
     Voronoi::VD vd;
     vd.construct_voronoi(colored_lines.begin(), colored_lines.end());
@@ -709,11 +732,11 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
     // First, mark each Voronoi vertex on the input polygon to prevent it from being deleted later.
     for (const Voronoi::VD::cell_type &cell : vd.cells()) {
         if (cell.is_degenerate() || !cell.contains_segment())
-                    continue;
+            continue;
 
         if (const Geometry::SegmentCellRange<Point> cell_range = Geometry::VoronoiUtils::compute_segment_cell_range(cell, colored_lines.begin(), colored_lines.end()); cell_range.is_valid())
             cell_range.edge_begin->vertex0()->color(VD_ANNOTATION::VERTEX_ON_CONTOUR);
-                }
+    }
 
     // Second, remove all Voronoi vertices that are outside the bounding box of input polygons.
     // Such Voronoi vertices are definitely not inside of input polygons, so we don't care about them.
@@ -723,7 +746,7 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
 
         if (!Geometry::VoronoiUtils::is_in_range<coord_t>(vertex) || !bbox.contains(Geometry::VoronoiUtils::to_point(vertex).cast<coord_t>()))
             delete_vertex_deep(vertex);
-                    }
+    }
 
     // Third, remove all Voronoi edges that are infinite.
     for (const Voronoi::VD::edge_type &edge : vd.edges()) {
@@ -751,13 +774,13 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
             const VD::edge_type *edge = cell_range.edge_begin;
             do {
                 if (edge->color() == VD_ANNOTATION::DELETED)
-                continue;
+                    continue;
 
                 if (!points_inside(current_line.line, next_line.line, Geometry::VoronoiUtils::to_point(edge->vertex1()).cast<coord_t>())) {
                     edge->color(VD_ANNOTATION::DELETED);
                     edge->twin()->color(VD_ANNOTATION::DELETED);
                     delete_vertex_deep(*edge->vertex1());
-        }
+                }
             } while (edge = edge->prev()->twin(), edge != cell_range.edge_begin);
         }
     }
@@ -766,20 +789,20 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
     for (const Voronoi::VD::vertex_type &vertex : vd.vertices()) {
         if (vertex.color() == VD_ANNOTATION::VERTEX_ON_CONTOUR)
             remove_multiple_edges_in_vertex(vertex);
-}
+    }
 
 #ifdef MM_SEGMENTATION_DEBUG_GRAPH
-{
+    {
         static int iRun = 0;
         export_graph_to_svg(debug_out_path("mm-graph-%d-%d.svg", layer_idx, iRun++), vd, colored_polygons);
-}
+    }
 #endif // MM_SEGMENTATION_DEBUG_GRAPH
 
     // Sixth, extract the colored segments from the annotated Voronoi diagram.
     std::vector<ExPolygons> segmented_expolygons_per_extruder(num_extruders + 1);
     for (const Voronoi::VD::cell_type &cell : vd.cells()) {
         if (cell.is_degenerate() || !cell.contains_segment())
-                continue;
+            continue;
 
         if (const Geometry::SegmentCellRange<Point> cell_range = Geometry::VoronoiUtils::compute_segment_cell_range(cell, colored_lines.begin(), colored_lines.end()); cell_range.is_valid()) {
             if (cell_range.edge_begin->vertex0()->color() != VD_ANNOTATION::VERTEX_ON_CONTOUR)
@@ -802,8 +825,8 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
 
                 if (next_vertex.color() == VD_ANNOTATION::VERTEX_ON_CONTOUR || next_vertex.color() == VD_ANNOTATION::DELETED) {
                     assert(next_vertex.color() == VD_ANNOTATION::VERTEX_ON_CONTOUR);
-            break;
-    }
+                    break;
+                }
 
                 edge = edge->twin();
             } while (edge = edge->twin()->next(), edge != cell_range.edge_begin);
@@ -813,8 +836,8 @@ static std::vector<ExPolygons> extract_colored_segments(const std::vector<Colore
 
             cell_range.edge_begin->vertex0()->color(VD_ANNOTATION::DELETED);
             segmented_expolygons_per_extruder[source_segment.color].emplace_back(std::move(segmented_polygon));
-                    }
-                }
+        }
+    }
 
     // Merge all polygons together for each extruder
     for (auto &segmented_expolygons : segmented_expolygons_per_extruder)
@@ -858,8 +881,8 @@ static bool is_volume_sinking(const indexed_triangle_set &its, const Transform3d
 
 // Returns MM segmentation of top and bottom layers based on painting in MM segmentation gizmo
 static inline std::vector<std::vector<ExPolygons>> mm_segmentation_top_and_bottom_layers(const PrintObject             &print_object,
-                                                                                          const std::vector<ExPolygons> &input_expolygons,
-                                                                                          const std::function<void()>   &throw_on_cancel_callback)
+                                                                                         const std::vector<ExPolygons> &input_expolygons,
+                                                                                         const std::function<void()>   &throw_on_cancel_callback)
 {
     const size_t num_extruders = print_object.print()->config().nozzle_diameter.size() + 1;
     const size_t num_layers    = input_expolygons.size();
@@ -891,7 +914,7 @@ static inline std::vector<std::vector<ExPolygons>> mm_segmentation_top_and_botto
             if (mv->is_model_part()) {
                 const Transform3d volume_trafo = object_trafo * mv->get_matrix();
                 for (size_t extruder_idx = 0; extruder_idx < num_extruders; ++ extruder_idx) {
-                    const indexed_triangle_set painted = mv->mm_segmentation_facets.get_facets_strict(*mv, EnforcerBlockerType(extruder_idx));
+                    const indexed_triangle_set painted = mv->mm_segmentation_facets.get_facets_strict(*mv, TriangleStateType(extruder_idx));
 #ifdef MM_SEGMENTATION_DEBUG_TOP_BOTTOM
                     {
                         static int iRun = 0;
@@ -1151,9 +1174,9 @@ static void export_regions_to_svg(const std::string &path, const std::vector<ExP
         size_t extrude_idx = &by_extruder - &regions.front();
         if (extrude_idx < int(colors.size()))
             svg.draw(by_extruder, colors[extrude_idx]);
-            else
+        else
             svg.draw(by_extruder, "black");
-        }
+    }
 }
 #endif // MM_SEGMENTATION_DEBUG_REGIONS
 
@@ -1238,6 +1261,7 @@ std::vector<std::vector<ExPolygons>> multi_material_segmentation_by_painting(con
 #ifdef MM_SEGMENTATION_DEBUG
     static int iRun = 0;
 #endif // MM_SEGMENTATION_DEBUG
+
     // Merge all regions and remove small holes
     BOOST_LOG_TRIVIAL(debug) << "MM segmentation - slices preparation in parallel - begin";
     tbb::parallel_for(tbb::blocked_range<size_t>(0, num_layers), [&layers, &input_expolygons, &throw_on_cancel_callback](const tbb::blocked_range<size_t> &range) {
@@ -1294,7 +1318,7 @@ std::vector<std::vector<ExPolygons>> multi_material_segmentation_by_painting(con
         tbb::parallel_for(tbb::blocked_range<size_t>(1, num_extruders + 1), [&mv, &print_object, &layers, &edge_grids, &painted_lines, &painted_lines_mutex, &input_expolygons, &throw_on_cancel_callback](const tbb::blocked_range<size_t> &range) {
             for (size_t extruder_idx = range.begin(); extruder_idx < range.end(); ++extruder_idx) {
                 throw_on_cancel_callback();
-                const indexed_triangle_set custom_facets = mv->mm_segmentation_facets.get_facets(*mv, EnforcerBlockerType(extruder_idx));
+                const indexed_triangle_set custom_facets = mv->mm_segmentation_facets.get_facets(*mv, TriangleStateType(extruder_idx));
                 if (!mv->is_model_part() || custom_facets.indices.empty())
                     continue;
 
@@ -1426,7 +1450,7 @@ std::vector<std::vector<ExPolygons>> multi_material_segmentation_by_painting(con
     throw_on_cancel_callback();
 
 #ifdef MM_SEGMENTATION_DEBUG_REGIONS
-        for (size_t layer_idx = 0; layer_idx < print_object.layers().size(); ++layer_idx)
+    for (size_t layer_idx = 0; layer_idx < print_object.layers().size(); ++layer_idx)
         export_regions_to_svg(debug_out_path("mm-regions-merged-%d-%d.svg", layer_idx, iRun), segmented_regions_merged[layer_idx], input_expolygons[layer_idx]);
 #endif // MM_SEGMENTATION_DEBUG_REGIONS
 

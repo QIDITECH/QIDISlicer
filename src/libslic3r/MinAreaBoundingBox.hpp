@@ -2,6 +2,7 @@
 #define MINAREABOUNDINGBOX_HPP
 
 #include "libslic3r/Point.hpp"
+#include "libslic3r/BoundingBox.hpp"
 
 namespace Slic3r {
 

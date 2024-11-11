@@ -1,7 +1,13 @@
 #include "ClipperUtils.hpp"
-#include "Geometry.hpp"
+
+#include <cmath>
+
 #include "ShortestPath.hpp"
-#include "Utils.hpp"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/Surface.hpp"
+#include "libslic3r/libslic3r.h"
 
 // #define CLIPPER_UTILS_TIMING
 
@@ -9,7 +15,9 @@
     // time limit for one ClipperLib operation (union / diff / offset), in ms
     #define CLIPPER_UTILS_TIME_LIMIT_DEFAULT 50
     #include <boost/current_function.hpp>
+
     #include "Timer.hpp"
+
     #define CLIPPER_UTILS_TIME_LIMIT_SECONDS(limit) Timing::TimeLimitAlarm time_limit_alarm(uint64_t(limit) * 1000000000l, BOOST_CURRENT_FUNCTION)
     #define CLIPPER_UTILS_TIME_LIMIT_MILLIS(limit) Timing::TimeLimitAlarm time_limit_alarm(uint64_t(limit) * 1000000l, BOOST_CURRENT_FUNCTION)
 #else
@@ -209,7 +217,7 @@ namespace ClipperUtils {
             out.insert(out.end(), temp.begin(), temp.end());
         }
 
-        out.erase(std::remove_if(out.begin(), out.end(), [](const Polygon &polygon) { return polygon.empty(); }), out.end());
+        out.erase(std::remove_if(out.begin(), out.end(), [](const Polygon &polygon) {return polygon.empty(); }), out.end());
         return out;
     }
  }
@@ -833,7 +841,6 @@ Slic3r::ExPolygons union_ex(const Slic3r::ExPolygons &subject, const Slic3r::Pol
 Slic3r::ExPolygons union_ex(const Slic3r::Surfaces &subject)
     { return PolyTreeToExPolygons(clipper_do_polytree(ClipperLib::ctUnion, ClipperUtils::SurfacesProvider(subject), ClipperUtils::EmptyPathsProvider(), ClipperLib::pftNonZero)); }
 
-
 template<typename PathsProvider1, typename PathsProvider2>
 Polylines _clipper_pl_open(ClipperLib::ClipType clipType, PathsProvider1 &&subject, PathsProvider2 &&clip)
 {
@@ -1290,12 +1297,6 @@ static void variable_offset_inner_raw(const ExPolygon &expoly, const std::vector
     holes.reserve(expoly.holes.size());
     for (const Polygon &hole : expoly.holes)
         append(holes, fix_after_outer_offset(mittered_offset_path_scaled(hole.points, deltas[1 + &hole - expoly.holes.data()], miter_limit), ClipperLib::pftNegative, false));
-#ifndef NDEBUG
-    // Offsetting a hole curve of a C shape may close the C into a ring with a new hole inside, thus creating a hole inside a hole shape, thus a hole will be created with negative area
-    // and the following test will fail.
-//    for (auto &c : holes)
-//        assert(ClipperLib::Area(c) > 0.);
-#endif /* NDEBUG */
 }
 
 Polygons variable_offset_inner(const ExPolygon &expoly, const std::vector<std::vector<float>> &deltas, double miter_limit)
@@ -1369,12 +1370,6 @@ static void variable_offset_outer_raw(const ExPolygon &expoly, const std::vector
     contours = fix_after_outer_offset(mittered_offset_path_scaled(expoly.contour.points, deltas.front(), miter_limit), ClipperLib::pftPositive, false);
     // Inflating a contour must not remove it.
     assert(contours.size() >= 1);
-#ifndef NDEBUG
-    // Offsetting a positive curve of a C shape may close the C into a ring with hole shape, thus a hole will be created with negative area
-    // and the following test will fail.
-//  for (auto &c : contours)
-//      assert(ClipperLib::Area(c) > 0.);
-#endif /* NDEBUG */
 
     // 2) Offset the holes one by one, collect the results.
     holes.reserve(expoly.holes.size());

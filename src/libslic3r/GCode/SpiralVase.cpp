@@ -1,8 +1,11 @@
 #include "SpiralVase.hpp"
-#include "GCode.hpp"
-#include <sstream>
-#include <cmath>
-#include <limits>
+#include <utility>
+#include <cstddef>
+
+#include "libslic3r/AABBTreeLines.hpp"
+#include "libslic3r/GCode/GCodeWriter.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -24,19 +27,19 @@ std::string SpiralVase::process_layer(const std::string &gcode, bool last_layer)
           at the beginning
         - each layer is composed by suitable geometry (i.e. a single complete loop)
         - loops were not clipped before calling this method  */
-    
+
     // If we're not going to modify G-code, just feed it to the reader
     // in order to update positions.
-    if (! m_enabled) {
+    if (!m_enabled) {
         m_reader.parse_buffer(gcode);
         return gcode;
     }
-    
+
     // Get total XY length for this layer by summing all extrusion moves.
     float total_layer_length = 0.f;
     float layer_height       = 0.f;
-    float z = 0.f;
-    
+    float z                  = 0.f;
+
     {
         //FIXME Performance warning: This copies the GCodeConfig of the reader.
         GCodeReader r = m_reader;  // clone
@@ -56,10 +59,10 @@ std::string SpiralVase::process_layer(const std::string &gcode, bool last_layer)
             }
         });
     }
-    
-    // Remove layer height from initial Z.
+
+    // Remove layer height from initial Z.
     z -= layer_height;
-    
+
     // FIXME Tapering of the transition layer and smoothing only works reliably with relative extruder distances.
     // For absolute extruder distances it will be switched off.
     // Tapering the absolute extruder distances requires to process every extrusion value after the first transition
@@ -70,7 +73,8 @@ std::string SpiralVase::process_layer(const std::string &gcode, bool last_layer)
 
     const AABBTreeLines::LinesDistancer previous_layer_distancer = get_layer_distancer(m_previous_layer);
     Vec2f                               last_point               = m_previous_layer.empty() ? Vec2f::Zero() : m_previous_layer.back();
-    float len = 0.f;
+    float                               len                      = 0.f;
+
     std::string        new_gcode, transition_gcode;
     std::vector<Vec2f> current_layer;
     m_reader.parse_buffer(gcode, [z, total_layer_length, layer_height, transition_in, transition_out, smooth_spiral, max_xy_smoothing = m_max_xy_smoothing,
@@ -123,30 +127,30 @@ std::string SpiralVase::process_layer(const std::string &gcode, bool last_layer)
                             // Scale the extrusion amount according to change in length
                             line.set(reader, E, line.e() * modified_dist_XY / dist_XY, 5);
                             last_point = target;
-            } else {
+                        } else {
                             last_point = p;
                         }
                     }
 
                     if (emit_gcode_line)
                         new_gcode += line.raw() + '\n';
-                    }
-                    return;
-                
-                    /*  Skip travel moves: the move to first perimeter point will
-                        cause a visible seam when loops are not aligned in XY; by skipping
-                        it we blend the first loop move in the XY plane (although the smoothness
-                        of such blend depend on how long the first segment is; maybe we should
+                }
+                return;
+                /*  Skip travel moves: the move to first perimeter point will
+                    cause a visible seam when loops are not aligned in XY; by skipping
+                    it we blend the first loop move in the XY plane (although the smoothness
+                    of such blend depend on how long the first segment is; maybe we should
                     enforce some minimum length?).
                     When smooth_spiral is enabled, we're gonna end up exactly where the next layer should
                     start anyway, so we don't need the travel move */
-                }
             }
+        }
+
         new_gcode += line.raw() + '\n';
         if (transition_out)
             transition_gcode += line.raw() + '\n';
     });
-    
+
     m_previous_layer = std::move(current_layer);
     return new_gcode + transition_gcode;
 }

@@ -1,7 +1,7 @@
 #include "SLAArchiveReader.hpp"
 #include "SL1.hpp"
 #include "SL1_SVG.hpp"
-#include "I18N.hpp"
+#include "libslic3r/I18N.hpp"
 
 #include "libslic3r/SlicesToTriangleMesh.hpp"
 

@@ -1,7 +1,14 @@
 #ifndef slic3r_IntersectionPoints_hpp_
 #define slic3r_IntersectionPoints_hpp_
 
+#include <stdint.h>
+#include <vector>
+#include <cinttypes>
+
 #include "ExPolygon.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
 
 namespace Slic3r {
 
@@ -11,6 +18,7 @@ struct IntersectionLines {
     Vec2d intersection;
 };
 using IntersectionsLines = std::vector<IntersectionLines>;
+
 // collect all intersecting points
 IntersectionsLines get_intersections(const Lines &lines);
 IntersectionsLines get_intersections(const Polygon &polygon);

@@ -1,14 +1,21 @@
 #ifndef slic3r_NSVGUtils_hpp_
 #define slic3r_NSVGUtils_hpp_
 
+#include <stddef.h>
 #include <memory>
 #include <string>
 #include <sstream>
+#include <cmath>
+#include <cstddef>
+
 #include "Polygon.hpp"
 #include "ExPolygon.hpp"
 #include "EmbossShape.hpp" // ExPolygonsWithIds
 #include "nanosvg/nanosvg.h"    // load SVG file
+#include "libslic3r/Point.hpp"
+#include "libslic3r/libslic3r.h"
 
+// Helper function to work with nano svg
 namespace Slic3r {
 
 /// <summary>
@@ -41,6 +48,7 @@ struct NSVGLineParams
         arc_tolerance(std::pow(tesselation_tolerance, 1/3.))
     {}
 };
+
 /// <summary>
 /// Convert .svg opened by nanoSvg to shapes stored in expolygons with ids
 /// </summary>

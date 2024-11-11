@@ -1,12 +1,22 @@
 #include "LabelObjects.hpp"
 
-#include "ClipperUtils.hpp"
-#include "GCode/GCodeWriter.hpp"
-#include "Model.hpp"
-#include "Print.hpp"
-#include "TriangleMeshSlicer.hpp"
+#include <algorithm>
+#include <cstdio>
+#include <map>
+#include <cassert>
 
-#include "boost/algorithm/string/replace.hpp"
+#include "libslic3r/ClipperUtils.hpp"
+#include "libslic3r/GCode/GCodeWriter.hpp"
+#include "libslic3r/Model.hpp"
+#include "libslic3r/Print.hpp"
+#include "libslic3r/TriangleMeshSlicer.hpp"
+#include "libslic3r/MultiMaterialSegmentation.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/TriangleMesh.hpp"
+#include "libslic3r/libslic3r.h"
+
 
 namespace Slic3r::GCode {
 
@@ -56,7 +66,7 @@ void LabelObjects::init(const SpanOfConstPtrs<PrintObject>& objects, LabelObject
     for (const PrintObject* po : objects)
         for (const PrintInstance& pi : po->instances())
             model_object_to_print_instances[pi.model_instance->get_object()].emplace_back(&pi);
-    
+
     // Now go through the map, assign a unique_id to each of the PrintInstances and get the indices of the
     // respective ModelObject and ModelInstance so we can use them in the tags. This will maintain
     // indices even in case that some instances are rotated (those end up in different PrintObjects)
@@ -158,8 +168,7 @@ std::string LabelObjects::all_objects_header() const
     if (m_label_objects_style == LabelObjectsStyle::Disabled)
         return std::string();
 
-    std::string out;
-
+    std::string out;   
 
     out += "\n";
     for (const LabelData& label : m_label_data) {
@@ -188,6 +197,7 @@ std::string LabelObjects::all_objects_header_singleline_json() const
     out += "]}";
     return out;
 }
+
 
 
 std::string LabelObjects::start_object(const PrintInstance& print_instance, IncludeName include_name) const

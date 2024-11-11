@@ -12,7 +12,6 @@ enum GCodeFlavor : unsigned char;
 enum class LabelObjectsStyle;
 struct PrintInstance;
 class Print;
-
 class GCodeWriter;
 
 namespace GCode {
@@ -43,10 +42,12 @@ private:
         std::string polygon;
         int unique_id;
     };
+
     enum class IncludeName {
         No,
         Yes
     };
+
     std::string start_object(const PrintInstance& print_instance, IncludeName include_name) const;
     std::string stop_object(const PrintInstance& print_instance) const;
 
@@ -56,10 +57,7 @@ private:
     LabelObjectsStyle m_label_objects_style;
     GCodeFlavor       m_flavor;
     std::vector<LabelData> m_label_data;
-
 };
-
-
 } // namespace GCode
 } // namespace Slic3r
 

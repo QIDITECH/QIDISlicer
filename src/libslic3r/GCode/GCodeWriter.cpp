@@ -1,12 +1,12 @@
 #include "GCodeWriter.hpp"
-#include "../CustomGCode.hpp"
+
 #include <algorithm>
-#include <iomanip>
 #include <iostream>
-#include <map>
-#include <assert.h>
 #include <string_view>
-#include <boost/math/special_functions/pow.hpp>
+#include <cassert>
+#include <cinttypes>
+
+#include "libslic3r/libslic3r.h"
 
 #ifdef __APPLE__
     #include <boost/spirit/include/karma.hpp>
@@ -16,6 +16,7 @@
 #define FLAVOR_IS_NOT(val) this->config.gcode_flavor != val
 
 using namespace std::string_view_literals;
+
 namespace Slic3r {
 
 // static
@@ -268,9 +269,10 @@ std::string GCodeWriter::update_progress(unsigned int num, unsigned int tot, boo
 {
     if (FLAVOR_IS_NOT(gcfMakerWare) && FLAVOR_IS_NOT(gcfSailfish))
         return {};
+    
     unsigned int percent = (unsigned int)floor(100.0 * num / tot + 0.5);
     if (!allow_100) percent = std::min(percent, (unsigned int)99);
-
+    
     std::ostringstream gcode;
     gcode << "M73 P" << percent;
     if (this->config.gcode_comments) gcode << " ; update progress";
@@ -318,7 +320,6 @@ std::string GCodeWriter::set_speed(double F, const std::string_view comment, con
 
 std::string GCodeWriter::get_travel_to_xy_gcode(const Vec2d &point, const std::string_view comment) const
 {
-    
     GCodeG1Formatter w;
     w.emit_xy(point);
     //B36
@@ -334,6 +335,7 @@ std::string GCodeWriter::travel_to_xy(const Vec2d &point, const std::string_view
     m_pos.head<2>() = point.head<2>();
     return this->get_travel_to_xy_gcode(point, comment);
 }
+
 std::string GCodeWriter::travel_to_xy_G2G3IJ(const Vec2d &point, const Vec2d &ij, const bool ccw, const std::string_view comment)
 {
     assert(std::abs(point.x()) < 1200.);
@@ -341,7 +343,7 @@ std::string GCodeWriter::travel_to_xy_G2G3IJ(const Vec2d &point, const Vec2d &ij
     assert(std::abs(ij.x()) < 1200.);
     assert(std::abs(ij.y()) < 1200.);
     assert(std::abs(ij.x()) >= 0.001 || std::abs(ij.y()) >= 0.001);
-
+ 
     m_pos.head<2>() = point.head<2>();
 
     GCodeG2G3Formatter w(ccw);
@@ -349,8 +351,8 @@ std::string GCodeWriter::travel_to_xy_G2G3IJ(const Vec2d &point, const Vec2d &ij
     w.emit_ij(ij);
     w.emit_comment(this->config.gcode_comments, comment);
     return w.string();
-    }
-    
+}
+
 std::string GCodeWriter::travel_to_xyz(const Vec3d& from, const Vec3d &to, const std::string_view comment)
 {
     if (std::abs(to.x() - m_pos.x()) < EPSILON && std::abs(to.y() - m_pos.y()) < EPSILON) {
@@ -362,7 +364,7 @@ std::string GCodeWriter::travel_to_xyz(const Vec3d& from, const Vec3d &to, const
         return this->get_travel_to_xyz_gcode(from, to, comment);
     }
 }
-    
+
 std::string GCodeWriter::get_travel_to_xyz_gcode(const Vec3d &from, const Vec3d &to, const std::string_view comment) const {
     GCodeG1Formatter w;
     w.emit_xyz(to);
@@ -381,11 +383,11 @@ std::string GCodeWriter::get_travel_to_xyz_gcode(const Vec3d &from, const Vec3d 
     } else {
         w.emit_f(this->config.travel_speed.value * 60.0);
     }
+
     w.emit_comment(this->config.gcode_comments, comment);
     return w.string();
 }
 
-    
 std::string GCodeWriter::travel_to_z(double z, const std::string_view comment)
 {
     if (std::abs(m_pos.z() - z) < EPSILON) {
@@ -398,11 +400,10 @@ std::string GCodeWriter::travel_to_z(double z, const std::string_view comment)
 
 std::string GCodeWriter::get_travel_to_z_gcode(double z, const std::string_view comment) const
 {
-
     double speed = this->config.travel_speed_z.value;
     if (speed == 0.)
         speed = this->config.travel_speed.value;
-    
+
     GCodeG1Formatter w;
     w.emit_z(z);
     w.emit_f(speed * 60.0);
@@ -485,6 +486,7 @@ std::string GCodeWriter::_retract(double length, double restart_extra, const std
 {
     assert(std::abs(length) < 1000.0);
     assert(std::abs(restart_extra) < 1000.0);
+
     /*  If firmware retraction is enabled, we use a fake value of 1
         since we ignore the actual configured retract_length which 
         might be 0, in which case the retraction logic gets skipped. */
@@ -541,7 +543,6 @@ std::string GCodeWriter::unretract()
     
     return gcode;
 }
-
 
 void GCodeWriter::update_position(const Vec3d &new_pos)
 {

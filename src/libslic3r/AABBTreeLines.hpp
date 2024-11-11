@@ -119,10 +119,10 @@ inline std::tuple<int, int> coordinate_aligned_ray_hit_count(size_t             
 template<typename LineType, typename TreeType, typename VectorType>
 inline void insert_intersections_with_line(std::vector<std::pair<VectorType, size_t>> &result,
                                            size_t                                      node_idx,
-                                                                              const TreeType                       &tree,
-                                                                              const std::vector<LineType>          &lines,
-                                                                              const LineType                       &line,
-                                                                              const typename TreeType::BoundingBox &line_bb)
+                                           const TreeType                             &tree,
+                                           const std::vector<LineType>                &lines,
+                                           const LineType                             &line,
+                                           const typename TreeType::BoundingBox       &line_bb)
 {
     const auto &node = tree.node(node_idx);
     assert(node.is_valid());
@@ -132,23 +132,62 @@ inline void insert_intersections_with_line(std::vector<std::pair<VectorType, siz
             result.emplace_back(intersection_pt, node.idx);
         }
         return;
-        }
-        size_t      left_node_idx  = node_idx * 2 + 1;
-        size_t      right_node_idx = left_node_idx + 1;
-        const auto &node_left      = tree.node(left_node_idx);
-        const auto &node_right     = tree.node(right_node_idx);
-        assert(node_left.is_valid());
-        assert(node_right.is_valid());
+    }
 
+    size_t      left_node_idx  = node_idx * 2 + 1;
+    size_t      right_node_idx = left_node_idx + 1;
+    const auto &node_left      = tree.node(left_node_idx);
+    const auto &node_right     = tree.node(right_node_idx);
+    assert(node_left.is_valid());
+    assert(node_right.is_valid());
 
-        if (node_left.bbox.intersects(line_bb)) {
+    if (node_left.bbox.intersects(line_bb)) {
         insert_intersections_with_line<LineType, TreeType, VectorType>(result, left_node_idx, tree, lines, line, line_bb);
-        }
+    }
 
-        if (node_right.bbox.intersects(line_bb)) {
+    if (node_right.bbox.intersects(line_bb)) {
         insert_intersections_with_line<LineType, TreeType, VectorType>(result, right_node_idx, tree, lines, line, line_bb);
-        }
+    }
 
+    //// NOTE: Non recursive implementation - for my case was slower ;-(     
+    // std::vector<size_t> node_indicies_for_check; // evaluation queue
+    // size_t approx_size = static_cast<size_t>(std::ceil(std::sqrt(tree.nodes().size())));
+    // node_indicies_for_check.reserve(approx_size);
+    // do {
+    //     const auto &node = tree.node(node_index);
+    //     assert(node.is_valid());
+    //     if (node.is_leaf()) {
+    //         VectorType intersection_pt;
+    //         if (line_alg::intersection(line, lines[node.idx], &intersection_pt))
+    //             result.emplace_back(intersection_pt, node.idx);
+    //         node_index = 0;// clear next node
+    //     } else {
+    //         size_t      left_node_idx  = node_index * 2 + 1;
+    //         size_t      right_node_idx = left_node_idx + 1;
+    //         const auto &node_left      = tree.node(left_node_idx);
+    //         const auto &node_right     = tree.node(right_node_idx);
+    //         assert(node_left.is_valid());
+    //         assert(node_right.is_valid());
+
+    //        // Set next node index
+    //        node_index = 0; // clear next node
+    //        if (node_left.bbox.intersects(line_bb))
+    //            node_index = left_node_idx;
+
+    //        if (node_right.bbox.intersects(line_bb)) {
+    //            if (node_index == 0)
+    //                node_index = right_node_idx;
+    //            else
+    //                node_indicies_for_check.push_back(right_node_idx); // store for later evaluation
+    //        }
+    //    }
+
+    //    if (node_index == 0 && !node_indicies_for_check.empty()) {
+    //        // no direct next node take one from queue
+    //        node_index = node_indicies_for_check.back();
+    //        node_indicies_for_check.pop_back();
+    //    }
+    //} while (node_index != 0);
 }
 
 } // namespace detail
@@ -268,6 +307,7 @@ inline std::vector<std::pair<VectorType, size_t>> get_intersections_with_line(co
 
     std::vector<std::pair<VectorType, size_t>> intersections; // result
     detail::insert_intersections_with_line(intersections, 0, tree, lines, line, line_bb);
+
     if (sorted) {
         using Floating =
             typename std::conditional<std::is_floating_point<typename LineType::Scalar>::value, typename LineType::Scalar, double>::type;
@@ -283,7 +323,6 @@ inline std::vector<std::pair<VectorType, size_t>> get_intersections_with_line(co
             intersections[i] = points_with_sq_distance[i].second;
         }
     }
-
     return intersections;
 }
 

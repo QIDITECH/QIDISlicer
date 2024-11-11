@@ -1,7 +1,10 @@
 #include "CustomGCode.hpp"
+
+#include <cassert>
+
 #include "Config.hpp"
 #include "GCode.hpp"
-#include "GCode/GCodeWriter.hpp"
+#include "libslic3r/PrintConfig.hpp"
 
 namespace Slic3r {
 
@@ -83,6 +86,7 @@ std::vector<std::pair<double, unsigned int>> custom_color_changes(const Info& cu
         }
     return custom_color_changes;
 }
+
 } // namespace CustomGCode
 
 } // namespace Slic3r

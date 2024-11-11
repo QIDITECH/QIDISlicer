@@ -18,13 +18,13 @@
 #include <fstream>
 #include <stdexcept>
 #include <unordered_map>
+#include <boost/range/join.hpp>
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <boost/nowide/cenv.hpp>
 #include <boost/nowide/convert.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/nowide/fstream.hpp>
@@ -36,7 +36,7 @@
 #include "libslic3r.h"
 #include "Utils.hpp"
 #include "PlaceholderParser.hpp"
-#include "GCode/Thumbnails.hpp"
+#include "libslic3r/GCode/Thumbnails.hpp"
 
 #include "PresetBundle.hpp"
 
@@ -146,6 +146,22 @@ VendorProfile VendorProfile::from_ini(const ptree &tree, const boost::filesystem
     const auto templates_profile = vendor_section.find("templates_profile");
     if (templates_profile != vendor_section.not_found()) {
         res.templates_profile = templates_profile->second.data() == "1";
+    }
+
+    const auto repo_id = vendor_section.find("repo_id");
+    if (repo_id != vendor_section.not_found()) {
+        res.repo_id = repo_id->second.data();
+    } else {
+        // For backward compatibility assume all profiles without repo_id are from "prod" repo
+        // DK: "No, dont!"
+        res.repo_id = "";
+    }
+
+    const auto repo_prefix = vendor_section.find("repo_prefix");
+    if (repo_prefix != vendor_section.not_found()) {
+         res.repo_prefix = repo_prefix->second.data();
+    } else {
+        res.repo_prefix = "";
     }
 
     if (! load_all) {
@@ -318,6 +334,7 @@ std::string Preset::remove_invalid_keys(DynamicPrintConfig &config, const Dynami
     std::string incorrect_keys;
     for (const std::string &key : config.keys())
         if (! default_config.has(key)) {
+            BOOST_LOG_TRIVIAL(error) << key;
             if (incorrect_keys.empty())
                 incorrect_keys = key;
             else {
@@ -467,6 +484,7 @@ static std::vector<std::string> s_Preset_print_options {
     "mmu_segmented_region_interlocking_depth", "wipe_tower_extruder", "wipe_tower_no_sparse_layers", "wipe_tower_extra_flow", "wipe_tower_extra_spacing", "compatible_printers", "compatible_printers_condition", "inherits",
     "perimeter_generator", "wall_transition_length", "wall_transition_filter_deviation", "wall_transition_angle",
     "wall_distribution_count", "min_feature_size", "min_bead_width",
+    "top_one_perimeter_type", "only_one_perimeter_first_layer",
     //B36
     "first_layer_travel_speed",
     //B37
@@ -475,14 +493,8 @@ static std::vector<std::string> s_Preset_print_options {
     "detect_narrow_internal_solid_infill",
     //Y21
     "seam_gap",
-    //w16
-    "top_one_wall_type",
-    //w17
-    "top_area_threshold",
     //w21
     "filter_top_gap_infill",
-    //w23
-    "only_one_wall_first_layer",
     //w25
     "slow_down_layers",
     //w26
@@ -504,7 +516,7 @@ static std::vector<std::string> s_Preset_print_options {
 };
 
 static std::vector<std::string> s_Preset_filament_options {
-    "filament_colour", "filament_diameter", "filament_type", "filament_soluble", "filament_notes", "filament_max_volumetric_speed",
+    "filament_colour", "filament_diameter", "filament_type", "filament_soluble", "filament_abrasive", "filament_notes", "filament_max_volumetric_speed", "filament_infill_max_speed", "filament_infill_max_crossing_speed",
     "extrusion_multiplier", "filament_density", "filament_cost", "filament_spool_weight", "filament_loading_speed", "filament_loading_speed_start", "filament_load_time",
     "filament_unloading_speed", "filament_unloading_speed_start", "filament_unload_time", "filament_toolchange_delay", "filament_cooling_moves", "filament_stamping_loading_speed", "filament_stamping_distance",
     "filament_cooling_initial_speed", "filament_purge_multiplier", "filament_cooling_final_speed", "filament_ramming_parameters", "filament_minimal_purge_on_wipe_tower",
@@ -662,7 +674,9 @@ static std::vector<std::string> s_Preset_sla_material_options {
     "material_notes",
     "material_vendor",
     "material_print_speed",
+    "area_fill",
     "default_sla_material_profile",
+    "zcorrection_layers",
     "compatible_prints", "compatible_prints_condition",
     "compatible_printers", "compatible_printers_condition", "inherits",
 
@@ -678,12 +692,32 @@ static std::vector<std::string> s_Preset_sla_material_options {
     "material_ow_branchingsupport_pillar_diameter",
 
     "material_ow_support_points_density_relative",
-
-    "material_ow_relative_correction_x",
-    "material_ow_relative_correction_y",
-    "material_ow_relative_correction_z",
+    "material_ow_absolute_correction",
     "material_ow_elefant_foot_compensation"
 };
+
+static std::vector<std::string> s_Preset_sla_tilt_options{
+     "delay_before_exposure"
+    ,"delay_after_exposure"
+    ,"tower_hop_height"
+    ,"tower_speed"
+    ,"use_tilt"
+    ,"tilt_down_initial_speed"
+    ,"tilt_down_offset_steps"
+    ,"tilt_down_offset_delay"
+    ,"tilt_down_finish_speed"
+    ,"tilt_down_cycles"
+    ,"tilt_down_delay"
+    ,"tilt_up_initial_speed"
+    ,"tilt_up_offset_steps"
+    ,"tilt_up_offset_delay"
+    ,"tilt_up_finish_speed"
+    ,"tilt_up_cycles"
+    ,"tilt_up_delay"
+};
+const std::vector<std::string>& tilt_options() { return s_Preset_sla_tilt_options; }
+
+static std::vector<std::string> s_Preset_sla_material_options_all = boost::copy_range<std::vector<std::string>>(boost::join(s_Preset_sla_material_options, s_Preset_sla_tilt_options));
 
 static std::vector<std::string> s_Preset_sla_printer_options {
     "printer_technology",
@@ -691,7 +725,7 @@ static std::vector<std::string> s_Preset_sla_printer_options {
     "display_width", "display_height", "display_pixels_x", "display_pixels_y",
     "display_mirror_x", "display_mirror_y",
     "display_orientation",
-    "fast_tilt_time", "slow_tilt_time", "high_viscosity_tilt_time", "area_fill",
+    "fast_tilt_time", "slow_tilt_time", "high_viscosity_tilt_time", //"area_fill",
     "relative_correction",
     "relative_correction_x",
     "relative_correction_y",
@@ -717,7 +751,7 @@ const std::vector<std::string>& Preset::machine_limits_options() { return s_Pres
 // of the nozzle_diameter vector.
 const std::vector<std::string>& Preset::nozzle_options()         { return print_config_def.extruder_option_keys(); }
 const std::vector<std::string>& Preset::sla_print_options()      { return s_Preset_sla_print_options; }
-const std::vector<std::string>& Preset::sla_material_options()   { return s_Preset_sla_material_options; }
+const std::vector<std::string>& Preset::sla_material_options()   { return s_Preset_sla_material_options_all; }
 const std::vector<std::string>& Preset::sla_printer_options()    { return s_Preset_sla_printer_options; }
 
 const std::vector<std::string>& Preset::printer_options()
@@ -918,25 +952,26 @@ ExternalPreset PresetCollection::load_external_preset(
             const size_t idx = it - m_presets.begin();
             // The newly selected preset can be activated AND have to be make as visible.
             bool is_installed = !m_presets[idx].is_visible;
+
             // Select the existing preset and override it with new values, so that
             // the differences will be shown in the preset editor against the referenced profile.
             this->select_preset(idx);
 
             // update dirty state only if it's needed
             if (!profile_print_params_same(it->config, cfg)) {
-            // The source config may contain keys from many possible preset types. Just copy those that relate to this preset.
+                // The source config may contain keys from many possible preset types. Just copy those that relate to this preset.
 
-            // Following keys are not used neither by the UI nor by the slicing core, therefore they are not important 
+                // Following keys are not used neither by the UI nor by the slicing core, therefore they are not important 
                 // Erase them from config apply to avoid redundant "dirty" parameter in loaded preset.
                 for (const char* key : { "print_settings_id", "filament_settings_id", "sla_print_settings_id", "sla_material_settings_id", "printer_settings_id", "filament_vendor", 
-                                     "printer_model", "printer_variant", "default_print_profile", "default_filament_profile", "default_sla_print_profile", "default_sla_material_profile" })
-                keys.erase(std::remove(keys.begin(), keys.end(), key), keys.end());
+                                         "printer_model", "printer_variant", "default_print_profile", "default_filament_profile", "default_sla_print_profile", "default_sla_material_profile" })
+                    keys.erase(std::remove(keys.begin(), keys.end(), key), keys.end());
 
-            this->get_edited_preset().config.apply_only(combined_config, keys, true);
-            this->update_dirty();
-            // Don't save the newly loaded project as a "saved into project" state.
-            //update_saved_preset_from_current_preset();
-            assert(this->get_edited_preset().is_dirty);
+                this->get_edited_preset().config.apply_only(combined_config, keys, true);
+                this->update_dirty();
+                // Don't save the newly loaded project as a "saved into project" state.
+                //update_saved_preset_from_current_preset();
+                assert(this->get_edited_preset().is_dirty);
             }
             return ExternalPreset(&(*it), this->get_edited_preset().is_dirty, is_installed);
         }
@@ -1248,6 +1283,20 @@ const std::string& PresetCollection::get_preset_name_by_alias(const std::string&
     return alias;
 }
 
+const std::string& PresetCollection::get_preset_name_by_alias_invisible(const std::string& alias) const
+{
+    for (
+        // Find the 1st profile name with the alias.
+        auto it = Slic3r::lower_bound_by_predicate(m_map_alias_to_profile_name.begin(), m_map_alias_to_profile_name.end(), [&alias](auto& l) { return l.first < alias; });
+        // Continue over all profile names with the same alias.
+        it != m_map_alias_to_profile_name.end() && it->first == alias; ++it)
+        if (auto it_preset = this->find_preset_internal(it->second);
+            it_preset != m_presets.end() && it_preset->name == it->second &&
+            it_preset->is_compatible)
+            return it_preset->name;
+    return alias;
+}
+
 const std::string* PresetCollection::get_preset_name_renamed(const std::string &old_name) const
 {
 	auto it_renamed = m_map_system_profile_renamed.find(old_name);
@@ -1269,6 +1318,12 @@ Preset* PresetCollection::find_preset(const std::string &name, bool first_visibl
     // Ensure that a temporary copy is returned if the preset found is currently selected.
     return (it != m_presets.end() && it->name == key.name) ? &this->preset(it - m_presets.begin(), respect_active_preset) :
         first_visible_if_not_found ? &this->first_visible() : nullptr;
+}
+
+size_t PresetCollection::get_preset_idx_by_name(const std::string name) const
+{
+    auto it = this->find_preset_internal(name);
+    return it != m_presets.end() ? it - m_presets.begin() : size_t(-1);
 }
 
 // Return index of the first visible preset. Certainly at least the '- default -' preset shall be visible.
@@ -1401,7 +1456,7 @@ static const std::set<std::string> independent_from_extruder_number_options = {
     "gcode_substitutions",
     "post_process",
 //Y20 //B52
-    "bed_exclude_area",
+    "bed_exclude_area"
 };
 
 bool PresetCollection::is_independent_from_extruder_number_option(const std::string& opt_key)
@@ -1443,6 +1498,7 @@ inline t_config_option_keys deep_diff(const ConfigBase &config_this, const Confi
                 case coPercents:add_correct_opts_to_diff<ConfigOptionPercents   >(opt_key, diff, config_other, config_this);  break;
                 case coPoints:  add_correct_opts_to_diff<ConfigOptionPoints     >(opt_key, diff, config_other, config_this);  break;
                 case coFloatsOrPercents:    add_correct_opts_to_diff<ConfigOptionFloatsOrPercents   >(opt_key, diff, config_other, config_this);  break;
+                case coEnums:   add_correct_opts_to_diff<ConfigOptionEnumsGeneric>(opt_key, diff, config_other, config_this);  break;
                 default:        diff.emplace_back(opt_key);     break;
                 }
                 // "nozzle_diameter" is a vector option which contain info about diameter for each nozzle
@@ -1520,13 +1576,13 @@ Preset& PresetCollection::select_preset(size_t idx)
     return m_presets[idx];
 }
 
-bool PresetCollection::select_preset_by_name(const std::string &name_w_suffix, bool force)
+bool PresetCollection::select_preset_by_name(const std::string &name_w_suffix, bool force, bool force_invisible /*= false*/)
 {
     std::string name = Preset::remove_suffix_modified(name_w_suffix);
     // 1) Try to find the preset by its name.
     auto it = this->find_preset_internal(name);
     size_t idx = 0;
-    if (it != m_presets.end() && it->name == name && it->is_visible)
+    if (it != m_presets.end() && it->name == name && (force_invisible || it->is_visible))
         // Preset found by its name and it is visible.
         idx = it - m_presets.begin();
     else {
@@ -1914,6 +1970,7 @@ static void update_preset_names_if_were_renamed(std::set<std::string>& preset_na
     if (was_renamed)
         preset_names = new_names;
 }
+
 // Load all printers found in dir_path.
 // Throws an exception on error.
 void PhysicalPrinterCollection::load_printers(
@@ -1936,9 +1993,11 @@ void PhysicalPrinterCollection::load_printers(
                 // This happens when there's is a preset (most likely legacy one) with the same name as a system preset
                 // that's already been loaded from a bundle.
                 BOOST_LOG_TRIVIAL(warning) << "Printer already present, not loading: " << name;
+
                 // But some of used printer_preset might have been renamed.
                 // Check it and replace with new name(s) if it's needed
                 update_preset_names_if_were_renamed(found_printer->preset_names, m_preset_bundle_owner->printers);
+
                 continue;
             }
             try {
@@ -2244,6 +2303,7 @@ void PhysicalPrinterCollection::select_printer(const std::string& full_name)
         m_selected_preset = *it->preset_names.begin();
     else
         m_selected_preset = it->get_preset_name(full_name);
+
     // Check if selected preset wasn't renamed and replace it with new name
     if (const std::string* new_name = m_preset_bundle_owner->printers.get_preset_name_renamed(m_selected_preset))
         m_selected_preset = *new_name;
@@ -2311,6 +2371,7 @@ void ExtruderFilaments::select_filament(size_t idx)
     // Invalidate m_idx_selected, if idx is out of range m_extr_filaments
     m_idx_selected = (idx == size_t(-1) || idx < m_extr_filaments.size()) ? idx : size_t(-1); 
 }
+
 bool ExtruderFilaments::select_filament(const std::string &name_w_suffix, bool force/*= false*/)
 {
     std::string name = Preset::remove_suffix_modified(name_w_suffix);

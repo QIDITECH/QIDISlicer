@@ -1,15 +1,29 @@
 #ifndef slic3r_ExPolygon_hpp_
 #define slic3r_ExPolygon_hpp_
 
+#include <assert.h>
+#include <oneapi/tbb/scalable_allocator.h>
+#include <stdint.h>
+#include <vector>
+#include <algorithm>
+#include <cstddef>
+#include <initializer_list>
+#include <iterator>
+#include <utility>
+#include <cassert>
+#include <cinttypes>
+
 #include "Point.hpp"
 #include "libslic3r.h"
 #include "Polygon.hpp"
 #include "Polyline.hpp"
-#include <vector>
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/Line.hpp"
 
 namespace Slic3r {
 
 class ExPolygon;
+
 using ExPolygons = std::vector<ExPolygon>;
 
 class ExPolygon
@@ -376,6 +390,7 @@ inline void translate(ExPolygons &expolys, const Point &p) {
     for (ExPolygon &expoly : expolys)
         expoly.translate(p);
 }
+
 inline void polygons_append(Polygons &dst, const ExPolygon &src) 
 { 
     dst.reserve(dst.size() + src.holes.size() + 1);
@@ -467,6 +482,7 @@ bool has_duplicate_points(const ExPolygons &expolys);
 
 // Return True when erase some otherwise False.
 bool remove_same_neighbor(ExPolygons &expolys);
+
 bool remove_sticks(ExPolygon &poly);
 void keep_largest_contour_only(ExPolygons &polygons);
 
@@ -480,6 +496,7 @@ bool        remove_small_and_small_holes(ExPolygons &expolygons, double min_area
 
 // start Boost
 #include <boost/polygon/polygon.hpp>
+
 namespace boost { namespace polygon {
     template <>
         struct polygon_traits<Slic3r::ExPolygon> {

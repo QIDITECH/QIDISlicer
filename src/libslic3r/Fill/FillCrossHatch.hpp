@@ -12,7 +12,7 @@ namespace Slic3r {
 class FillCrossHatch : public Fill
 {
 public:
-    Fill *clone() const override { return new FillCrossHatch(*this); };
+    //Fill *clone() const override { return new FillCrossHatch(*this); };
     ~FillCrossHatch() override {}
 
 protected:

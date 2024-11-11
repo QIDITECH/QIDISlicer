@@ -2,9 +2,18 @@
 #ifndef EDGECACHE_HPP
 #define EDGECACHE_HPP
 
-#include <vector>
-
 #include <libslic3r/ExPolygon.hpp>
+#include <assert.h>
+#include <stddef.h>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <cassert>
+#include <cstddef>
+
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r { namespace arr2 {
 

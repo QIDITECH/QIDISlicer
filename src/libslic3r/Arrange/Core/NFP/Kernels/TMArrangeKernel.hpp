@@ -87,13 +87,11 @@ public:
         // Will hold the resulting score
         double score = 0;
 
-
         // Distinction of cases for the arrangement scene
         enum e_cases {
             // This branch is for big items in a mixed (big and small) scene
             // OR for all items in a small-only scene.
             BIG_ITEM,
-
 
             // For small items in a mixed scene.
             SMALL_ITEM,
@@ -165,7 +163,8 @@ public:
             // The final mix of the score is the balance between the
             // distance from the full pile center, the pack density and
             // the alignment with the neighbors
-                // Let the density matter more when fewer objects remain
+
+            // Let the density matter more when fewer objects remain
             score = 0.6 * dist + 0.1 * alignment_score + (1.0 - R) * (0.3 * dist) + R * 0.3 * alignment_score;
 
             break;

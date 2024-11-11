@@ -1,5 +1,13 @@
 #include "MultiPoint.hpp"
+
+#include <cmath>
+#include <limits>
+#include <queue>
+#include <cstdlib>
+
 #include "BoundingBox.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -102,7 +110,6 @@ bool MultiPoint::remove_duplicate_points()
     }
     return false;
 }
-
 
 // Visivalingam simplification algorithm https://github.com/slic3r/Slic3r/pull/3825
 // thanks to @fuchstraumer

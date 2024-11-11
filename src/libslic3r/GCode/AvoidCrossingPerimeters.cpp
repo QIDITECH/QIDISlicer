@@ -1,3 +1,15 @@
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/iterator/reverse_iterator.hpp>
+#include <unordered_set>
+#include <algorithm>
+#include <iterator>
+#include <limits>
+#include <utility>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+
 #include "../Layer.hpp"
 #include "../GCode.hpp"
 #include "../EdgeGrid.hpp"
@@ -6,12 +18,15 @@
 #include "../ExPolygon.hpp"
 #include "../Geometry.hpp"
 #include "../ClipperUtils.hpp"
-#include "../SVG.hpp"
-#include "AvoidCrossingPerimeters.hpp"
-
-#include <numeric>
-#include <unordered_set>
-#include <boost/range/adaptor/reversed.hpp>
+#include "libslic3r/GCode/AvoidCrossingPerimeters.hpp"
+#include "libslic3r/Config.hpp"
+#include "libslic3r/Flow.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Surface.hpp"
+#include "libslic3r/Utils.hpp"
+#include "libslic3r/libslic3r.h"
 
 //#define AVOID_CROSSING_PERIMETERS_DEBUG_OUTPUT
 

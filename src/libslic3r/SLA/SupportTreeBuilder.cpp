@@ -1,7 +1,10 @@
 
 #include <libslic3r/SLA/SupportTreeBuilder.hpp>
-#include <libslic3r/SLA/SupportTreeUtils.hpp>
 #include <libslic3r/SLA/SupportTreeMesher.hpp>
+
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/SLA/SupportTree.hpp"
+#include "libslic3r/TriangleMesh.hpp"
 
 namespace Slic3r {
 namespace sla {

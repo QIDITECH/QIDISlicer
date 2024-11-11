@@ -1,6 +1,15 @@
-#include <assert.h>
-#include <stdio.h>
+#include <oneapi/tbb/scalable_allocator.h>
+#include <boost/container/vector.hpp>
 #include <memory>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <set>
+#include <utility>
+#include <vector>
+#include <cassert>
+#include <cinttypes>
+#include <cstdlib>
 
 #include "../ClipperUtils.hpp"
 #include "../Geometry.hpp"
@@ -10,24 +19,36 @@
 #include "../Surface.hpp"
 // for Arachne based infills
 #include "../PerimeterGenerator.hpp"
-
 #include "FillBase.hpp"
 #include "FillRectilinear.hpp"
 #include "FillLightning.hpp"
-#include "FillConcentric.hpp"
 #include "FillEnsuring.hpp"
-#include "Polygon.hpp"
-//w21
-#include "../ShortestPath.hpp"
-//w11
-//w29
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/ExtrusionEntity.hpp"
+#include "libslic3r/ExtrusionEntityCollection.hpp"
+#include "libslic3r/ExtrusionRole.hpp"
+#include "libslic3r/Flow.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polyline.hpp"
+#include "libslic3r/libslic3r.h"
+#include "libslic3r/ShortestPath.hpp"
+
+////w11
+////w29
 #include "FillConcentricInternal.hpp"
-
-#include "LayerRegion.hpp"
-
+#include "FillConcentric.hpp"
 #define NARROW_INFILL_AREA_THRESHOLD 3
 #define NARROW_INFILL_AREA_THRESHOLD_MIN 0.5
 namespace Slic3r {
+namespace FillAdaptive {
+struct Octree;
+}  // namespace FillAdaptive
+namespace FillLightning {
+class Generator;
+}  // namespace FillLightning
 
 //static constexpr const float NarrowInfillAreaThresholdMM = 3.f;
 
@@ -379,6 +400,7 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
             }
         }
     }
+
     return surface_fills;
 }
 
@@ -502,10 +524,6 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 {
 	this->clear_fills();
 
-#ifdef SLIC3R_DEBUG_SLICE_PROCESSING
-//	this->export_region_fill_surfaces_to_svg_debug("10_fill-initial");
-#endif /* SLIC3R_DEBUG_SLICE_PROCESSING */
-
     std::vector<SurfaceFill>  surface_fills       = group_fills(*this);
     const Slic3r::BoundingBox bbox                = this->object()->bounding_box();
     const auto                resolution          = this->object()->print()->config().gcode_resolution.value;
@@ -549,6 +567,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         } else if (surface_fill.params.pattern == ipLightning)
             dynamic_cast<FillLightning::Filler *>(f.get())->generator = lightning_generator;
 
+
         // calculate flow spacing for infill pattern generation
         bool using_internal_flow = ! surface_fill.surface.is_solid() && ! surface_fill.params.bridge;
         double link_max_length = 0.;
@@ -571,17 +590,17 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 
         // apply half spacing using this flow's own spacing and generate infill
         FillParams params;
-        params.density           = float(0.01 * surface_fill.params.density);
-        params.dont_adjust       = false; //  surface_fill.params.dont_adjust;
-        params.anchor_length     = surface_fill.params.anchor_length;
-        params.anchor_length_max = surface_fill.params.anchor_length_max;
-        params.resolution        = resolution;
-		//w14
-        //w29
+        params.density                    = float(0.01 * surface_fill.params.density);
+        params.dont_adjust                = false; //  surface_fill.params.dont_adjust;
+        params.anchor_length              = surface_fill.params.anchor_length;
+        params.anchor_length_max          = surface_fill.params.anchor_length_max;
+        params.resolution                 = resolution;
+		//w21
         params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentric;
-        params.layer_height      = layerm.layer()->height;
-        //w29
-        params.flow              = surface_fill.params.flow;
+        params.layer_height               = layerm.layer()->height;
+        params.prefer_clockwise_movements = this->object()->print()->config().prefer_clockwise_movements;
+		//w21
+		params.flow              = surface_fill.params.flow;
         params.extrusion_role    = surface_fill.params.extrusion_role;
         params.using_internal_flow = !surface_fill.surface.is_solid() && !surface_fill.params.bridge;
 
@@ -593,17 +612,9 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
             surface_fill.surface.expolygon = std::move(expoly);
             Polylines      polylines;
             ThickPolylines thick_polylines;
-            // w14
-            //w29
-            /* if (this->object()->config().detect_narrow_internal_solid_infill &&
-                (surface_fill.params.pattern == ipConcentricInternal || surface_fill.params.pattern == ipEnsuring)) {
-                layerm.region().config().infill_overlap.percent ? f->overlap = layerm.region().config().perimeter_extrusion_width *
-                                                                               layerm.region().config().infill_overlap.value / 100 * (-1) :
-                                                                  f->overlap = float(layerm.region().config().infill_overlap.value);
-            } else
-                f->overlap = 0;*/
             //w29
             f->fill_surface_extrusion(&surface_fill.surface, params, polylines, thick_polylines);
+
             if (!polylines.empty() || !thick_polylines.empty()) {
                 // calculate actual flow from spacing (which might have been adjusted by the infill
                 // pattern generator)
@@ -698,8 +709,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                 }
                 insert_fills_into_islands(*this, uint32_t(surface_fill.region_id), fill_begin, uint32_t(layerm.fills().size()));
             }
-        }
-        
+		}
     }
 
 	for (LayerSlice &lslice : this->lslices_ex)
@@ -924,8 +934,9 @@ Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Oc
         case ipHilbertCurve:
         case ipArchimedeanChords:
         case ipOctagramSpiral:
-		//w14
-        case ipConcentricInternal: break;
+        case ipZigZag: break;
+		// //w14
+        // case ipConcentricInternal: break;
         }
 
         // Create the filler object.
@@ -1034,8 +1045,8 @@ void Layer::make_ironing()
 
 		bool operator==(const IroningParams &rhs) const {
 			return this->extruder == rhs.extruder && this->just_infill == rhs.just_infill &&
-				   this->line_spacing == rhs.line_spacing && this->height == rhs.height && this->speed == rhs.speed &&
-				   this->angle == rhs.angle 
+				this->line_spacing == rhs.line_spacing && this->height == rhs.height && this->speed == rhs.speed &&
+				this->angle == rhs.angle
                    //w33
                    && this->pattern == rhs.pattern;
 		}
@@ -1094,15 +1105,14 @@ void Layer::make_ironing()
 		}
 	std::sort(by_extruder.begin(), by_extruder.end());
 
-    //w33
-    //FillRectilinear 	fill;
+    FillRectilinear 	fill;
     FillParams 			fill_params;
-	//fill.set_bounding_box(this->object()->bounding_box());
+	fill.set_bounding_box(this->object()->bounding_box());
 	// Layer ID is used for orienting the infill in alternating directions.
 	// Layer::id() returns layer ID including raft layers, subtract them to make the infill direction independent
 	// from raft.
 	//FIXME ironing does not take fill angle into account. Shall it? Does it matter?
-    //w33
+	//w33
 	//fill.layer_id 			 = this->id() - this->object()->get_layer(0)->id();
     //fill.z 					 = this->print_z;
     //fill.overlap 			 = 0;
@@ -1207,7 +1217,7 @@ void Layer::make_ironing()
 			Polylines polylines;
 			try {
                 assert(!fill_params.use_arachne);
-                //w33
+				//w33
 				//polylines = fill.fill_surface(&surface_fill, fill_params);
                 polylines = f->fill_surface(&surface_fill, fill_params);
 			} catch (InfillFailedException &) {

@@ -21,6 +21,7 @@
 #include "SurfaceCollection.hpp"
 #include "clipper/clipper_z.hpp"
 
+#include "Arachne/PerimeterOrder.hpp"
 #include "Arachne/WallToolPaths.hpp"
 #include "Arachne/utils/ExtrusionLine.hpp"
 #include "Arachne/utils/ExtrusionJunction.hpp"
@@ -308,7 +309,7 @@ static bool detect_steep_overhang(const PrintRegionConfig &config,
         return true;
     }
 
-    Polygons lower_slcier_chopped = ClipperUtils::clip_clipper_polygons_with_subject_bbox(*lower_slices, extrusion_bboxs,true);
+    Polygons lower_slcier_chopped = ClipperUtils::clip_clipper_polygons_with_subject_bbox(*lower_slices, extrusion_bboxs);
 
     // All we need to check is whether we have lines outside `threshold`
     double off = threshold - 0.5 * extrusion_width;
@@ -585,7 +586,7 @@ struct PerimeterGeneratorArachneExtrusion
 //w38
 static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::Parameters &           params,
                                                      const Polygons &                                 lower_slices_polygons_cache,
-                                                     std::vector<PerimeterGeneratorArachneExtrusion> &pg_extrusions,
+                                                     Arachne::PerimeterOrder::PerimeterExtrusions &pg_extrusions,
                                                      bool &                                           steep_overhang_contour,
                                                      bool &                                           steep_overhang_hole)
 {
@@ -593,17 +594,17 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
     bool overhangs_reverse = params.config.overhang_reverse &&
                              params.layer_id % 2 == 1;
     ExtrusionEntityCollection extrusion_coll;
-    for (PerimeterGeneratorArachneExtrusion &pg_extrusion : pg_extrusions) {
-        Arachne::ExtrusionLine *extrusion = pg_extrusion.extrusion;
-        if (extrusion->empty())
+    for (Arachne::PerimeterOrder::PerimeterExtrusion &pg_extrusion : pg_extrusions) {
+        Arachne::ExtrusionLine &extrusion = pg_extrusion.extrusion;
+        if (extrusion.empty())
             continue;
 
-        const bool    is_external = extrusion->inset_idx == 0;
+        const bool    is_external = extrusion.inset_idx == 0;
         ExtrusionRole role_normal   = is_external ? ExtrusionRole::ExternalPerimeter : ExtrusionRole::Perimeter;
         ExtrusionRole role_overhang = role_normal | ExtrusionRoleModifier::Bridge;
 
         if (pg_extrusion.fuzzify)
-            fuzzy_extrusion_line(*extrusion, scaled<float>(params.config.fuzzy_skin_thickness.value), scaled<float>(params.config.fuzzy_skin_point_dist.value));
+            fuzzy_extrusion_line(extrusion, scaled<float>(params.config.fuzzy_skin_thickness.value), scaled<float>(params.config.fuzzy_skin_point_dist.value));
 
         ExtrusionPaths paths;
         // detect overhanging/bridging perimeters
@@ -612,9 +613,9 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
                  params.object_config.support_material_contact_distance.value == 0)) {
 
             ClipperLib_Z::Path extrusion_path;
-            extrusion_path.reserve(extrusion->size());
+            extrusion_path.reserve(extrusion.size());
             BoundingBox extrusion_path_bbox;
-            for (const Arachne::ExtrusionJunction &ej : extrusion->junctions) {
+            for (const Arachne::ExtrusionJunction &ej : extrusion.junctions) {
                 extrusion_path.emplace_back(ej.p.x(), ej.p.y(), ej.w);
                 extrusion_path_bbox.merge(Point{ej.p.x(), ej.p.y()});
             }
@@ -643,14 +644,14 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
 
             //w38
             if (overhangs_reverse && params.config.fuzzy_skin != FuzzySkinType::None) {
-                if (pg_extrusion.is_contour) {
+                if (pg_extrusion.is_contour()) {
                     steep_overhang_contour = true;
                 } else if (params.config.fuzzy_skin != FuzzySkinType::External) {
                     steep_overhang_hole = true;
                 }
             }
-            bool found_steep_overhang = (pg_extrusion.is_contour && steep_overhang_contour) ||
-                                        (!pg_extrusion.is_contour && steep_overhang_hole);
+            bool found_steep_overhang = (pg_extrusion.is_contour() && steep_overhang_contour) ||
+                                        (!pg_extrusion.is_contour() && steep_overhang_hole);
             if (overhangs_reverse && !found_steep_overhang) {
                 std::map<double, ExtrusionPaths> recognization_paths;
                 for (const ExtrusionPath &path : paths) {
@@ -668,7 +669,7 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
 
                     BoundingBox extrusion_bboxs = get_extents(be_clipped);
 
-                    if (detect_steep_overhang(params.config, pg_extrusion.is_contour, extrusion_bboxs, it.first, be_clipped,
+                    if (detect_steep_overhang(params.config, pg_extrusion.is_contour(), extrusion_bboxs, it.first, be_clipped,
                                               params.lower_slices, steep_overhang_contour, steep_overhang_hole)) {
                         break;
                     }
@@ -686,7 +687,7 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
             // Arachne sometimes creates extrusion with zero-length (just two same endpoints);
             if (!paths.empty()) {
                 Point start_point = paths.front().first_point();
-                if (!extrusion->is_closed) {
+                if (!extrusion.is_closed) {
                     // Especially for open extrusion, we need to select a starting point that is at the start
                     // or the end of the extrusions to make one continuous line. Also, we prefer a non-overhang
                     // starting point.
@@ -722,15 +723,15 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
                 chain_and_reorder_extrusion_paths(paths, &start_point);
             }
         } else {
-            extrusion_paths_append(paths, *extrusion, role_normal, is_external ? params.ext_perimeter_flow : params.perimeter_flow);
+            extrusion_paths_append(paths, extrusion, role_normal, is_external ? params.ext_perimeter_flow : params.perimeter_flow);
         }
 
         // Append paths to collection.
         if (!paths.empty()) {
-            if (extrusion->is_closed) {
+            if (extrusion.is_closed) {
                 ExtrusionLoop extrusion_loop(std::move(paths));
                 // Restore the orientation of the extrusion loop.
-                if (pg_extrusion.is_contour == extrusion_loop.is_clockwise())
+                if (pg_extrusion.is_contour() == extrusion_loop.is_clockwise())
                     extrusion_loop.reverse_loop();
 
                 for (auto it = std::next(extrusion_loop.paths.begin()); it != extrusion_loop.paths.end(); ++it) {
@@ -769,7 +770,7 @@ static ExtrusionEntityCollection traverse_extrusions(const PerimeterGenerator::P
 }
 
 #ifdef ARACHNE_DEBUG
-static void export_perimeters_to_svg(const std::string &path, const Polygons &contours, const std::vector<Arachne::VariableWidthLines> &perimeters, const ExPolygons &infill_area)
+static void export_perimeters_to_svg(const std::string &path, const Polygons &contours, const Arachne::Perimeters &perimeters, const ExPolygons &infill_area)
 {
     coordf_t    stroke_width = scale_(0.03);
     BoundingBox bbox         = get_extents(contours);
@@ -1444,11 +1445,11 @@ void PerimeterGenerator::process_arachne(
             ClipperLib_Z::Paths loops_paths;
             loops_paths.reserve(closed_loop_extrusions.size());
             for (const auto &cl_extrusion : closed_loop_extrusions) {
-                assert(cl_extrusion->extrusion->junctions.front() == cl_extrusion->extrusion->junctions.back());
+                assert(cl_extrusion->extrusion.junctions.front() == cl_extrusion->extrusion.junctions.back());
                 size_t             loop_idx = &cl_extrusion - &closed_loop_extrusions.front();
                 ClipperLib_Z::Path loop_path;
-                loop_path.reserve(cl_extrusion->extrusion->junctions.size() - 1);
-                for (auto junction_it = cl_extrusion->extrusion->junctions.begin(); junction_it != std::prev(cl_extrusion->extrusion->junctions.end()); ++junction_it)
+                loop_path.reserve(cl_extrusion->extrusion.junctions.size() - 1);
+                for (auto junction_it = cl_extrusion->extrusion.junctions.begin(); junction_it != std::prev(cl_extrusion->extrusion.junctions.end()); ++junction_it)
                     loop_path.emplace_back(junction_it->p.x(), junction_it->p.y(), loop_idx);
                 loops_paths.emplace_back(loop_path);
             }
@@ -1538,6 +1539,8 @@ void PerimeterGenerator::process_arachne(
             infill_areas = diff_ex(infill_areas, filled_area);
         }
     }
+    
+    append(out_fill_expolygons, std::move(infill_areas));
     //w21
     append(out_fill_no_overlap, offset2_ex(union_ex(pp),float(-min_perimeter_infill_spacing / 2.), float(  min_perimeter_infill_spacing / 2.)));
     append(out_fill_expolygons, std::move(infill_areas));
@@ -2168,7 +2171,6 @@ void PerimeterGenerator::process_classic(
                     last = union_ex(last, temp_gap);
             }
 
-
             if (i == loop_number && (! has_gap_fill || params.config.fill_density.value == 0)) {
             	// The last run of this loop is executed to collect gaps for gap fill.
             	// As the gap fill is either disabled or not 
@@ -2350,7 +2352,6 @@ void PerimeterGenerator::process_classic(
     }
     
     append(out_fill_expolygons, std::move(infill_areas));
+
 }
-
-
 }

@@ -1,11 +1,14 @@
 #include "BranchingTree.hpp"
-#include "PointCloud.hpp"
 
-#include <numeric>
 #include <optional>
 #include <algorithm>
+#include <cstddef>
 
+#include "PointCloud.hpp"
 #include "libslic3r/TriangleMesh.hpp"
+#include "libslic3r/BoundingBox.hpp"
+
+struct indexed_triangle_set;
 
 namespace Slic3r { namespace branchingtree {
 

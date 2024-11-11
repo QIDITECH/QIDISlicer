@@ -1,10 +1,13 @@
 #include "Circle.hpp"
 
-#include "../Polygon.hpp"
-
+#include <boost/log/trivial.hpp>
 #include <numeric>
 #include <random>
-#include <boost/log/trivial.hpp>
+#include <algorithm>
+#include <limits>
+#include <vector>
+
+#include "libslic3r/Point.hpp"
 
 namespace Slic3r { namespace Geometry {
 
@@ -17,9 +20,14 @@ Point circle_center_taubin_newton(const Points::const_iterator& input_begin, con
 	return Point::new_scale(center.x(), center.y());
 }
 
-/// Adapted from work in "Circular and Linear Regression: Fitting circles and lines by least squares", pg 126
-/// Returns a point corresponding to the center of a circle for which all of the points from input_begin to input_end
-/// lie on.
+// Robust and accurate algebraic circle fit, which works well even if data points are observed only within a small arc.
+// The method was proposed by G. Taubin in
+//      "Estimation Of Planar Curves, Surfaces And Nonplanar Space Curves Defined By Implicit Equations, 
+//       With Applications To Edge And Range Image Segmentation", IEEE Trans. PAMI, Vol. 13, pages 1115-1138, (1991)."
+// This particular implementation was adapted from
+//      "Circular and Linear Regression: Fitting circles and lines by least squares", pg 126"
+// Returns a point corresponding to the center of a circle for which all of the points from input_begin to input_end
+// lie on.
 Vec2d circle_center_taubin_newton(const Vec2ds::const_iterator& input_begin, const Vec2ds::const_iterator& input_end, size_t cycles)
 {
     // calculate the centroid of the data set
@@ -215,4 +223,5 @@ Circled circle_linear_least_squares_normal(const Vec2ds &input)
     }
     return out;
 }
+
 } } // namespace Slic3r::Geometry

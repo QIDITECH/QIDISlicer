@@ -1,4 +1,7 @@
 #include "SupportTreeMesher.hpp"
+#include <cmath>
+#include <cassert>
+#include <cstdlib>
 
 namespace Slic3r { namespace sla {
 

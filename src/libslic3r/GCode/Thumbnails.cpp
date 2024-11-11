@@ -1,12 +1,22 @@
 #include "Thumbnails.hpp"
-#include "../miniz_extension.hpp"
-#include "../format.hpp"
 
-#include <qoi/qoi.h>
+#include <qoi.h>
 #include <jpeglib.h>
-#include <jerror.h>
-#include <boost/algorithm/string.hpp>
+#include <jmorecfg.h>
+#include <stdlib.h>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/log/trivial.hpp>
 #include <string>
+#include <cstdint>
+
+#include "libslic3r/miniz_extension.hpp" // IWYU pragma: keep
+#include "../format.hpp"
+#include "libslic3r/Config.hpp"
+#include "libslic3r/GCode/ThumbnailData.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "miniz.h"
+
 namespace Slic3r::GCodeThumbnails {
 
 using namespace std::literals;
@@ -29,14 +39,12 @@ struct CompressedQOI : CompressedImageBuffer
     std::string_view tag() const override { return "thumbnail_QOI"sv; }
 };
 
-
 std::unique_ptr<CompressedImageBuffer> compress_thumbnail_png(const ThumbnailData &data)
 {
     auto out = std::make_unique<CompressedPNG>();
     out->data = tdefl_write_image_to_png_file_in_memory_ex((const void*)data.pixels.data(), data.width, data.height, 4, &out->size, MZ_DEFAULT_LEVEL, 1);
     return out;
 }
-
 
 std::unique_ptr<CompressedImageBuffer> compress_thumbnail_jpg(const ThumbnailData& data)
 {

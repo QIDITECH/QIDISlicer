@@ -104,6 +104,7 @@ ExPolygons to_expolygons(const SegmentedRectangleBed<Args...> &bed)
 template<class SegB>
 struct IsRectangular_<SegB, std::enable_if_t<IsSegmentedBed<SegB>, void>> : public std::true_type
 {};
+
 }} // namespace Slic3r::arr2
 
 #endif // SEGMENTEDRECTANGLEBED_HPP

@@ -1,16 +1,26 @@
 #include "BuildVolume.hpp"
-#include "ClipperUtils.hpp"
-#include "Geometry/ConvexHull.hpp"
-#include "GCode/GCodeProcessor.hpp"
-#include "Point.hpp"
 
 #include <boost/log/trivial.hpp>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <cassert>
+#include <cstddef>
+
+#include "ClipperUtils.hpp"
+#include "Geometry/ConvexHull.hpp"
+#include "libslic3r/GCode/GCodeProcessor.hpp"
+#include "Point.hpp"
+#include "admesh/stl.h"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExtrusionRole.hpp"
+#include "libslic3r/Geometry/Circle.hpp"
+#include "libslic3r/Polygon.hpp"
 
 namespace Slic3r {
 
 //B52
-BuildVolume::BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height, const std::vector<Vec2d> &exclude_bed_shape)
-    : m_bed_shape(bed_shape), m_max_print_height(max_print_height),m_exclude_bed_shape(exclude_bed_shape)
+BuildVolume::BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height, const std::vector<Vec2d> &exclude_bed_shape): m_bed_shape(bed_shape), m_max_print_height(max_print_height), m_exclude_bed_shape(exclude_bed_shape)
 {
     assert(max_print_height >= 0);
 
@@ -398,7 +408,7 @@ bool BuildVolume::all_paths_inside(const GCodeProcessorResult& paths, const Boun
         const Vec2f c = unscaled<float>(m_circle.center);
         const float r = unscaled<double>(m_circle.radius) + epsilon;
         const float r2 = sqr(r);
-        return m_max_print_height == 0.0 ? 
+        return m_max_print_height == 0.0 ?
             std::all_of(paths.moves.begin(), paths.moves.end(), [move_valid, c, r2](const GCodeProcessorResult::MoveVertex &move)
                 { return ! move_valid(move) || (to_2d(move.position) - c).squaredNorm() <= r2; }) :
             std::all_of(paths.moves.begin(), paths.moves.end(), [move_valid, c, r2, z = m_max_print_height + epsilon](const GCodeProcessorResult::MoveVertex& move)
@@ -427,40 +437,6 @@ inline bool all_inside_vertices_normals_interleaved(const std::vector<float> &pa
         it += 3;
     }
     return true;
-}
-
-bool BuildVolume::all_paths_inside_vertices_and_normals_interleaved(const std::vector<float>& paths, const Eigen::AlignedBox<float, 3>& paths_bbox, bool ignore_bottom) const
-{
-    assert(paths.size() % 6 == 0);
-    static constexpr const double epsilon = BedEpsilon;
-    switch (m_type) {
-    case Type::Rectangle:
-    {
-        BoundingBox3Base<Vec3d> build_volume = this->bounding_volume().inflated(epsilon);
-        if (m_max_print_height == 0.0)
-            build_volume.max.z() = std::numeric_limits<double>::max();
-        if (ignore_bottom)
-            build_volume.min.z() = -std::numeric_limits<double>::max();
-        return build_volume.contains(paths_bbox.min().cast<double>()) && build_volume.contains(paths_bbox.max().cast<double>());
-    }
-    case Type::Circle:
-    {
-        const Vec2f c = unscaled<float>(m_circle.center);
-        const float r = unscaled<double>(m_circle.radius) + float(epsilon);
-        const float r2 = sqr(r);
-        return m_max_print_height == 0.0 ?
-            all_inside_vertices_normals_interleaved(paths, [c, r2](Vec3f p) { return (to_2d(p) - c).squaredNorm() <= r2; }) :
-            all_inside_vertices_normals_interleaved(paths, [c, r2, z = m_max_print_height + epsilon](Vec3f p) { return (to_2d(p) - c).squaredNorm() <= r2 && p.z() <= z; });
-    }
-    case Type::Convex:
-        //FIXME doing test on convex hull until we learn to do test on non-convex polygons efficiently.
-    case Type::Custom:
-        return m_max_print_height == 0.0 ?
-            all_inside_vertices_normals_interleaved(paths, [this](Vec3f p) { return Geometry::inside_convex_polygon(m_top_bottom_convex_hull_decomposition_bed, to_2d(p).cast<double>()); }) :
-            all_inside_vertices_normals_interleaved(paths, [this, z = m_max_print_height + epsilon](Vec3f p) { return Geometry::inside_convex_polygon(m_top_bottom_convex_hull_decomposition_bed, to_2d(p).cast<double>()) && p.z() <= z; });
-    default:
-        return true;
-    }
 }
 
 std::string_view BuildVolume::type_name(Type type)

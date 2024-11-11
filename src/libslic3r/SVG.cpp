@@ -1,7 +1,14 @@
 #include "SVG.hpp"
-#include <iostream>
 
 #include <boost/nowide/cstdio.hpp>
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Surface.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 

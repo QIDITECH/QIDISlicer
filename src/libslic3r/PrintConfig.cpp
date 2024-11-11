@@ -12,8 +12,21 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/thread.hpp>
-
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/lexical_cast/bad_lexical_cast.hpp>
+#include <boost/preprocessor/cat.hpp>
+#include <cereal/cereal.hpp>
+#include <set>
+#include <cmath>
+#include <optional>
+#include <string_view>
+#include "Config.hpp"
+#include "I18N.hpp"
+#include "format.hpp"
+#include "libslic3r/GCode/Thumbnails.hpp"
+#include "libslic3r/SLA/SupportTreeStrategies.hpp"
+#include "libslic3r/enum_bitmask.hpp"
+#include "libslic3r/libslic3r.h"
 #include <float.h>
 
 namespace Slic3r {
@@ -73,16 +86,18 @@ CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(MachineLimitsUsage)
 
 //B55
 static const t_config_enum_values s_keys_map_PrintHostType {
-    { "qidilink",      htQIDILink },
-    { "qidiconnect",   htQIDIConnect },
+    { "qidilink",       htQIDILink },
+    { "qidiconnect",    htQIDIConnect },
     { "octoprint",      htOctoPrint },
     { "moonraker",      htMoonraker },
-    { "moonraker2",      htMoonraker2 },
+    { "moonraker2",     htMoonraker2 },
     { "duet",           htDuet },
     { "flashair",       htFlashAir },
     { "astrobox",       htAstroBox },
     { "repetier",       htRepetier },
-    { "mks",            htMKS }
+    { "mks",            htMKS },
+    { "qidiconnectnew", htQIDIConnectNew }
+
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(PrintHostType)
 
@@ -119,7 +134,8 @@ static const t_config_enum_values s_keys_map_InfillPattern {
     { "adaptivecubic",      ipAdaptiveCubic },
     { "supportcubic",       ipSupportCubic },
     { "lightning",          ipLightning },
-        //w14
+    { "zigzag",             ipZigZag },
+    //w14
     { "concentricInternal", ipConcentricInternal },
     //w32
     { "crosshatch",         ipCrossHatch}
@@ -266,6 +282,7 @@ PrintConfigDef::PrintConfigDef()
     this->init_extruder_option_keys();
     assign_printer_technology_to_unknown(this->options, ptFFF);
     this->init_sla_params();
+    this->init_sla_tilt_params();
     assign_printer_technology_to_unknown(this->options, ptSLA);
     this->finalize();
 }
@@ -419,6 +436,7 @@ void PrintConfigDef::init_common_params()
     def = this->add("printhost_password", coString);
     def->label = L("Password");
 //    def->tooltip = L("");
+    def->gui_type = ConfigOptionDef::GUIType::password;
     def->mode = comAdvanced;
     def->cli = ConfigOptionDef::nocli;
     def->set_default_value(new ConfigOptionString(""));
@@ -616,6 +634,24 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(1));
 
+    def = this->add("top_one_perimeter_type", coEnum);
+    def->label = L("Single perimeter on top surfaces");
+    def->category = L("Layers and Perimeters");
+    def->tooltip = L("Use only one perimeter on flat top surface, to give more space to the top infill pattern. Could be applied on topmost surface or all top surfaces.");
+    def->mode = comExpert;
+    def->set_enum<TopOnePerimeterType>({
+        { "none",    L("Disabled") },
+        { "top",     L("All top surfaces") },
+        { "topmost", L("Topmost surface only") }
+    });
+    def->set_default_value(new ConfigOptionEnum<TopOnePerimeterType>(TopOnePerimeterType::None));
+
+    def = this->add("only_one_perimeter_first_layer", coBool);
+    def->label = L("Only one perimeter on first layer");
+    def->category = L("Layers and Perimeters");
+    def->tooltip = L("Use only one perimeter on the first layer.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
     //w30
     def          = this->add("top_solid_infill_flow_ratio", coFloat);
     def->label   = L("Top surface flow ratio");
@@ -1166,6 +1202,26 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloats { 0. });
 
+    def = this->add("filament_infill_max_speed", coFloats);
+    def->label = L("Max non-crossing infill speed");
+    def->tooltip = L("Maximum speed allowed for this filament while printing infill without "
+                     "any self intersections in a single layer. "
+                     "Set to zero for no limit.");
+    def->sidetext = L("mm/s");
+    def->min = 0;
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloats { 0. });
+
+    def = this->add("filament_infill_max_crossing_speed", coFloats);
+    def->label = L("Max crossing infill speed");
+    def->tooltip = L("Maximum speed allowed for this filament while printing infill with "
+                     "self intersections in a single layer. "
+                     "Set to zero for no limit.");
+    def->sidetext = L("mm/s");
+    def->min = 0;
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloats { 0. });
+
     def = this->add("filament_loading_speed", coFloats);
     def->label = L("Loading speed");
     def->tooltip = L("Speed used for loading the filament on the wipe tower.");
@@ -1394,6 +1450,12 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBools { false });
 
+    def = this->add("filament_abrasive", coBools);
+    def->label = L("Abrasive material");
+    def->tooltip = L("This flag means that the material is abrasive and requires a hardened nozzle. The value is used by the printer to check it.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBools { false });
+
     def = this->add("filament_cost", coFloats);
     def->label = L("Cost");
     def->tooltip = L("Enter your filament cost per kg here. This is only for statistical information.");
@@ -1418,6 +1480,28 @@ void PrintConfigDef::init_fff_params()
     def = this->add("filament_vendor", coString);
     def->set_default_value(new ConfigOptionString(L("(Unknown)")));
     def->cli = ConfigOptionDef::nocli;
+
+    def = this->add("filament_shrinkage_compensation_xy", coPercents);
+    def->label = L("Shrinkage compensation XY");
+    def->tooltip = L("Enter your filament shrinkage percentages for the X and Y axes here to apply scaling of the object to "
+                     "compensate for shrinkage in the X and Y axes. For example, if you measured 99mm instead of 100mm, "
+                     "enter 1%.");
+    def->sidetext = L("%");
+    def->mode = comAdvanced;
+    def->min = -10.;
+    def->max = 10.;
+    def->set_default_value(new ConfigOptionPercents { 0 });
+
+    def = this->add("filament_shrinkage_compensation_z", coPercents);
+    def->label = L("Shrinkage compensation Z");
+    def->tooltip = L("Enter your filament shrinkage percentages for the Z axis here to apply scaling of the object to "
+                     "compensate for shrinkage in the Z axis. For example, if you measured 99mm instead of 100mm, "
+                     "enter 1%.");
+    def->sidetext = L("%");
+    def->mode = comAdvanced;
+    def->min = -10.;
+    def->max = 10.;
+    def->set_default_value(new ConfigOptionPercents { 0. });
 
     def = this->add("fill_angle", coFloat);
     def->label = L("Fill angle");
@@ -1479,6 +1563,7 @@ void PrintConfigDef::init_fff_params()
         { "adaptivecubic",      L("Adaptive Cubic")},
         { "supportcubic",       L("Support Cubic")},
         { "lightning",          L("Lightning")},
+        { "zigzag",             L("Zig Zag")},
         //w32
         { "crosshatch",          L("Cross Hatch")}
     });

@@ -1,15 +1,14 @@
-#include "../libslic3r.h"
-#include "../Exception.hpp"
-#include "../Model.hpp"
-#include "../Utils.hpp"
-#include "../LocalesUtils.hpp"
-#include "../GCode.hpp"
-#include "../Geometry.hpp"
-#include "../GCode/ThumbnailData.hpp"
-#include "../Semver.hpp"
-#include "../Time.hpp"
+#include "libslic3r/libslic3r.h"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/Model.hpp"
+#include "libslic3r/Utils.hpp"
+#include "libslic3r/GCode.hpp"
+#include "libslic3r/Geometry.hpp"
+#include "libslic3r/GCode/ThumbnailData.hpp"
+#include "libslic3r/Semver.hpp"
+#include "libslic3r/Time.hpp"
 
-#include "../I18N.hpp"
+#include "libslic3r/I18N.hpp"
 
 #include "3mf.hpp"
 
@@ -33,15 +32,17 @@ namespace pt = boost::property_tree;
 
 #include <expat.h>
 #include <Eigen/Dense>
-#include "miniz_extension.hpp"
+#include <LocalesUtils.hpp>
 
-#include "TextConfiguration.hpp"
-#include "EmbossShape.hpp"
-#include "ExPolygonSerialize.hpp" 
+#include "libslic3r/miniz_extension.hpp"
 
-#include "NSVGUtils.hpp"
+#include "libslic3r/TextConfiguration.hpp"
+#include "libslic3r/EmbossShape.hpp"
+#include "libslic3r/ExPolygonSerialize.hpp" 
 
-#include <fast_float/fast_float.h>
+#include "libslic3r/NSVGUtils.hpp"
+
+#include <fast_float.h>
 
 // Slightly faster than sprintf("%.9g"), but there is an issue with the karma floating point formatter,
 // https://github.com/boostorg/spirit/pull/586
@@ -823,7 +824,7 @@ namespace Slic3r {
                         add_error("Archive does not contain a valid model config");
                         return false;
                     }
-                }
+                } 
                 else if (_is_svg_shape_file(name)) {
                     _extract_embossed_svg_shape_file(name, archive, stat);
                 }

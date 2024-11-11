@@ -2,11 +2,14 @@
 #ifndef ARRANGESETTINGSDB_APPCFG_HPP
 #define ARRANGESETTINGSDB_APPCFG_HPP
 
+#include <string>
+
 #include "ArrangeSettingsView.hpp"
 #include "libslic3r/AppConfig.hpp"
 #include "libslic3r/PrintConfig.hpp"
 
 namespace Slic3r {
+class AppConfig;
 
 class ArrangeSettingsDb_AppCfg: public arr2::ArrangeSettingsDb
 {
@@ -53,6 +56,7 @@ public:
     explicit ArrangeSettingsDb_AppCfg(AppConfig *appcfg);
 
     void sync();
+
     float get_distance_from_objects() const override { return get_ref(this).d_obj; }
     float get_distance_from_bed() const  override { return get_ref(this).d_bed; }
     bool  is_rotation_enabled() const override { return get_ref(this).rotations; }

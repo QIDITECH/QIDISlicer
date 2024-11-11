@@ -1,4 +1,13 @@
 #include "Layer.hpp"
+
+#include <boost/log/trivial.hpp>
+#include <clipper/clipper_z.hpp>
+#include <cstdint>
+#include <iterator>
+#include <numeric>
+#include <tuple>
+#include <cassert>
+
 #include "ClipperZUtils.hpp"
 #include "ClipperUtils.hpp"
 #include "Point.hpp"
@@ -7,9 +16,14 @@
 #include "ShortestPath.hpp"
 #include "SVG.hpp"
 #include "BoundingBox.hpp"
-#include "clipper/clipper.hpp"
-
-#include <boost/log/trivial.hpp>
+#include "libslic3r/ExtrusionEntity.hpp"
+#include "libslic3r/ExtrusionEntityCollection.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/Surface.hpp"
+#include "libslic3r/SurfaceCollection.hpp"
+#include "libslic3r/Utils.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -929,11 +943,12 @@ void Layer::sort_perimeters_into_islands(
                             // Not referenced by any map_expolygon_to_region_and_fill.
                             new_pos = last ++;
                     // Move just the content of m_fill_expolygons to fills_temp, but don't move the container vector.
-                    auto &fills = layerm.m_fill_expolygons;
+                    auto &fills       = layerm.m_fill_expolygons;
                     auto &fill_bboxes = layerm.m_fill_expolygons_bboxes;
 
                     assert(fills.size() == fill_bboxes.size());
                     assert(last == int(fills.size()));
+
                     fills_temp.resize(fills.size());
                     fills_temp.assign(std::make_move_iterator(fills.begin()), std::make_move_iterator(fills.end()));
 
@@ -942,7 +957,7 @@ void Layer::sort_perimeters_into_islands(
 
                     // Move / reorder the ExPolygons and BoundingBoxes back into m_fill_expolygons and m_fill_expolygons_bboxes.
                     for (size_t old_pos = 0; old_pos < new_positions.size(); ++old_pos) {
-                        fills[new_positions[old_pos]] = std::move(fills_temp[old_pos]);
+                        fills[new_positions[old_pos]]       = std::move(fills_temp[old_pos]);
                         fill_bboxes[new_positions[old_pos]] = std::move(fill_bboxes_temp[old_pos]);
                     }
                 }
@@ -955,9 +970,11 @@ void Layer::sort_perimeters_into_islands(
 
     auto insert_into_island = [
         // Region where the perimeters, gap fills and fill expolygons are stored.
-        region_id, 
+        region_id,
         // Whether there are infills with different regions generated for this LayerSlice.
         has_multiple_regions,
+        // Layer split into surfaces
+        &slices,
         // Perimeters and gap fills to be sorted into islands.
         &perimeter_and_gapfill_ranges,
         // Infill regions to be sorted into islands.
@@ -970,13 +987,14 @@ void Layer::sort_perimeters_into_islands(
         lslices_ex[lslice_idx].islands.push_back({});
         LayerIsland &island = lslices_ex[lslice_idx].islands.back();
         island.perimeters = LayerExtrusionRange(region_id, perimeter_and_gapfill_ranges[source_slice_idx].first);
+        island.boundary = slices.surfaces[source_slice_idx].expolygon;
         island.thin_fills = perimeter_and_gapfill_ranges[source_slice_idx].second;
         if (ExPolygonRange fill_range = fill_expolygons_ranges[source_slice_idx]; ! fill_range.empty()) {
             if (has_multiple_regions) {
                 // Check whether the fill expolygons of this island were split into multiple regions.
                 island.fill_region_id = LayerIsland::fill_region_composite_id;
                 for (uint32_t fill_idx : fill_range) {
-                    if (const int fill_regon_id = map_expolygon_to_region_and_fill[fill_idx].region_id; 
+                    if (const int fill_regon_id = map_expolygon_to_region_and_fill[fill_idx].region_id;
                         fill_regon_id == -1 || (island.fill_region_id != LayerIsland::fill_region_composite_id && int(island.fill_region_id) != fill_regon_id)) {
                         island.fill_region_id = LayerIsland::fill_region_composite_id;
                         break;

@@ -6,9 +6,11 @@
 #include <array>
 
 #include "libslic3r/StaticMap.hpp"
+
 namespace Slic3r { namespace arr2 {
 
 using namespace std::string_view_literals;
+
 class ArrangeSettingsView
 {
 public:
@@ -33,6 +35,7 @@ public:
     virtual XLPivots         get_xl_alignment() const      = 0;
     virtual GeometryHandling get_geometry_handling() const = 0;
     virtual ArrangeStrategy  get_arrange_strategy() const  = 0;
+
     static constexpr std::string_view get_label(GeometryHandling v)
     {
         constexpr auto STR = std::array{

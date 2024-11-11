@@ -1,10 +1,18 @@
+#include <ankerl/unordered_dense.h>
+#include <cmath>
+#include <limits>
+#include <cinttypes>
+#include <cstring>
+
 #include "BoundingBox.hpp"
-#include "ClipperUtils.hpp"
 #include "Exception.hpp"
 #include "Polygon.hpp"
 #include "Polyline.hpp"
-
-#include <ankerl/unordered_dense.h>
+#include "libslic3r/ClipperUtils.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/MultiPoint.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -468,6 +476,7 @@ bool remove_same_neighbor(Polygons &polygons)
     polygons.erase(std::remove_if(polygons.begin(), polygons.end(), [](const Polygon &p) { return p.points.size() <= 2; }), polygons.end());
     return exist;
 }
+
 static inline bool is_stick(const Point &p1, const Point &p2, const Point &p3)
 {
     Point v1 = p2 - p1;

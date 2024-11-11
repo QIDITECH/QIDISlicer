@@ -1,16 +1,16 @@
 #include "GCodeReader.hpp"
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/nowide/fstream.hpp>
+
 #include <boost/nowide/cstdio.hpp>
-#include <fstream>
+#include <fast_float.h>
 #include <iostream>
 #include <iomanip>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+
 #include "Utils.hpp"
-
-#include "LocalesUtils.hpp"
-
-#include <fast_float/fast_float.h>
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -127,6 +127,10 @@ bool GCodeReader::parse_file_raw_internal(const std::string &filename, ParseLine
 {
     FilePtr in{ boost::nowide::fopen(filename.c_str(), "rb") };
 
+    fseek(in.f, 0, SEEK_END);
+    const long file_size = ftell(in.f);
+    rewind(in.f);
+
     // Read the input stream 64kB at a time, extract lines and process them.
     std::vector<char> buffer(65536 * 10, 0);
     // Line buffer.
@@ -137,6 +141,7 @@ bool GCodeReader::parse_file_raw_internal(const std::string &filename, ParseLine
         size_t cnt_read = ::fread(buffer.data(), 1, buffer.size(), in.f);
         if (::ferror(in.f))
             return false;
+
         bool eof       = cnt_read == 0;
         auto it        = buffer.begin();
         auto it_bufend = buffer.begin() + cnt_read;
@@ -174,6 +179,8 @@ bool GCodeReader::parse_file_raw_internal(const std::string &filename, ParseLine
         if (eof)
             break;
         file_pos += cnt_read;
+        if (m_progress_callback != nullptr)
+            m_progress_callback(static_cast<float>(file_pos) / static_cast<float>(file_size));
     }
     return true;
 }
@@ -237,7 +244,7 @@ bool GCodeReader::GCodeLine::has(char axis) const
 }
 
 std::string_view GCodeReader::GCodeLine::axis_pos(char axis) const
-{
+{ 
     const std::string &s = this->raw();
     const char *c = GCodeReader::axis_pos(this->raw().c_str(), axis);
     return c ? std::string_view{ c, s.size() - (c - s.data()) } : std::string_view();
@@ -246,15 +253,15 @@ std::string_view GCodeReader::GCodeLine::axis_pos(char axis) const
 bool GCodeReader::GCodeLine::has_value(std::string_view axis_pos, float &value)
 {
     if (const char *c = axis_pos.data(); c) {
-    // Try to parse the numeric value.
-    double v = 0.;
+        // Try to parse the numeric value.
+        double v = 0.;
         const char *end = axis_pos.data() + axis_pos.size();
-    auto [pend, ec] = fast_float::from_chars(++c, end, v);
-    if (pend != c && is_end_of_word(*pend)) {
-        // The axis value has been parsed correctly.
-        value = float(v);
-        return true;
-    }
+        auto [pend, ec] = fast_float::from_chars(++ c, end, v);
+        if (pend != c && is_end_of_word(*pend)) {
+            // The axis value has been parsed correctly.
+            value = float(v);
+            return true;
+        }
     }
     return false;
 }
@@ -268,14 +275,14 @@ bool GCodeReader::GCodeLine::has_value(char axis, float &value) const
 bool GCodeReader::GCodeLine::has_value(std::string_view axis_pos, int &value)
 {
     if (const char *c = axis_pos.data(); c) {
-    // Try to parse the numeric value.
-    char   *pend = nullptr;
-    long    v = strtol(++ c, &pend, 10);
-    if (pend != nullptr && is_end_of_word(*pend)) {
-        // The axis value has been parsed correctly.
-        value = int(v);
-        return true;
-    }
+        // Try to parse the numeric value.
+        char   *pend = nullptr;
+        long    v = strtol(++ c, &pend, 10);
+        if (pend != nullptr && is_end_of_word(*pend)) {
+            // The axis value has been parsed correctly.
+            value = int(v);
+            return true;
+        }
     }
     return false;
 }
@@ -284,6 +291,7 @@ bool GCodeReader::GCodeLine::has_value(char axis, int &value) const
 {
     return this->has_value(this->axis_pos(axis), value);
 }
+
 void GCodeReader::GCodeLine::set(const GCodeReader &reader, const Axis axis, const float new_value, const int decimal_digits)
 {
     std::ostringstream ss;

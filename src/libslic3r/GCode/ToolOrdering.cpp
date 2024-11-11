@@ -1,6 +1,13 @@
-#include "Print.hpp"
-#include "ToolOrdering.hpp"
-#include "Layer.hpp"
+#include "libslic3r/Print.hpp"
+#include "libslic3r/Layer.hpp"
+#include "libslic3r/GCode/ToolOrdering.hpp"
+#include "libslic3r/CustomGCode.hpp"
+#include "libslic3r/ExtrusionEntity.hpp"
+#include "libslic3r/ExtrusionEntityCollection.hpp"
+#include "libslic3r/ExtrusionRole.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/Model.hpp"
+#include "tcbspan/span.hpp"
 
 // #define SLIC3R_DEBUG
 
@@ -11,12 +18,12 @@
     #undef NDEBUG
 #endif
 
+#include <boost/log/trivial.hpp>
+#include <libslic3r/libslic3r.h>
 #include <cassert>
 #include <limits>
-
-#include <boost/log/trivial.hpp>
-
-#include <libslic3r.h>
+#include <cmath>
+#include <cstring>
 
 namespace Slic3r {
 
@@ -247,6 +254,7 @@ void ToolOrdering::collect_extruders(
     unsigned int extruder_override = 0;
 
     std::vector<std::pair<double, unsigned int>>::const_iterator it_per_layer_color_changes = per_layer_color_changes.begin();
+
     // Collect the object extruders.
     for (auto layer : object.layers()) {
         LayerTools &layer_tools = this->tools_for_layer(layer->print_z);
@@ -266,6 +274,7 @@ void ToolOrdering::collect_extruders(
                 layer_tools.extruders.emplace_back(it_per_layer_color_changes->second);
             }
         }
+
         // What extruders are required to print this object layer?
         for (const LayerRegion *layerm : layer->regions()) {
             const PrintRegion &region = layerm->region();
@@ -499,6 +508,7 @@ bool ToolOrdering::insert_wipe_tower_extruder()
 {
     if (!m_print_config_ptr->wipe_tower)
         return false;
+
     // In case that wipe_tower_extruder is set to non-zero, we must make sure that the extruder will be in the list.
     bool changed = false;
     if (m_print_config_ptr->wipe_tower_extruder != 0) {
@@ -856,6 +866,7 @@ void WipingExtrusions::ensure_perimeters_infills_order(const Print& print, const
     }
 }
 
+
 int ToolOrdering::toolchanges_count() const
 {
     std::vector<unsigned int> tools_in_order;
@@ -870,4 +881,5 @@ int ToolOrdering::toolchanges_count() const
         tools_in_order.pop_back();
     return std::max(0, int(tools_in_order.size())-1); // 5 tools = 4 toolchanges
 }
+
 } // namespace Slic3r

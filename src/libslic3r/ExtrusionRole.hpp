@@ -90,6 +90,8 @@ struct ExtrusionRole : public ExtrusionRoleModifiers
     bool is_support_base() const { return this->is_support() && ! this->is_external(); }
     bool is_support_interface() const { return this->is_support() && this->is_external(); }
     bool is_mixed() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Mixed); }
+
+    // Brim is currently marked as skirt.
     bool is_skirt() const { return this->ExtrusionRoleModifiers::has(ExtrusionRoleModifier::Skirt); }
 };
 

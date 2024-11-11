@@ -1,14 +1,18 @@
 #ifndef slic3r_GCode_Wipe_hpp_
 #define slic3r_GCode_Wipe_hpp_
 
-#include "SmoothPath.hpp"
+#include <math.h>
+#include <cassert>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+#include <cmath>
 
+#include "SmoothPath.hpp"
 #include "../Geometry/ArcWelder.hpp"
 #include "../Point.hpp"
 #include "../PrintConfig.hpp"
-
-#include <cassert>
-#include <optional>
 
 namespace Slic3r {
 
@@ -49,7 +53,7 @@ public:
 
     // Reduce feedrate a bit; travel speed is often too high to move on existing material.
     // Too fast = ripping of existing material; too slow = short wipe path, thus more blob.
-    static double calc_wipe_speed(const GCodeConfig &config) { return config.travel_speed.value * 0.8; }
+    static double   calc_wipe_speed(const GCodeConfig &config) { return config.travel_speed.value * 0.8; }
     // Reduce retraction length a bit to avoid effective retraction speed to be greater than the configured one
     // due to rounding (TODO: test and/or better math for this).
     static double   calc_xy_to_e_ratio(const GCodeConfig &config, unsigned int extruder_id) 

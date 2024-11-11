@@ -2,14 +2,19 @@
 #ifndef BEDS_HPP
 #define BEDS_HPP
 
-#include <numeric>
-
 #include <libslic3r/Point.hpp>
 #include <libslic3r/ExPolygon.hpp>
 #include <libslic3r/BoundingBox.hpp>
 #include <libslic3r/ClipperUtils.hpp>
-
 #include <boost/variant.hpp>
+#include <boost/variant/variant.hpp>
+#include <numeric>
+#include <cmath>
+#include <limits>
+#include <type_traits>
+
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r { namespace arr2 {
 
@@ -186,6 +191,7 @@ template<> struct IsRectangular_<RectangleBed>: public std::true_type {};
 template<> struct IsRectangular_<BoundingBox>: public std::true_type {};
 
 template<class Bed> static constexpr bool IsRectangular = IsRectangular_<Bed>::value;
+
 } // namespace arr2
 
 inline BoundingBox &bounding_box(BoundingBox &bb) { return bb; }

@@ -1,16 +1,29 @@
 #ifndef slic3r_Emboss_hpp_
 #define slic3r_Emboss_hpp_
 
+#include <admesh/stl.h> // indexed_triangle_set
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <vector>
 #include <set>
 #include <optional>
 #include <memory>
-#include <admesh/stl.h> // indexed_triangle_set
+#include <Eigen/Geometry>
+#include <functional>
+#include <map>
+#include <string>
+#include <utility>
+#include <cassert>
+#include <cinttypes>
+#include <cstddef>
+
 #include "Polygon.hpp"
 #include "ExPolygon.hpp"
 #include "EmbossShape.hpp" // ExPolygonsWithIds
 #include "BoundingBox.hpp"
 #include "TextConfiguration.hpp"
+#include "libslic3r/Point.hpp"
 
 namespace Slic3r {
 
@@ -20,8 +33,6 @@ namespace Slic3r {
 /// </summary>
 namespace Emboss
 {    
-    // every glyph's shape point is divided by SHAPE_SCALE - increase precission of fixed point value
-    // stored in fonts (to be able represents curve by sequence of lines)
     static const float UNION_DELTA = 50.0f; // [approx in nano meters depends on volume scale]
     static const unsigned UNION_MAX_ITERATIN = 10; // [count]
 
@@ -167,8 +178,9 @@ namespace Emboss
     /// Fix duplicit points and self intersections in polygons.
     /// Also try to reduce amount of points and remove useless polygon parts
     /// </summary>
-    /// <param name="precision">Define wanted precision of shape after heal</param>
-    /// <returns>Healed shapes</returns>
+    /// <param name="is_non_zero">Fill type ClipperLib::pftNonZero for overlapping otherwise </param>
+    /// <param name="max_iteration">Look at heal_expolygon()::max_iteration</param>
+    /// <returns>Healed shapes with flag is fully healed</returns>
     HealedExPolygons heal_polygons(const Polygons &shape, bool is_non_zero = true, unsigned max_iteration = 10);
 
     /// <summary>
@@ -199,8 +211,8 @@ namespace Emboss
     /// <summary>
     /// Use data from font property to modify transformation
     /// </summary>
-    /// <param name="font_prop">Z-move as surface distance(FontProp::distance)
-    /// Z-rotation as angle to Y axis(FontProp::angle)</param>
+    /// <param name="angle">Z-rotation as angle to Y axis</param>
+    /// <param name="distance">Z-move as surface distance</param>
     /// <param name="transformation">In / Out transformation to modify by property</param>
     void apply_transformation(const std::optional<float> &angle, const std::optional<float> &distance, Transform3d &transformation);
 
@@ -244,7 +256,7 @@ namespace Emboss
     /// </summary>
     /// <param name="font">Infos for collections</param>
     /// <param name="prop">Collection index + Additional line gap</param>
-    /// <returns>Line height with spacing in ExPolygon size</returns>
+    /// <returns>Line height with spacing in scaled font points (same as ExPolygons)</returns>
     int get_line_height(const FontFile &font, const FontProp &prop);
 
     /// <summary>
@@ -279,8 +291,6 @@ namespace Emboss
     class IProjection : public IProject3d
     {
     public:
-        virtual ~IProjection() = default;
-
         /// <summary>
         /// convert 2d point to 3d points
         /// </summary>
@@ -458,9 +468,16 @@ namespace Emboss
     /// <param name="polygon">Polygon know neighbor of point</param>
     /// <returns>angle(atan2) of normal in polygon point</returns>
     double calculate_angle(int32_t distance, PolygonPoint polygon_point, const Polygon &polygon);
-    std::vector<double> calculate_angles(int32_t distance, const PolygonPoints& polygon_points, const Polygon &polygon);
+    std::vector<double> calculate_angles(
+        const BoundingBoxes &glyph_sizes,
+        const PolygonPoints &polygon_points,
+        const Polygon &polygon
+    );
 
 } // namespace Emboss
+
+///////////////////////
+// Move to ExPolygonsWithIds Utils
 void translate(ExPolygonsWithIds &e, const Point &p);
 BoundingBox get_extents(const ExPolygonsWithIds &e);
 void center(ExPolygonsWithIds &e);

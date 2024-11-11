@@ -1,9 +1,11 @@
 #include "Point.hpp"
-#include "Line.hpp"
-#include "MultiPoint.hpp"
+
+#include <algorithm>
+#include <cstring>
+
 #include "Int128.hpp"
 #include "BoundingBox.hpp"
-#include <algorithm>
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -48,8 +50,8 @@ Pointf3s transform(const Pointf3s& points, const Transform3d& t)
 void Point::rotate(double angle, const Point &center)
 {
     Vec2d  cur = this->cast<double>();
-    double s     = ::sin(angle);
-    double c     = ::cos(angle);
+    double s   = ::sin(angle);
+    double c   = ::cos(angle);
     auto   d   = cur - center.cast<double>();
     this->x() = fast_round_up<coord_t>(center.x() + c * d.x() - s * d.y());
     this->y() = fast_round_up<coord_t>(center.y() + s * d.x() + c * d.y());

@@ -156,7 +156,6 @@ struct PathsPointIndexLocator
     }
 };
 
-
 }//namespace Slic3r::Arachne
 
 namespace std

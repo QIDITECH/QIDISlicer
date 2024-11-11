@@ -4,7 +4,7 @@
 
 #include "FillBedTask.hpp"
 
-#include "Arrange/Core/NFP/NFPArrangeItemTraits.hpp"
+#include "libslic3r/Arrange/Core/NFP/NFPArrangeItemTraits.hpp"
 
 #include <boost/log/trivial.hpp>
 
@@ -71,8 +71,7 @@ void extract(FillBedTask<ArrItem> &task,
 
     // Workaround for missing items when arranging the same geometry only:
     // Injecting a number of items but with slightly shrinked shape, so that
-    // they can fill the emerging holes. Priority is set to lowest so that
-    // these filler items will only be inserted as the last ones.
+    // they can fill the emerging holes.
     ArrItem prototype_item_shrinked;
     scene.model().visit_arrangeable(selected_ids.front(),
         [&prototype_item_shrinked, &itm_conv](const Arrangeable &arrbl) {
@@ -100,8 +99,6 @@ void extract(FillBedTask<ArrItem> &task,
                 << "ObjectID " << std::to_string(arrbl.id().id) << ": " << ex.what();
         }
     };
-
-    // Set the lowest priority to the shrinked prototype (hole filler) item
 
     scene.model().for_each_arrangeable(collect_task_items);
 
@@ -185,6 +182,7 @@ std::unique_ptr<FillBedTaskResult> FillBedTask<ArrItem>::process_native(
     }
 
     arranger->arrange(selected_fillers, unsel_cpy, bed, FillBedCtl{ctl, *this});
+
     auto arranged_range = Range{selected.begin(),
                                 selected.begin() + selected_existing_count};
 
@@ -200,6 +198,7 @@ std::unique_ptr<FillBedTaskResult> FillBedTask<ArrItem>::process_native(
     for (auto &itm : selected_fillers)
         if (get_bed_index(itm) == PhysicalBedId)
             result->add_new_item(itm);
+
     return result;
 }
 

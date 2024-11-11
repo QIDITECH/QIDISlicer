@@ -1,11 +1,26 @@
-#include "../GCode.hpp"
-#include "CoolingBuffer.hpp"
-#include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/log/trivial.hpp>
-#include <iostream>
-#include <float.h>
+#include <algorithm>
+#include <charconv>
+#include <cmath>
+#include <iterator>
+#include <string_view>
+#include <system_error>
+#include <utility>
+#include <cassert>
+#include <cfloat>
+#include <cinttypes>
+#include <cstdio>
+#include <cstring>
+
+#include "../GCode.hpp"
+#include "libslic3r/GCode/CoolingBuffer.hpp"
+#include "libslic3r/Extruder.hpp"
+#include "libslic3r/GCode/GCodeWriter.hpp"
+#include "libslic3r/Geometry/ArcWelder.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/libslic3r.h"
 
 #if 0
     #define DEBUG
@@ -13,9 +28,7 @@
     #undef NDEBUG
 #endif
 
-#include <assert.h>
-
-#include <fast_float/fast_float.h>
+#include <fast_float.h>
 
 namespace Slic3r {
 
@@ -71,6 +84,7 @@ struct CoolingLine
         TYPE_ADJUSTABLE_EMPTY   = 1 << 16,
         // Custom fan speed (introduced for overhang fan speed)
         TYPE_SET_FAN_SPEED      = 1 << 17,
+        // Reset fan speed back to speed calculate by the CoolingBuffer.
         TYPE_RESET_FAN_SPEED    = 1 << 18,
     };
 
@@ -277,12 +291,14 @@ float new_feedrate_to_reach_time_stretch(
             }
         }
         assert(denom > 0);
-        if (denom <= 0)
+        if (nomin <= 0 || denom <= EPSILON)
             return min_feedrate;
+
         new_feedrate = nomin / denom;
         assert(new_feedrate > min_feedrate - EPSILON);
         if (new_feedrate < min_feedrate + EPSILON)
             goto finished;
+
         for (auto it = it_begin; it != it_end; ++ it)
 			for (size_t i = 0; i < (*it)->n_lines_adjustable; ++i) {
 				const CoolingLine &line = (*it)->lines[i];
@@ -433,7 +449,7 @@ std::vector<PerExtruderAdjustments> CoolingBuffer::parse_layer_gcode(const std::
             if (adjustment->dont_slow_down_outer_wall && external_perimeter)
                 adjust_external = false;
 
-            if (boost::contains(sline, ";_EXTRUDE_SET_SPEED") && ! wipe && adjust_external) {
+            if (boost::contains(sline, ";_EXTRUDE_SET_SPEED") && ! wipe) {
                 line.type |= CoolingLine::TYPE_ADJUSTABLE;
                 active_speed_modifier = adjustment->lines.size();
             }
@@ -556,19 +572,20 @@ std::vector<PerExtruderAdjustments> CoolingBuffer::parse_layer_gcode(const std::
                     fast_float::from_chars(sline.data() + (has_S ? pos_S : pos_P) + 1, sline.data() + sline.size(), line.time);
                 if (has_P)
                     line.time *= 0.001f;
-            } else
+            } else {
                 line.time = 0;
-            line.time_max = line.time;
-        }
+            }
 
-        if (boost::contains(sline, ";_SET_FAN_SPEED")) {
+            line.time_max = line.time;
+        } else if (boost::contains(sline, ";_SET_FAN_SPEED")) {
             auto speed_start = sline.find_last_of('D');
             int  speed       = 0;
             for (char num : sline.substr(speed_start + 1)) {
                 speed = speed * 10 + (num - '0');
             }
-            line.type |= CoolingLine::TYPE_SET_FAN_SPEED;
+
             line.fan_speed = speed;
+            line.type |= CoolingLine::TYPE_SET_FAN_SPEED;
         } else if (boost::contains(sline, ";_RESET_FAN_SPEED")) {
             line.type |= CoolingLine::TYPE_RESET_FAN_SPEED;
         }
@@ -805,9 +822,9 @@ std::string CoolingBuffer::apply_layer_cooldown(
     new_gcode.reserve(gcode.size() * 2);
     bool bridge_fan_control = false;
     int  bridge_fan_speed   = 0;
-    auto change_extruder_set_fan = [this, layer_id, layer_time, &new_gcode, &bridge_fan_control, &bridge_fan_speed]() {
+    auto change_extruder_set_fan = [this, layer_id, layer_time, &new_gcode, &bridge_fan_control, &bridge_fan_speed](const int requested_fan_speed = -1) {
 #define EXTRUDER_CONFIG(OPT) m_config.OPT.get_at(m_current_extruder)
-        int min_fan_speed = EXTRUDER_CONFIG(min_fan_speed);
+        const int min_fan_speed            = EXTRUDER_CONFIG(min_fan_speed);
         //B15//Y26
         int enable_auxiliary_fan;
         if (m_config.opt_bool("seal_print"))
@@ -853,6 +870,7 @@ std::string CoolingBuffer::apply_layer_cooldown(
                 bridge_fan_speed = std::clamp(int(float(bridge_fan_speed) * factor + 0.5f), 0, 100);
                 custom_fan_speed_limits.second = fan_speed_new;
             }
+
 #undef EXTRUDER_CONFIG
             bridge_fan_control = bridge_fan_speed > fan_speed_new;
         } else { // fan disabled

@@ -1,13 +1,21 @@
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Surface_sweep_2_algorithms.h>
+#include <boost/variant/get.hpp>
+#include <vector>
+#include <cassert>
 
 #include "libslic3r/Geometry/Voronoi.hpp"
 #include "libslic3r/Geometry/VoronoiUtils.hpp"
 #include "libslic3r/Arachne/utils/PolygonsSegmentIndex.hpp"
 #include "libslic3r/MultiMaterialSegmentation.hpp"
-
 #include "VoronoiUtilsCgal.hpp"
+#include "libslic3r/Line.hpp"
+#include "libslic3r/Point.hpp"
+
+namespace CGAL {
+class MP_Float;
+}  // namespace CGAL
 
 using VD = Slic3r::Geometry::VoronoiDiagram;
 
@@ -22,6 +30,7 @@ template bool VoronoiUtilsCgal::is_voronoi_diagram_planar_angle(const VD &, Line
 template bool VoronoiUtilsCgal::is_voronoi_diagram_planar_angle(const VD &, VD::SegmentIt, VD::SegmentIt);
 template bool VoronoiUtilsCgal::is_voronoi_diagram_planar_angle(const VD &, ColoredLinesConstIt, ColoredLinesConstIt);
 template bool VoronoiUtilsCgal::is_voronoi_diagram_planar_angle(const VD &, PolygonsSegmentIndexConstIt, PolygonsSegmentIndexConstIt);
+
 // The tangent vector of the parabola is computed based on the Proof of the reflective property.
 // https://en.wikipedia.org/wiki/Parabola#Proof_of_the_reflective_property
 // https://math.stackexchange.com/q/2439647/2439663#comment5039739_2439663
@@ -199,9 +208,10 @@ get_parabolic_segment(const VD::edge_type &edge, const SegmentIterator segment_b
 
     const Point       focus_pt   = VoronoiUtils::get_source_point(*(left_cell->contains_point() ? left_cell : right_cell), segment_begin, segment_end);
     const Segment    &directrix  = VoronoiUtils::get_source_segment(*(left_cell->contains_point() ? right_cell : left_cell), segment_begin, segment_end);
-    CGAL::Orientation            focus_side = CGAL::opposite(CGAL::orientation(to_cgal_point(edge.vertex0()), to_cgal_point(edge.vertex1()), to_cgal_point(focus_pt)));
+    CGAL::Orientation focus_side = CGAL::opposite(CGAL::orientation(to_cgal_point(edge.vertex0()), to_cgal_point(edge.vertex1()), to_cgal_point(focus_pt)));
 
     assert(focus_side == CGAL::Orientation::LEFT_TURN || focus_side == CGAL::Orientation::RIGHT_TURN);
+
     const Point directrix_from = boost::polygon::segment_traits<Segment>::get(directrix, boost::polygon::LOW);
     const Point directrix_to   = boost::polygon::segment_traits<Segment>::get(directrix, boost::polygon::HIGH);
     return {focus_pt, Line(directrix_from, directrix_to), make_linef(edge), focus_side};

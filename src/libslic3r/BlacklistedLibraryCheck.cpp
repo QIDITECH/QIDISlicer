@@ -1,8 +1,5 @@
 #include "BlacklistedLibraryCheck.hpp"
 
-#include <cstdio>
-#include <boost/nowide/convert.hpp>
-
 #ifdef  WIN32
 #include <psapi.h>
 # endif //WIN32

@@ -1,6 +1,9 @@
 #ifndef slic3r_VoronoiUtilsCgal_hpp_
 #define slic3r_VoronoiUtilsCgal_hpp_
 
+#include <boost/polygon/polygon.hpp>
+#include <iterator>
+
 #include "Voronoi.hpp"
 #include "../Arachne/utils/PolygonsSegmentIndex.hpp"
 
@@ -20,7 +23,6 @@ public:
             typename boost::polygon::geometry_concept<typename std::iterator_traits<SegmentIterator>::value_type>::type>::type>::type,
         bool>::type
     is_voronoi_diagram_planar_angle(const VoronoiDiagram &voronoi_diagram, SegmentIterator segment_begin, SegmentIterator segment_end);
-
 };
 } // namespace Slic3r::Geometry
 

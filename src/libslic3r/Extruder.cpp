@@ -1,6 +1,13 @@
 #include "Extruder.hpp"
-#include "GCode/GCodeWriter.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+
+#include "libslic3r/GCode/GCodeWriter.hpp"
 #include "PrintConfig.hpp"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -131,7 +138,6 @@ double Extruder::retract_length() const
 {
     return m_config->retract_length.get_at(m_id);
 }
-
 
 int Extruder::retract_speed() const
 {

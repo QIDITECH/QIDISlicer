@@ -1,10 +1,15 @@
 #ifndef slic3r_GCode_WipeTower_hpp_
 #define slic3r_GCode_WipeTower_hpp_
+
+#include <stddef.h>
 #include <cmath>
 #include <string>
 #include <sstream>
 #include <utility>
 #include <algorithm>
+#include <limits>
+#include <vector>
+#include <cstddef>
 
 #include "libslic3r/Point.hpp"
 
@@ -14,6 +19,7 @@ namespace Slic3r
 class WipeTowerWriter;
 class PrintConfig;
 class PrintRegionConfig;
+
 enum GCodeFlavor : unsigned char;
 
 
@@ -231,8 +237,10 @@ public:
         float               unloading_speed = 0.f;
         float               unloading_speed_start = 0.f;
         float               delay = 0.f ;
+
 		float               filament_stamping_loading_speed = 0.f;
 		float               filament_stamping_distance = 0.f;
+
         int                 cooling_moves = 0;
         float               cooling_initial_speed = 0.f;
         float               cooling_final_speed = 0.f;
@@ -312,6 +320,7 @@ private:
 	// State of the wipe tower generator.
 	unsigned int m_num_layer_changes = 0; // Layer change counter for the output statistics.
 	unsigned int m_num_tool_changes  = 0; // Tool change change counter for the output statistics.
+
 	// A fill-in direction (positive Y, negative Y) alternates with each layer.
 	wipe_shape   	m_current_shape = SHAPE_NORMAL;
     size_t 	m_current_tool  = 0;
@@ -337,7 +346,6 @@ private:
 
 	// Calculates depth for all layers and propagates them downwards
 	void plan_tower();
-
 
     // Goes through m_plan, calculates border and finish_layer extrusions and subtracts them from last wipe
     void save_on_last_wipe();

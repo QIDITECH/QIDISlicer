@@ -1,3 +1,15 @@
+#include <boost/log/trivial.hpp>
+#include <oneapi/tbb/blocked_range.h>
+#include <oneapi/tbb/parallel_for.h>
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+#include <cassert>
+#include <cstddef>
+
 #include "ClipperUtils.hpp"
 #include "ElephantFootCompensation.hpp"
 #include "I18N.hpp"
@@ -5,10 +17,25 @@
 #include "MultiMaterialSegmentation.hpp"
 #include "Print.hpp"
 #include "ShortestPath.hpp"
-
-#include <boost/log/trivial.hpp>
-
-#include <tbb/parallel_for.h>
+#include "admesh/stl.h"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/Flow.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/Model.hpp"
+#include "libslic3r/ObjectID.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/PrintBase.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "libslic3r/Slicing.hpp"
+#include "libslic3r/Surface.hpp"
+#include "libslic3r/TriangleMesh.hpp"
+#include "libslic3r/TriangleMeshSlicer.hpp"
+#include "libslic3r/Utils.hpp"
+#include "libslic3r/libslic3r.h"
+#include "tcbspan/span.hpp"
 
 
 namespace Slic3r {
@@ -234,7 +261,6 @@ static std::vector<PrintObjectRegions::LayerRangeRegions>::const_iterator layer_
 }
 
 static std::vector<std::vector<ExPolygons>> slices_to_regions(
-    const PrintConfig                                        &print_config,
     ModelVolumePtrs                                           model_volumes,
     const PrintObjectRegions                                 &print_object_regions,
     const std::vector<float>                                 &zs,
@@ -715,7 +741,7 @@ void PrintObject::slice_volumes()
     }
 
     std::vector<float>                   slice_zs      = zs_from_layers(m_layers);
-    std::vector<std::vector<ExPolygons>> region_slices = slices_to_regions(print->config(), this->model_object()->volumes, *m_shared_regions, slice_zs,
+    std::vector<std::vector<ExPolygons>> region_slices = slices_to_regions(this->model_object()->volumes, *m_shared_regions, slice_zs,
         slice_volumes_inner(
             print->config(), this->config(), this->trafo_centered(),
             this->model_object()->volumes, m_shared_regions->layer_ranges, slice_zs, throw_on_cancel_callback),
@@ -760,6 +786,7 @@ void PrintObject::slice_volumes()
         BOOST_LOG_TRIVIAL(debug) << "Slicing volumes - MMU segmentation";
         apply_mm_segmentation(*this, [print]() { print->throw_if_canceled(); });
     }
+
 
     BOOST_LOG_TRIVIAL(debug) << "Slicing volumes - make_slices in parallel - begin";
     {

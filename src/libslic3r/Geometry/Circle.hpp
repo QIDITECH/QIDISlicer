@@ -1,9 +1,20 @@
 #ifndef slic3r_Geometry_Circle_hpp_
 #define slic3r_Geometry_Circle_hpp_
 
-#include "../Point.hpp"
-
+#include <assert.h>
+#include <stddef.h>
 #include <Eigen/Geometry>
+#include <cmath>
+#include <iterator>
+#include <optional>
+#include <type_traits>
+#include <cassert>
+#include <complex>
+#include <cstddef>
+
+#include "../Point.hpp"
+#include "libslic3r/libslic3r.h"
+#include "libslic3r/Point.hpp"
 
 namespace Slic3r { namespace Geometry {
 
@@ -62,6 +73,7 @@ std::optional<Eigen::Matrix<typename Derived::Scalar, 2, 1, Eigen::DontAlign>> t
         return std::make_optional<Vector>(a + Vector(- v.y(), v.x()) / (2 * d));
     }
 }
+
 // 2D circle defined by its center and squared radius
 template<typename Vector>
 struct CircleSq {
@@ -147,6 +159,7 @@ Circled circle_ransac(const Vec2ds& input, size_t iterations = 20, double* min_e
     Circled circle_linear_least_squares_qr(const Vec2ds &input);
     // Linear Least squares fitting solving normal equations. Low accuracy, high speed.
     Circled circle_linear_least_squares_normal(const Vec2ds &input);
+
 // Randomized algorithm by Emo Welzl, working with squared radii for efficiency. The returned circle radius is inflated by epsilon.
 template<typename Vector, typename Points>
 CircleSq<Vector> smallest_enclosing_circle2_welzl(const Points &points, const typename Vector::Scalar epsilon)

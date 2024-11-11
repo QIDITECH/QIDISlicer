@@ -2,6 +2,10 @@
 
 #include <libslic3r/AABBTreeLines.hpp>
 
+#include "libslic3r/AABBTreeIndirect.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Exception.hpp"
+
 //NOTE: using CGAL SweepLines is slower !!! (example in git history)
 
 namespace {    
@@ -14,7 +18,7 @@ IntersectionsLines compute_intersections(const Lines &lines)
     auto tree = AABBTreeLines::build_aabb_tree_over_indexed_lines(lines);
     IntersectionsLines result;
     for (uint32_t li = 0; li < lines.size()-1; ++li) {
-        const Line  &l = lines[li];
+        const Line &l = lines[li];
         auto intersections = AABBTreeLines::get_intersections_with_line<false, Point, Line>(lines, tree, l);
         for (const auto &[p, node_index] : intersections) {
             if (node_index - 1 <= li)
@@ -31,10 +35,8 @@ IntersectionsLines compute_intersections(const Lines &lines)
             Vec2d intersection_point = p.cast<double>();
 
             result.push_back(IntersectionLines{li, static_cast<uint32_t>(node_index), intersection_point});
-}
-
-}
-
+        }
+    }
     return result;
 }
 } // namespace
@@ -46,5 +48,3 @@ IntersectionsLines get_intersections(const Polygons &polygons)     { return comp
 IntersectionsLines get_intersections(const ExPolygon &expolygon)   { return compute_intersections(to_lines(expolygon)); }
 IntersectionsLines get_intersections(const ExPolygons &expolygons) { return compute_intersections(to_lines(expolygons)); }
 }
-
-

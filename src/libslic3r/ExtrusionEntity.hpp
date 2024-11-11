@@ -1,20 +1,30 @@
 #ifndef slic3r_ExtrusionEntity_hpp_
 #define slic3r_ExtrusionEntity_hpp_
 
+#include <assert.h>
+#include <stddef.h>
+#include <optional>
+#include <string_view>
+#include <numeric>
+#include <cmath>
+#include <limits>
+#include <utility>
+#include <vector>
+#include <cassert>
+#include <cstddef>
+
 #include "libslic3r.h"
 #include "ExtrusionRole.hpp"
 #include "Flow.hpp"
 #include "Polygon.hpp"
 #include "Polyline.hpp"
-
-#include <assert.h>
-#include <optional>
-#include <string_view>
-#include <numeric>
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Point.hpp"
 
 namespace Slic3r {
 
 class ExPolygon;
+
 using ExPolygons = std::vector<ExPolygon>;
 class ExtrusionEntityCollection;
 class Extruder;
@@ -59,6 +69,7 @@ public:
 
 using ExtrusionEntitiesPtr = std::vector<ExtrusionEntity*>;
 
+// Const reference for ordering extrusion entities without having to modify them.
 class ExtrusionEntityReference final
 {
 public:
@@ -107,25 +118,42 @@ struct OverhangAttributes {
     float proximity_to_curled_lines; //value between 0 and 1
 };
 
+inline bool operator==(const OverhangAttributes &lhs, const OverhangAttributes &rhs) {
+    if (std::abs(lhs.start_distance_from_prev_layer - rhs.start_distance_from_prev_layer) > std::numeric_limits<float>::epsilon()) {
+        return false;
+    }
+    if (std::abs(lhs.end_distance_from_prev_layer - rhs.end_distance_from_prev_layer) > std::numeric_limits<float>::epsilon()) {
+        return false;
+    }
+    if (std::abs(lhs.proximity_to_curled_lines - rhs.proximity_to_curled_lines) > std::numeric_limits<float>::epsilon()) {
+        return false;
+    }
+    return true;
+}
+
 struct ExtrusionAttributes : ExtrusionFlow
 {
     ExtrusionAttributes() = default;
     ExtrusionAttributes(ExtrusionRole role) : role{ role } {}
     ExtrusionAttributes(ExtrusionRole role, const Flow &flow) : role{ role }, ExtrusionFlow{ flow } {}
     ExtrusionAttributes(ExtrusionRole role, const ExtrusionFlow &flow) : role{ role }, ExtrusionFlow{ flow } {}
+    ExtrusionAttributes(ExtrusionRole role, const ExtrusionFlow &flow, const bool maybe_self_crossing)
+        : role{role}, ExtrusionFlow{flow}, maybe_self_crossing(maybe_self_crossing) {}
 
     // What is the role / purpose of this extrusion?
     ExtrusionRole   role{ ExtrusionRole::None };
-    // Volumetric velocity. mm^3 of plastic per mm of linear head motion. Used by the G-code generator.
+    bool maybe_self_crossing{false};
+    // OVerhangAttributes are currently computed for perimeters if dynamic overhangs are enabled. 
+    // They are used to control fan and print speed in export.
     std::optional<OverhangAttributes> overhang_attributes;
 };
-    // Width of the extrusion, used for visualization purposes.
+
 inline bool operator==(const ExtrusionAttributes &lhs, const ExtrusionAttributes &rhs)
 {
     return static_cast<const ExtrusionFlow&>(lhs) == static_cast<const ExtrusionFlow&>(rhs) &&
-           lhs.role == rhs.role;
+           lhs.role == rhs.role && lhs.overhang_attributes == rhs.overhang_attributes;
 }
-    // Height of the extrusion, used for visualization purposes.
+
 class ExtrusionPath : public ExtrusionEntity
 {
 public:
@@ -160,6 +188,7 @@ public:
     void clip_end(double distance);
     void simplify(double tolerance);
     double length() const override;
+   
     const ExtrusionAttributes&  attributes() const { return m_attributes; }
     ExtrusionRole               role() const override { return m_attributes.role; }
     float                       width() const { return m_attributes.width; }
@@ -168,21 +197,22 @@ public:
     // Minimum volumetric velocity of this extrusion entity. Used by the constant nozzle pressure algorithm.
     double                      min_mm3_per_mm() const override { return m_attributes.mm3_per_mm; }
     std::optional<OverhangAttributes>& overhang_attributes_mutable() { return m_attributes.overhang_attributes; }
+
     // Produce a list of 2D polygons covered by the extruded paths, offsetted by the extrusion width.
     // Increase the offset by scaled_epsilon to achieve an overlap, so a union will produce no gaps.
-    void polygons_covered_by_width(Polygons &out, const float scaled_epsilon) const override;
+    void        polygons_covered_by_width(Polygons &out, const float scaled_epsilon) const override;
     // Produce a list of 2D polygons covered by the extruded paths, offsetted by the extrusion spacing.
     // Increase the offset by scaled_epsilon to achieve an overlap, so a union will produce no gaps.
     // Useful to calculate area of an infill, which has been really filled in by a 100% rectilinear infill.
-    void polygons_covered_by_spacing(Polygons &out, const float scaled_epsilon) const override;
-    Polygons polygons_covered_by_width(const float scaled_epsilon = 0.f) const
+    void        polygons_covered_by_spacing(Polygons &out, const float scaled_epsilon) const override;
+    Polygons    polygons_covered_by_width(const float scaled_epsilon = 0.f) const
         { Polygons out; this->polygons_covered_by_width(out, scaled_epsilon); return out; }
-    Polygons polygons_covered_by_spacing(const float scaled_epsilon = 0.f) const
+    Polygons    polygons_covered_by_spacing(const float scaled_epsilon = 0.f) const
         { Polygons out; this->polygons_covered_by_spacing(out, scaled_epsilon); return out; }
-    // Minimum volumetric velocity of this extrusion entity. Used by the constant nozzle pressure algorithm.
-    Polyline as_polyline() const override { return this->polyline; }
-    void   collect_polylines(Polylines &dst) const override { if (! this->polyline.empty()) dst.emplace_back(this->polyline); }
-    void   collect_points(Points &dst) const override { append(dst, this->polyline.points); }
+
+    Polyline    as_polyline() const override { return this->polyline; }
+    void        collect_polylines(Polylines &dst) const override { if (! this->polyline.empty()) dst.emplace_back(this->polyline); }
+    void        collect_points(Points &dst) const override { append(dst, this->polyline.points); }
     double      total_volume() const override { return m_attributes.mm3_per_mm * unscale<double>(length()); }
     //w21
     void     set_width(float set_val) { m_attributes.width = set_val; }
@@ -190,7 +220,7 @@ public:
     void        set_mm3_per_mm(float set_val) { m_attributes.mm3_per_mm = set_val; }
 
 private:
-    void _inflate_collection(const Polylines &polylines, ExtrusionEntityCollection* collection) const;
+    void        _inflate_collection(const Polylines &polylines, ExtrusionEntityCollection* collection) const;
 
     ExtrusionAttributes     m_attributes;
 };
@@ -201,6 +231,7 @@ public:
     ExtrusionPathOriented(const ExtrusionAttributes &attribs) : ExtrusionPath(attribs) {}
     ExtrusionPathOriented(const Polyline &polyline, const ExtrusionAttributes &attribs) : ExtrusionPath(polyline, attribs) {}
     ExtrusionPathOriented(Polyline &&polyline, const ExtrusionAttributes &attribs) : ExtrusionPath(std::move(polyline), attribs) {}
+
     ExtrusionEntity* clone() const override { return new ExtrusionPathOriented(*this); }
     // Create a new object, initialize it with this object using the move semantics.
     ExtrusionEntity* clone_move() override { return new ExtrusionPathOriented(std::move(*this)); }
@@ -266,7 +297,7 @@ class ExtrusionLoop : public ExtrusionEntity
 {
 public:
     ExtrusionPaths paths;
-    
+
     ExtrusionLoop() = default;
     ExtrusionLoop(ExtrusionLoopRole role) : m_loop_role(role) {}
     ExtrusionLoop(const ExtrusionPaths &paths, ExtrusionLoopRole role = elrDefault) : paths(paths), m_loop_role(role) {}
@@ -283,15 +314,18 @@ public:
     double          area() const;
     bool            is_counter_clockwise() const { return this->area() > 0; }
     bool            is_clockwise() const { return this->area() < 0; }
-    void reverse() override;
+    // Reverse shall never be called on ExtrusionLoop using a virtual function call, it is most likely never what one wants,
+    // as this->can_reverse() returns false for an ExtrusionLoop.
+    void            reverse() override;
+    // Used by PerimeterGenerator to reorient extrusion loops.
     void            reverse_loop();
-    const Point& first_point() const override { return this->paths.front().polyline.points.front(); }
-    const Point& last_point() const override { assert(this->first_point() == this->paths.back().polyline.points.back()); return this->first_point(); }
-    const Point& middle_point() const override { auto& path = this->paths[this->paths.size() / 2]; return path.polyline.points[path.polyline.size() / 2]; }
-    Polygon polygon() const;
-    double length() const override;
-    bool split_at_vertex(const Point &point, const double scaled_epsilon = scaled<double>(0.001));
-    void split_at(const Point &point, bool prefer_non_overhang, const double scaled_epsilon = scaled<double>(0.001));
+    const Point&    first_point() const override { return this->paths.front().polyline.points.front(); }
+    const Point&    last_point() const override { assert(this->first_point() == this->paths.back().polyline.points.back()); return this->first_point(); }
+    const Point&    middle_point() const override { auto& path = this->paths[this->paths.size() / 2]; return path.polyline.points[path.polyline.size() / 2]; }
+    Polygon         polygon() const;
+    double          length() const override;
+    bool            split_at_vertex(const Point &point, const double scaled_epsilon = scaled<double>(0.001));
+    void            split_at(const Point &point, bool prefer_non_overhang, const double scaled_epsilon = scaled<double>(0.001));
     struct ClosestPathPoint {
         size_t path_idx;
         size_t segment_idx;
@@ -378,8 +412,6 @@ inline void extrusion_entities_append_paths(ExtrusionEntitiesPtr &dst, Polylines
                 new ExtrusionPathOriented(std::move(polyline), attributes));
     polylines.clear();
 }
-
-
 
 inline void extrusion_entities_append_loops(ExtrusionEntitiesPtr &dst, Polygons &&loops, const ExtrusionAttributes &attributes)
 {

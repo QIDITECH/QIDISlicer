@@ -2,6 +2,8 @@
 #define slic3r_GCode_SmoothPath_hpp_
 
 #include <ankerl/unordered_dense.h>
+#include <optional>
+#include <vector>
 
 #include "../ExtrusionEntity.hpp"
 #include "../Geometry/ArcWelder.hpp"
@@ -9,6 +11,8 @@
 namespace Slic3r {
 
 class ExtrusionEntityCollection;
+class Point;
+class Polyline;
 
 namespace GCode {
 
@@ -34,6 +38,7 @@ std::optional<Point> sample_path_point_at_distance_from_end(const SmoothPath &pa
 double clip_end(SmoothPath &path, double distance, double min_point_distance_threshold);
 
 void reverse(SmoothPath &path);
+
 class SmoothPathCache
 {
 public:

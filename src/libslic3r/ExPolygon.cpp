@@ -1,16 +1,20 @@
+#include <ankerl/unordered_dense.h>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <limits>
+#include <cstring>
+
 #include "BoundingBox.hpp"
 #include "ExPolygon.hpp"
-#include "Exception.hpp"
 #include "Geometry/MedialAxis.hpp"
 #include "Polygon.hpp"
 #include "Line.hpp"
 #include "ClipperUtils.hpp"
-#include "SVG.hpp"
-#include <algorithm>
-#include <cassert>
-#include <list>
-
-#include <ankerl/unordered_dense.h>
+#include "libslic3r/MultiPoint.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polyline.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -474,6 +478,7 @@ bool remove_same_neighbor(ExPolygons &expolygons)
                          expolygons.end());
     return remove_from_holes || remove_from_contour;
 }
+
 bool remove_sticks(ExPolygon &poly)
 {
     return remove_sticks(poly.contour) || remove_sticks(poly.holes);

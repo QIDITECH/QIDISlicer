@@ -1,6 +1,11 @@
 
 #include "EdgeCache.hpp"
+
+#include <iterator>
+
 #include "CircularEdgeIterator.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Line.hpp"
 
 namespace Slic3r { namespace arr2 {
 

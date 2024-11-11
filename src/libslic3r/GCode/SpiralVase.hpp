@@ -1,8 +1,14 @@
 #ifndef slic3r_SpiralVase_hpp_
 #define slic3r_SpiralVase_hpp_
 
-#include "../libslic3r.h"
-#include "../GCodeReader.hpp"
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "libslic3r/libslic3r.h"
+#include "libslic3r/GCodeReader.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/PrintConfig.hpp"
 
 namespace Slic3r {
 
@@ -13,8 +19,9 @@ public:
 
     explicit SpiralVase(const PrintConfig &config) : m_config(config)
     {
-        m_reader.z() = (float)m_config.z_offset;
+        m_reader.z() = (float) m_config.z_offset;
         m_reader.apply_config(m_config);
+
         const double max_nozzle_diameter = *std::max_element(config.nozzle_diameter.values.begin(), config.nozzle_diameter.values.end());
         m_max_xy_smoothing               = float(2. * max_nozzle_diameter);
     };
@@ -26,7 +33,7 @@ public:
     }
 
     std::string process_layer(const std::string &gcode, bool last_layer);
-    
+
 private:
     const PrintConfig  &m_config;
     GCodeReader 		m_reader;
@@ -39,7 +46,6 @@ private:
     bool                m_smooth_spiral = true;
     std::vector<Vec2f>  m_previous_layer;
 };
-
 }
 
 #endif // slic3r_SpiralVase_hpp_

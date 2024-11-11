@@ -254,7 +254,7 @@ void fill_rotations(const Range<It>           &items,
     }
 }
 
-// An arranger put together to fulfill all the requirements based
+// An arranger put together to fulfill all the requirements of QIDISlicer based
 // on the supplied ArrangeSettings
 template<class ArrItem>
 class DefaultArranger: public Arranger<ArrItem> {

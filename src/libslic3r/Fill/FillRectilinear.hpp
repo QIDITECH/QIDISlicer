@@ -1,9 +1,18 @@
 #ifndef slic3r_FillRectilinear_hpp_
 #define slic3r_FillRectilinear_hpp_
 
-#include "../libslic3r.h"
+#include <stddef.h>
+#include <initializer_list>
+#include <cstddef>
 
+#include "libslic3r/libslic3r.h"
 #include "FillBase.hpp"
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/Polyline.hpp"
+#include "libslic3r/ShortestPath.hpp"
 
 namespace Slic3r {
 
@@ -16,6 +25,7 @@ public:
     Fill* clone() const override { return new FillRectilinear(*this); }
     ~FillRectilinear() override = default;
     Polylines fill_surface(const Surface *surface, const FillParams &params) override;
+    bool is_self_crossing() override { return false; }
 
 protected:
     // Fill by single directional lines, interconnect the lines along perimeters.
@@ -28,6 +38,9 @@ protected:
         float pattern_shift;
     };
     bool fill_surface_by_multilines(const Surface *surface, FillParams params, const std::initializer_list<SweepParams> &sweep_params, Polylines &polylines_out);
+
+    // The extended bounding box of the whole object that covers any rotation of every layer.
+    BoundingBox extended_object_bounding_box() const;
 };
 
 class FillAlignedRectilinear : public FillRectilinear
@@ -65,6 +78,7 @@ public:
     Fill* clone() const override { return new FillGrid(*this); }
     ~FillGrid() override = default;
     Polylines fill_surface(const Surface *surface, const FillParams &params) override;
+    bool is_self_crossing() override { return true; }
 
 protected:
 	// The grid fill will keep the angle constant between the layers, see the implementation of Slic3r::Fill.
@@ -77,6 +91,7 @@ public:
     Fill* clone() const override { return new FillTriangles(*this); }
     ~FillTriangles() override = default;
     Polylines fill_surface(const Surface *surface, const FillParams &params) override;
+    bool is_self_crossing() override { return true; }
 
 protected:
 	// The grid fill will keep the angle constant between the layers, see the implementation of Slic3r::Fill.
@@ -89,6 +104,7 @@ public:
     Fill* clone() const override { return new FillStars(*this); }
     ~FillStars() override = default;
     Polylines fill_surface(const Surface *surface, const FillParams &params) override;
+    bool is_self_crossing() override { return true; }
 
 protected:
     // The grid fill will keep the angle constant between the layers, see the implementation of Slic3r::Fill.
@@ -101,6 +117,7 @@ public:
     Fill* clone() const override { return new FillCubic(*this); }
     ~FillCubic() override = default;
     Polylines fill_surface(const Surface *surface, const FillParams &params) override;
+    bool is_self_crossing() override { return true; }
 
 protected:
 	// The grid fill will keep the angle constant between the layers, see the implementation of Slic3r::Fill.
@@ -117,6 +134,15 @@ public:
 protected:
     // The grid fill will keep the angle constant between the layers, see the implementation of Slic3r::Fill.
     float _layer_angle(size_t idx) const override { return 0.f; }
+};
+
+class FillZigZag : public FillRectilinear
+{
+public:
+    Fill* clone() const override { return new FillZigZag(*this); }
+    ~FillZigZag() override = default;
+
+    bool has_consistent_pattern() const override { return true; }
 };
 
 Points sample_grid_pattern(const ExPolygon &expolygon, coord_t spacing, const BoundingBox &global_bounding_box);

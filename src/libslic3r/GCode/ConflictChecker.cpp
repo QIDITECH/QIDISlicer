@@ -1,12 +1,23 @@
-#include "libslic3r.h"
+// #include "libslic3r.h"
 #include "ConflictChecker.hpp"
 
-#include <tbb/parallel_for.h>
-#include <tbb/concurrent_vector.h>
-
+#include <oneapi/tbb/blocked_range.h>
+#include <oneapi/tbb/concurrent_vector.h>
+#include <oneapi/tbb/parallel_for.h>
 #include <map>
 #include <functional>
-#include <atomic>
+#include <cmath>
+#include <cstdint>
+#include <algorithm>
+#include <cassert>
+#include <cfloat>
+#include <cstdlib>
+
+#include "libslic3r/ExtrusionEntityCollection.hpp"
+#include "libslic3r/GCode/WipeTower.hpp"
+#include "libslic3r/Geometry.hpp"
+#include "libslic3r/LayerRegion.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace Slic3r {
 
@@ -89,6 +100,8 @@ inline Grids line_rasterization(const Line &line, int64_t xdist = RasteXDistance
 }
 } // namespace RasterizationImpl
 
+
+
 static std::vector<ExtrusionPaths> getFakeExtrusionPathsFromWipeTower(const WipeTowerData& wtd)
 {
     float h = wtd.height;
@@ -169,6 +182,9 @@ static std::vector<ExtrusionPaths> getFakeExtrusionPathsFromWipeTower(const Wipe
 
     return paths;
 }
+
+
+
 void LinesBucketQueue::emplace_back_bucket(std::vector<ExtrusionPaths> &&paths, const void *objPtr, Points offsets)
 {
     if (_objsPtrToId.find(objPtr) == _objsPtrToId.end()) {
@@ -291,6 +307,7 @@ ConflictResultOpt ConflictChecker::find_inter_of_lines_in_diff_objs(SpanOfConstP
     // The code ported from BS uses void* to identify objects...
     // Let's use the address of this variable to represent the wipe tower.
     int wtptr = 0;
+
     LinesBucketQueue conflictQueue;
     if (! wipe_tower_data.z_and_depth_pairs.empty()) {
         // The wipe tower is being generated.
@@ -344,9 +361,9 @@ ConflictResultOpt ConflictChecker::find_inter_of_lines_in_diff_objs(SpanOfConstP
         if (ptr1 == &wtptr || ptr2 == &wtptr) {
             assert(! wipe_tower_data.z_and_depth_pairs.empty());
             if (ptr2 == &wtptr) { std::swap(ptr1, ptr2); }
-                const PrintObject *obj2 = reinterpret_cast<const PrintObject *>(ptr2);
-                return std::make_optional<ConflictResult>("WipeTower", obj2->model_object()->name, conflictHeight, nullptr, ptr2);
-            }
+            const PrintObject *obj2 = reinterpret_cast<const PrintObject *>(ptr2);
+            return std::make_optional<ConflictResult>("WipeTower", obj2->model_object()->name, conflictHeight, nullptr, ptr2);
+        }
         const PrintObject *obj1 = reinterpret_cast<const PrintObject *>(ptr1);
         const PrintObject *obj2 = reinterpret_cast<const PrintObject *>(ptr2);
         return std::make_optional<ConflictResult>(obj1->model_object()->name, obj2->model_object()->name, conflictHeight, ptr1, ptr2);

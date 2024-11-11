@@ -23,18 +23,41 @@
 //#define DEBUG_OUTPUT_DIR std::string("C:/data/temp/cutSurface/")
 
 using namespace Slic3r;
-#include "ExPolygonsIndex.hpp"
-
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Exact_integer.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/Cartesian_converter.h>
-#include <tbb/parallel_for.h>
+#include <oneapi/tbb/blocked_range.h>
+#include <oneapi/tbb/parallel_for.h>
+#include <boost/property_map/property_map.hpp>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <limits>
+#include <map>
+#include <optional>
+#include <queue>
+#include <set>
+#include <tuple>
+#include <utility>
+#include <cassert>
 
+#include "ExPolygonsIndex.hpp"
 // libslic3r
 #include "TriangleMesh.hpp" // its_merge
 #include "Utils.hpp" // next_highest_power_of_2
-#include "ClipperUtils.hpp" // union_ex + offset_ex
+#include "admesh/stl.h"
+#include "libslic3r/AABBTreeIndirect.hpp"
+#include "libslic3r/ClipperUtils.hpp"
+#include "libslic3r/Emboss.hpp"
+#include "libslic3r/ExPolygon.hpp"
+#include "libslic3r/Exception.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/Polygon.hpp"
+#include "libslic3r/libslic3r.h"
 
 namespace priv {
 
@@ -449,17 +472,21 @@ ProjectionDistances choose_best_distance(
 /// </summary>
 /// <param name="best_distances">For each point selected closest distance</param>
 /// <param name="patches">All patches</param>
-/// <param name="shapes">All patches</param>
+/// <param name="shapes">Shape to cut</param>
+/// <param name="shapes_bb">Bound of shapes</param>
+/// <param name="s2i"></param>
+/// <param name="cutAOIs"></param>
+/// <param name="meshes"></param>
+/// <param name="projection"></param>
 /// <returns>Mask of used patch</returns>
 std::vector<bool> select_patches(const ProjectionDistances &best_distances,
                                  const SurfacePatches      &patches,
-
-                                 const ExPolygons       &shapes,
+                                 const ExPolygons          &shapes,
                                  const BoundingBox         &shapes_bb,
-                                 const ExPolygonsIndices &s2i,
-                                 const VCutAOIs         &cutAOIs,
-                                 const CutMeshes        &meshes,
-                                 const Project &projection);
+                                 const ExPolygonsIndices   &s2i,
+                                 const VCutAOIs            &cutAOIs,
+                                 const CutMeshes           &meshes,
+                                 const Project             &projection);
 
 /// <summary>
 /// Merge two surface cuts together
@@ -513,9 +540,10 @@ void store(const Emboss::IProjection &projection, const Point &point_to_project,
 } // namespace privat
 
 #ifdef DEBUG_OUTPUT_DIR
-#include "libslic3r/SVG.hpp"
 #include <boost/log/trivial.hpp>
 #include <filesystem>
+
+#include "libslic3r/SVG.hpp"
 #endif // DEBUG_OUTPUT_DIR
 
 SurfaceCut Slic3r::cut_surface(const ExPolygons &shapes,
@@ -1771,6 +1799,7 @@ priv::VDistances priv::calc_distances(const SurfacePatches &patches,
 
 #include "libslic3r/AABBTreeLines.hpp"
 #include "libslic3r/Line.hpp"
+
 // functions for choose_best_distance
 namespace priv {
 
@@ -2242,7 +2271,7 @@ priv::ProjectionDistances priv::choose_best_distance(
     if (unfinished_index >= s2i.get_count())
         // no point to select
         return result;
-    
+
 #ifdef DEBUG_OUTPUT_DIR
     Connections connections;
     connections.reserve(shapes.size());
@@ -2552,6 +2581,7 @@ void priv::create_face_types(FaceTypeMap           &map,
 
 #include <CGAL/Polygon_mesh_processing/clip.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
+
 bool priv::clip_cut(SurfacePatch &cut, CutMesh clipper)
 {
     CutMesh& tm = cut.mesh; 
@@ -3218,15 +3248,15 @@ bool priv::is_over_whole_expoly(const CutAOI    &cutAOI,
 
 std::vector<bool> priv::select_patches(const ProjectionDistances &best_distances,
                                        const SurfacePatches      &patches,
-
-                                       const ExPolygons       &shapes,
+                                       const ExPolygons          &shapes,
                                        const BoundingBox         &shapes_bb,
-                                       const ExPolygonsIndices &s2i,
-                                       const VCutAOIs         &cutAOIs,
-                                       const CutMeshes        &meshes,
-                                       const Project          &projection)
+                                       const ExPolygonsIndices   &s2i,
+                                       const VCutAOIs            &cutAOIs,
+                                       const CutMeshes           &meshes,
+                                       const Project             &projection)
 {
     // extension to cover numerical mistake made by back projection patch from 3d to 2d
+    // Calculated as one percent of average size(width and height)
     Point s = shapes_bb.size();
     const float extend_delta = (s.x() + s.y())/ float(2 * 100);
         
