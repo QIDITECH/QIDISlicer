@@ -1,4 +1,3 @@
-#include "libslic3r/Technologies.hpp"
 #include "WinRegistry.hpp"
 
 #ifdef _WIN32

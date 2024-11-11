@@ -9,6 +9,7 @@
 #ifdef _WIN32
 #include <wlanapi.h>
 #endif //_WIN32
+
 namespace Slic3r {
 
 using  WifiSsidPskMap = std::map<wxString, std::string>;
@@ -20,6 +21,7 @@ public:
     ~WifiScanner();
     
     bool is_init() const { return m_init; }
+
     const WifiSsidPskMap& get_map() const { return m_map; }
     // returns psk for given ssid
     // used on APPLE where each psk query requires user to give their password
@@ -31,6 +33,7 @@ public:
 private:
     WifiSsidPskMap m_map;
     std::string m_current_ssid;
+
     bool m_init { false };
 
 #ifdef _WIN32

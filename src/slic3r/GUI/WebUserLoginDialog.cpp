@@ -23,7 +23,8 @@
 #include <boost/dll.hpp>
 
 #include <sstream>
-#include <slic3r/GUI/Widgets/WebView.hpp>
+// #include <slic3r/GUI/Widgets/WebView.hpp>
+#include "WebView.hpp"
 #if QDT_RELEASE_TO_PUBLIC
 #include "../QIDI/QIDINetwork.hpp"
 #endif
@@ -64,7 +65,7 @@ ZUserLogin::ZUserLogin() : wxDialog((wxWindow *) (wxGetApp().mainframe), wxID_AN
     // set the frame icon
 
     // Create the webview
-    m_browser = WebView::CreateWebView(this, TargetUrl);
+    m_browser = WebView::CreateWebView(this, TargetUrl, {"wx"});
     if (m_browser == nullptr) {
         wxLogError("Could not init m_browser");
         return;
@@ -247,7 +248,7 @@ void ZUserLogin::RunScript(const wxString &javascript)
     if (!m_browser)
         return;
 
-    WebView::RunScript(m_browser, javascript);
+    // WebView::RunScript(m_browser, javascript);
 }
 #if wxUSE_WEBVIEW_IE
 void ZUserLogin::OnRunScriptObjectWithEmulationLevel(wxCommandEvent &WXUNUSED(evt))

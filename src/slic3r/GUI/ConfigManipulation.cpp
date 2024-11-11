@@ -350,7 +350,7 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     bool has_ironing = config->opt_bool("ironing");
     //w33
     for (auto el : {"ironing_type", "ironing_flowrate", "ironing_spacing", "ironing_speed", "ironing_pattern"})
-    	toggle_field(el, has_ironing);
+        toggle_field(el, has_ironing);
 
     bool have_sequential_printing = config->opt_bool("complete_objects");
     for (auto el : { "extruder_clearance_radius", "extruder_clearance_height" })
@@ -381,9 +381,6 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     toggle_field("min_feature_size", have_arachne);
     toggle_field("min_bead_width", have_arachne);
     toggle_field("thin_walls", !have_arachne);
-    //w21
-    bool is_top_one_wall = config->opt_enum<TopOneWallType>("top_one_wall_type") != TopOneWallType::Disable;
-    toggle_field("top_area_threshold", is_top_one_wall);
 
     //w38
     bool has_detect_overhang_wall = config->opt_bool("overhangs");

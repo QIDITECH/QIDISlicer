@@ -32,7 +32,6 @@ wxDECLARE_EVENT(EVT_PRESET_UPDATE_AVAILABLE_CLICKED, PresetUpdateAvailableClicke
 using CancelFn = std::function<void()>;
 
 class GLCanvas3D;
-class ImGuiWrapper;
 enum class InfoItemType;
 
 enum class NotificationType
@@ -125,7 +124,18 @@ enum class NotificationType
 	// MacOS specific - PS comes forward even when downloader is not allowed
 	URLNotRegistered,
 	// Config file was detected during startup, open wifi config dialog via hypertext
-	WifiConfigFileDetected
+	WifiConfigFileDetected,
+	// Info abouty successful login or logout
+	UserAccountID,
+	// When in Connect tab "set as current" is selected and selected presets in plater changes
+	SelectPrinterFromConnect,
+	SelectFilamentFromConnect,
+	// Debug notification for connect communication
+	QIDIConnectPrinters,
+    // Notification that bed temperatures for the used filaments differ significantly.
+    BedTemperaturesDiffer,
+    // Notification that shrinkage compensations for the used filaments differ.
+    ShrinkageCompensationsDiffer,
 };
 
 class NotificationManager
@@ -359,21 +369,17 @@ private:
 		// Call after every size change
 		virtual void init();
 		// Calculetes correct size but not se it in imgui!
-		virtual void set_next_window_size(ImGuiWrapper& imgui);
-		virtual void render_text(ImGuiWrapper& imgui,
-			                     const float win_size_x, const float win_size_y,
+		virtual void set_next_window_size();
+		virtual void render_text(const float win_size_x, const float win_size_y,
 			                     const float win_pos_x , const float win_pos_y);
-		virtual void render_close_button(ImGuiWrapper& imgui,
-			                             const float win_size_x, const float win_size_y,
+		virtual void render_close_button(const float win_size_x, const float win_size_y,
 			                             const float win_pos_x , const float win_pos_y);
-		virtual void render_hypertext(ImGuiWrapper& imgui,
-			                          const float text_x, const float text_y,
+		virtual void render_hypertext(const float text_x, const float text_y,
 		                              const std::string text,
 		                              bool more = false);
 		// Left sign could be error or warning sign
-		virtual void render_left_sign(ImGuiWrapper& imgui);
-		virtual void render_minimize_button(ImGuiWrapper& imgui,
-			                                const float win_pos_x, const float win_pos_y);
+		virtual void render_left_sign();
+		virtual void render_minimize_button(const float win_pos_x, const float win_pos_y);
 		// Hypertext action, returns true if notification should close.
 		// Action is stored in NotificationData::callback as std::function<bool(wxEvtHandler*)>
 		virtual bool on_text_click();
@@ -476,18 +482,15 @@ private:
 		float get_percentage() const { return m_percentage; }
 	protected:
 		virtual void init() override;		
-		virtual void	render_text(ImGuiWrapper& imgui,
-									const float win_size_x, const float win_size_y,
+		virtual void	render_text(const float win_size_x, const float win_size_y,
 									const float win_pos_x, const float win_pos_y) override;
-		virtual void	render_bar(ImGuiWrapper& imgui,
-									const float win_size_x, const float win_size_y,
+		virtual void	render_bar( const float win_size_x, const float win_size_y,
 									const float win_pos_x, const float win_pos_y) ;
-		virtual void	render_cancel_button(ImGuiWrapper& imgui,
+		virtual void	render_cancel_button(
 									const float win_size_x, const float win_size_y,
 									const float win_pos_x, const float win_pos_y)
 		{}
-		void			render_minimize_button(ImGuiWrapper& imgui,
-			const float win_pos_x, const float win_pos_y) override {}
+		void			render_minimize_button(const float win_pos_x, const float win_pos_y) override {}
 		float				m_percentage {0.0f};
 		//B64
         int                 m_waittime{0};
@@ -510,17 +513,13 @@ private:
 		void	set_cancel_callback(std::function<bool()> cancel_callback) { m_cancel_callback = cancel_callback; }
 
 	protected:
-		void	render_close_button(ImGuiWrapper& imgui,
-										const float win_size_x, const float win_size_y,
+		void	render_close_button(	const float win_size_x, const float win_size_y,
 										const float win_pos_x, const float win_pos_y) override;
-		void    render_close_button_inner(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void    render_close_button_inner( const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y);
-		void    render_cancel_button_inner(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void    render_cancel_button_inner( const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y);
-		void	render_bar(ImGuiWrapper& imgui,
-							const float win_size_x, const float win_size_y,
+		void	render_bar( const float win_size_x, const float win_size_y,
 							const float win_pos_x, const float win_pos_y) override;
 		void    on_cancel_button();
 
@@ -553,26 +552,20 @@ private:
 		void    set_error_message(const std::string& message) { m_error_message = message; }
 		bool    compare_text(const std::string& text) const override { return false; };
 	protected: 
-		void	render_close_button(ImGuiWrapper& imgui,
-									const float win_size_x, const float win_size_y,
+		void	render_close_button(const float win_size_x, const float win_size_y,
 									const float win_pos_x, const float win_pos_y) override;
-		void    render_close_button_inner(ImGuiWrapper& imgui,
+		void    render_close_button_inner( const float win_size_x, const float win_size_y,
+											const float win_pos_x, const float win_pos_y);
+		void    render_pause_cancel_buttons_inner(
 											const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y);
-		void    render_pause_cancel_buttons_inner(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void    render_open_button_inner(   const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y);
-		void    render_open_button_inner(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void    render_cancel_button_inner( const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y);
-		void    render_cancel_button_inner(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void    render_pause_button_inner(  const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y);
-		void    render_pause_button_inner(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
-											const float win_pos_x, const float win_pos_y);
-		void	render_bar(ImGuiWrapper& imgui,
-							const float win_size_x, const float win_size_y,
+		void	render_bar( const float win_size_x, const float win_size_y,
 							const float win_pos_x, const float win_pos_y) override;
 		void    trigger_user_action_callback(DownloaderUserAction action);
 
@@ -627,19 +620,17 @@ private:
 		void        init() override;
 		void		count_spaces() override;
 		bool		push_background_color() override;
-		virtual void	render_text(ImGuiWrapper& imgui,
+		virtual void render_text(
 								const float win_size_x, const float win_size_y,
 								const float win_pos_x, const float win_pos_y) override;
-		void		render_bar(ImGuiWrapper& imgui,
-								const float win_size_x, const float win_size_y,
+		void		render_bar( const float win_size_x, const float win_size_y,
 								const float win_pos_x, const float win_pos_y) override;
-		virtual void render_close_button(ImGuiWrapper& imgui,
+		virtual void render_close_button(
 									const float win_size_x, const float win_size_y,
 									const float win_pos_x, const float win_pos_y) override;
-		void		render_cancel_button(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void		render_cancel_button( 	const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y) override;
-		void		render_left_sign(ImGuiWrapper& imgui) override;
+		void		render_left_sign() override;
 	
 		void        generate_text();
 		void		on_more_hypertext_click() override { ProgressBarNotification::on_more_hypertext_click(); m_more_hypertext_used = true; }
@@ -701,18 +692,14 @@ private:
 		void                set_export_possible(bool b) { m_export_possible = b; }
 	protected:
 		void        init() override;
-		void	    render_text(ImGuiWrapper& imgui, const float win_size_x, const float win_size_y, const float win_pos_x, const float win_pos_y) override;
-		void		render_bar(ImGuiWrapper& imgui,
-								const float win_size_x, const float win_size_y,
+		void	    render_text(const float win_size_x, const float win_size_y, const float win_pos_x, const float win_pos_y) override;
+		void		render_bar( const float win_size_x, const float win_size_y,
 								const float win_pos_x, const float win_pos_y) override;
-		void		render_cancel_button(ImGuiWrapper& imgui,
-											const float win_size_x, const float win_size_y,
+		void		render_cancel_button( 	const float win_size_x, const float win_size_y,
 											const float win_pos_x, const float win_pos_y) override;
-		void		render_close_button(ImGuiWrapper& imgui,
-										const float win_size_x, const float win_size_y,
+		void		render_close_button(const float win_size_x, const float win_size_y,
 										const float win_pos_x, const float win_pos_y) override;
-		void		render_hypertext(ImGuiWrapper& imgui,
-										const float text_x, const float text_y,
+		void		render_hypertext(	const float text_x, const float text_y,
 										const std::string text,
 										bool more = false) override ;
 		void       on_cancel_button();
@@ -759,11 +746,9 @@ private:
 		CancelFn				m_cancel_callback { nullptr };
 		ProgressIndicatorState  m_progress_state { ProgressIndicatorState::PIS_HIDDEN };
 
-		void		render_close_button(ImGuiWrapper& imgui,
-			                            const float win_size_x, const float win_size_y,
+		void		render_close_button(const float win_size_x, const float win_size_y,
 			                            const float win_pos_x, const float win_pos_y) override;
-		void		render_cancel_button(ImGuiWrapper& imgui,
-									     const float win_size_x, const float win_size_y,
+		void		render_cancel_button(const float win_size_x, const float win_size_y,
 									     const float win_pos_x, const float win_pos_y) override;
 		void        on_cancel_button() { if (m_cancel_callback) m_cancel_callback(); }
 	};
@@ -787,17 +772,14 @@ private:
 	protected:
 		// Reserves space on right for more buttons
 		void count_spaces() override;
-		void render_text(ImGuiWrapper& imgui,
-						 const float win_size_x, const float win_size_y,
+		void render_text(const float win_size_x, const float win_size_y,
 						 const float win_pos_x, const float win_pos_y) override;
 		// Renders also button to open directory with exported path and eject removable media
-		void render_close_button(ImGuiWrapper& imgui,
-								 const float win_size_x, const float win_size_y,
+		void render_close_button(const float win_size_x, const float win_size_y,
 								 const float win_pos_x, const float win_pos_y) override;
-		void render_eject_button(ImGuiWrapper& imgui,
-			                             const float win_size_x, const float win_size_y,
+		void render_eject_button(        const float win_size_x, const float win_size_y,
 			                             const float win_pos_x, const float win_pos_y);
-		void render_minimize_button(ImGuiWrapper& imgui, const float win_pos_x, const float win_pos_y) override
+		void render_minimize_button(const float win_pos_x, const float win_pos_y) override
 			{ m_minimize_b_visible = false; }
 		bool on_text_click() override;
 		void on_eject_click();
@@ -823,7 +805,7 @@ private:
 			PopNotification::close(); 
 		}
 	protected:
-		//void render_left_sign(ImGuiWrapper& imgui) override;
+		//void render_left_sign() override;
 		std::vector<std::pair<InfoItemType, size_t>> m_types_and_counts;
 	};
 

@@ -13,6 +13,7 @@
 
 #include <regex>
 #include <wx/numformatter.h>
+#include <wx/bookctrl.h>
 #include <wx/tooltip.h>
 #include <wx/notebook.h>
 #include <wx/listbook.h>
@@ -23,6 +24,7 @@
 #include "BitmapComboBox.hpp"
 
 #include "Widgets/ComboBox.hpp"
+
 #ifdef __WXOSX__
 #define wxOSX true
 #else
@@ -73,7 +75,7 @@ ThumbnailErrors validate_thumbnails_string(wxString& str, const wxString& def_ex
         for (const auto& [format, size] : thumbnails_list)
             str += format_wxstr("%1%x%2%/%3%, ", size.x(), size.y(), extentions[int(format)]);
         str.resize(str.Len() - 2);
-}
+    }
 
     return errors;
 }
@@ -97,7 +99,6 @@ Field::~Field()
 
 void Field::PostInitialize()
 {
-
 	switch (m_opt.type)
 	{
 	case coPercents:
@@ -136,7 +137,7 @@ void Field::PostInitialize()
 #else /* __APPLE__ */
 				case WXK_CONTROL_F:
 #endif /* __APPLE__ */
-				case 'F': { wxGetApp().plater()->search(false); break; }
+				case 'F': { wxGetApp().show_search_dialog(); break; }
 			    default: break;
 			    }
 			    if (tab_id >= 0)
@@ -186,6 +187,7 @@ void Field::on_edit_value()
 	if (m_fn_edit_value)
 		m_fn_edit_value(m_opt_id);
 }
+
 wxString Field::get_tooltip_text(const wxString& default_string)
 {
     if (m_opt.tooltip.empty())
@@ -199,6 +201,7 @@ wxString Field::get_tooltip_text(const wxString& default_string)
     }
 
     bool newline_after_name = boost::iends_with(opt_id, "_gcode") && opt_id != "binary_gcode";
+
 	return from_u8(m_opt.tooltip) + "\n" + _L("default value") + "\t: " +
         (newline_after_name ? "\n" : "") + default_string +
         (newline_after_name ? "" : "\n") +
@@ -381,24 +384,23 @@ void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true
                     if (!error_str.empty())
                         error_str += "\n\n";
                     error_str += _L("Input value is out of range");
-                            }
+                }
                 if (errors.has(ThumbnailError::InvalidExt)) {
                     if (!error_str.empty())
                         error_str += "\n\n";
                     error_str += _L("Some extension in the input is invalid");
-                        }
+                }
                 show_error(m_parent, error_str);
-                    }
+            }
             else if (str_out != str) {
                 str = str_out;
                 set_value(str, true);
-                }
             }
+        }
 
         m_value = into_u8(str);
 		break;
-        }
-
+    }
 
 	default:
 		break;
@@ -674,6 +676,7 @@ void TextCtrl::change_field_value(wxEvent& event)
 };
 #endif //__WXGTK__
 
+
 wxWindow* CheckBox::GetNewWin(wxWindow* parent, const wxString& label /*= wxEmptyString*/)
 {
     if (wxGetApp().suppress_round_corners())
@@ -731,6 +734,7 @@ bool CheckBox::GetValue()
 
     return dynamic_cast<::SwitchButton*>(window)->GetValue();
 }
+
 void CheckBox::BUILD() {
 	auto size = wxSize(wxDefaultSize);
 	if (m_opt.height >= 0) 
@@ -835,6 +839,7 @@ void CheckBox::disable()
     window->Disable();
 }
 
+
 void SpinCtrl::BUILD() {
 	auto size = wxSize(def_width() * m_em_unit, wxDefaultCoord);
     if (m_opt.height >= 0) size.SetHeight(m_opt.height*m_em_unit);
@@ -871,6 +876,7 @@ void SpinCtrl::BUILD() {
 
 	auto temp = new ::SpinInput(m_parent, text_value, "", wxDefaultPosition, size,
 		wxTE_PROCESS_ENTER | wxSP_ARROW_KEYS
+
 		, min_val, max_val, default_value);
 
 #ifdef __WXGTK3__
@@ -908,8 +914,7 @@ void SpinCtrl::BUILD() {
 	temp->SetToolTip(get_tooltip_text(text_value));
 
     temp->Bind(wxEVT_TEXT, [this, temp](wxCommandEvent e) {
-
-		long value;
+        long value;
         if (!e.GetString().ToLong(&value))
             return;
         if (value < INT_MIN || value > INT_MAX)
@@ -1191,6 +1196,10 @@ void Choice::set_selection()
         field->SetSelection(m_opt.default_value->getInt());
 		break;
 	}
+	case coEnums:{
+        field->SetSelection(m_opt.default_value->getInts()[m_opt_idx]);
+		break;
+	}
 	case coFloat:
 	case coPercent:	{
 		double val = m_opt.default_value->getFloat();
@@ -1278,7 +1287,8 @@ void Choice::set_value(const boost::any& value, bool change_event)
 
 		break;
 	}
-	case coEnum: {
+	case coEnum:
+	case coEnums: {
 		auto val = m_opt.enum_def->enum_to_index(boost::any_cast<int>(value));
         assert(val.has_value());
 		field->SetSelection(val.has_value() ? *val : 0);
@@ -1343,7 +1353,7 @@ boost::any& Choice::get_value()
 		if (m_opt_id == rp_option)
 			return m_value = boost::any(ret_str);
 
-	if (m_opt.type == coEnum)
+	if (m_opt.type == coEnum || m_opt.type == coEnums)
         // Closed enum: The combo box item index returned by the field must be convertible to an enum value.
         m_value = m_opt.enum_def->index_to_enum(field->GetSelection());
     else if (m_opt.gui_type == ConfigOptionDef::GUIType::f_enum_open || m_opt.gui_type == ConfigOptionDef::GUIType::i_enum_open) {
@@ -1782,3 +1792,4 @@ boost::any& SliderCtrl::get_value()
 
 
 } // Slic3r :: GUI
+

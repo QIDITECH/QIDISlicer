@@ -1,7 +1,8 @@
 #include "libslic3r/Technologies.hpp"
 #include "GUI_Init.hpp"
 
-#include "libslic3r/AppConfig.hpp" 
+#include "libslic3r/AppConfig.hpp"
+#include "libslic3r/Utils/DirectoriesUtils.hpp"
 
 #include "slic3r/GUI/GUI.hpp"
 #include "slic3r/GUI/GUI_App.hpp"
@@ -18,14 +19,16 @@
 
 #include <boost/nowide/iostream.hpp>
 #include <boost/nowide/convert.hpp>
-
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/console.hpp>
 #if __APPLE__
     #include <signal.h>
 #endif // __APPLE__
 
 namespace Slic3r {
 namespace GUI {
-
 
 const std::vector<std::pair<int, int>> OpenGLVersions::core    = { {3,2}, {3,3}, {4,0}, {4,1}, {4,2}, {4,3}, {4,4}, {4,5}, {4,6} };
 
@@ -42,6 +45,11 @@ int GUI_Run(GUI_InitParams &params)
     signal(SIGCHLD, SIG_DFL);
 #endif // __APPLE__
 
+#ifdef SLIC3R_LOG_TO_FILE
+    auto sink = boost::log::add_file_log(get_default_datadir() + "/slicer.log");
+    sink->locked_backend()->auto_flush();
+    boost::log::add_console_log();
+#endif // SLIC3R_LOG_TO_FILE
     try {
         GUI::GUI_App* gui = new GUI::GUI_App(params.start_as_gcodeviewer ? GUI::GUI_App::EAppMode::GCodeViewer : GUI::GUI_App::EAppMode::Editor);
         if (gui->get_app_mode() != GUI::GUI_App::EAppMode::GCodeViewer) {

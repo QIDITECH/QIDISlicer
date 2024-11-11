@@ -26,7 +26,7 @@
 #include "Widgets/CheckBox.hpp"
 
 //Y
-#include "libslic3r/AppConfig.cpp"
+#include "libslic3r/AppConfig.hpp"
 
 namespace Slic3r {
 namespace GUI {
@@ -135,7 +135,6 @@ void MsgDialog::finalize()
     this->CenterOnParent();
 }
 
-
 // Text shown as HTML, so that mouse selection and Ctrl-V to copy will work.
 static void add_msg_content(MsgDialog* parent, wxBoxSizer* content_sizer, const HtmlContent& content)
 {
@@ -234,7 +233,7 @@ static void add_msg_content(MsgDialog* parent, wxBoxSizer* content_sizer, const 
             content.on_link_clicked(into_u8(event.GetLinkInfo().GetHref()));
         }
         else
-        wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref(), parent, false);
+            wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref(), parent, false);
         event.Skip(false);
     });
 
@@ -264,13 +263,15 @@ ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, bool monospaced_
     create(m_content, monospaced_font ? 48 : 84);
 }
 
-ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, const std::function<void(const std::string&)> &on_link_clicked)
+ErrorDialog::ErrorDialog(wxWindow *parent, const wxString &msg, const t_link_clicked& on_link_clicked)
     : MsgDialog(parent, wxString::Format(_L("%s error"), SLIC3R_APP_NAME), 
                         wxString::Format(_L("%s has encountered an error"), SLIC3R_APP_NAME), wxOK)
     , m_content(HtmlContent{ msg, false, true, on_link_clicked })
 {
     create(m_content, 84);
 }
+
+
 HtmlCapableRichMessageDialog::HtmlCapableRichMessageDialog(wxWindow                                       *parent,
                                                            const wxString                                 &msg,
                                                            const wxString                                 &caption,
@@ -278,6 +279,8 @@ HtmlCapableRichMessageDialog::HtmlCapableRichMessageDialog(wxWindow             
                                                            const std::function<void(const std::string &)> &on_link_clicked)
     : RichMessageDialogBase(parent, HtmlContent{msg, false, true, on_link_clicked}, caption, style)
 {}
+
+
 // WarningDialog
 
 WarningDialog::WarningDialog(wxWindow *parent,
@@ -326,13 +329,15 @@ RichMessageDialogBase::RichMessageDialogBase(wxWindow* parent, const HtmlContent
 #else
     m_checkBox = new wxCheckBox(this, wxID_ANY, m_checkBoxText);
 #endif
+
     wxGetApp().UpdateDarkUI(m_checkBox);
     m_checkBox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) { m_checkBoxValue = m_checkBox->GetValue(); });
 
     btn_sizer->Insert(0, m_checkBox, wxALIGN_CENTER_VERTICAL);
 
-    finalize();
+    finalize();    
 }
+
 
 int RichMessageDialogBase::ShowModal()
 {
@@ -346,6 +351,7 @@ int RichMessageDialogBase::ShowModal()
 
     return wxDialog::ShowModal();
 }
+
 
 // InfoDialog
 

@@ -52,11 +52,11 @@ public:
     std::vector<float> read_matrix_values();
 	void format_sizer(wxSizer* sizer, wxPanel* page, wxGridSizer* grid_sizer, const wxString& table_title, int table_lshift=0);
         
-private:
+private:        
     std::vector<std::vector<wxTextCtrl*>> edit_boxes;
     std::vector<wxColour> m_colours;
     unsigned int m_number_of_extruders  = 0;
-	wxPanel*	m_page_advanced = nullptr;
+    wxPanel*	m_page_advanced = nullptr;
     wxBoxSizer*	m_sizer = nullptr;
     wxBoxSizer* m_sizer_advanced = nullptr;
     wxGridSizer* m_gridsizer_advanced = nullptr;
@@ -79,7 +79,8 @@ public:
 
 private:
     void enable_or_disable_panel();
-    WipingPanel*  m_panel_wiping  = nullptr;
+
+    WipingPanel*       m_panel_wiping  = nullptr;
     std::vector<float> m_output_matrix;
     wxRadioButton*     m_radio_button1 = nullptr;
     wxRadioButton*     m_radio_button2 = nullptr;

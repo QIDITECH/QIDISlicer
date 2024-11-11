@@ -169,10 +169,10 @@ wxSize BitmapTextRenderer::GetSize() const
     if (!m_value.GetText().empty())
     {
         wxSize size;
-            wxDataViewCtrl* const view = GetView();
-            wxClientDC dc(view);
-            if (GetAttr().HasFont())
-                dc.SetFont(GetAttr().GetEffectiveFont(view->GetFont()));
+        wxDataViewCtrl* const view = GetView();
+        wxClientDC dc(view);
+        if (GetAttr().HasFont())
+            dc.SetFont(GetAttr().GetEffectiveFont(view->GetFont()));
         else
             dc.SetFont(view->GetFont());
 
@@ -183,8 +183,8 @@ wxSize BitmapTextRenderer::GetSize() const
 #endif // SUPPORTS_MARKUP && wxHAS_GENERIC_DATAVIEWCTRL
             size = dc.GetTextExtent(m_value.GetText());
 
-            int lines = m_value.GetText().Freq('\n') + 1;
-            size.SetHeight(size.GetHeight() * lines);
+        int lines = m_value.GetText().Freq('\n') + 1;
+        size.SetHeight(size.GetHeight() * lines);
 
         if (m_value.GetBitmap().IsOk())
             size.x += m_value.GetBitmap().GetWidth() + 4;
@@ -236,7 +236,7 @@ bool BitmapTextRenderer::GetValueFromEditorCtrl(wxWindow* ctrl, wxVariant& value
     if (!text_editor || text_editor->GetValue().IsEmpty())
         return false;
 
-    m_was_unusable_symbol = Slic3r::GUI::Plater::has_illegal_filename_characters(text_editor->GetValue());
+    m_was_unusable_symbol = Slic3r::GUI::has_illegal_characters(text_editor->GetValue());
     if (m_was_unusable_symbol)
         return false;
 
@@ -330,6 +330,7 @@ wxWindow* BitmapChoiceRenderer::CreateEditorCtrl(wxWindow* parent, wxRect labelR
 #ifdef _WIN32
     Slic3r::GUI::wxGetApp().UpdateDarkUI(c_editor);
 #endif
+
     int def_id = get_default_extruder_idx ? get_default_extruder_idx() : 0;
     c_editor->Append(_L("default"), def_id < 0 ? wxNullBitmap : *icons[def_id]);
     for (size_t i = 0; i < icons.size(); i++)

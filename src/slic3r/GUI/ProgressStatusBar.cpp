@@ -183,6 +183,5 @@ void ProgressStatusBar::set_font(const wxFont &font)
     self->SetFont(font);
 }
 
-
 }
 

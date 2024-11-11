@@ -40,7 +40,6 @@ public:
     static wxColor GetParentBackgroundColor(wxWindow * parent);
 
 protected:
-
     void paintEvent(wxPaintEvent& evt);
 
     void render(wxDC& dc);

@@ -58,7 +58,6 @@ public:
     wxString    get_status_text() const;
     void        set_font(const wxFont &font);
 
-
     void        update_dark_ui();
 
 private:

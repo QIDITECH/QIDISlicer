@@ -3,10 +3,11 @@
 
 #include <wx/event.h>
 #include <memory>
+#include <vector>
 
 #include "StateColor.hpp"
 
-
+class wxWindow;
 
 wxDECLARE_EVENT(EVT_ENABLE_CHANGED, wxCommandEvent);
 
@@ -43,7 +44,6 @@ public:
     void update_binds();
 
     int states() const { return states_ | states2_; }
-
 
 private:
     StateHandler(StateHandler * parent, wxWindow *owner);

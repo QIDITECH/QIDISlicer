@@ -1,5 +1,6 @@
 #include "StateColor.hpp"
 
+#include <cstddef>
 
 StateColor::StateColor(wxColour const &color) { append(color, 0); }
 
@@ -91,3 +92,4 @@ bool StateColor::setColorForStates(wxColour const &color, int states)
 }
 
 void StateColor::setTakeFocusedAsHovered(bool set) { takeFocusedAsHovered_ = set; }
+

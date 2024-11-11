@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include <boost/filesystem/path.hpp>
+#include <wx/wx.h>
 
 #include <wx/string.h>
 #include <wx/event.h>
@@ -21,6 +22,7 @@ class wxTextCtrl;
 class wxChoice;
 class wxComboBox;
 class wxDataViewListCtrl;
+class wxCheckBox;
 
 namespace Slic3r {
 
@@ -29,8 +31,8 @@ namespace GUI {
 class SendCheckBox : public wxCheckBox
 {
 public:
-    SendCheckBox(wxWindow *parent, wxWindowID id, const wxString &label, const wxPoint &pos = wxDefaultPosition)
-        : wxCheckBox(parent, id, label, pos)
+    SendCheckBox(wxWindow *parent, wxWindowID id, const wxString &label)
+        : wxCheckBox(parent, id, label)
     {}
 
     void SetState(bool value)

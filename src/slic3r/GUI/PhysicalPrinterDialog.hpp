@@ -62,7 +62,6 @@ class PhysicalPrinterDialog : public DPIDialog
     PhysicalPrinter     m_printer;
     wxString            m_default_name;
     DynamicPrintConfig* m_config            { nullptr };
-
     ::TextInput*        m_printer_name      { nullptr };
     std::vector<PresetForPrinter*> m_presets;
 

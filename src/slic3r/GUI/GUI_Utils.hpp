@@ -207,7 +207,6 @@ private:
 
     int   m_new_font_point_size;
 
-
     // check if new scale is differ from previous
     bool    is_new_scale_factor() const { return fabs(m_scale_factor - m_prev_scale_factor) > 0.001; }
 

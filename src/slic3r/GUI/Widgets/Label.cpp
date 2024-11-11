@@ -2,6 +2,7 @@
 #include "StaticBox.hpp"
 
 #include <wx/settings.h>
+
 wxFont Label::sysFont(int size, bool bold)
 {
 //#ifdef __linux__
@@ -42,7 +43,6 @@ wxFont Label::Body_9;
 
 void Label::initSysFont()
 {
-
     Head_24 = Label::sysFont(24, true);
     Head_20 = Label::sysFont(20, true);
     Head_18 = Label::sysFont(18, true);
@@ -62,8 +62,6 @@ void Label::initSysFont()
     Body_10 = Label::sysFont(10, false);
     Body_9  = Label::sysFont(9, false);
 }
-
-
 
 wxSize Label::split_lines(wxDC &dc, int width, const wxString &text, wxString &multiline_text)
 {
@@ -103,8 +101,7 @@ Label::Label(wxWindow *parent, wxFont const &font, wxString const &text, long st
         if (GetWindowStyle() & LB_HYPERLINK) {
             SetFont(this->font.Underlined());
             Refresh();
-    }
-
+        }
     });
     Bind(wxEVT_LEAVE_WINDOW, [this](auto &e) {
         SetFont(this->font);
@@ -127,5 +124,3 @@ void Label::SetWindowStyleFlag(long style)
     }
     Refresh();
 }
-
-

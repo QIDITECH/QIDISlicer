@@ -30,7 +30,6 @@ public:
 
     void SetLabel(const wxString& label) override;
 
-
     void SetIcon(const wxString& icon);
 
     void SetInactiveIcon(const wxString& icon);
@@ -48,7 +47,6 @@ public:
     bool Enable(bool enable = true) override;
 
     void SetCanFocus(bool canFocus) override;
-
 
     void Rescale();
 

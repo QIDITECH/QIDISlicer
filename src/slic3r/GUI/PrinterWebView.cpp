@@ -317,7 +317,6 @@ void PrinterWebView::CreatThread() {
                 if (m_pauseThread)
                     break;
                 if (!m_net_buttons.empty()) {
-                    BOOST_LOG_TRIVIAL(error) << "machine IP: " << device.local_ip;
                     //y5
                     std::unique_ptr<PrintHost> printhost(PrintHost::get_print_host_url(device.url, device.local_ip));
                     if (!printhost) {
@@ -413,7 +412,7 @@ void PrinterWebView::SetPresetChanged(bool status) {
         //y3
          if (webisNetMode == isNetWeb) {
              for (DeviceButton* button : m_net_buttons) {
-                 if (m_ip == (button->getIPLabel())) {
+                 if (button->getIPLabel().find(m_ip) != std::string::npos) {
                      button->SetIsSelected(true);
                      break;
                  }
@@ -421,17 +420,14 @@ void PrinterWebView::SetPresetChanged(bool status) {
          } 
          else if (webisNetMode == isLocalWeb) 
          {
-             if (m_exit_host.find(into_u8(m_ip)) != m_exit_host.end()) 
-             {
-                 for (DeviceButton* button : m_buttons) 
-                 {
-                     if (m_ip == (button->getIPLabel())) 
-                     {
-                         button->SetIsSelected(true);
-                         break;
-                     }
-                 }
-             }
+            for (DeviceButton* button : m_buttons) 
+            {
+                if (button->getIPLabel().find(m_ip) != std::string::npos) 
+                {
+                    button->SetIsSelected(true);
+                    break;
+                }
+            }
          }
          else
          {
@@ -480,9 +476,6 @@ void PrinterWebView::SetLoginStatus(bool status) {
         //y3
         if (webisNetMode == isNetWeb)
             webisNetMode = isDisconnect;
-        //y5
-        std::string head_name = wxGetApp().app_config->get("user_head_name");
-        wxString      head_savePath = (boost::filesystem::path(Slic3r::data_dir()) / "user" / head_name).make_preferred().string();
         m_user_head_name = "";
         SetPresetChanged(true);
         UpdateState();

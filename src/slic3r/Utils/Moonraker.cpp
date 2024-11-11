@@ -407,6 +407,7 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
         // This new address returns in "test_msg_or_host_ip" variable.
         // Solves troubles of uploades failing with name address.
         // in original address (m_host) replace host for resolved ip 
+        info_fn(L"resolve", test_msg_or_host_ip);
         url = substitute_host(make_url("server/files/upload"), GUI::into_u8(test_msg_or_host_ip));
         BOOST_LOG_TRIVIAL(info) << "Upload address after ip resolve: " << url;
     }

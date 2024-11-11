@@ -71,7 +71,7 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     auto *label_dir_hint2 = new wxStaticText(this, wxID_ANY, _L("Upload to Printer Host with the following filename:"));
     label_dir_hint2->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 
-    //B61 //B64
+    //B64
     ThumbnailData thumbnail_data = m_plater->get_thumbnailldate_send();
 
     wxImage image(thumbnail_data.width, thumbnail_data.height);
@@ -163,7 +163,10 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
 
     wxScrolledWindow *scroll_macine_list = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(800), FromDIP(300)),
                                                                 wxHSCROLL | wxVSCROLL);
-    scroll_macine_list->SetBackgroundColour(*wxWHITE);
+    if(check_dark_mode())
+        scroll_macine_list->SetBackgroundColour(wxColour(62,62,62));
+    else
+        scroll_macine_list->SetBackgroundColour(*wxWHITE);
     scroll_macine_list->SetScrollRate(5, 5);
     scroll_macine_list->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
     scroll_macine_list->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
@@ -222,7 +225,10 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     wxBoxSizer *scrool_box_sizer = new wxBoxSizer(wxVERTICAL);
 
     wxPanel *panel = new wxPanel(this, wxID_ANY);
-    panel->SetBackgroundColour(*wxWHITE);
+    if(check_dark_mode())
+        panel->SetBackgroundColour(wxColour(62,62,62));
+    else
+        panel->SetBackgroundColour(*wxWHITE);
 
     wxBoxSizer *box_sizer = new wxBoxSizer(wxHORIZONTAL);
     panel->SetSizer(box_sizer);
@@ -261,7 +267,10 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
 
     wxScrolledWindow *scroll_macine_list2 = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(FromDIP(800), FromDIP(300)),
                                                                 wxHSCROLL | wxVSCROLL);
-    scroll_macine_list2->SetBackgroundColour(*wxWHITE);
+    if(check_dark_mode())
+        scroll_macine_list2->SetBackgroundColour(wxColour(62,62,62));
+    else
+        scroll_macine_list2->SetBackgroundColour(*wxWHITE);
     scroll_macine_list2->SetScrollRate(5, 5);
     scroll_macine_list2->SetMinSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
     scroll_macine_list2->SetMaxSize(wxSize(FromDIP(320), 10 * FromDIP(27)));
@@ -296,7 +305,10 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     wxBoxSizer *scrool_box_sizer2 = new wxBoxSizer(wxVERTICAL);
 
     wxPanel *panel2 = new wxPanel(this, wxID_ANY);
-    panel2->SetBackgroundColour(*wxWHITE);
+    if(check_dark_mode())
+        panel2->SetBackgroundColour(wxColour(62,62,62));
+    else
+        panel2->SetBackgroundColour(*wxWHITE);
 
     wxBoxSizer *box_sizer2 = new wxBoxSizer(wxHORIZONTAL);
     panel2->SetSizer(box_sizer2);
@@ -574,7 +586,7 @@ std::string PrintHostSendDialog::storage() const
         return GUI::format("%1%", m_preselected_storage);
     if (combo_storage->GetSelection() < 0 || combo_storage->GetSelection() >= int(m_paths.size()))
         return {};
-    return boost::nowide::narrow(m_paths[combo_storage->GetSelection()]);
+    return into_u8(m_paths[combo_storage->GetSelection()]);
 }
 //B64
 wxBoxSizer *PrintHostSendDialog::create_item_input(
@@ -608,20 +620,39 @@ wxBoxSizer *PrintHostSendDialog::create_item_input(
     sizer_input->Add(0, 0, 0, wxEXPAND | wxLEFT, 3);
     sizer_input->Add(second_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
 
-    input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, param, input](wxCommandEvent &e) {
+    //input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, param, input](wxCommandEvent &e) {
+    //    auto value = input->GetTextCtrl()->GetValue();
+    //    wxGetApp().app_config->set(param, std::string(value.mb_str()));
+    //    wxGetApp().app_config->save();
+    //    e.Skip();
+    //});
+
+    //input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, param, input](wxFocusEvent &e) {
+    //    auto value = input->GetTextCtrl()->GetValue();
+    //    wxGetApp().app_config->set(param, std::string(value.mb_str()));
+    //    wxGetApp().app_config->save();
+    //    e.Skip();
+    //});
+
+    input->GetTextCtrl()->Bind(wxEVT_TEXT, [this, param, input](wxCommandEvent &e) {
         auto value = input->GetTextCtrl()->GetValue();
-        wxGetApp().app_config->set(param, std::string(value.mb_str()));
-        wxGetApp().app_config->save();
+        if (!value.empty()) {
+            if (std::stoi(into_u8(value)) > 6 && (param == "max_send")) {
+                MessageDialog msg_wingow(nullptr, _L("The max send number cannot exceed 6"), "", wxICON_WARNING | wxOK);
+                msg_wingow.ShowModal();
+                value = "6";
+                input->GetTextCtrl()->SetValue(value);
+            } else if (std::stoi(into_u8(value)) > 240 && (param == "sending_interval")) {
+                MessageDialog msg_wingow(nullptr, _L("The sending interval cannot exceed 240"), "", wxICON_WARNING | wxOK);
+                msg_wingow.ShowModal();
+                value = "240";
+                input->GetTextCtrl()->SetValue(value);
+            }
+            wxGetApp().app_config->set(param, std::string(value.mb_str()));
+            wxGetApp().app_config->save();
+        }
         e.Skip();
     });
-
-    input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, param, input](wxFocusEvent &e) {
-        auto value = input->GetTextCtrl()->GetValue();
-        wxGetApp().app_config->set(param, std::string(value.mb_str()));
-        wxGetApp().app_config->save();
-        e.Skip();
-    });
-
     return sizer_input;
 }
 void PrintHostSendDialog::EndModal(int ret)
@@ -926,7 +957,9 @@ void PrintHostQueueDialog::on_progress(Event &evt)
         wxVariant nm, hst;
         job_list->GetValue(nm, evt.job_id, COL_FILENAME);
         job_list->GetValue(hst, evt.job_id, COL_HOST);
-        wxGetApp().notification_manager()->set_upload_job_notification_percentage(evt.job_id + 1, boost::nowide::narrow(nm.GetString()), boost::nowide::narrow(hst.GetString()), evt.progress / 100.f);
+        const wchar_t * nm_str = nm.GetString();
+        const wchar_t * hst_str = hst.GetString();
+        wxGetApp().notification_manager()->set_upload_job_notification_percentage(evt.job_id + 1, into_u8(nm_str), into_u8(hst_str), evt.progress / 100.f);
     }
 }
 
@@ -937,8 +970,8 @@ void PrintHostQueueDialog::on_wait(Event &evt)
     wxVariant nm, hst;
     job_list->GetValue(nm, evt.job_id, COL_FILENAME);
     job_list->GetValue(hst, evt.job_id, COL_HOST);
-    wxGetApp().notification_manager()->set_upload_job_notification_waittime(evt.job_id + 1, boost::nowide::narrow(nm.GetString()),
-                                                                                  boost::nowide::narrow(hst.GetString()),
+    wxGetApp().notification_manager()->set_upload_job_notification_waittime(evt.job_id + 1, into_u8(nm.GetString()),
+                                                                                 into_u8(hst.GetString()),
                                                                                   evt.waittime);
 }
 void PrintHostQueueDialog::on_error(Event &evt)
@@ -972,7 +1005,7 @@ void PrintHostQueueDialog::on_error(Event &evt)
     wxVariant nm, hst;
     job_list->GetValue(nm, evt.job_id, COL_FILENAME);
     job_list->GetValue(hst, evt.job_id, COL_HOST);
-    wxGetApp().notification_manager()->upload_job_notification_show_error(evt.job_id + 1, boost::nowide::narrow(nm.GetString()), boost::nowide::narrow(hst.GetString()));
+    wxGetApp().notification_manager()->upload_job_notification_show_error(evt.job_id + 1, into_u8(nm.GetString()), into_u8(hst.GetString()));
 }
 
 void PrintHostQueueDialog::on_cancel(Event &evt)
@@ -987,7 +1020,7 @@ void PrintHostQueueDialog::on_cancel(Event &evt)
     wxVariant nm, hst;
     job_list->GetValue(nm, evt.job_id, COL_FILENAME);
     job_list->GetValue(hst, evt.job_id, COL_HOST);
-    wxGetApp().notification_manager()->upload_job_notification_show_canceled(evt.job_id + 1, boost::nowide::narrow(nm.GetString()), boost::nowide::narrow(hst.GetString()));
+    wxGetApp().notification_manager()->upload_job_notification_show_canceled(evt.job_id + 1, into_u8(nm.GetString()), into_u8(hst.GetString()));
 }
 
 void PrintHostQueueDialog::on_info(Event& evt)
@@ -997,17 +1030,17 @@ void PrintHostQueueDialog::on_info(Event& evt)
     if (evt.tag == L"resolve") {
         wxVariant hst(evt.status);
         job_list->SetValue(hst, evt.job_id, COL_HOST);
-        wxGetApp().notification_manager()->set_upload_job_notification_host(evt.job_id + 1, boost::nowide::narrow(evt.status));
+        wxGetApp().notification_manager()->set_upload_job_notification_host(evt.job_id + 1, into_u8(evt.status));
     } else if (evt.tag == L"complete") {
         wxVariant hst(evt.status);
         job_list->SetValue(hst, evt.job_id, COL_ERRORMSG);
         wxGetApp().notification_manager()->set_upload_job_notification_completed(evt.job_id + 1);
-        wxGetApp().notification_manager()->set_upload_job_notification_status(evt.job_id + 1, boost::nowide::narrow(evt.status));
+        wxGetApp().notification_manager()->set_upload_job_notification_status(evt.job_id + 1, into_u8(evt.status));
     } else if(evt.tag == L"complete_with_warning"){
         wxVariant hst(evt.status);
         job_list->SetValue(hst, evt.job_id, COL_ERRORMSG);
         wxGetApp().notification_manager()->set_upload_job_notification_completed_with_warning(evt.job_id + 1);
-        wxGetApp().notification_manager()->set_upload_job_notification_status(evt.job_id + 1, boost::nowide::narrow(evt.status));
+        wxGetApp().notification_manager()->set_upload_job_notification_status(evt.job_id + 1, into_u8(evt.status));
     } else if (evt.tag == L"set_complete_off") {
         wxGetApp().notification_manager()->set_upload_job_notification_comp_on_100(evt.job_id + 1, false);
     }

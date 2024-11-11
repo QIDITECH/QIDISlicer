@@ -472,14 +472,19 @@ wxBitmapBundle *BitmapCache::from_png_of_login(const std::string &bitmap_name, u
     int radius = height / 2;
     int cx     = image.GetWidth() / 2;
     int cy     = image.GetHeight() / 2;
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < height; ++x) {
+
+    for (int y = 0; y < height; ++y) 
+    {
+        for (int x = 0; x < height; ++x)
+        {
             int dx = x - radius;
             int dy = y - radius;
-            if (dx * dx + dy * dy <= radius * radius) {
+            if (dx * dx + dy * dy <= radius * radius) 
+            {
                 image.SetRGB(x, y, image.GetRed(cx + dx, cy + dy), image.GetGreen(cx + dx, cy + dy), image.GetBlue(cx + dx, cy + dy));
                 image.SetAlpha(x, y, 255);
-            } else {
+            } else
+            {
                 image.SetRGB(x, y, 38, 38, 41);
                 image.SetAlpha(x, y, 0);
             }

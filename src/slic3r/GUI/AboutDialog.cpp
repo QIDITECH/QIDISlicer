@@ -73,6 +73,7 @@ CopyrightsDialog::CopyrightsDialog()
     m_html->Bind(wxEVT_HTML_LINK_CLICKED, &CopyrightsDialog::onLinkClicked, this);
 
     wxStdDialogButtonSizer* buttons = this->CreateStdDialogButtonSizer(wxCLOSE);
+    wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
     wxGetApp().UpdateDlgDarkUI(this, true);
     this->SetEscapeId(wxID_CLOSE);
     this->Bind(wxEVT_BUTTON, &CopyrightsDialog::onCloseDialog, this, wxID_CLOSE);
@@ -211,7 +212,7 @@ void CopyrightsDialog::onCloseDialog(wxEvent &)
 
 AboutDialog::AboutDialog()
     : DPIDialog(static_cast<wxWindow*>(wxGetApp().mainframe), wxID_ANY, format_wxstr(_L("About %s"), wxGetApp().is_editor() ? SLIC3R_APP_NAME : GCODEVIEWER_APP_NAME), wxDefaultPosition,
-        wxDefaultSize, /*wxCAPTION*/wxDEFAULT_DIALOG_STYLE)
+        wxDefaultSize, /*wxCAPTION*/wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
     SetFont(wxGetApp().normal_font());
 
@@ -220,7 +221,7 @@ AboutDialog::AboutDialog()
     wxBoxSizer* hsizer = new wxBoxSizer(wxHORIZONTAL);
 
 	auto main_sizer = new wxBoxSizer(wxVERTICAL);
-	main_sizer->Add(hsizer, 0, wxEXPAND | wxALL, 0);
+	main_sizer->Add(hsizer, 0, wxEXPAND | wxALL, 20);
 
     // logo
     m_logo = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("QIDI_Back", 99));
@@ -261,12 +262,12 @@ AboutDialog::AboutDialog()
     m_html = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHW_SCROLLBAR_AUTO/*NEVER*/);
     {
         m_html->SetMinSize(wxSize(-1, 16 * wxGetApp().em_unit()));
-        wxFont font = get_default_font(this);
+        wxFont font = wxGetApp().normal_font();// get_default_font(this);
         const auto text_clr = wxGetApp().get_label_clr_default();
         const auto text_clr_str = encode_color(ColorRGB(text_clr.Red(), text_clr.Green(), text_clr.Blue()));
         const auto bgr_clr_str = encode_color(ColorRGB(bgr_clr.Red(), bgr_clr.Green(), bgr_clr.Blue()));
 
-		const int fs = font.GetPointSize();
+		const int fs = font.GetPointSize()-1;
         int size[] = {fs,fs,fs,fs,fs,fs,fs};
         m_html->SetFonts(font.GetFaceName(), font.GetFaceName(), size);
         m_html->SetBorders(2);
@@ -289,6 +290,7 @@ AboutDialog::AboutDialog()
             "<a href=\"https://qidi3d.com/\">%6%</a>"
             "<br /><br />"
             "%7%<br />"
+            "%12% &copy; 2023-2024 QIDI Technology. <br />"
             "%8% &copy; 2016-2024 Prusa Research. <br />"
             "%9% &copy; 2011-2018 Alessandro Ranellucci. <br />"
             "<a href=\"http://slic3r.org/\">Slic3r</a> %10% "
@@ -298,7 +300,7 @@ AboutDialog::AboutDialog()
             "</html>", bgr_clr_str, text_clr_str, text_clr_str
             , contributors_str, a_url_str, s_url_str ,version_str
             , copyright_str, copyright_str
-            , is_lecensed_str, license_str);
+            , is_lecensed_str, license_str, copyright_str);
         m_html->SetPage(text);
         m_html->SetForegroundColour(wxColour(68, 121, 251));
         vsizer->Add(m_html, 1, wxEXPAND | wxTOP, -30);
@@ -307,17 +309,25 @@ AboutDialog::AboutDialog()
 
 
     wxStdDialogButtonSizer* buttons = this->CreateStdDialogButtonSizer(wxCLOSE);
+    wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
 
     m_copy_rights_btn_id = NewControlId();
     auto copy_rights_btn = new wxButton(this, m_copy_rights_btn_id, _L("Portions copyright")+dots);
     buttons->Insert(0, copy_rights_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
     copy_rights_btn->Bind(wxEVT_BUTTON, &AboutDialog::onCopyrightBtn, this);
+    wxGetApp().SetWindowVariantForButton(copy_rights_btn);
+
+    m_copy_version_btn_id = NewControlId();
+    auto copy_version_btn = new wxButton(this, m_copy_version_btn_id, _L("Copy Version Info"));
+    buttons->Insert(1, copy_version_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+    copy_version_btn->Bind(wxEVT_BUTTON, &AboutDialog::onCopyToClipboard, this);
+    wxGetApp().SetWindowVariantForButton(copy_version_btn);
 
     wxGetApp().UpdateDlgDarkUI(this, true);
     
     this->SetEscapeId(wxID_CLOSE);
     this->Bind(wxEVT_BUTTON, &AboutDialog::onCloseDialog, this, wxID_CLOSE);
-    vsizer->Add(buttons, 0, wxEXPAND | wxRIGHT | wxTOP | wxBOTTOM, 15);
+    vsizer->Add(buttons, 0, wxEXPAND | wxRIGHT | wxBOTTOM, 3);
 
 	SetSizer(main_sizer);
 	main_sizer->SetSizeHints(this);
@@ -363,6 +373,13 @@ void AboutDialog::onCopyrightBtn(wxEvent &)
 {
     CopyrightsDialog dlg;
     dlg.ShowModal();
+}
+
+void AboutDialog::onCopyToClipboard(wxEvent&)
+{
+    wxTheClipboard->Open();
+    wxTheClipboard->SetData(new wxTextDataObject(_L("Version") + " " + std::string(SLIC3R_VERSION)));
+    wxTheClipboard->Close();
 }
 
 } // namespace GUI

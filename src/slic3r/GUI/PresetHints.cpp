@@ -26,7 +26,6 @@ std::string PresetHints::cooling_description(const Preset &preset)
     if (cooling) {
 		int 	slowdown_below_layer_time 	= preset.config.opt_int("slowdown_below_layer_time", 0);
 		int 	min_fan_speed 				= preset.config.opt_int("min_fan_speed", 0);
-
 		int 	max_fan_speed 				= preset.config.opt_int("max_fan_speed", 0);
 		int 	min_print_speed				= int(preset.config.opt_float("min_print_speed", 0) + 0.5);
 
@@ -309,4 +308,5 @@ std::string PresetHints::top_bottom_shell_thickness_explanation(const PresetBund
 
     return out;
 }
+
 }; // namespace Slic3r

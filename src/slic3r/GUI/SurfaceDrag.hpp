@@ -42,6 +42,7 @@ struct SurfaceDrag
 
     // initial Z distance from surface
     std::optional<float> start_distance;
+
     // Flag whether coordinate hit some volume
     bool exist_hit = true;
 
@@ -52,6 +53,7 @@ struct SurfaceDrag
 // Limit direction of up vector on model
 // Between side and top surface
 constexpr double UP_LIMIT = 0.9;
+
 /// <summary>
 /// Mouse event handler, when move(drag&drop) volume over model surface
 /// NOTE: Dragged volume has to be selected. And also has to be hovered on start of dragging.
@@ -163,5 +165,6 @@ TransformationType get_drag_transformation_type(const Selection &selection);
 /// <param name="start_angle">Cache for start dragging angle</param>
 /// <param name="selection">Selected only Actual embossed volume</param>
 void dragging_rotate_gizmo(double gizmo_angle, std::optional<float>& current_angle, std::optional<float> &start_angle, Selection &selection);
+
 } // namespace Slic3r::GUI
 #endif // slic3r_SurfaceDrag_hpp_

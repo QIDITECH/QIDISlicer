@@ -50,7 +50,6 @@ public:
 
     void SetSelection(int n) override;
 
-
     virtual void Rescale() override;
 
     wxString GetValue() const;
@@ -66,6 +65,7 @@ public:
     void     SetString(unsigned int n, wxString const &value) override;
 
     wxBitmap GetItemBitmap(unsigned int n);
+
     void     OnKeyDown(wxKeyEvent& event);
 
 protected:
@@ -82,7 +82,6 @@ protected:
     
     void OnEdit() override;
 
-
 #ifdef __WIN32__
     WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) override;
 #endif
@@ -95,6 +94,7 @@ private:
     void keyDown(wxKeyEvent &event);
 
     void sendComboBoxEvent();
+
     DECLARE_EVENT_TABLE()
 };
 

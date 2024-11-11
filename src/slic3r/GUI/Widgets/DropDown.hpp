@@ -5,6 +5,7 @@
 #include <wx/popupwin.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+
 #include "../wxExtensions.hpp"
 #include "StateHandler.hpp"
 
@@ -83,9 +84,11 @@ public:
     void Rescale();
 
     bool HasDismissLongTime();
-    
+
     static void SetTransparentBG(wxDC& dc, wxWindow* win);
+
     void CallDismissAndNotify() { DismissAndNotify(); }
+    
 protected:
     void OnDismiss() override;
 

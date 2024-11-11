@@ -1,5 +1,5 @@
 #include "slic3r/Utils/Bonjour.hpp"   // On Windows, boost needs to be included before wxWidgets headers
-#include "slic3r/Utils/Udp.hpp"
+
 #include "BonjourDialog.hpp"
 
 #include <set>
@@ -137,7 +137,6 @@ bool BonjourDialog::show_and_lookup()
 	timer->Start(1000);
     on_timer_process();
 
-
 	// The background thread needs to queue messages for this dialog
 	// and for that it needs a valid pointer to it (mandated by the wxWidgets API).
 	// Here we put the pointer under a shared_ptr and protect it by a mutex,
@@ -171,7 +170,7 @@ bool BonjourDialog::show_and_lookup()
 
 
 	// Note: More can be done here when we support discovery of hosts other than Octoprint and SL1
-    Bonjour::TxtKeys txt_keys{"version", "model"};
+	Bonjour::TxtKeys txt_keys { "version", "model" };
 
     bonjour = Bonjour("octoprint")
 		.set_txt_keys(std::move(txt_keys))
@@ -215,58 +214,54 @@ wxString BonjourDialog::get_selected() const
 
 void BonjourDialog::on_reply(BonjourReplyEvent &e)
 {
-    if (replies->find(e.reply) != replies->end()) {
-        // We already have this reply
-        return;
-    }
+	if (replies->find(e.reply) != replies->end()) {
+		// We already have this reply
+		return;
+	}
 
-    // Filter replies based on selected technology
-    const auto model = e.reply.txt_data.find("model");
-    const bool sl1   = model != e.reply.txt_data.end() && model->second == "SL1";
-    if ((tech == ptFFF && sl1) || (tech == ptSLA && !sl1)) {
-        return;
-    }
+	// Filter replies based on selected technology
+	const auto model = e.reply.txt_data.find("model");
+	const bool sl1 = model != e.reply.txt_data.end() && model->second == "SL1";
+	if ((tech == ptFFF && sl1) || (tech == ptSLA && !sl1)) {
+		return;
+	}
 
-    replies->insert(std::move(e.reply));
+	replies->insert(std::move(e.reply));
 
-    auto selected = get_selected();
+	auto selected = get_selected();
 
-    wxWindowUpdateLocker freeze_guard(this);
-    (void) freeze_guard;
+	wxWindowUpdateLocker freeze_guard(this);
+	(void)freeze_guard;
 
-    list->DeleteAllItems();
+	list->DeleteAllItems();
 
-    // The whole list is recreated so that we benefit from it already being sorted in the set.
-    // (And also because wxListView's sorting API is bananas.)
-    for (const auto &reply : *replies) {
-        auto item = list->InsertItem(0, reply.full_address);
-        list->SetItem(item, 1, reply.hostname);
-        list->SetItem(item, 2, reply.service_name);
+	// The whole list is recreated so that we benefit from it already being sorted in the set.
+	// (And also because wxListView's sorting API is bananas.)
+	for (const auto &reply : *replies) {
+		auto item = list->InsertItem(0, reply.full_address);
+		list->SetItem(item, 1, reply.hostname);
+		list->SetItem(item, 2, reply.service_name);
 
-        if (tech == ptFFF) {
-            const auto it = reply.txt_data.find("version");
-            if (it != reply.txt_data.end()) {
-                list->SetItem(item, 3, GUI::from_u8(it->second));
-            }
-        }
-    }
+		if (tech == ptFFF) {
+			const auto it = reply.txt_data.find("version");
+			if (it != reply.txt_data.end()) {
+				list->SetItem(item, 3, GUI::from_u8(it->second));
+			}
+		}
+	}
 
-    const int em = GUI::wxGetApp().em_unit();
+	const int em = GUI::wxGetApp().em_unit();
 
-    for (int i = 0; i < list->GetColumnCount(); i++) {
-        list->SetColumnWidth(i, wxLIST_AUTOSIZE);
-        if (list->GetColumnWidth(i) < 10 * em) {
-            list->SetColumnWidth(i, 10 * em);
-        }
-    }
+	for (int i = 0; i < list->GetColumnCount(); i++) {
+		list->SetColumnWidth(i, wxLIST_AUTOSIZE);
+		if (list->GetColumnWidth(i) < 10 * em) { list->SetColumnWidth(i, 10 * em); }
+	}
 
-    if (!selected.IsEmpty()) {
-        // Attempt to preserve selection
-        auto hit = list->FindItem(-1, selected);
-        if (hit >= 0) {
-            list->SetItemState(hit, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-        }
-    }
+	if (!selected.IsEmpty()) {
+		// Attempt to preserve selection
+		auto hit = list->FindItem(-1, selected);
+		if (hit >= 0) { list->SetItemState(hit, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED); }
+	}
 }
 
 // B29

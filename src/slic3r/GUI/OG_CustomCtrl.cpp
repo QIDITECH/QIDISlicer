@@ -246,9 +246,7 @@ void OG_CustomCtrl::OnMotion(wxMouseEvent& event)
 
     wxString language = wxGetApp().app_config->get("translation_language");
 
-    //B21
-    //const bool suppress_hyperlinks = get_app_config()->get_bool("suppress_hyperlinks");
-    const bool suppress_hyperlinks = true;
+    const bool suppress_hyperlinks = get_app_config()->get_bool("suppress_hyperlinks");
 
     for (CtrlLine& line : ctrl_lines) {
         line.is_focused = is_point_in_rect(pos, line.rect_label);
@@ -334,6 +332,7 @@ void OG_CustomCtrl::OnLeftDown(wxMouseEvent& event)
                 event.Skip();
                 return;
             }
+
             if (opt_idx < line.rects_edit_icon.size() && is_point_in_rect(pos, line.rects_edit_icon[opt_idx])) {
                 if (Field* field = opt_group->get_field(opt_key))
                     field->on_edit_value();
@@ -579,11 +578,11 @@ void OG_CustomCtrl::CtrlLine::render(wxDC& dc, wxCoord v_pos)
     }
 
     wxCoord h_pos = draw_mode_bmp(dc, v_pos);
+
     Field* field = ctrl->opt_group->get_field(og_line.get_options().front().opt_id);
 
-    //B21
-    //const bool suppress_hyperlinks = get_app_config()->get_bool("suppress_hyperlinks");
-    const bool suppress_hyperlinks = true;
+
+    const bool suppress_hyperlinks = get_app_config()->get_bool("suppress_hyperlinks");
     if (draw_just_act_buttons) {
         if (field) {
             const wxPoint pos = draw_act_bmps(dc, wxPoint(h_pos, v_pos), field->undo_to_sys_bitmap(), field->undo_bitmap(), field->blink());
@@ -593,7 +592,6 @@ void OG_CustomCtrl::CtrlLine::render(wxDC& dc, wxCoord v_pos)
         }
         return;
     }
-
 
     if (og_line.near_label_widget_win)
         h_pos += og_line.near_label_widget_win->GetSize().x + ctrl->m_h_gap;

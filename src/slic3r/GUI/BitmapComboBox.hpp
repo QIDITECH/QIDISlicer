@@ -5,6 +5,7 @@
 #include <wx/gdicmn.h>
 
 #include "Widgets/ComboBox.hpp"
+
 #include "GUI_Utils.hpp"
 
 // ---------------------------------

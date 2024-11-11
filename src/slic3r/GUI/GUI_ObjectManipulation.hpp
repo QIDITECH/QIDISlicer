@@ -11,6 +11,7 @@
 
 #include "Widgets/ComboBox.hpp"
 #include "Widgets/TextInput.hpp"
+
 #ifdef __WXOSX__
 class wxBitmapComboBox;
 #else
@@ -21,10 +22,10 @@ class LockButton;
 class wxStaticBitmap;
 
 namespace Slic3r {
-namespace GUI {
+    namespace GUI {
 
 #ifdef _WIN32
-class BitmapComboBox;
+        class BitmapComboBox;
 #endif
 
 #if 1

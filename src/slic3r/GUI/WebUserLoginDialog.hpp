@@ -60,7 +60,11 @@ public:
     bool ShowErrorPage();
 
     bool run();
+    void OnRunScriptObjectWithEmulationLevel(wxCommandEvent &WXUNUSED(evt));
 
+    void OnRunScriptDateWithEmulationLevel(wxCommandEvent &WXUNUSED(evt));
+
+    void OnRunScriptArrayWithEmulationLevel(wxCommandEvent &WXUNUSED(evt));
     static int web_sequence_id;
 private:
     wxTimer *m_timer { nullptr };

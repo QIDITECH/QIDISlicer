@@ -267,7 +267,7 @@ class ObjectDataViewModel :public wxDataViewModel
 {
     std::vector<ObjectDataViewModelNode*>       m_objects;
     std::vector<wxBitmapBundle*>                m_volume_bmps;
-    std::vector<wxBitmapBundle*>                m_text_volume_bmps;
+    std::vector<wxBitmapBundle *>               m_text_volume_bmps;
     std::vector<wxBitmapBundle *>               m_svg_volume_bmps;
     std::map<InfoItemType, wxBitmapBundle*>     m_info_bmps;
     wxBitmapBundle                              m_empty_bmp;

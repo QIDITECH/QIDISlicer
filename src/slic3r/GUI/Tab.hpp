@@ -38,6 +38,7 @@
 #include "libslic3r/Preset.hpp"
 
 class CheckBox;
+
 namespace Slic3r {
 namespace GUI {
 
@@ -169,7 +170,6 @@ protected:
 	std::string			m_name;
 	const wxString		m_title;
 	TabPresetComboBox*	m_presets_choice;
-	ScalableButton*		m_search_btn;
 	ScalableButton*		m_btn_compare_preset;
 	ScalableButton*		m_btn_save_preset;
 	ScalableButton*		m_btn_rename_preset;
@@ -184,8 +184,6 @@ protected:
 
 	wxScrolledWindow*	m_page_view {nullptr};
 	wxBoxSizer*			m_page_sizer {nullptr};
-
-    ModeSizer*			m_mode_sizer {nullptr};
 
    	struct PresetDependencies {
 		Preset::Type type	  = Preset::TYPE_INVALID;
@@ -365,6 +363,7 @@ public:
     void            update_mode();
     void            update_mode_markers();
     void            update_visibility();
+    virtual void    update_sla_qidi_specific_visibility() {}
     virtual void    msw_rescale();
     virtual void	sys_color_changed();
 	Field*			get_field(const t_config_option_key& opt_key, int opt_index = -1) const;
@@ -394,6 +393,7 @@ public:
 	static bool validate_custom_gcode(const wxString& title, const std::string& gcode);
 	bool        validate_custom_gcodes();
     bool        validate_custom_gcodes_was_shown{ false };
+    bool        is_qidi_printer() const;
 
     void						edit_custom_gcode(const t_config_option_key& opt_key);
     virtual const std::string&	get_custom_gcode(const t_config_option_key& opt_key);
@@ -464,7 +464,7 @@ class TabFilament : public Tab
     std::map<std::string, wxWindow*> m_overrides_options;
 public:
 	TabFilament(wxBookCtrlBase* parent) :
-		Tab(parent, _(L("Filament Settings")), Slic3r::Preset::TYPE_FILAMENT) {}
+		Tab(parent, _L("Filaments"), Slic3r::Preset::TYPE_FILAMENT) {}
 	~TabFilament() {}
 
 	void		build() override;
@@ -487,6 +487,7 @@ public:
 
 	const std::string&	get_custom_gcode(const t_config_option_key& opt_key) override;
 	void				set_custom_gcode(const t_config_option_key& opt_key, const std::string& value) override;
+
 protected:
     bool        select_preset_by_name(const std::string& name_w_suffix, bool force) override;
     bool        save_current_preset(const std::string& new_name, bool detach) override;
@@ -521,7 +522,7 @@ public:
     PrinterTechnology               m_printer_technology = ptFFF;
 
     TabPrinter(wxBookCtrlBase* parent) :
-        Tab(parent, _L("Printer Settings"), Slic3r::Preset::TYPE_PRINTER) {}
+        Tab(parent, _L("Printers"), Slic3r::Preset::TYPE_PRINTER) {}
 	~TabPrinter() {}
 
 	void		build() override;
@@ -547,6 +548,7 @@ public:
 	wxSizer*	create_bed_shape_widget(wxWindow* parent);
 	void		cache_extruder_cnt(const DynamicPrintConfig* config = nullptr);
 	bool		apply_extruder_cnt_from_cache();
+	void		update_sla_qidi_specific_visibility() override;
 };
 
 class TabSLAMaterial : public Tab
@@ -557,15 +559,24 @@ class TabSLAMaterial : public Tab
 	void		update_material_overrides_page();
 
 	std::map<std::string, wxWindow*> m_overrides_options;
+	ogStaticText*	m_z_correction_to_mm_description = nullptr;
+
 public:
     TabSLAMaterial(wxBookCtrlBase* parent) :
-		Tab(parent, _(L("Material Settings")), Slic3r::Preset::TYPE_SLA_MATERIAL) {}
+		Tab(parent, _L("Materials"), Slic3r::Preset::TYPE_SLA_MATERIAL) {}
     ~TabSLAMaterial() {}
 
 	void		build() override;
+	void		build_tilt_group(Slic3r::GUI::PageShp page);
+	void		toggle_tilt_options(bool is_above);
 	void		toggle_options() override;
 	void		update() override;
+	void		clear_pages() override;
+	void        msw_rescale() override;
+	void		sys_color_changed() override;
 	bool 		supports_printer_technology(const PrinterTechnology tech) const override { return tech == ptSLA; }
+	void		update_sla_qidi_specific_visibility() override;
+    void		update_description_lines() override;
 };
 
 class TabSLAPrint : public Tab

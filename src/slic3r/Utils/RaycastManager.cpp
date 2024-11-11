@@ -378,4 +378,5 @@ RaycastManager::AllowVolumes create_condition(const ModelVolumePtrs &volumes, co
     }
     return RaycastManager::AllowVolumes(allowed_volumes_id);
 }
+
 } // namespace Slic3r::GUI

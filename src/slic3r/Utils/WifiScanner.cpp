@@ -1,8 +1,7 @@
 #include "WifiScanner.hpp"
-
+#include "slic3r/GUI/GUI.hpp"
 
 #include <boost/log/trivial.hpp>
-#include <boost/nowide/system.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/filesystem.hpp>
 
@@ -12,6 +11,7 @@
 #include <wtypes.h>
 
 #include "libslic3r//Utils.hpp"
+
 #elif __APPLE_
 #include "WifiScannerMac.h"
 #endif 
@@ -21,6 +21,7 @@
 #endif //__linux__
 
 namespace {
+
 #ifdef _WIN32
 bool ptree_get_value(const boost::property_tree::ptree& pt, const std::string& target, std::string& result)
 {
@@ -39,6 +40,7 @@ bool ptree_get_value(const boost::property_tree::ptree& pt, const std::string& t
 
     return false;  // Element not found in this subtree
 }
+
 #elif __APPLE__
 void get_connected_ssid(std::string& connected_ssid)
 {
@@ -351,6 +353,7 @@ std::string WifiScanner::get_psk(const std::string& ssid)
     }
     return {};
 }
+
 #ifdef _WIN32
 // Fill SSID map. Implementation from Raspberry Pi imager and Win32 Api examples.
 // https://github.com/raspberrypi/rpi-imager/blob/qml/src/windows/winwlancredentials.cpp
@@ -456,7 +459,7 @@ void WifiScanner::fill_wifi_map(Slic3r::WifiSsidPskMap& wifi_map, std::string& c
                 {
                     wxString xml(xmlstr);
                     boost::property_tree::ptree pt;
-                    std::stringstream ss(boost::nowide::narrow(xml));
+                    std::stringstream ss(Slic3r::GUI::into_u8(xml));
                     boost::property_tree::read_xml(ss, pt);
                     std::string password;
                     std::string psk_protected;

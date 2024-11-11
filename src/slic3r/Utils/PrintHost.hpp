@@ -39,6 +39,8 @@ struct PrintHostUpload
     std::string storage;
 
     PrintHostPostUploadAction post_action { PrintHostPostUploadAction::None };
+
+    std::string data_json;
 };
 
 class PrintHost

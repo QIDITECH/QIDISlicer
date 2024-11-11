@@ -191,7 +191,7 @@ void BackgroundSlicingProcess::process_sla()
 					sizes.emplace_back(size);
 			}
 			ThumbnailsList thumbnails = this->render_thumbnails(ThumbnailsParams{sizes, true, true, true, true });
-            m_sla_print->export_print(export_path, thumbnails);
+			m_sla_print->export_print(export_path, thumbnails);
 
             m_print->set_status(100, GUI::format(_L("Masked SLA file exported to %1%"), export_path));
         } else if (! m_upload_job.empty()) {
@@ -742,9 +742,22 @@ void BackgroundSlicingProcess::prepare_upload()
 			m_upload_job.upload_data.upload_path = output_name_str;
     } else {
         m_upload_job.upload_data.upload_path = m_sla_print->print_statistics().finalize_output_path(m_upload_job.upload_data.upload_path.string());
-        
-        ThumbnailsList thumbnails = this->render_thumbnails(
-        	ThumbnailsParams{current_print()->full_print_config().option<ConfigOptionPoints>("thumbnails")->values, true, true, true, true});
+
+		auto [thumbnails_list, errors] = GCodeThumbnails::make_and_check_thumbnail_list(current_print()->full_print_config());
+
+		if (errors != enum_bitmask<ThumbnailError>()) {
+			std::string error_str = format("Invalid thumbnails value:");
+			error_str += GCodeThumbnails::get_error_string(errors);
+			throw Slic3r::ExportError(error_str);
+		}
+
+		Vec2ds 	sizes;
+		if (!thumbnails_list.empty()) {
+			sizes.reserve(thumbnails_list.size());
+			for (const auto& [format, size] : thumbnails_list)
+				sizes.emplace_back(size);
+		}
+		ThumbnailsList thumbnails = this->render_thumbnails(ThumbnailsParams{ sizes, true, true, true, true });
         m_sla_print->export_print(source_path.string(),thumbnails, m_upload_job.upload_data.upload_path.filename().string());
     }
 

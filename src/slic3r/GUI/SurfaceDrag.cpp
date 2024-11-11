@@ -4,6 +4,7 @@
 #include <libslic3r/Emboss.hpp>
 
 #include "slic3r/Utils/RaycastManager.hpp"
+
 #include "GLCanvas3D.hpp"
 #include "Camera.hpp"
 #include "CameraUtils.hpp"
@@ -67,7 +68,6 @@ const Transform3d *get_fix_transformation(const Selection &selection);
 }
 
 namespace Slic3r::GUI {
-
  // Calculate scale in world for check in debug
 [[maybe_unused]] static std::optional<double> calc_scale(const Matrix3d &from, const Matrix3d &to, const Vec3d &dir)
 {
@@ -196,6 +196,7 @@ std::optional<float> calc_distance(const GLVolume &gl_volume, RaycastManager &ra
 
     if (!volume->emboss_shape.has_value())
         return {};
+        
     RaycastManager::AllowVolumes condition = create_condition(object->volumes, volume->id());
     RaycastManager::Meshes meshes = create_meshes(canvas, condition);
     raycaster.actualize(*instance, &condition, &meshes);
@@ -386,7 +387,6 @@ bool face_selected_volume_to_camera(const Camera &camera, GLCanvas3D &canvas, co
 }
 
 void do_local_z_rotate(Selection &selection, double relative_angle) {
-
     assert(!selection.is_empty());
     if(selection.is_empty()) return;
 
@@ -416,7 +416,6 @@ void do_local_z_rotate(Selection &selection, double relative_angle) {
         selection.rotate(Vec3d(0., 0., relative_angle), get_drag_transformation_type(selection));
     };
     selection_transform(selection, selection_rotate_fnc);
-
 }
 
 void do_local_z_move(Selection &selection, double relative_move) {
@@ -429,7 +428,6 @@ void do_local_z_move(Selection &selection, double relative_move) {
         selection.translate(translate, TransformationType::Local);
     };
     selection_transform(selection, selection_translate_fnc);
-
 }
 
 TransformationType get_drag_transformation_type(const Selection &selection)
@@ -497,79 +495,78 @@ bool start_dragging(const Vec2d                &mouse_pos,
                     RaycastManager             &raycast_manager,
                     const std::optional<double>&up_limit)
 {
-        // selected volume
+    // selected volume
     GLVolume *gl_volume_ptr = get_selected_gl_volume(canvas);
     if (gl_volume_ptr == nullptr)
-            return false;
+        return false;
     const GLVolume &gl_volume = *gl_volume_ptr;
 
-        // is selected volume closest hovered?
-        const GLVolumePtrs &gl_volumes = canvas.get_volumes().volumes;        
+    // is selected volume closest hovered?
+    const GLVolumePtrs &gl_volumes = canvas.get_volumes().volumes;
     if (int hovered_idx = canvas.get_first_hover_volume_idx(); hovered_idx < 0)
-            return false;        
-        else if (auto hovered_idx_ = static_cast<size_t>(hovered_idx);
+        return false;
+    else if (auto hovered_idx_ = static_cast<size_t>(hovered_idx);
              hovered_idx_ >= gl_volumes.size() || gl_volumes[hovered_idx_] != gl_volume_ptr)
-            return false;
+        return false;
 
-        const ModelObjectPtrs &objects = canvas.get_model()->objects;
+    const ModelObjectPtrs &objects = canvas.get_model()->objects;
     const ModelObject     *object  = get_model_object(gl_volume, objects);
-        assert(object != nullptr);
-        if (object == nullptr)
-            return false;
+    assert(object != nullptr);
+    if (object == nullptr)
+        return false;
 
     const ModelInstance *instance = get_model_instance(gl_volume, *object);
     const ModelVolume   *volume   = get_model_volume(gl_volume, *object);
-        assert(instance != nullptr && volume != nullptr);
-        if (object == nullptr || instance == nullptr || volume == nullptr)
-            return false;
+    assert(instance != nullptr && volume != nullptr);
+    if (object == nullptr || instance == nullptr || volume == nullptr)
+        return false;
 
-        // allowed drag&drop by canvas for object
-        if (volume->is_the_only_one_part())
-            return false;
+    // allowed drag&drop by canvas for object
+    if (volume->is_the_only_one_part())
+        return false;
 
     RaycastManager::AllowVolumes condition = create_condition(object->volumes, volume->id());
-        RaycastManager::Meshes meshes = create_meshes(canvas, condition);
-        // initialize raycasters
-        // INFO: It could slows down for big objects
-        // (may be move to thread and do not show drag until it finish)
-        raycast_manager.actualize(*instance, &condition, &meshes);
+    RaycastManager::Meshes meshes = create_meshes(canvas, condition);
+    // initialize raycasters
+    // INFO: It could slows down for big objects
+    // (may be move to thread and do not show drag until it finish)
+    raycast_manager.actualize(*instance, &condition, &meshes);
 
-
-        // world_matrix_fixed() without sla shift
+    // world_matrix_fixed() without sla shift
     Transform3d to_world = world_matrix_fixed(gl_volume, objects);
-        
-        // zero point of volume in world coordinate system
-        Vec3d volume_center = to_world.translation();
-        // screen coordinate of volume center
-        Vec2i coor = CameraUtils::project(camera, volume_center);
-        Vec2d mouse_offset = coor.cast<double>() - mouse_pos;
-        Vec2d mouse_offset_without_sla_shift = mouse_offset;
+
+    // zero point of volume in world coordinate system
+    Vec3d volume_center = to_world.translation();
+    // screen coordinate of volume center
+    Vec2i coor                           = CameraUtils::project(camera, volume_center);
+    Vec2d mouse_offset                   = coor.cast<double>() - mouse_pos;
+    Vec2d mouse_offset_without_sla_shift = mouse_offset;
     if (double sla_shift = gl_volume.get_sla_shift_z(); !is_approx(sla_shift, 0.)) {
-            Transform3d to_world_without_sla_move = instance->get_matrix() * volume->get_matrix();
+        Transform3d to_world_without_sla_move = instance->get_matrix() * volume->get_matrix();
         if (volume->emboss_shape.has_value() && volume->emboss_shape->fix_3mf_tr.has_value())
             to_world_without_sla_move = to_world_without_sla_move * (*volume->emboss_shape->fix_3mf_tr);
-            // zero point of volume in world coordinate system
-            volume_center = to_world_without_sla_move.translation();
-            // screen coordinate of volume center
-            coor = CameraUtils::project(camera, volume_center);
-            mouse_offset_without_sla_shift = coor.cast<double>() - mouse_pos;            
-        }
+        // zero point of volume in world coordinate system
+        volume_center = to_world_without_sla_move.translation();
+        // screen coordinate of volume center
+        coor                           = CameraUtils::project(camera, volume_center);
+        mouse_offset_without_sla_shift = coor.cast<double>() - mouse_pos;
+    }
 
     Transform3d volume_tr = gl_volume.get_volume_transformation().get_matrix();
 
-            // fix baked transformation from .3mf store process
+    // fix baked transformation from .3mf store process
     if (const std::optional<EmbossShape> &es_opt = volume->emboss_shape; es_opt.has_value()) {
         const std::optional<Slic3r::Transform3d> &fix = es_opt->fix_3mf_tr;
         if (fix.has_value())
             volume_tr = volume_tr * fix->inverse();
-        }
+    }
 
-        Transform3d instance_tr     = instance->get_matrix();
-        Transform3d instance_tr_inv = instance_tr.inverse();
-        Transform3d world_tr        = instance_tr * volume_tr;
-        std::optional<float> start_angle;
+    Transform3d instance_tr     = instance->get_matrix();
+    Transform3d instance_tr_inv = instance_tr.inverse();
+    Transform3d world_tr        = instance_tr * volume_tr;
+    std::optional<float> start_angle;
     if (up_limit.has_value()) {
-            start_angle = Emboss::calc_up(world_tr, *up_limit);        
+        start_angle = Emboss::calc_up(world_tr, *up_limit);
         if (start_angle.has_value() && has_reflection(world_tr))
             start_angle = -(*start_angle);
     }
@@ -581,11 +578,11 @@ bool start_dragging(const Vec2d                &mouse_pos,
                                gl_volume_ptr,  condition, start_angle,
                                start_distance, true,      mouse_offset_without_sla_shift};
 
-        // disable moving with object by mouse
-        canvas.enable_moving(false);
-        canvas.enable_picking(false);
-        return true;
-    }
+    // disable moving with object by mouse
+    canvas.enable_moving(false);
+    canvas.enable_picking(false);
+    return true;
+}
 
 Transform3d get_volume_transformation(
     Transform3d world, // from volume
@@ -600,51 +597,51 @@ Transform3d get_volume_transformation(
     const std::optional<double> &up_limit) 
 {
     auto world_linear = world.linear();
-        // Calculate offset: transformation to wanted position
-        {
-            // Reset skew of the text Z axis:
-            // Project the old Z axis into a new Z axis, which is perpendicular to the old XY plane.
-            Vec3d old_z         = world_linear.col(2);
-            Vec3d new_z         = world_linear.col(0).cross(world_linear.col(1));
-            world_linear.col(2) = new_z * (old_z.dot(new_z) / new_z.squaredNorm());
-        }
+    // Calculate offset: transformation to wanted position
+    {
+        // Reset skew of the text Z axis:
+        // Project the old Z axis into a new Z axis, which is perpendicular to the old XY plane.
+        Vec3d old_z         = world_linear.col(2);
+        Vec3d new_z         = world_linear.col(0).cross(world_linear.col(1));
+        world_linear.col(2) = new_z * (old_z.dot(new_z) / new_z.squaredNorm());
+    }
 
-        Vec3d       text_z_world     = world_linear.col(2); // world_linear * Vec3d::UnitZ()
+    Vec3d       text_z_world     = world_linear.col(2); // world_linear * Vec3d::UnitZ()
     auto        z_rotation       = Eigen::Quaternion<double, Eigen::DontAlign>::FromTwoVectors(text_z_world, world_dir);
     Transform3d world_new        = z_rotation * world;
-        auto        world_new_linear = world_new.linear();
+    auto        world_new_linear = world_new.linear();
 
-        // Fix direction of up vector to zero initial rotation
-        if(up_limit.has_value()){
-            Vec3d z_world = world_new_linear.col(2);
-            z_world.normalize();
-            Vec3d wanted_up = Emboss::suggest_up(z_world, *up_limit);
+    // Fix direction of up vector to zero initial rotation
+    if(up_limit.has_value()){
+        Vec3d z_world = world_new_linear.col(2);
+        z_world.normalize();
+        Vec3d wanted_up = Emboss::suggest_up(z_world, *up_limit);
 
-            Vec3d y_world    = world_new_linear.col(1);
-            auto  y_rotation = Eigen::Quaternion<double, Eigen::DontAlign>::FromTwoVectors(y_world, wanted_up);
+        Vec3d y_world    = world_new_linear.col(1);
+        auto  y_rotation = Eigen::Quaternion<double, Eigen::DontAlign>::FromTwoVectors(y_world, wanted_up);
 
-            world_new        = y_rotation * world_new;
-            world_new_linear = world_new.linear();
-        }
-        
-        // Edit position from right
+        world_new        = y_rotation * world_new;
+        world_new_linear = world_new.linear();
+    }
+    
+    // Edit position from right
     Transform3d volume_new{Eigen::Translation<double, 3>(instance_inv * world_position)};
     volume_new.linear() = instance_inv.linear() * world_new_linear;
 
-        // Check that transformation matrix is valid transformation
-        assert(volume_new.matrix()(0, 0) == volume_new.matrix()(0, 0)); // Check valid transformation not a NAN
-        if (volume_new.matrix()(0, 0) != volume_new.matrix()(0, 0))
+    // Check that transformation matrix is valid transformation
+    assert(volume_new.matrix()(0, 0) == volume_new.matrix()(0, 0)); // Check valid transformation not a NAN
+    if (volume_new.matrix()(0, 0) != volume_new.matrix()(0, 0))
         return Transform3d::Identity();
 
-        // Check that scale in world did not changed
-        assert(!calc_scale(world_linear, world_new_linear, Vec3d::UnitY()).has_value());
-        assert(!calc_scale(world_linear, world_new_linear, Vec3d::UnitZ()).has_value());
+    // Check that scale in world did not changed
+    assert(!calc_scale(world_linear, world_new_linear, Vec3d::UnitY()).has_value());
+    assert(!calc_scale(world_linear, world_new_linear, Vec3d::UnitZ()).has_value());
 
-            // fix baked transformation from .3mf store process
+    // fix baked transformation from .3mf store process
     if (fix.has_value())
         volume_new = volume_new * (*fix);
 
-            // apply move in Z direction and rotation by up vector
+    // apply move in Z direction and rotation by up vector
     Emboss::apply_transformation(current_angle, {}, volume_new);
 
     return volume_new;    
@@ -666,7 +663,7 @@ bool dragging(const Vec2d                 &mouse_pos,
         // cross hair need redraw
         canvas.set_as_dirty();
         return true;
-        }
+    }
 
     const ModelVolume *volume = get_model_volume(*surface_drag.gl_volume, canvas.get_model()->objects);
     std::optional<Transform3d> fix;
@@ -676,19 +673,20 @@ bool dragging(const Vec2d                 &mouse_pos,
         fix = volume->emboss_shape->fix_3mf_tr;
     Transform3d volume_new = get_volume_transformation(surface_drag.world, hit->normal, hit->position,
         fix, surface_drag.instance_inv, surface_drag.start_angle, up_limit);
-        // Update transformation for all instances
-        for (GLVolume *vol : canvas.get_volumes().volumes) {
+
+    // Update transformation for all instances
+    for (GLVolume *vol : canvas.get_volumes().volumes) {
         if (vol->object_idx() != surface_drag.gl_volume->object_idx() || 
             vol->volume_idx() != surface_drag.gl_volume->volume_idx())
-                continue;
-            vol->set_volume_transformation(volume_new);
-        }
+            continue;
+        vol->set_volume_transformation(volume_new);
+    }
 
-        canvas.set_as_dirty();
+    canvas.set_as_dirty();
     // Show current position in manipulation panel
     wxGetApp().obj_manipul()->set_dirty();
-        return true;
-    }
+    return true;
+}
 
 bool is_embossed_object(const Selection &selection)
 {

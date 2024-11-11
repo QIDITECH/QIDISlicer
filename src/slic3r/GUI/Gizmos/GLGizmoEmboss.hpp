@@ -26,6 +26,9 @@ namespace Slic3r{
     class AppConfig;
     class GLVolume;
     enum class ModelVolumeType : int;
+    namespace GUI::Emboss {
+        struct CreateVolumeParams;
+    }
 }
 
 namespace Slic3r::GUI {
@@ -43,6 +46,7 @@ public:
     /// <param name="volume_type">Object part / Negative volume / Modifier</param>
     /// <param name="mouse_pos">Define position of new volume</param>
     bool create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos);
+
     /// <summary>
     /// Create new text without given position
     /// </summary>
@@ -70,6 +74,7 @@ public:
     /// <param name="job_cancel">Way to stop re_emboss job</param>
     /// <returns>True on success otherwise False</returns>
     static bool re_emboss(const ModelVolume &text, std::shared_ptr<std::atomic<bool>> job_cancel = nullptr);
+
 protected:
     bool on_init() override;
     std::string on_get_name() const override;
@@ -99,6 +104,7 @@ protected:
     std::string get_gizmo_entering_text() const override;
     std::string get_gizmo_leaving_text() const override;
     std::string get_action_snapshot_name() const override;
+
 private:
     void volume_transformation_changing();
     void volume_transformation_changed();
@@ -111,7 +117,7 @@ private:
     void reset_volume();
 
     // create volume from text - main functionality
-    bool process(bool make_snapshot = true);
+    bool process(bool make_snapshot = true, std::optional<Transform3d> volume_transformation = std::nullopt);
     void close();
     void draw_window();
     void draw_text_input();
@@ -129,13 +135,23 @@ private:
     void draw_height(bool use_inch);
     void draw_depth(bool use_inch);
 
-
     // call after set m_style_manager.get_style().prop.size_in_mm
     bool set_height();
 
     bool draw_italic_button();
     bool draw_bold_button();
     void draw_advanced();
+
+    void draw_use_surface();
+    void draw_per_glyph();
+    void draw_align();
+    void draw_char_gap();
+    void draw_line_gap();
+    void draw_boldness();
+    void draw_skew();
+    void draw_rotation();
+
+    void draw_surface_distance();
 
     bool select_facename(const wxString& facename);
 
@@ -150,12 +166,10 @@ private:
     template<typename T> bool rev_input(const std::string &name, T &value, const T *default_value, 
         const std::string &undo_tooltip, T step, T step_fast, const char *format, ImGuiInputTextFlags flags = 0) const;
     bool rev_checkbox(const std::string &name, bool &value, const bool* default_value, const std::string  &undo_tooltip) const;
-    bool rev_slider(const std::string &name, std::optional<int>& value, const std::optional<int> *default_value,
-        const std::string &undo_tooltip, int v_min, int v_max, const std::string &format, const wxString &tooltip) const;
     bool rev_slider(const std::string &name, std::optional<float>& value, const std::optional<float> *default_value,
-        const std::string &undo_tooltip, float v_min, float v_max, const std::string &format, const wxString &tooltip) const;
+        const std::string &undo_tooltip, const MinMax<float>& min_max, const std::string &format, const wxString &tooltip) const;
     bool rev_slider(const std::string &name, float &value, const float *default_value, 
-        const std::string &undo_tooltip, float v_min, float v_max, const std::string &format, const wxString &tooltip) const;
+        const std::string &undo_tooltip, const MinMax<float>& min_max, const std::string &format, const wxString &tooltip) const;
     template<typename T, typename Draw> bool revertible(const std::string &name, T &value, const T *default_value,
         const std::string &undo_tooltip, float undo_offset, Draw draw) const;
 
@@ -173,7 +187,11 @@ private:
     void create_notification_not_valid_font(const TextConfiguration& tc);
     void create_notification_not_valid_font(const std::string& text);
     void remove_notification_not_valid_font();
-    
+
+    // initialize data for create volume in job
+    Emboss::CreateVolumeParams create_input(ModelVolumeType volume_type);
+    // Emboss::CreateVolumeParams create_input(GLCanvas3D &canvas, const StyleManager::Style &style, RaycastManager &raycaster, ModelVolumeType volume_type);
+
     struct GuiCfg;
     std::unique_ptr<const GuiCfg> m_gui_cfg;
 
@@ -232,6 +250,7 @@ private:
     // For text on scaled objects
     std::optional<float> m_scale_height;
     std::optional<float> m_scale_depth;
+    std::optional<float> m_scale_width;
     void calculate_scale();
 
     // drawing icons

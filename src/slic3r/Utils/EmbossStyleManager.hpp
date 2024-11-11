@@ -24,7 +24,6 @@ namespace Slic3r::GUI::Emboss {
 class StyleManager
 {
     friend class CreateFontStyleImagesJob; // access to StyleImagesData
-
 public:
     /// <param name="language_glyph_range">Character to load for imgui when initialize imgui font</param>
     /// <param name="create_default_styles">Function to create default styles</param>
@@ -48,7 +47,7 @@ public:
     /// </summary>
     /// <param name="item_to_store">Configuration</param>
     /// <param name="use_modification">When true cache state will be used for store</param>
-    /// <param name="use_modification">When true store activ index into configuration</param>
+    /// <param name="store_active_index">When treu also store current activ index</param>
     /// <returns>True on succes otherwise False.</returns>
     bool store_styles_to_app_config(bool use_modification = true, bool store_active_index = true);
 
@@ -109,7 +108,6 @@ public:
     // remove cached imgui font for actual selected font
     void clear_imgui_font();
 
-
     // getters for private data
     const Style *get_stored_style() const;
 
@@ -136,6 +134,7 @@ public:
     bool is_font_changed() const;
 
     bool is_unique_style_name(const std::string &name) const;
+
     /// <summary>
     /// Setter on wx_font when changed
     /// </summary>
@@ -183,7 +182,7 @@ public:
         ImVec2 tex_size;
         ImVec2 uv0;
         ImVec2 uv1;
-        Point  offset     = Point(0, 0);
+        Point  offset = Point(0, 0);
     };
 
     /// <summary>
@@ -207,7 +206,7 @@ public:
         std::optional<float> angle; // [in radians] form -Pi to Pi
 
         bool operator==(const Style &other) const
-    {
+        {
             return EmbossStyle::operator==(other) && 
                 projection == other.projection &&
                 is_approx(distance, other.distance) &&
@@ -270,7 +269,6 @@ private:
         size_t style_index = std::numeric_limits<size_t>::max();
 
     } m_style_cache;
-
 
     // Privat member
     Styles m_styles;

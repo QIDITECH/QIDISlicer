@@ -100,19 +100,17 @@ private:
         }
         return (-1);
     }
-        
-        
+
     void recalculate_line();
-     
-    
+
     wxRect m_rect;                  // rectangle on screen the chart is mapped into (screen coordinates)
     wxPoint m_previous_mouse;        
     std::vector<ButtonToDrag> m_buttons;
     std::vector<int> m_line_to_draw;
     wxRect2DDouble visible_area;
     ButtonToDrag* m_dragged = nullptr;
-    float m_total_volume = 0.f;  
-    
+    float m_total_volume = 0.f;
+
     bool m_uniform = false; // testing only
 };
 

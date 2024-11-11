@@ -290,6 +290,8 @@ public:
     void set_icons_size(float size);
     void set_scale(float scale);
 
+    float get_scale() const { return m_layout.scale; }
+
     bool is_enabled() const { return m_enabled; }
     void set_enabled(bool enable) { m_enabled = enable; }
 
@@ -329,6 +331,9 @@ public:
     bool on_mouse(wxMouseEvent& evt, GLCanvas3D& parent);
     // get item pointer for highlighter timer
     GLToolbarItem* get_item(const std::string& item_name);
+
+    bool generate_icons_texture();
+
 private:
     void calc_layout();
     float get_width_horizontal() const;
@@ -348,8 +353,6 @@ private:
     void render_background(float left, float top, float right, float bottom, float border_w, float border_h) const;
     void render_horizontal(const GLCanvas3D& parent);
     void render_vertical(const GLCanvas3D& parent);
-
-    bool generate_icons_texture();
 
     // returns true if any item changed its state
     bool update_items_visibility();

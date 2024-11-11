@@ -23,6 +23,33 @@
 #include "slic3r/Utils/MacDarkMode.hpp"
 #endif
 
+// ----------------------------------------------------------------------------
+// MenuWithSeparators
+// ----------------------------------------------------------------------------
+
+void MenuWithSeparators::DestroySeparators()
+{
+    if (m_separator_frst) {
+        Destroy(m_separator_frst);
+        m_separator_frst = nullptr;
+    }
+
+    if (m_separator_scnd) {
+        Destroy(m_separator_scnd);
+        m_separator_scnd = nullptr;
+    }
+}
+
+void MenuWithSeparators::SetFirstSeparator()
+{
+    m_separator_frst = this->AppendSeparator();
+}
+
+void MenuWithSeparators::SetSecondSeparator()
+{
+    m_separator_scnd = this->AppendSeparator();
+}
+
 namespace Slic3r
 {
 namespace GUI
@@ -494,6 +521,7 @@ wxString MenuFactory::get_repaire_result_message(
 
     return msg;
 }
+
 void MenuFactory::append_menu_item_delete(wxMenu* menu)
 {
     append_menu_item(menu, wxID_ANY, _L("Delete") + "\tDel", _L("Remove the selected object"),
@@ -542,7 +570,7 @@ static void append_menu_itemm_add_(const wxString& name, GLGizmosManager::EType 
         const GLCanvas3D *canvas = plater()->canvas3D();
         const GLGizmosManager &mng = canvas->get_gizmos_manager();
         GLGizmoBase *gizmo_base = mng.get_gizmo(gizmo_type);
-        
+
         ModelVolumeType volume_type = type;
         // no selected object means create new object
         if (volume_type == ModelVolumeType::INVALID)
@@ -553,11 +581,11 @@ static void append_menu_itemm_add_(const wxString& name, GLGizmosManager::EType 
             auto emboss = dynamic_cast<GLGizmoEmboss *>(gizmo_base);
             assert(emboss != nullptr);
             if (emboss == nullptr) return;
-        if (screen_position.has_value()) {
-            emboss->create_volume(volume_type, *screen_position);
-        } else {
-            emboss->create_volume(volume_type);
-        }
+            if (screen_position.has_value()) {
+                emboss->create_volume(volume_type, *screen_position);
+            } else {
+                emboss->create_volume(volume_type);
+            }
         } else if (gizmo_type == GLGizmosManager::Svg) {
             auto svg = dynamic_cast<GLGizmoSVG *>(gizmo_base);
             assert(svg != nullptr);
@@ -572,7 +600,7 @@ static void append_menu_itemm_add_(const wxString& name, GLGizmosManager::EType 
 
     if (type == ModelVolumeType::MODEL_PART || type == ModelVolumeType::NEGATIVE_VOLUME || type == ModelVolumeType::PARAMETER_MODIFIER ||
         type == ModelVolumeType::INVALID // cannot use gizmo without selected object
-        ) {
+    ) {
         wxString item_name = wxString(is_submenu_item ? "" : _(ADD_VOLUME_MENU_ITEMS[int(type)].first) + ": ") + name;
         menu->AppendSeparator();
         const std::string icon_name = is_submenu_item ? "" : ADD_VOLUME_MENU_ITEMS[int(type)].second;
@@ -587,6 +615,7 @@ void MenuFactory::append_menu_item_add_text(wxMenu* menu, ModelVolumeType type, 
 void MenuFactory::append_menu_item_add_svg(wxMenu *menu, ModelVolumeType type, bool is_submenu_item /* = true*/){
     append_menu_itemm_add_(_L("SVG"), GLGizmosManager::Svg, menu, type, is_submenu_item);
 }
+
 void MenuFactory::append_menu_items_add_volume(MenuType menu_type)
 {
     wxMenu* menu = menu_type == mtObjectFFF ? &m_object_menu : menu_type == mtObjectSLA ? &m_sla_object_menu : nullptr;
@@ -1049,7 +1078,7 @@ void MenuFactory::append_menu_item_edit_text(wxMenu *menu)
             return false;
         const ModelVolume *volume = get_model_volume(*gl_volume, selection.get_model()->objects);
         if (volume == nullptr)
-        return false;
+            return false;
         return volume->is_text();        
     };
 
@@ -1108,6 +1137,7 @@ void MenuFactory::append_menu_item_edit_svg(wxMenu *menu)
     };
     append_menu_item(menu, wxID_ANY, name, description, open_svg, icon, nullptr, can_edit_svg, m_parent);
 }
+
 MenuFactory::MenuFactory()
 {
     for (int i = 0; i < mtCount; i++) {
@@ -1321,6 +1351,7 @@ wxMenu *MenuFactory::svg_part_menu()
     append_mutable_part_menu_items(&m_svg_part_menu);
     return &m_svg_part_menu;
 }
+
 wxMenu* MenuFactory::instance_menu()
 {
     return &m_instance_menu;
@@ -1464,18 +1495,24 @@ static void update_menu_item_def_colors(T* item)
 
 void MenuFactory::sys_color_changed()
 {
-    for (MenuWithSeparators* menu : { &m_object_menu, &m_sla_object_menu, &m_part_menu, &m_default_menu }) {
-        sys_color_changed_menu(dynamic_cast<wxMenu*>(menu));// msw_rescale_menu updates just icons, so use it
+    for (MenuWithSeparators* menu : { &m_object_menu, &m_sla_object_menu, &m_part_menu, &m_default_menu })
+        sys_color_changed(dynamic_cast<wxMenu*>(menu));
+}
+
+void MenuFactory::sys_color_changed(wxMenu* menu)
+{
+    sys_color_changed_menu(menu);// msw_rescale_menu updates just icons, so use it
 #ifdef _WIN32 
-        // but under MSW we have to update item's bachground color
-        for (wxMenuItem* item : menu->GetMenuItems())
-            update_menu_item_def_colors(item);
+    // but under MSW we have to update item's bachground color
+    for (wxMenuItem* item : menu->GetMenuItems())
+        update_menu_item_def_colors(item);
 #endif
-    }
 }
 
 void MenuFactory::sys_color_changed(wxMenuBar* menubar)
 {
+    if (!menubar)
+        return;
     for (size_t id = 0; id < menubar->GetMenuCount(); id++) {
         wxMenu* menu = menubar->GetMenu(id);
         sys_color_changed_menu(menu);

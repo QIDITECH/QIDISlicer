@@ -63,7 +63,6 @@ void Button::SetLabel(const wxString& label)
     Refresh();
 }
 
-
 void Button::SetIcon(const wxString& icon)
 {
     if (!icon.IsEmpty()) {
@@ -124,7 +123,6 @@ bool Button::Enable(bool enable)
 
 void Button::SetCanFocus(bool canFocus) { this->canFocus = canFocus; }
 
-
 void Button::Rescale()
 {
 /*    if (this->active_icon.bmp().IsOk())
@@ -132,7 +130,6 @@ void Button::Rescale()
 
     if (this->inactive_icon.bmp().IsOk())
         this->inactive_icon.msw_rescale();
-
 */
     messureSize();
 }
@@ -228,8 +225,7 @@ void Button::messureSize()
     wxSize size = szContent + paddingSize * 2;
     if (minSize.GetHeight() > 0)
         size.SetHeight(minSize.GetHeight());
-
-        wxWindow::SetMinSize(size);
+    wxWindow::SetMinSize(size);
 }
 
 void Button::mouseDown(wxMouseEvent& event)
@@ -238,7 +234,7 @@ void Button::mouseDown(wxMouseEvent& event)
     pressedDown = true;
     if (canFocus)
         SetFocus();
-        CaptureMouse();
+    CaptureMouse();
 }
 
 void Button::mouseReleased(wxMouseEvent& event)

@@ -28,6 +28,7 @@ static void draw_transparent_icon(const IconManager::Icon &icon); // only help f
 IconManager::~IconManager() {
 	priv::clear(m_icons);
 	// release opengl texture is made in ~GLTexture()
+
     if (m_id != 0)
         glsafe(::glDeleteTextures(1, &m_id));
 }
@@ -164,7 +165,8 @@ IconManager::Icons IconManager::init(const InitTypes &input)
         NSVGimage *image = parse_file(i.filepath.c_str());
         assert(image != nullptr);
         if (image == nullptr)
-    return {};
+            return {};
+
         ScopeGuard sg_image([image]() { ::nsvgDelete(image); });
 
         float svg_scale = i.size.y / image->height;
@@ -217,6 +219,7 @@ std::vector<IconManager::Icons> IconManager::init(const std::vector<std::string>
     assert(!file_paths.empty());
     assert(size.x >= 1);
     assert(size.x < 256*16);
+
     // TODO: remove in future
     if (!m_icons.empty()) {
         // not first initialization
@@ -352,6 +355,7 @@ void priv::draw_transparent_icon(const IconManager::Icon &icon)
     draw(icon_px);
 }
 
+#include "imgui/imgui_internal.h" //ImGuiWindow
 namespace Slic3r::GUI {
 
 void draw(const IconManager::Icon &icon, const ImVec2 &size, const ImVec4 &tint_col, const ImVec4 &border_col)
@@ -372,7 +376,10 @@ void draw(const IconManager::Icon &icon, const ImVec2 &size, const ImVec4 &tint_
 bool clickable(const IconManager::Icon &icon, const IconManager::Icon &icon_hover)
 {
     // check of hover
-    float cursor_x = ImGui::GetCursorPosX();
+    ImGuiWindow *window = ImGui::GetCurrentWindow();
+    float cursor_x = ImGui::GetCursorPosX()
+        - window->DC.GroupOffset.x 
+        - window->DC.ColumnsOffset.x;
     priv::draw_transparent_icon(icon);
     ImGui::SameLine(cursor_x);
     if (ImGui::IsItemHovered()) {

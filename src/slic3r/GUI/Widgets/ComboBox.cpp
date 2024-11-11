@@ -4,6 +4,7 @@
 #include <wx/dcgraph.h>
 
 #include "../GUI_App.hpp"
+
 BEGIN_EVENT_TABLE(ComboBox, TextInput)
 
 EVT_LEFT_DOWN(ComboBox::mouseDown)
@@ -39,11 +40,13 @@ ComboBox::ComboBox(wxWindow *      parent,
         GetTextCtrl()->Hide();
     else
         GetTextCtrl()->Bind(wxEVT_KEY_DOWN, &ComboBox::keyDown, this);
+
     SetBorderColor(TextInput::GetBorderColor());
     if (parent) {
         SetBackgroundColour(parent->GetBackgroundColour());
         SetForegroundColour(parent->GetForegroundColour());
     }
+
     drop.Bind(wxEVT_COMBOBOX, [this](wxCommandEvent &e) {
         SetSelection(e.GetInt());
         e.SetEventObject(this);
@@ -55,6 +58,7 @@ ComboBox::ComboBox(wxWindow *      parent,
         wxCommandEvent e(wxEVT_COMBOBOX_CLOSEUP);
         GetEventHandler()->ProcessEvent(e);
     });
+
 #ifndef _WIN32
     this->Bind(wxEVT_SYS_COLOUR_CHANGED, [this, parent](wxSysColourChangedEvent& event) {
         event.Skip();
@@ -78,11 +82,10 @@ void ComboBox::SetSelection(int n)
         SetIcon(icons[drop.selection]);
 }
 
-
-
 void ComboBox::Rescale()
 {
     SetFont(Slic3r::GUI::wxGetApp().normal_font());
+
     TextInput::Rescale();
     drop.Rescale();
 }
@@ -172,9 +175,9 @@ int ComboBox::Append(const wxString &item, const wxBitmapBundle &bitmap)
     return Append(item, bitmap, nullptr);
 }
 
-int ComboBox::Append(const wxString &item,
+int ComboBox::Append(const wxString         &item,
                      const wxBitmapBundle   &bitmap,
-                     void *          clientData)
+                     void *                 clientData)
 {
     texts.push_back(item);
     icons.push_back(bitmap);
@@ -368,8 +371,8 @@ void ComboBox::keyDown(wxKeyEvent& event)
             }
             event.Skip();
             break;
+        }
     }
-}
 }
 
 void ComboBox::OnEdit()

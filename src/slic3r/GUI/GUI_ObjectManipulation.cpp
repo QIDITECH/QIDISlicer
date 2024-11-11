@@ -22,6 +22,7 @@
 #include "slic3r/Utils/FixModelByWin10.hpp"
 
 #include "Widgets/CheckBox.hpp"
+
 // For special mirroring in manipulation gizmo
 #include "Gizmos/GLGizmosManager.hpp"
 #include "Gizmos/GLGizmoEmboss.hpp"
@@ -1197,6 +1198,7 @@ void ObjectManipulation::sys_color_changed()
     wxGetApp().UpdateDarkUI(m_word_local_combo);
     wxGetApp().UpdateDarkUI(m_check_inch);
 #endif
+
     CheckBox::SysColorChanged(m_check_inch);
     for (ManipulationEditor* editor : m_editors)
         editor->sys_color_changed(this);

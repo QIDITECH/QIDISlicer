@@ -8,8 +8,10 @@
 #include <libslic3r/EmbossShape.hpp> // ExPolygonsWithIds
 #include "libslic3r/Point.hpp" // Transform3d
 #include "libslic3r/ObjectID.hpp"
+
 #include "slic3r/GUI/Camera.hpp"
 #include "slic3r/GUI/TextLines.hpp"
+
 #include "Job.hpp"
 
 // forward declarations
@@ -59,6 +61,14 @@ public:
     // False (engraved).. move into object (NEGATIVE_VOLUME)
     bool is_outside = true;
 
+    /// <summary>
+    /// Used only with text for embossing per glyph
+    /// </summary>
+    /// <param name="tr">Embossed volume final transformation in world</param>
+    /// <param name="vols">Volumes to be sliced to text lines</param>
+    /// <returns>True on succes otherwise False(Per glyph shoud be disabled)</returns>
+    virtual bool create_text_lines(const Transform3d& tr, const ModelVolumePtrs &vols) { return false; }
+
     // Define per letter projection on one text line
     // [optional] It is not used when empty
     Slic3r::Emboss::TextLines text_lines = {};
@@ -95,7 +105,6 @@ struct DataCreateVolume : public DataBase
     // new created volume transformation
     Transform3d trmat;
 };
-
 using DataBasePtr = std::unique_ptr<DataBase>;
 
 /// <summary>
@@ -105,10 +114,16 @@ struct DataUpdate
 {
     // Hold data about shape
     DataBasePtr base;
+
     // unique identifier of volume to change
     ObjectID volume_id;
+
     // Used for prevent flooding Undo/Redo stack on slider.
     bool make_snapshot;
+
+    // Transformation of volume after update volume shape
+    // NOTE: Add for style change, because it change rotation and distance from surface
+    std::optional<Transform3d> trmat;
 };
 
 /// <summary>
@@ -175,7 +190,7 @@ struct UpdateSurfaceVolumeData : public DataUpdate, public SurfaceVolumeData{};
 class UpdateSurfaceVolumeJob : public Job
 {
     UpdateSurfaceVolumeData m_input;
-    TriangleMesh           m_result;
+    TriangleMesh            m_result;
 
 public:
     // move params to private variable
@@ -196,6 +211,10 @@ SurfaceVolumeData::ModelSources create_volume_sources(const ModelVolume &volume)
 /// </summary>
 struct CreateVolumeParams
 {
+    // base input data for job
+    // When nullptr there is some issue with creation params ...
+    DataBasePtr data;
+
     GLCanvas3D &canvas;
 
     // Direction of ray into scene
@@ -229,22 +248,15 @@ struct CreateVolumeParams
 /// <summary>
 /// Create new volume on position of mouse cursor
 /// </summary>
-/// <param name="plater_ptr">canvas + camera + bed shape + </param>
-/// <param name="data">Shape of emboss</param>
-/// <param name="volume_type">New created volume type</param>
-/// <param name="raycaster">Knows object in scene</param>
-/// <param name="gizmo">Define which gizmo open on the success - enum GLGizmosManager::EType</param>
-/// <param name="mouse_pos">Define position where to create volume</param>
-/// <param name="distance">Wanted additionl move in Z(emboss) direction of new created volume</param>
-/// <param name="angle">Wanted additionl rotation around Z of new created volume</param>
+/// <param name="input">Cantain all needed data for start creation job</param>
 /// <returns>True on success otherwise False</returns>
-bool start_create_volume(CreateVolumeParams &input, DataBasePtr data, const Vec2d &mouse_pos);
+bool start_create_volume(CreateVolumeParams &input, const Vec2d &mouse_pos);
 
 /// <summary>
 /// Same as previous function but without mouse position
 /// Need to suggest position or put near the selection
 /// </summary>
-bool start_create_volume_without_position(CreateVolumeParams &input, DataBasePtr data);
+bool start_create_volume_without_position(CreateVolumeParams &input);
 
 /// <summary>
 /// Start job for update embossed volume
@@ -255,6 +267,7 @@ bool start_create_volume_without_position(CreateVolumeParams &input, DataBasePtr
 /// <param name="raycaster">Could cast ray to scene</param>
 /// <returns>True when start job otherwise false</returns>
 bool start_update_volume(DataUpdate &&data, const ModelVolume &volume, const Selection &selection, RaycastManager &raycaster);
+
 } // namespace Slic3r::GUI
 
 #endif // slic3r_EmbossJob_hpp_

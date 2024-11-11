@@ -98,6 +98,7 @@ struct DataCreateObject
 
     // Define which gizmo open on the success
     GLGizmosManager::EType gizmo;
+
     // additionl rotation around Z axe, given by style settings
     std::optional<float> angle = {};
 };
@@ -164,6 +165,7 @@ bool check(const CreateSurfaceVolumeData &input, bool is_main_thread = false);
 bool check(const UpdateSurfaceVolumeData &input, bool is_main_thread = false);
 
 template<typename Fnc> static ExPolygons create_shape(DataBase &input, Fnc was_canceled);
+
 // create sure that emboss object is bigger than source object [in mm]
 constexpr float safe_extension = 1.0f;
 
@@ -191,7 +193,7 @@ TriangleMesh create_default_mesh();
 /// <param name="mesh">New mesh data</param>
 /// <param name="data">Text configuration, ...</param>
 /// <param name="mesh">Transformation of volume</param>
-void update_volume(TriangleMesh &&mesh, const DataUpdate &data, const Transform3d *tr = nullptr);
+void final_update_volume(TriangleMesh &&mesh, const DataUpdate &data, const Transform3d *tr = nullptr);
 
 /// <summary>
 /// Update name in right panel
@@ -280,7 +282,6 @@ void CreateVolumeJob::process(Ctl &ctl) {
         throw std::runtime_error("Bad input data for EmbossCreateVolumeJob.");
     m_result = create_mesh(*m_input.base, was_canceled(ctl, *m_input.base), ctl);
 }
-
 void CreateVolumeJob::finalize(bool canceled, std::exception_ptr &eptr) {
     if (!::finalize(canceled, eptr, *m_input.base))
         return;
@@ -328,6 +329,7 @@ void CreateObjectJob::process(Ctl &ctl)
     offset -= m_result.center();
     Transform3d::TranslationType tt(offset.x(), offset.y(), offset.z());
     m_transformation = Transform3d(tt);
+
     // rotate around Z by style settings
     if (m_input.angle.has_value()) {
         std::optional<float> distance; // new object ignore surface distance from style settings
@@ -344,9 +346,8 @@ void CreateObjectJob::finalize(bool canceled, std::exception_ptr &eptr)
     if (m_result.empty()) 
         return create_message("Can't create empty object.");
 
-    GUI_App    &app      = wxGetApp();
-    Plater     *plater   = app.plater();
-
+    GUI_App &app    = wxGetApp();
+    Plater  *plater = app.plater();
     plater->take_snapshot(_L("Add Emboss text object"));
 
     Model& model = plater->model();
@@ -409,7 +410,7 @@ void UpdateJob::finalize(bool canceled, std::exception_ptr &eptr)
 {
     if (!::finalize(canceled, eptr, *m_input.base))
         return;
-    ::update_volume(std::move(m_result), m_input);
+    ::final_update_volume(std::move(m_result), m_input);
 }
 
 void UpdateJob::update_volume(ModelVolume *volume, TriangleMesh &&mesh, const DataBase &base)
@@ -435,13 +436,12 @@ void UpdateJob::update_volume(ModelVolume *volume, TriangleMesh &&mesh, const Da
         const ObjectList *obj_list = app.obj_list();
         if (obj_list != nullptr)
             update_name_in_list(*obj_list, *volume);
-}
+    }
 
     ModelObject *object = volume->get_object();
     assert(object != nullptr);
     if (object == nullptr)
         return;
-
 
     Plater *plater = app.plater();
     if (plater->printer_technology() == ptSLA)
@@ -492,7 +492,7 @@ void UpdateSurfaceVolumeJob::finalize(bool canceled, std::exception_ptr &eptr)
 
     // when start using surface it is wanted to move text origin on surface of model
     // also when repeteadly move above surface result position should match
-    ::update_volume(std::move(m_result), m_input, &m_input.transform);
+    ::final_update_volume(std::move(m_result), m_input, &m_input.transform);
 }
 
 namespace {
@@ -534,11 +534,11 @@ const GLVolume *find_closest(
 /// <summary>
 /// Start job for add object with text into scene
 /// </summary>
-/// <param name="input">Contain worker, build shape, gizmo</param>
-/// <param name="emboss_data">Define params for create volume</param>
+/// <param name="input">Contain worker, build shape, gizmo, 
+/// emboss_data is moved out soo it can't be const</param>
 /// <param name="coor">Screen coordinat, where to create new object laying on bed</param>
 /// <returns>True when can add job to worker otherwise FALSE</returns>
-bool start_create_object_job(const CreateVolumeParams &input, DataBasePtr emboss_data, const Vec2d &coor);
+bool start_create_object_job(CreateVolumeParams &input, const Vec2d &coor);
 
 /// <summary>
 /// Start job to create volume on the surface of object
@@ -549,7 +549,7 @@ bool start_create_object_job(const CreateVolumeParams &input, DataBasePtr emboss
 /// <param name="try_no_coor">True .. try to create volume without screen_coor,
 /// False .. </param>
 /// <returns>Nullptr when job is sucessfully add to worker otherwise return data to be processed different way</returns>
-bool start_create_volume_on_surface_job(CreateVolumeParams &input, DataBasePtr data, const Vec2d &screen_coor, bool try_no_coor);
+bool start_create_volume_on_surface_job(CreateVolumeParams &input, const Vec2d &screen_coor, bool try_no_coor);
 
 } // namespace
 
@@ -564,25 +564,25 @@ SurfaceVolumeData::ModelSources create_volume_sources(const ModelVolume &text_vo
     return ::create_sources(volumes, text_volume.id().id);
 }
 
-bool start_create_volume(CreateVolumeParams &input, DataBasePtr data, const Vec2d &mouse_pos)
+bool start_create_volume(CreateVolumeParams &input, const Vec2d &mouse_pos)
 {
-    if (data == nullptr)
+    if (input.data == nullptr)
         return false;
     if (!check(input))
         return false;
 
     if (input.gl_volume == nullptr)
         // object is not under mouse position soo create object on plater
-        return ::start_create_object_job(input, std::move(data), mouse_pos);
+        return ::start_create_object_job(input, mouse_pos);
 
     bool try_no_coor = true;
-    return ::start_create_volume_on_surface_job(input, std::move(data), mouse_pos, try_no_coor);
+    return ::start_create_volume_on_surface_job(input, mouse_pos, try_no_coor);
 }
 
-bool start_create_volume_without_position(CreateVolumeParams &input, DataBasePtr data)
+bool start_create_volume_without_position(CreateVolumeParams &input)
 {
-    assert(data != nullptr);
-    if (data == nullptr)
+    assert(input.data != nullptr);
+    if (input.data == nullptr)
         return false;
     if (!check(input))
         return false;
@@ -600,17 +600,17 @@ bool start_create_volume_without_position(CreateVolumeParams &input, DataBasePtr
         static_cast<size_t>(object_idx) >= objects.size()) 
         // create Object on center of screen
         // when ray throw center of screen not hit bed it create object on center of bed
-        return ::start_create_object_job(input, std::move(data), screen_center);
+        return ::start_create_object_job(input, screen_center);
 
     // create volume inside of selected object
     Vec2d coor;
     const Camera &camera = wxGetApp().plater()->get_camera();
     input.gl_volume = ::find_closest(selection, screen_center, camera, objects, &coor);
     if (input.gl_volume == nullptr)
-        return ::start_create_object_job(input, std::move(data), screen_center);
+        return ::start_create_object_job(input, screen_center);
     
     bool try_no_coor = false;
-    return ::start_create_volume_on_surface_job(input, std::move(data), coor, try_no_coor);
+    return ::start_create_volume_on_surface_job(input, coor, try_no_coor);
 }
 
 #ifdef EXECUTE_UPDATE_ON_MAIN_THREAD
@@ -678,6 +678,7 @@ bool start_update_volume(DataUpdate &&data, const ModelVolume &volume, const Sel
 }
 
 } // namespace Slic3r::GUI::Emboss
+
 ////////////////////////////
 /// private namespace implementation
 namespace {
@@ -708,14 +709,16 @@ bool check(GLGizmosManager::EType gizmo)
 {
     assert(gizmo == GLGizmosManager::Emboss || gizmo == GLGizmosManager::Svg);
     return gizmo == GLGizmosManager::Emboss || gizmo == GLGizmosManager::Svg;
-    }
+}
+
 bool check(const CreateVolumeParams &input)
 {
     bool res        = is_valid(input.volume_type);
     auto gizmo_type = static_cast<GLGizmosManager::EType>(input.gizmo);
     res &= ::check(gizmo_type);
-    return res; 
+    return res;
 }
+
 bool check(const DataCreateVolume &input, bool is_main_thread)
 {
     bool check_fontfile = false;
@@ -726,7 +729,7 @@ bool check(const DataCreateVolume &input, bool is_main_thread)
     res &= check(input.gizmo);
     assert(!input.base->shape.projection.use_surface);
     res &= !input.base->shape.projection.use_surface;
-    return res; 
+    return res;
 }
 bool check(const DataCreateObject &input)
 {
@@ -830,32 +833,26 @@ template<typename Fnc> TriangleMesh create_mesh_per_glyph(DataBase &input, Fnc w
 {
     // method use square of coord stored into int64_t
     static_assert(std::is_same<Point::coord_type, int32_t>());
-
     const EmbossShape &shape = input.create_shape();
     if (shape.shapes_with_ids.empty())
         return {};
-
+    
     // Precalculate bounding boxes of glyphs
     // Separate lines of text to vector of Bounds
     assert(get_count_lines(shape.shapes_with_ids) == input.text_lines.size());
     size_t count_lines = input.text_lines.size();
     std::vector<BoundingBoxes> bbs = create_line_bounds(shape.shapes_with_ids, count_lines);
-
+        
     double depth = shape.projection.depth / shape.scale;
     auto scale_tr = Eigen::Scaling(shape.scale); 
     
-    // half of font em size for direction of letter emboss
-    // double  em_2_mm      = prop.size_in_mm / 2.; // TODO: fix it
-    double em_2_mm = 5.;
-    int32_t em_2_polygon = static_cast<int32_t>(std::round(scale_(em_2_mm)));
-
     size_t s_i_offset = 0; // shape index offset(for next lines)
     indexed_triangle_set result;
     for (size_t text_line_index = 0; text_line_index < input.text_lines.size(); ++text_line_index) {
         const BoundingBoxes &line_bbs = bbs[text_line_index];
         const TextLine      &line     = input.text_lines[text_line_index];
         PolygonPoints        samples  = sample_slice(line, line_bbs, shape.scale);
-        std::vector<double>  angles   = calculate_angles(em_2_polygon, samples, line.polygon);
+        std::vector<double> angles = calculate_angles(line_bbs, samples, line.polygon);
 
         for (size_t i = 0; i < line_bbs.size(); ++i) {
             const BoundingBox &letter_bb = line_bbs[i];
@@ -917,7 +914,6 @@ template<typename Fnc> TriangleMesh create_mesh_per_glyph(DataBase &input, Fnc w
     }
     return TriangleMesh(std::move(result));
 }
-
 
 template<typename Fnc>
 TriangleMesh try_create_mesh(DataBase &input, const Fnc& was_canceled)
@@ -996,18 +992,18 @@ void update_name_in_list(const ObjectList& object_list, const ModelVolume& volum
         if (objects[i]->id() == object_id) {
             object_index = static_cast<int>(i);
             break;
-    }
+        }
 
     const ModelVolumePtrs volumes   = object->volumes;
     const ObjectID       &volume_id = volume.id();
-        
+
     // search for index of volume
     int volume_index = -1;
     for (size_t i = 0; i < volumes.size(); ++i)
         if (volumes[i]->id() == volume_id) {
             volume_index = static_cast<int>(i);
             break;
-    }
+        }
 
     if (object_index < 0 || volume_index < 0)
         return;
@@ -1015,13 +1011,13 @@ void update_name_in_list(const ObjectList& object_list, const ModelVolume& volum
     object_list.update_name_in_list(object_index, volume_index);
 }
 
-void update_volume(TriangleMesh &&mesh, const DataUpdate &data, const Transform3d *tr)
+void final_update_volume(TriangleMesh &&mesh, const DataUpdate &data, const Transform3d *tr)
 {
     // for sure that some object will be created
-    if (mesh.its.empty()) 
+    if (mesh.its.empty())
         return create_message("Empty mesh can't be created.");
 
-    Plater     *plater = wxGetApp().plater();
+    Plater *plater = wxGetApp().plater();
     // Check gizmo is still open otherwise job should be canceled
     assert(plater->canvas3D()->get_gizmos_manager().get_current_type() == GLGizmosManager::Emboss ||
            plater->canvas3D()->get_gizmos_manager().get_current_type() == GLGizmosManager::Svg);
@@ -1030,15 +1026,21 @@ void update_volume(TriangleMesh &&mesh, const DataUpdate &data, const Transform3
         // TRN: This is the title of the action appearing in undo/redo stack.
         // It is same for Text and SVG.
         std::string snap_name = _u8L("Emboss attribute change");
-    Plater::TakeSnapshot snapshot(plater, snap_name, UndoRedo::SnapshotType::GizmoAction);
+        Plater::TakeSnapshot snapshot(plater, snap_name, UndoRedo::SnapshotType::GizmoAction);
     }
+
     ModelVolume *volume = get_model_volume(data.volume_id, plater->model().objects);   
 
     // could appear when user delete edited volume
     if (volume == nullptr)
         return;
 
-    if (tr) {
+    if (data.trmat.has_value()) {
+        assert(tr == nullptr);
+        tr = &(*data.trmat);
+    }
+
+    if (tr != nullptr) {
         volume->set_transformation(*tr);
     } else {
         // apply fix matrix made by store to .3mf
@@ -1047,7 +1049,6 @@ void update_volume(TriangleMesh &&mesh, const DataUpdate &data, const Transform3
         if (emboss_shape.has_value() && emboss_shape->fix_3mf_tr.has_value())
             volume->set_transformation(volume->get_matrix() * emboss_shape->fix_3mf_tr->inverse());
     }
-
     UpdateJob::update_volume(volume, std::move(mesh), *data.base);
 }
 
@@ -1064,14 +1065,14 @@ void create_volume(TriangleMesh                    &&mesh,
     GLCanvas3D      *canvas   = plater->canvas3D();
     ModelObjectPtrs &objects  = plater->model().objects;
 
-    ModelObject *obj = nullptr;
-    size_t object_idx = 0;
+    ModelObject *obj        = nullptr;
+    size_t       object_idx = 0;
     for (; object_idx < objects.size(); ++object_idx) {
         ModelObject *o = objects[object_idx];
-        if (o->id() == object_id) { 
+        if (o->id() == object_id) {
             obj = o;
             break;
-        }   
+        }
     }
 
     // Parent object for text volume was propably removed.
@@ -1090,6 +1091,7 @@ void create_volume(TriangleMesh                    &&mesh,
         size_t instance_index = 0; // must exist
         instance_bb           = obj->instance_bounding_box(instance_index);
     }
+
     // NOTE: be carefull add volume also center mesh !!!
     // So first add simple shape(convex hull is also calculated)
     ModelVolume *volume = obj->add_volume(make_cube(1., 1., 1.), type);
@@ -1099,14 +1101,13 @@ void create_volume(TriangleMesh                    &&mesh,
     volume->set_mesh(std::move(mesh));
     volume->calculate_convex_hull();
 
-
     // set a default extruder value, since user can't add it manually
     volume->config.set_key_value("extruder", new ConfigOptionInt(0));
 
     // do not allow model reload from disk
     volume->source.is_from_builtin_objects = true;
 
-    volume->name               = data.volume_name; // copy
+    volume->name = data.volume_name; // copy
 
     if (trmat.has_value()) {
         volume->set_transformation(*trmat);
@@ -1139,7 +1140,7 @@ void create_volume(TriangleMesh                    &&mesh,
     // select only actual volume
     // when new volume is created change selection to this volume
     auto                add_to_selection = [volume](const ModelVolume *vol) { return vol == volume; };
-    wxDataViewItemArray sel = obj_list->reorder_volumes_and_get_selection(object_idx, add_to_selection);
+    wxDataViewItemArray sel              = obj_list->reorder_volumes_and_get_selection(object_idx, add_to_selection);
     if (!sel.IsEmpty())
         obj_list->select_item(sel.front());
 
@@ -1161,7 +1162,7 @@ OrthoProject create_projection_for_cut(Transform3d tr, double shape_scale, const
     double max_z = z_range.second + safe_extension;
     assert(min_z < max_z);
     // range between min and max value
-    double projection_size = max_z - min_z; 
+    double   projection_size           = max_z - min_z;
     Matrix3d transformation_for_vector = tr.linear();
     // Projection must be negative value.
     // System of text coordinate
@@ -1186,7 +1187,6 @@ OrthoProject3d create_emboss_projection(bool is_outside, float emboss, Transform
     Vec3d from_front_to_back(0., 0., back_move - front_move);
     return OrthoProject3d(from_front_to_back);
 }
-
 
 indexed_triangle_set cut_surface_to_its(const ExPolygons &shapes, const Transform3d& tr,const SurfaceVolumeData::ModelSources &sources, DataBase& input, std::function<bool()> was_canceled) {
     assert(!sources.empty());
@@ -1213,8 +1213,8 @@ indexed_triangle_set cut_surface_to_its(const ExPolygons &shapes, const Transfor
             biggest_count = its.vertices.size();
             biggest       = &s;
         }
-        size_t source_index = &s - &sources.front();
-        size_t its_index = itss.size();
+        size_t source_index     = &s - &sources.front();
+        size_t its_index        = itss.size();
         s_to_itss[source_index] = its_index;
         itss.emplace_back(std::move(its));
     }
@@ -1224,17 +1224,17 @@ indexed_triangle_set cut_surface_to_its(const ExPolygons &shapes, const Transfor
     Transform3d tr_inv = biggest->tr.inverse();
     Transform3d cut_projection_tr = tr_inv * tr;
 
-    size_t        itss_index = s_to_itss[biggest - &sources.front()];
+    size_t itss_index = s_to_itss[biggest - &sources.front()];
     BoundingBoxf3 mesh_bb    = bounding_box(itss[itss_index]);
     for (const SurfaceVolumeData::ModelSource &s : sources) {
         itss_index = s_to_itss[&s - &sources.front()];
         if (itss_index == std::numeric_limits<size_t>::max())
             continue;
-        if (&s == biggest) 
+        if (&s == biggest)
             continue;
 
-        Transform3d tr = s.tr * tr_inv;
-        bool fix_reflected = true;
+        Transform3d           tr  = s.tr * tr_inv;
+        bool        fix_reflected = true;
         indexed_triangle_set &its = itss[itss_index];
         its_transform(its, tr, fix_reflected);
         BoundingBoxf3 its_bb = bounding_box(its);
@@ -1242,8 +1242,8 @@ indexed_triangle_set cut_surface_to_its(const ExPolygons &shapes, const Transfor
     }
 
     // tr_inv = transformation of mesh inverted
-    Transform3d   emboss_tr  = cut_projection_tr.inverse();
-    BoundingBoxf3 mesh_bb_tr = mesh_bb.transformed(emboss_tr);
+    Transform3d             emboss_tr  = cut_projection_tr.inverse();
+    BoundingBoxf3           mesh_bb_tr = mesh_bb.transformed(emboss_tr);
     std::pair<float, float> z_range{mesh_bb_tr.min.z(), mesh_bb_tr.max.z()};
     OrthoProject cut_projection = create_projection_for_cut(cut_projection_tr, shape_scale, z_range);
     float projection_ratio = (-z_range.first + safe_extension) / 
@@ -1284,7 +1284,6 @@ indexed_triangle_set cut_surface_to_its(const ExPolygons &shapes, const Transfor
 
 TriangleMesh cut_per_glyph_surface(DataBase &input1, const SurfaceVolumeData &input2, std::function<bool()> was_canceled) 
 {
-
     // Precalculate bounding boxes of glyphs
     // Separate lines of text to vector of Bounds
     const EmbossShape &es = input1.create_shape();
@@ -1295,10 +1294,6 @@ TriangleMesh cut_per_glyph_surface(DataBase &input1, const SurfaceVolumeData &in
     assert(get_count_lines(es.shapes_with_ids) == input1.text_lines.size());
     size_t count_lines = input1.text_lines.size();
     std::vector<BoundingBoxes> bbs = create_line_bounds(es.shapes_with_ids, count_lines);
-    
-    // half of font em size for direction of letter emboss
-    double  em_2_mm      = 5.; // TODO: fix it
-    int32_t em_2_polygon = static_cast<int32_t>(std::round(scale_(em_2_mm)));
 
     size_t s_i_offset = 0; // shape index offset(for next lines)
     indexed_triangle_set result;
@@ -1306,7 +1301,7 @@ TriangleMesh cut_per_glyph_surface(DataBase &input1, const SurfaceVolumeData &in
         const BoundingBoxes &line_bbs = bbs[text_line_index];
         const TextLine      &line     = input1.text_lines[text_line_index];
         PolygonPoints        samples  = sample_slice(line, line_bbs, es.scale);
-        std::vector<double>  angles   = calculate_angles(em_2_polygon, samples, line.polygon);
+        std::vector<double>  angles   = calculate_angles(line_bbs, samples, line.polygon);
 
         for (size_t i = 0; i < line_bbs.size(); ++i) {
             const BoundingBox &glyph_bb = line_bbs[i];
@@ -1347,7 +1342,6 @@ TriangleMesh cut_per_glyph_surface(DataBase &input1, const SurfaceVolumeData &in
         throw JobException(_u8L("There is no valid surface for text projection.").c_str());
     return TriangleMesh(std::move(result));
 }
-
 
 // input can't be const - cache of font
 template<typename Fnc>
@@ -1490,67 +1484,85 @@ const GLVolume *find_closest(
     return closest;
 }
 
-bool start_create_object_job(const CreateVolumeParams &input, DataBasePtr emboss_data, const Vec2d &coor)
+bool start_create_object_job(CreateVolumeParams &input, const Vec2d &coor)
 {
     const Pointfs   &bed_shape  = input.build_volume.bed_shape();
     auto             gizmo_type = static_cast<GLGizmosManager::EType>(input.gizmo);
-    DataCreateObject data{std::move(emboss_data), coor, input.camera, bed_shape, gizmo_type, input.angle};
+    DataCreateObject data{std::move(input.data), coor, input.camera, bed_shape, gizmo_type, input.angle};
 
     // Fix: adding text on print bed with style containing use_surface
     if (data.base->shape.projection.use_surface) 
         // Til the print bed is flat using surface for Object is useless
         data.base->shape.projection.use_surface = false;
-    auto             job = std::make_unique<CreateObjectJob>(std::move(data));
+
+    auto job = std::make_unique<CreateObjectJob>(std::move(data));
     return queue_job(input.worker, std::move(job));
 }
 
-bool start_create_volume_on_surface_job(CreateVolumeParams &input, DataBasePtr data, const Vec2d &screen_coor, bool try_no_coor)
+namespace {
+// for creation volume
+ModelVolumePtrs prepare_volumes_to_slice(const ModelObject &mo) {
+    const ModelVolumePtrs &volumes = mo.volumes;
+    ModelVolumePtrs result;
+    result.reserve(volumes.size());
+    for (ModelVolume *volume : volumes) {
+        // only part could be surface for volumes
+        if (!volume->is_model_part())
+            continue;
+
+        result.push_back(volume);
+    }
+    return result;
+}
+} // namespace
+
+bool start_create_volume_on_surface_job(CreateVolumeParams &input, const Vec2d &screen_coor, bool try_no_coor)
 {
-    auto on_bad_state = [&input, try_no_coor](DataBasePtr data_, const ModelObject *object = nullptr) {
+    auto on_bad_state = [&input, try_no_coor](const ModelObject *object = nullptr) {
         if (try_no_coor) {
             // Can't create on coordinate try to create somewhere
-            return start_create_volume_without_position(input, std::move(data_));
+            return start_create_volume_without_position(input);
         } else {
             // In centroid of convex hull is not hit with object. e.g. torid
             // soo create transfomation on border of object
 
             // there is no point on surface so no use of surface will be applied
-            if (data_->shape.projection.use_surface)
-                data_->shape.projection.use_surface = false;
+            if (input.data->shape.projection.use_surface)
+                input.data->shape.projection.use_surface = false;
 
             if (object == nullptr)
                 return false;
 
             auto gizmo_type = static_cast<GLGizmosManager::EType>(input.gizmo);
-            return start_create_volume_job(input.worker, *object, {}, std::move(data_), input.volume_type, gizmo_type);
+            return start_create_volume_job(input.worker, *object, {}, std::move(input.data), input.volume_type, gizmo_type);
         }
     };
 
     assert(input.gl_volume != nullptr);
     if (input.gl_volume == nullptr)
-        return on_bad_state(std::move(data));
+        return on_bad_state();
 
     const Model *model = input.canvas.get_model();
 
     assert(model != nullptr);
     if (model == nullptr)
-        return on_bad_state(std::move(data));
+        return on_bad_state();
 
     const ModelObjectPtrs &objects = model->objects;
     const ModelVolume     *volume  = get_model_volume(*input.gl_volume, objects);
     assert(volume != nullptr);
     if (volume == nullptr)
-        return on_bad_state(std::move(data));
+        return on_bad_state();
 
     const ModelInstance *instance = get_model_instance(*input.gl_volume, objects);
     assert(instance != nullptr);
     if (instance == nullptr)
-        return on_bad_state(std::move(data));
+        return on_bad_state();
 
     const ModelObject *object = volume->get_object();
     assert(object != nullptr);
     if (object == nullptr)
-        return on_bad_state(std::move(data));
+        return on_bad_state();
 
     auto                   cond   = RaycastManager::AllowVolumes({volume->id().id});
     RaycastManager::Meshes meshes = create_meshes(input.canvas, cond);
@@ -1563,15 +1575,19 @@ bool start_create_volume_on_surface_job(CreateVolumeParams &input, DataBasePtr d
     if (!hit.has_value())
         // When model is broken. It could appear that hit miss the object.
         // So add part near by in simmilar manner as right panel do
-        return on_bad_state(std::move(data), object);
+        return on_bad_state(object);
 
     // Create result volume transformation
     Transform3d surface_trmat = create_transformation_onto_surface(hit->position, hit->normal, UP_LIMIT);
     apply_transformation(input.angle, input.distance, surface_trmat);
     Transform3d transform  = instance->get_matrix().inverse() * surface_trmat;
-    auto        gizmo_type = static_cast<GLGizmosManager::EType>(input.gizmo);
+    auto gizmo_type = static_cast<GLGizmosManager::EType>(input.gizmo);
+
+    // Create text lines for Per Glyph projection when needed
+    input.data->create_text_lines(transform, prepare_volumes_to_slice(*object));
+    
     // Try to cast ray into scene and find object for add volume
-    return start_create_volume_job(input.worker, *object, transform, std::move(data), input.volume_type, gizmo_type);
+    return start_create_volume_job(input.worker, *object, transform, std::move(input.data), input.volume_type, gizmo_type);
 }
 
 void create_message(const std::string &message) {

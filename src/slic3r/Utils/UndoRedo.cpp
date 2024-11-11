@@ -1,33 +1,29 @@
 #include "UndoRedo.hpp"
 
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/map.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/utility.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/archives/binary.hpp>
+#include <boost/format.hpp>
+#include <cereal/cereal.hpp>
 #include <algorithm>
-#include <iostream>
 #include <fstream>
 #include <memory>
-#include <typeinfo> 
 #include <cassert>
-#include <cstddef>
+#include <map>
+#include <type_traits>
+#include <cstring>
 
-#include <cereal/types/polymorphic.hpp>
-#include <cereal/types/map.hpp> 
-#include <cereal/types/string.hpp> 
-#include <cereal/types/utility.hpp> 
-#include <cereal/types/vector.hpp> 
-#include <cereal/archives/binary.hpp>
 #define CEREAL_FUTURE_EXPERIMENTAL
 #include <cereal/archives/adapters.hpp>
-
-#include <libslic3r/PrintConfig.hpp>
 #include <libslic3r/ObjectID.hpp>
 #include <libslic3r/Utils.hpp>
 
 #include "slic3r/GUI/3DScene.hpp"
-
-#include <boost/foreach.hpp>
-
-#ifndef NDEBUG
-// #define SLIC3R_UNDOREDO_DEBUG
-#endif /* NDEBUG */
+#include "libslic3r/BoundingBox.hpp"
+#include "libslic3r/Exception.hpp"
 #if 0
 	// Stop at a fraction of the normal Undo / Redo stack size.
 	#define UNDO_REDO_DEBUG_LOW_MEM_FACTOR 10000
@@ -696,11 +692,6 @@ using OutputArchive = cereal::UserDataAdapter<StackImpl, cereal::BinaryOutputArc
 
 } // namespace UndoRedo
 
-class Model;
-class ModelObject;
-class ModelVolume;
-class ModelInstance;
-class ModelMaterial;
 class DynamicPrintConfig;
 class TriangleMesh;
 

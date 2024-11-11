@@ -118,7 +118,6 @@ wxColor StaticBox::GetParentBackgroundColor(wxWindow* parent)
     return *wxWHITE;
 }
 
-
 void StaticBox::paintEvent(wxPaintEvent& evt)
 {
     // depending on your system you may need to look at double-buffered dcs
@@ -166,6 +165,7 @@ void StaticBox::doRender(wxDC& dc)
                 dc.SetBrush(wxBrush(background_color.colorForStates(states)));
             else
                 dc.SetBrush(wxBrush(GetBackgroundColour()));
+
             if (border_width && border_color.count() > 0) {
 #ifdef __WXOSX__
                 const double bw = (double)border_width;
@@ -184,12 +184,13 @@ void StaticBox::doRender(wxDC& dc)
             } else {
                 dc.SetPen(wxPen(background_color.colorForStates(states)));
             }
+
             if (radius == 0.)
                 dc.DrawRectangle(rc);
             else
                 dc.DrawRoundedRectangle(rc, radius - border_width);
-            }
         }
+    }
     else {
         wxColor start = background_color.colorForStates(states);
         wxColor stop = background_color2.colorForStates(states);

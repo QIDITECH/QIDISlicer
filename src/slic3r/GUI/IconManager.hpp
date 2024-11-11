@@ -96,6 +96,7 @@ public:
 private:        
     // keep data stored on GPU
     GLTexture m_icons_texture;
+
     unsigned int m_id{ 0 };
     Icons m_icons;
 };

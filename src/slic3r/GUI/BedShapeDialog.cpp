@@ -290,6 +290,7 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
         }
         m_canvas->repaint(tem_shape);
     });
+    m_canvas->Bind(wxEVT_PAINT, [this](wxPaintEvent& e) { m_canvas->repaint(m_shape); });
     m_canvas->Bind(wxEVT_SIZE, [this](wxSizeEvent& e) { m_canvas->Refresh(); });
 
     wxSizer* left_sizer = new wxBoxSizer(wxVERTICAL);
@@ -298,6 +299,8 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
     left_sizer->Add(exclude_panel, 0, wxEXPAND);
     left_sizer->Add(texture_panel, 0, wxEXPAND);
     left_sizer->Add(model_panel, 0, wxEXPAND);
+    left_sizer->Add(texture_panel, 1, wxEXPAND);
+    left_sizer->Add(model_panel, 1, wxEXPAND);
 
     wxSizer* top_sizer = new wxBoxSizer(wxHORIZONTAL);
     top_sizer->Add(left_sizer, 0, wxEXPAND | wxLEFT | wxTOP | wxBOTTOM, 10);
@@ -319,7 +322,7 @@ ConfigOptionsGroupShp BedShapePanel::init_shape_options_page(const wxString& tit
     ConfigOptionsGroupShp optgroup = std::make_shared<ConfigOptionsGroup>(panel, _L("Settings"));
 
     optgroup->label_width = 10;
-    optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    optgroup->on_change = [this](t_config_option_key opt_key, boost::any value) {
         update_shape();
     };
 	
@@ -378,7 +381,7 @@ wxPanel* BedShapePanel::init_texture_panel()
     ConfigOptionsGroupShp optgroup = std::make_shared<ConfigOptionsGroup>(panel, _L("Texture"));
 
     optgroup->label_width = 10;
-    optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    optgroup->on_change = [this](t_config_option_key opt_key, boost::any value) {
         update_shape();
     };
 
@@ -451,7 +454,7 @@ wxPanel* BedShapePanel::init_model_panel()
     ConfigOptionsGroupShp optgroup = std::make_shared<ConfigOptionsGroup>(panel, _L("Model"));
 
     optgroup->label_width = 10;
-    optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    optgroup->on_change = [this](t_config_option_key opt_key, boost::any value) {
         update_shape();
     };
 
@@ -525,7 +528,7 @@ wxPanel* BedShapePanel::init_model_panel()
 //B52
 void BedShapePanel::set_shape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2)
 {
-    BedShape shape(points1,points2);
+    BedShape shape(points1, points2);
 
     m_shape_options_book->SetSelection(int(shape.get_page_type()));
     shape.apply_optgroup_values(m_optgroups[int(shape.get_page_type())]);

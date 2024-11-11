@@ -98,7 +98,7 @@ bool MsgUpdateSlic3r::disable_version_check() const
 
  wxSize AppUpdateAvailableDialog::AUAD_size;
 // AppUpdater
-AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, const Semver& ver_online, bool from_user)
+AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, const Semver& ver_online, bool from_user, bool browser_on_next)
 	: MsgDialog(nullptr, _(L("App Update available")), wxString::Format(_(L("New version of %s is available.\nDo you wish to download it?")), SLIC3R_APP_NAME))
 {
 	//B44
@@ -116,14 +116,23 @@ AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, co
 		content_sizer->Add(cbox);
 	}
 	content_sizer->AddSpacer(VERT_SPACING);
+	
+    if (browser_on_next)
+    {
+        content_sizer->Add(new wxStaticText(this, wxID_ANY, _L("Clicking \'Next\' will open a browser window where you can select which variant of QIDISlicer you want to download.")));
+        content_sizer->AddSpacer(VERT_SPACING);
+    }
+
     AUAD_size = wxSize(850, 500);
     content_sizer->SetMinSize(AppUpdateAvailableDialog::AUAD_size);
-
-	add_button(wxID_CANCEL);
-
+	//B
+	if (auto* tt_ok = get_button(wxID_OK); tt_ok == NULL) {
+		add_button(wxID_OK, true);;
+	}
 	if (auto* btn_ok = get_button(wxID_OK); btn_ok != NULL) {
 		btn_ok->SetLabel(_L("Next"));
 	}
+	add_button(wxID_CANCEL);
 
 	finalize();
 }
@@ -321,6 +330,7 @@ MsgUpdateConfig::MsgUpdateConfig(const std::vector<Update> &updates, bool force_
 			update_printer->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 			flex->Add(update_printer);
 		}
+
 		versions->Add(flex);
 
 		if (! update.changelog_url.empty() && update.version.prerelease() == nullptr) {
@@ -389,6 +399,7 @@ MsgUpdateForced::MsgUpdateForced(const std::vector<Update>& updates) :
 			update_printer->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 			versions->Add(update_printer);
 		}
+
 		if (!update.changelog_url.empty() && update.version.prerelease() == nullptr) {
 			auto* line = new wxBoxSizer(wxHORIZONTAL);
 			auto changelog_url = (boost::format(update.changelog_url) % lang_code).str();
@@ -489,6 +500,14 @@ MsgDataLegacy::MsgDataLegacy() :
 	//content_sizer->Add(text2);
 	//content_sizer->Add(link);
 	//content_sizer->AddSpacer(VERT_SPACING);
+	auto *text2 = new wxStaticText(this, wxID_ANY, _(L("For more information please visit our wiki page:")));
+	static const wxString url("https://github.com/qidi3d/QIDISlicer/wiki/Slic3r-PE-1.40-configuration-update");
+	// The wiki page name is intentionally not localized:
+	// TRN %s = QIDISlicer
+	auto *link = new wxHyperlinkCtrl(this, wxID_ANY, format_wxstr(_L("%s 1.40 configuration update"), SLIC3R_APP_NAME), CONFIG_UPDATE_WIKI_URL);
+	content_sizer->Add(text2);
+	content_sizer->Add(link);
+	content_sizer->AddSpacer(VERT_SPACING);
 
 	finalize();
 }

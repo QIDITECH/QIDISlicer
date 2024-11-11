@@ -121,6 +121,7 @@ class UndoValueUIManager
 	};
 
 	EditValueUI m_edit_ui;
+
 public:
 	UndoValueUIManager() {}
 	~UndoValueUIManager() {}
@@ -133,6 +134,7 @@ public:
 
 	bool 	set_edit_bitmap(const ScalableBitmap* bmp)			{ return m_edit_ui.set_bitmap(bmp); }
 	bool 	set_edit_tooltip(const wxString& tip)				{ return m_edit_ui.set_tooltip(tip); }
+
 	// ui items used for revert line value
 	bool					has_undo_ui()			const { return m_undo_ui.undo_bitmap != nullptr; }
 	const wxBitmapBundle&	undo_bitmap()			const { return m_undo_ui.undo_bitmap->bmp(); }
@@ -140,11 +142,13 @@ public:
 	const wxBitmapBundle&	undo_to_sys_bitmap()	const { return m_undo_ui.undo_to_sys_bitmap->bmp(); }
 	const wxString*			undo_to_sys_tooltip()	const { return m_undo_ui.undo_to_sys_tooltip; }
 	const wxColour*			label_color()			const { return m_undo_ui.label_color; }
+
 	// Extentions
 
 	// Search blinker
 	const bool				blink()					const { return m_undo_ui.blink; }
 	bool*					get_blink_ptr()				  { return &m_undo_ui.blink; }
+
 	// Edit field button
 	bool					has_edit_ui()			const { return !m_edit_ui.tooltip.IsEmpty(); }
 	const wxBitmapBundle*	edit_bitmap()			const { return &m_edit_ui.bitmap->bmp(); }
@@ -201,6 +205,7 @@ public:
 
 	/// Callback function to edit field value 
 	t_back_to_init	m_fn_edit_value{ nullptr };
+
 	// This is used to avoid recursive invocation of the field change/update by wxWidgets.
     bool			m_disable_change_event {false};
     bool			m_is_modified_value {false};
@@ -290,6 +295,7 @@ inline bool is_window_field(const t_field& obj) { return !is_bad_field(obj) && o
 inline bool is_sizer_field(const t_field& obj) { return !is_bad_field(obj) && obj->getSizer() != nullptr; }
 
 using text_ctrl = ::TextInput; //wxTextCtrl
+
 class TextCtrl : public Field {
     using Field::Field;
 #ifdef __WXGTK__
@@ -339,6 +345,7 @@ public:
 	static bool			GetValue(wxWindow* win);
 	static void			Rescale(wxWindow* win);
 	static void			SysColorChanged(wxWindow* win);
+
 	wxWindow*		window{ nullptr };
 	void			BUILD() override;
 
@@ -354,6 +361,7 @@ public:
 	void			enable() override;
 	void			disable() override;
 	wxWindow*		getWindow() override { return window; }
+
 private:
 	void SetValue(bool value);
 	bool GetValue();
@@ -387,14 +395,13 @@ public:
         m_value = value;
 		dynamic_cast<::SpinInput*>(window)->SetValue(tmp_value);
 		m_disable_change_event = false;
-    }
+	}
 */
     void            set_value(const boost::any& value, bool change_event = false) override;
     void            set_last_meaningful_value() override;
     void            set_na_value() override;
 
 	boost::any&		get_value() override;
-
 /*
 	boost::any&		get_value() override {
 		int value = static_cast<::SpinInput*>(window)->GetValue();

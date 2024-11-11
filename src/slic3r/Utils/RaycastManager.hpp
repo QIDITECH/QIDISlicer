@@ -174,6 +174,7 @@ std::optional<RaycastManager::Hit> ray_from_camera(const RaycastManager        &
 /// <param name="disallowed_volume_id">Disallowed volume</param>
 /// <returns>Condition</returns>
 RaycastManager::AllowVolumes create_condition(const ModelVolumePtrs &volumes, const ObjectID &disallowed_volume_id);
+
 } // namespace Slic3r::GUI
 
 #endif // slic3r_RaycastManager_hpp_

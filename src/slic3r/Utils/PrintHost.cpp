@@ -20,7 +20,9 @@
 #include "Repetier.hpp"
 #include "MKS.hpp"
 #include "Moonraker.hpp"
+#include "QIDIConnect.hpp"
 #include "../GUI/PrintHostDialogs.hpp"
+#include "../GUI/GUI_App.hpp"
 
 // B64
 #include <boost/thread.hpp>
@@ -57,12 +59,17 @@ PrintHost* PrintHost::get_print_host(DynamicPrintConfig *config)
             case htRepetier:  return new Repetier(config);
             case htQIDILink: return new QIDILink(config);
             case htQIDIConnect: return new QIDIConnect(config);
+            case htQIDIConnectNew: return new QIDIConnectNew(config);
             case htMKS:       return new MKS(config);
             case htMoonraker: return new Moonraker(config,true);
             case htMoonraker2: return new Moonraker(config,false);
             default:          return nullptr;
         }
     } else {
+        const auto opt = config->option<ConfigOptionEnum<PrintHostType>>("host_type");
+        if (opt != nullptr && opt->value == htQIDIConnectNew) {
+            return new QIDIConnectNew(config);
+        }  
         return new SL1Host(config);
     }
 }
@@ -214,6 +221,9 @@ void PrintHostJobQueue::priv::bg_thread_main()
 
             remove_source();
             job_id++;
+            if (channel_jobs.size_hint() == 0) {
+                GUI::wxGetApp().plater()->resetUploadCount();
+            }
         }
     } catch (const std::exception &e) {
         emit_error(e.what());
@@ -383,17 +393,20 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
             break;
         boost::this_thread::sleep(boost::posix_time::seconds(1));
      }
-    emit_progress(0);   // Indicate the upload is starting
 
-    bool success = the_job.printhost->upload(std::move(the_job.upload_data),
-        [this](Http::Progress progress, bool &cancel)   { this->progress_fn(std::move(progress), cancel); },
-        [this](wxString error)                          { this->error_fn(std::move(error)); },
-        [this](wxString tag, wxString host)             { this->info_fn(std::move(tag), std::move(host)); }
-    );
-
-    if (success) {
-        emit_progress(100);
-    }
+     if (this->cancel_fn()) {
+         emit_cancel(this->job_id);
+     } else {
+        emit_progress(0);   // Indicate the upload is starting
+        bool success = the_job.printhost->upload(std::move(the_job.upload_data),
+            [this](Http::Progress progress, bool &cancel)   { this->progress_fn(std::move(progress), cancel); },
+            [this](wxString error)                          { this->error_fn(std::move(error)); },
+            [this](wxString tag, wxString host)             { this->info_fn(std::move(tag), std::move(host)); }
+        );
+        if (success) {
+            emit_progress(100);
+        }
+     }
 }
 
 //B64

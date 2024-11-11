@@ -25,6 +25,7 @@
 #include "Http.hpp"
 
 #include <curl/curl.h>
+
 namespace fs = boost::filesystem;
 namespace pt = boost::property_tree;
 
@@ -94,7 +95,7 @@ bool Duet::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn e
 	if (dsf) {
 		http.set_put_body(upload_data.source_path);
 		if (connect_msg.empty())
-			http.header("X-Session-Key", boost::nowide::narrow(connect_msg));
+            http.header("X-Session-Key", GUI::into_u8(connect_msg));
 	} else {
 		http.set_post_body(upload_data.source_path);
 	}
@@ -161,7 +162,7 @@ Duet::ConnectionType Duet::connect(wxString &msg) const
 						auto key = root.get_optional<std::string>("sessionKey");
 						if (key)
 							msg = boost::nowide::widen(*key);
-					res = ConnectionType::dsf;
+						res = ConnectionType::dsf;
 					}
 					catch (const std::exception&) {
 						BOOST_LOG_TRIVIAL(error) << "Failed to parse serverKey from Duet reply to Connect request: " << body;

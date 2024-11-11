@@ -370,6 +370,7 @@ std::pair<double, double> Camera::calc_tight_frustrum_zs_around(const BoundingBo
     auto& [near_z, far_z] = ret;
 
     set_distance(DefaultDistance);
+
     // box in eye space
     const BoundingBoxf3 eye_box = box.transformed(m_view_matrix);
     near_z = -eye_box.max.z();

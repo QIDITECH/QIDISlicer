@@ -57,9 +57,7 @@ public:
 
     // IDs of the Vertex Array Objects, into which the geometry has been loaded.
     // Zero if the VBOs are not sent to GPU yet.
-#if ENABLE_GL_CORE_PROFILE
     unsigned int              vertices_VAO_id{ 0 };
-#endif // ENABLE_GL_CORE_PROFILE
     unsigned int              vertices_VBO_id{ 0 };
     std::vector<unsigned int> triangle_indices_VBO_ids;
 };
@@ -70,6 +68,7 @@ public:
     // Plus 1 in the initialization of m_gizmo_scene is because the first position is allocated for non-painted triangles, and the indices above colors.size() are allocated for seed fill.
     explicit TriangleSelectorMmGui(const TriangleMesh& mesh, const std::vector<ColorRGBA>& colors, const ColorRGBA& default_volume_color)
         : TriangleSelectorGUI(mesh), m_colors(colors), m_default_volume_color(default_volume_color), m_gizmo_scene(2 * (colors.size() + 1)) {}
+
     ~TriangleSelectorMmGui() override = default;
 
     void render(ImGuiWrapper* imgui, const Transform3d& matrix) override;
@@ -107,8 +106,8 @@ protected:
     ColorRGBA get_cursor_sphere_left_button_color() const override;
     ColorRGBA get_cursor_sphere_right_button_color() const override;
 
-    EnforcerBlockerType get_left_button_state_type() const override { return EnforcerBlockerType(m_first_selected_extruder_idx + 1); }
-    EnforcerBlockerType get_right_button_state_type() const override { return EnforcerBlockerType(m_second_selected_extruder_idx + 1); }
+    TriangleStateType get_left_button_state_type() const override { return TriangleStateType(m_first_selected_extruder_idx + 1); }
+    TriangleStateType get_right_button_state_type() const override { return TriangleStateType(m_second_selected_extruder_idx + 1); }
 
     void on_render_input_window(float x, float y, float bottom_limit) override;
     std::string on_get_name() const override;
@@ -146,18 +145,9 @@ private:
 
     // This map holds all translated description texts, so they can be easily referenced during layout calculations
     // etc. When language changes, GUI is recreated and this class constructed again, so the change takes effect.
-    std::map<std::string, wxString> m_desc;
+    std::map<std::string, std::string> m_desc;
 };
 
-std::vector<ColorRGBA> get_extruders_colors();
-
-inline size_t get_extruder_color_idx(const ModelVolume &model_volume, const int extruders_count)
-{
-    if (const int extruder_id = model_volume.extruder_id(); extruder_id <= 0 || extruder_id > extruders_count)
-        return 0;
-    else
-        return extruder_id - 1;
-}
 } // namespace Slic3r
 
 

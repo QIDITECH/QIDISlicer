@@ -1,3 +1,4 @@
+
 #include "Preferences.hpp"
 #include "OptionsGroup.hpp"
 #include "GUI_App.hpp"
@@ -12,6 +13,7 @@
 #include "OG_CustomCtrl.hpp"
 #include "GLCanvas3D.hpp"
 #include "ConfigWizard.hpp"
+#include "Search.hpp"
 
 #include "Widgets/SpinInput.hpp"
 
@@ -126,8 +128,11 @@ void PreferencesDialog::show(const std::string& highlight_opt_key /*= std::strin
 		downloader->set_path_name(app_config->get("url_downloader_dest"));
 		downloader->allow(!app_config->has("downloader_url_registered") || app_config->get_bool("downloader_url_registered"));
 
-		for (const std::string& opt_key : {"suppress_hyperlinks", "downloader_url_registered"})
+		for (const std::string& opt_key : {"suppress_hyperlinks", "downloader_url_registered", "show_login_button"})
 			m_optgroup_other->set_value(opt_key, app_config->get_bool(opt_key));
+		// by default "Log in" button is visible
+		if (!app_config->has("show_login_button"))
+			m_optgroup_other->set_value("show_login_button", true);
 
 		for (const std::string& opt_key : { "default_action_on_close_application"
 										   ,"default_action_on_new_project"
@@ -145,6 +150,9 @@ void PreferencesDialog::show(const std::string& highlight_opt_key /*= std::strin
 		for (size_t mode = 0; mode < color_pickres.size(); ++mode)
 			update_color(color_pickres[mode], palette[mode]);
 	}
+
+	// invalidate this flag before show preferences
+	m_settings_layout_changed = false;
 
 	this->ShowModal();
 }
@@ -183,7 +191,7 @@ static void activate_options_tab(std::shared_ptr<ConfigOptionsGroup> optgroup)
 	optgroup->parent()->Layout();
 
 	// apply sercher
-	wxGetApp().sidebar().get_searcher().append_preferences_options(optgroup->get_lines());
+	wxGetApp().searcher().append_preferences_options(optgroup->get_lines());
 }
 
 static void append_bool_option( std::shared_ptr<ConfigOptionsGroup> optgroup,
@@ -202,7 +210,7 @@ static void append_bool_option( std::shared_ptr<ConfigOptionsGroup> optgroup,
 	optgroup->append_single_option_line(option);
 
 	// fill data to the Search Dialog
-	wxGetApp().sidebar().get_searcher().add_key(opt_key, Preset::TYPE_PREFERENCES, optgroup->config_category(), L("Preferences"));
+	wxGetApp().searcher().add_key(opt_key, Preset::TYPE_PREFERENCES, optgroup->config_category(), L("Preferences"));
 }
 
 template<typename EnumType>
@@ -225,17 +233,18 @@ static void append_enum_option( std::shared_ptr<ConfigOptionsGroup> optgroup,
 	optgroup->append_single_option_line(option);
 
 	// fill data to the Search Dialog
-	wxGetApp().sidebar().get_searcher().add_key(opt_key, Preset::TYPE_PREFERENCES, optgroup->config_category(), L("Preferences"));
+	wxGetApp().searcher().add_key(opt_key, Preset::TYPE_PREFERENCES, optgroup->config_category(), L("Preferences"));
 }
 
 static void append_preferences_option_to_searcher(std::shared_ptr<ConfigOptionsGroup> optgroup,
 												const std::string& opt_key,
 												const wxString& label)
 {
+	Search::OptionsSearcher& searcher = wxGetApp().searcher();
 	// fill data to the Search Dialog
-	wxGetApp().sidebar().get_searcher().add_key(opt_key, Preset::TYPE_PREFERENCES, optgroup->config_category(), L("Preferences"));
+	searcher.add_key(opt_key, Preset::TYPE_PREFERENCES, optgroup->config_category(), L("Preferences"));
 	// apply sercher
-	wxGetApp().sidebar().get_searcher().append_preferences_option(Line(opt_key, label, ""));
+	searcher.append_preferences_option(Line(opt_key, label, ""));
 }
 
 void PreferencesDialog::build()
@@ -264,7 +273,7 @@ void PreferencesDialog::build()
 
 	// Add "General" tab
 	m_optgroup_general = create_options_tab(L("General"), tabs);
-	m_optgroup_general->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+	m_optgroup_general->on_change = [this](t_config_option_key opt_key, boost::any value) {
 		if (auto it = m_values.find(opt_key); it != m_values.end()) {
 			m_values.erase(it); // we shouldn't change value, if some of those parameters were selected, and then deselected
 			return;
@@ -448,7 +457,7 @@ void PreferencesDialog::build()
 
 	// Add "Camera" tab
 	m_optgroup_camera = create_options_tab(L("Camera"), tabs);
-	m_optgroup_camera->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+	m_optgroup_camera->on_change = [this](t_config_option_key opt_key, boost::any value) {
 		if (auto it = m_values.find(opt_key);it != m_values.end()) {
 			m_values.erase(it); // we shouldn't change value, if some of those parameters were selected, and then deselected
 			return;
@@ -475,7 +484,7 @@ void PreferencesDialog::build()
 
 	// Add "GUI" tab
 	m_optgroup_gui = create_options_tab(L("GUI"), tabs);
-	m_optgroup_gui->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+	m_optgroup_gui->on_change = [this](t_config_option_key opt_key, boost::any value) {
 		if (opt_key == "notify_release") {
 			int val_int = boost::any_cast<int>(value);
 			for (const auto& item : s_keys_map_NotifyReleaseMode) {
@@ -491,15 +500,6 @@ void PreferencesDialog::build()
 			get_app_config()->set("use_custom_toolbar_size", boost::any_cast<bool>(value) ? "1" : "0");
 			wxGetApp().plater()->get_current_canvas3D()->render();
 			return;
-		}
-		if (opt_key == "tabs_as_menu") {
-			bool disable_new_layout = boost::any_cast<bool>(value);
-			m_rb_new_settings_layout_mode->Show(!disable_new_layout);
-			if (disable_new_layout && m_rb_new_settings_layout_mode->GetValue()) {
-				m_rb_new_settings_layout_mode->SetValue(false);
-				m_rb_old_settings_layout_mode->SetValue(true);
-			}
-			refresh_og(m_optgroup_gui);
 		}
 
 		if (auto it = m_values.find(opt_key); it != m_values.end()) {
@@ -554,13 +554,6 @@ void PreferencesDialog::build()
 			L("If enabled, related notification will be shown, when sliced object looks like a logo or a sign."),
 			app_config->get_bool("allow_auto_color_change"));
 
-#ifdef _MSW_DARK_MODE
-		append_bool_option(m_optgroup_gui, "tabs_as_menu",
-			L("Set settings tabs as menu items"),
-			L("If enabled, Settings Tabs will be placed as menu items. If disabled, old UI will be used."),
-			app_config->get_bool("tabs_as_menu"));
-#endif
-
 		m_optgroup_gui->append_separator();
 /*
 		append_bool_option(m_optgroup_gui, "suppress_round_corners",
@@ -607,7 +600,7 @@ void PreferencesDialog::build()
 		create_settings_mode_color_widget();
 
 		m_optgroup_other = create_options_tab(_L("Other"), tabs);
-		m_optgroup_other->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+		m_optgroup_other->on_change = [this](t_config_option_key opt_key, boost::any value) {
 
 			if (auto it = m_values.find(opt_key); it != m_values.end() && opt_key != "url_downloader_dest") {
 				m_values.erase(it); // we shouldn't change value, if some of those parameters were selected, and then deselected
@@ -632,6 +625,11 @@ void PreferencesDialog::build()
 			//L("If enabled, the descriptions of configuration parameters in settings tabs wouldn't work as hyperlinks. "
 			//  "If disabled, the descriptions of configuration parameters in settings tabs will work as hyperlinks."),
 			app_config->get_bool("suppress_hyperlinks"));
+
+		append_bool_option(m_optgroup_other, "show_login_button",
+			L("Show \"Log in\" button in application top bar"),
+			L("If enabled, QIDISlicer will show up \"Log in\" button in application top bar."),
+			app_config->get_bool("show_login_button"));
 		
 		append_bool_option(m_optgroup_other, "downloader_url_registered",
 			L("Allow downloads from Printables.com"),
@@ -646,7 +644,7 @@ void PreferencesDialog::build()
 #if ENABLE_ENVIRONMENT_MAP
 		// Add "Render" tab
 		m_optgroup_render = create_options_tab(L("Render"), tabs);
-		m_optgroup_render->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+		m_optgroup_render->on_change = [this](t_config_option_key opt_key, boost::any value) {
 			if (auto it = m_values.find(opt_key); it != m_values.end()) {
 				m_values.erase(it); // we shouldn't change value, if some of those parameters were selected, and then deselected
 				return;
@@ -666,7 +664,7 @@ void PreferencesDialog::build()
 #ifdef _WIN32
 		// Add "Dark Mode" tab
 		m_optgroup_dark_mode = create_options_tab(_L("Dark mode"), tabs);
-		m_optgroup_dark_mode->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+		m_optgroup_dark_mode->on_change = [this](t_config_option_key opt_key, boost::any value) {
 			if (auto it = m_values.find(opt_key); it != m_values.end()) {
 				m_values.erase(it); // we shouldn't change value, if some of those parameters were selected, and then deselected
 				return;
@@ -751,12 +749,12 @@ void PreferencesDialog::accept(wxEvent&)
 		if (!downloader->on_finish())
 			return;
 #if defined(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION) 
-		if( downloader->get_perform_registration_linux()) 
+		if(DownloaderUtils::Worker::perform_registration_linux) 
 			DesktopIntegrationDialog::perform_downloader_desktop_integration();
 #endif //(__linux__) && defined(SLIC3R_DESKTOP_INTEGRATION)
 	}
 
-	std::vector<std::string> options_to_recreate_GUI = { "no_defaults", "tabs_as_menu", "sys_menu_enabled", "font_pt_size", "suppress_round_corners" };
+	std::vector<std::string> options_to_recreate_GUI = { "no_defaults", "sys_menu_enabled", "font_pt_size", "suppress_round_corners" };
 
 	for (const std::string& option : options_to_recreate_GUI) {
 		if (m_values.find(option) != m_values.end()) {
@@ -785,9 +783,7 @@ void PreferencesDialog::accept(wxEvent&)
 	if (auto it = m_values.find("seq_top_layer_only"); it != m_values.end())
 		m_seq_top_layer_only_changed = app_config->get("seq_top_layer_only") != it->second;
 
-	m_settings_layout_changed = false;
 	for (const std::string& key : { "old_settings_layout_mode",
-								    "new_settings_layout_mode",
 								    "dlg_settings_layout_mode" })
 	{
 	    auto it = m_values.find(key);
@@ -865,11 +861,6 @@ void PreferencesDialog::revert(wxEvent&)
 			m_settings_layout_changed = false;
 			continue;
 		}
-		if (key == "new_settings_layout_mode") {
-			m_rb_new_settings_layout_mode->SetValue(app_config->get_bool(key));
-			m_settings_layout_changed = false;
-			continue;
-		}
 		if (key == "dlg_settings_layout_mode") {
 			m_rb_dlg_settings_layout_mode->SetValue(app_config->get_bool(key));
 			m_settings_layout_changed = false;
@@ -886,11 +877,6 @@ void PreferencesDialog::revert(wxEvent&)
 			}) {
 			if (opt_group->set_value(key, app_config->get_bool(key)))
 				break;
-		}
-		if (key == "tabs_as_menu") {
-			m_rb_new_settings_layout_mode->Show(!app_config->get_bool(key));
-			refresh_og(m_optgroup_gui);
-			continue;
 		}
 	}
 
@@ -1016,7 +1002,6 @@ void PreferencesDialog::create_settings_mode_widget()
 
 	auto app_config = get_app_config();
 	std::vector<wxString> choices = {	_L("Old regular layout with the tab bar"),
-										_L("New layout, access via settings button in the top menu"),
 										_L("Settings in non-modal window") };
 	int id = -1;
 	auto add_radio = [this, parent, stb_sizer, choices](wxRadioButton** rb, int id, bool select) {
@@ -1025,24 +1010,12 @@ void PreferencesDialog::create_settings_mode_widget()
 		(*rb)->SetValue(select);
 		(*rb)->Bind(wxEVT_RADIOBUTTON, [this, id](wxCommandEvent&) {
 			m_values["old_settings_layout_mode"] = (id == 0) ? "1" : "0";
-			m_values["new_settings_layout_mode"] = (id == 1) ? "1" : "0";
-			m_values["dlg_settings_layout_mode"] = (id == 2) ? "1" : "0";
+			m_values["dlg_settings_layout_mode"] = (id == 1) ? "1" : "0";
 		});
 	};
 
 	add_radio(&m_rb_old_settings_layout_mode, ++id, app_config->get_bool("old_settings_layout_mode"));
-	add_radio(&m_rb_new_settings_layout_mode, ++id, app_config->get_bool("new_settings_layout_mode"));
 	add_radio(&m_rb_dlg_settings_layout_mode, ++id, app_config->get_bool("dlg_settings_layout_mode"));
-
-#ifdef _MSW_DARK_MODE
-	if (app_config->get_bool("tabs_as_menu")) {
-		m_rb_new_settings_layout_mode->Hide();
-		if (m_rb_new_settings_layout_mode->GetValue()) {
-			m_rb_new_settings_layout_mode->SetValue(false);
-			m_rb_old_settings_layout_mode->SetValue(true);
-		}
-	}
-#endif
 
 	std::string opt_key = "settings_layout_mode";
 	m_blinkers[opt_key] = new BlinkingBitmap(parent);

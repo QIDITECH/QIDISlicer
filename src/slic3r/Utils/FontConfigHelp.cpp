@@ -1,9 +1,17 @@
 #include "FontConfigHelp.hpp"
 
+#include <wx/buffer.h>
+#include <wx/chartype.h>
+#include <wx/defs.h>
+#include <wx/string.h>
+#include <optional>
+#include <cstddef>
+
 #ifdef EXIST_FONT_CONFIG_INCLUDE
 
 #include <wx/filename.h>
 #include <fontconfig/fontconfig.h>
+
 #include "libslic3r/Utils.hpp"
 
 using namespace Slic3r::GUI;

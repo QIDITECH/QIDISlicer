@@ -68,9 +68,6 @@ RammingDialog::RammingDialog(wxWindow* parent,const std::string& parameters)
 }
 
 
-
-
-
 RammingPanel::RammingPanel(wxWindow* parent, const std::string& parameters)
 : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize/*,wxPoint(50,50), wxSize(800,350),wxBORDER_RAISED*/)
 {
@@ -140,6 +137,7 @@ RammingPanel::RammingPanel(wxWindow* parent, const std::string& parameters)
     // TRN: The placeholder expands to Ctrl or Cmd (on macOS).
     gsizer_param->Add(new wxStaticText(this, wxID_ANY, format_wxstr(_L("For constant flow rate, hold %1% while dragging."), ctrl_str)), 0, wxALIGN_CENTER_VERTICAL);
 
+
 	sizer_param->Add(gsizer_param, 0, wxTOP, scale(10));
 
     m_widget_time->SetValue(m_chart->get_time());
@@ -189,7 +187,7 @@ std::string RammingPanel::get_parameters()
 // Parent dialog for purging volume adjustments - it fathers WipingPanel widget (that contains all controls) and a button.
 WipingDialog::WipingDialog(wxWindow* parent, const std::vector<float>& matrix, const std::vector<std::string>& extruder_colours,
                            double printer_purging_volume, const std::vector<double>& filament_purging_multipliers, bool use_custom_matrix)
-: wxDialog(parent, wxID_ANY, _(L("Wipe tower - Purging volume adjustment")), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE/* | wxRESIZE_BORDER*/)
+    : wxDialog(parent, wxID_ANY, _(L("Wipe tower - Purging volume adjustment")), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE/* | wxRESIZE_BORDER*/)
 {
     SetFont(wxGetApp().normal_font());
     update_ui(this);
@@ -232,6 +230,7 @@ WipingDialog::WipingDialog(wxWindow* parent, const std::vector<float>& matrix, c
     stb_sizer2->Add(t, 0, wxALIGN_CENTER_HORIZONTAL | wxCENTER | wxBOTTOM, 5);
     stb_sizer2->Add(m_widget_button, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 10);
     main_sizer->Add(stb_sizer2, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxBOTTOM | wxLEFT | wxRIGHT, 20);
+
     auto buttons = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
     wxGetApp().SetWindowVariantForButton(buttons->GetAffirmativeButton());
     wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
@@ -256,7 +255,9 @@ WipingDialog::WipingDialog(wxWindow* parent, const std::vector<float>& matrix, c
     m_radio_button1->SetValue(! use_custom_matrix);
     m_radio_button2->SetValue(use_custom_matrix);
     enable_or_disable_panel();
+
     this->Show();
+
 }
 
 // This function allows to "play" with sizrs parameters (like align or border)
@@ -267,6 +268,7 @@ void WipingPanel::format_sizer(wxSizer* sizer, wxPanel* page, wxGridSizer* grid_
 	table_sizer->Add(new wxStaticText(page, wxID_ANY, table_title), 0, wxALIGN_CENTER | wxTOP, 10);
 	table_sizer->Add(grid_sizer, 0, wxALIGN_CENTER | wxTOP | wxLEFT, 15);
 }
+
 
 WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, const std::vector<std::string>& extruder_colours,
                          const std::vector<double>& filament_purging_multipliers, double printer_purging_volume, wxButton* widget_button)
@@ -362,7 +364,6 @@ WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, con
 	m_sizer->SetSizeHints(this);
 	SetSizer(m_sizer);
 
-    
     m_page_advanced->Bind(wxEVT_PAINT,[this](wxPaintEvent&) {
                                               wxPaintDC dc(m_page_advanced);
                                               int y_pos = 0.5 * (edit_boxes[0][0]->GetPosition().y + edit_boxes[0][edit_boxes.size()-1]->GetPosition().y + edit_boxes[0][edit_boxes.size()-1]->GetSize().y);
@@ -370,6 +371,7 @@ WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, con
                                               int text_width = 0;
                                               int text_height = 0;
                                               dc.GetTextExtent(label,&text_width,&text_height);
+
                                               int xpos = m_gridsizer_advanced->GetPosition().x;
                                               if (!m_page_advanced->IsEnabled()) {
                                                   dc.SetTextForeground(wxSystemSettings::GetColour(
@@ -386,7 +388,7 @@ WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, con
 #endif
                                               }
                                               else
-                                              dc.DrawRotatedText(label,xpos-text_height,y_pos + text_width/2.f,90);
+                                                  dc.DrawRotatedText(label, xpos - text_height, y_pos + text_width / 2.f, 90);
     });
 }
 

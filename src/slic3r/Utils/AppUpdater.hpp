@@ -15,6 +15,10 @@ namespace Slic3r {
 std::string get_downloads_path_mac();
 #endif //__APPLE__
 
+enum class AppUpdaterURLAction {
+    AUUA_DOWNLOAD,
+    AUUA_OPEN_IN_BROWSER
+};
 struct DownloadAppData
 {
 	std::string				url;
@@ -22,6 +26,7 @@ struct DownloadAppData
 	boost::optional<Semver> version;
 	size_t				    size;
 	boost::filesystem::path target_path;
+    AppUpdaterURLAction     action { AppUpdaterURLAction::AUUA_DOWNLOAD };
 };
 
 class AppUpdater

@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <boost/algorithm/string.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -12,6 +13,10 @@
 #include <wx/button.h>
 #include <wx/statbox.h>
 #include <wx/wupdlock.h>
+#if wxUSE_SECRETSTORE 
+#include <wx/secretstore.h>
+#endif
+#include <wx/clipbrd.h>
 
 #include "libslic3r/libslic3r.h"
 #include "libslic3r/PrintConfig.hpp"
@@ -28,6 +33,7 @@
 #include "../Utils/PrintHost.hpp"
 #include "../Utils/FixModelByWin10.hpp"
 #include "../Utils/UndoRedo.hpp"
+#include "../Utils/ServiceConfig.hpp"
 #include "RemovableDriveManager.hpp"
 #include "BitmapCache.hpp"
 #include "BonjourDialog.hpp"
@@ -746,11 +752,20 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
         msg_wingow.ShowModal();
         return;
     }
-    if (m_exit_host.find(now_host) != m_exit_host.end()) {
-        MessageDialog msg_wingow(nullptr, _L("A device with the same host (IP or URL) already exists, please re-enter."), "",
-                                 wxICON_WARNING | wxOK);
-        msg_wingow.ShowModal();
-        return;
+    if (now_host.find(":") != std::string::npos) 
+    {
+        size_t pos = now_host.find(":");
+        now_host   = now_host.substr(0, pos);
+    }
+    for(auto exit_host : m_exit_host)
+    {
+        if(exit_host.find(now_host) != std::string::npos)
+        {
+            MessageDialog msg_wingow(nullptr, _L("A device with the same host (IP or URL) already exists, please re-enter."), "",
+                        wxICON_WARNING | wxOK);
+            msg_wingow.ShowModal();
+            return;
+        }
     }
 
     wxString printer_name = m_printer_name->GetValue();

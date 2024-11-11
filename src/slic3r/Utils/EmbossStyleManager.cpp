@@ -1,6 +1,9 @@
 #include "EmbossStyleManager.hpp"
 #include <optional>
 #include <GL/glew.h> // Imgui texture
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
 #include <imgui/imgui_internal.h> // ImTextCharFromUtf8
 #include <libslic3r/AppConfig.hpp>
 #include <libslic3r/Utils.hpp> // ScopeGuard
@@ -8,7 +11,7 @@
 #include "WxFontUtils.hpp"
 #include "slic3r/GUI/3DScene.hpp" // ::glsafe
 #include "slic3r/GUI/Jobs/CreateFontStyleImagesJob.hpp"
-#include "slic3r/GUI/ImGuiWrapper.hpp" // check of font ranges
+#include "slic3r/GUI/ImGuiPureWrap.hpp" // check of font ranges
 
 #include <boost/assign.hpp>
 #include <boost/bimap.hpp>
@@ -37,6 +40,7 @@ void                    store_style_index(AppConfig &cfg, size_t index);
 StyleManager::Styles load_styles(const AppConfig &cfg);
 void store_styles(AppConfig &cfg, const StyleManager::Styles &styles);
 void make_unique_name(const StyleManager::Styles &styles, std::string &name);
+
 // Enum map to string and vice versa
 using HorizontalAlignToName = boost::bimap<FontProp::HorizontalAlign, std::string_view>;
 const HorizontalAlignToName horizontal_align_to_name = 
@@ -51,6 +55,7 @@ boost::assign::list_of<VerticalAlignToName::relation>
     (FontProp::VerticalAlign::center, "middle")
     (FontProp::VerticalAlign::bottom, "bottom");
 } // namespace
+
 void StyleManager::init(AppConfig *app_config)
 {
     assert(app_config != nullptr);
@@ -60,7 +65,7 @@ void StyleManager::init(AppConfig *app_config)
     if (m_styles.empty()) {
         // No styles loaded from ini file so use default
         EmbossStyles styles = m_create_default_styles();
-    for (EmbossStyle &style : styles) {
+        for (EmbossStyle &style : styles) {
             ::make_unique_name(m_styles, style.name);
             m_styles.push_back({style});
         }
@@ -292,6 +297,7 @@ bool StyleManager::is_unique_style_name(const std::string &name) const {
             return false;
     return true;
 }
+
 bool StyleManager::is_active_font() { return m_style_cache.font_file.has_value(); }
 
 const StyleManager::Style *StyleManager::get_stored_style() const
@@ -308,7 +314,6 @@ void StyleManager::clear_glyphs_cache()
 }
 
 void StyleManager::clear_imgui_font() { m_style_cache.atlas.Clear(); }
-
 
 ImFont *StyleManager::get_imgui_font()
 {
@@ -327,13 +332,12 @@ ImFont *StyleManager::get_imgui_font()
 }
 
 const StyleManager::Styles &StyleManager::get_styles() const{ return m_styles; }
-
 void StyleManager::init_trunc_names(float max_width) { 
     for (auto &s : m_styles)
         if (s.truncated_name.empty()) {
             std::string name = s.name;
-            ImGuiWrapper::escape_double_hash(name);
-            s.truncated_name = ImGuiWrapper::trunc(name, max_width);
+            ImGuiPureWrap::escape_double_hash(name);
+            s.truncated_name = ImGuiPureWrap::trunc(name, max_width);
         }
 }
 
@@ -533,7 +537,7 @@ bool StyleManager::set_wx_font(const wxFont &wx_font, std::unique_ptr<FontFile> 
 
 #include <libslic3r/AppConfig.hpp>
 #include "WxFontUtils.hpp"
-#include "fast_float/fast_float.h"
+#include <fast_float.h>
 
 // StylesSerializable
 namespace {
@@ -605,6 +609,7 @@ bool read(const Section &section, const std::string &key, Slic3r::FontProp::Vert
     value = (it != map.end()) ? it->second : Slic3r::FontProp::VerticalAlign::center;
     return true;
 }
+
 bool read(const Section &section, const std::string &key, float &value)
 {
     auto item = section.find(key);

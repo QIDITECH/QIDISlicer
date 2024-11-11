@@ -14,9 +14,7 @@ public:
 
 	Label(wxWindow *parent, wxFont const &font, wxString const &text = {}, long style = 0);
 
-
     void SetWindowStyleFlag(long style) override;
-
 
 private:
     wxFont font;

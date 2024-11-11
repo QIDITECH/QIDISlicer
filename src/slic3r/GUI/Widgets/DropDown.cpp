@@ -101,6 +101,7 @@ static gint gtk_popup_key_press (GtkWidget *widget, GdkEvent *gdk_event, wxPopup
     return TRUE;
 }
 #endif
+
 void DropDown::Create(wxWindow *     parent,
          long           style)
 {
@@ -270,6 +271,7 @@ constexpr int slider_step   = 1;
 constexpr int slider_step   = 5;
 #endif
 constexpr int items_padding = 2;
+
 /*
  * Here we do the actual rendering. I put it in a separate
  * method so that it can work no matter what type of DC
@@ -279,9 +281,11 @@ void DropDown::render(wxDC &dc)
 {
     if (texts.size() == 0) return;
     int states = state_handler.states();
+
     const wxSize size = GetSize(); 
     if (radius > 0. && !wxOSX)
         SetTransparentBG(dc, this);
+
     dc.SetPen(wxPen(border_color.colorForStates(states)));
     dc.SetBrush(wxBrush(GetBackgroundColour()));
     // if (GetWindowStyle() & wxBORDER_NONE)
@@ -293,6 +297,7 @@ void DropDown::render(wxDC &dc)
     // On Retina displays all controls are cut on 1px
     if (is_retina)
         rc.x = rc.y = 1;
+
     // draw background
     if (radius == 0.0 || wxOSX)
         dc.DrawRectangle(rc);
@@ -306,6 +311,7 @@ void DropDown::render(wxDC &dc)
     const bool has_bar = rowSize.y * text_size > size.y;
     if (has_bar)
         rcContent.width -= slider_width;
+
     if (hover_item >= 0 && (states & StateColor::Hovered)) {
         rcContent.y += rowSize.y * hover_item;
         if (rcContent.GetBottom() > 0 && rcContent.y < size.y) {
@@ -374,7 +380,7 @@ void DropDown::render(wxDC &dc)
         }
         if (rcContent.y > size.y) break;
         wxPoint pt   = rcContent.GetLeftTop();
-        auto & icon = icons[i];
+        auto &  icon = icons[i];
         const wxSize pref_icon_sz = get_preferred_size(icon, m_parent);
         if (iconSize.x > 0) {
             if (icon.IsOk()) {
@@ -451,7 +457,7 @@ void DropDown::messureSize()
     wxWindow::SetSize(szContent);
 #ifdef __WXGTK__
     // Gtk has a wrapper window for popup widget
-    gtk_window_resize (GTK_WINDOW (m_widget), szContent.x, szContent.y);
+    gtk_window_resize(GTK_WINDOW(m_widget), szContent.x, szContent.y);
 #endif
     need_sync = false;
 }
@@ -482,13 +488,13 @@ void DropDown::autoPosition()
             wxWindow::SetSize(size);
         }
     }
-            if (selection >= 0) {
-                if (offset.y + rowSize.y * (selection + 1) > size.y)
+    if (selection >= 0) {
+        if (offset.y + rowSize.y * (selection + 1) > size.y)
             offset.y = size.y - rowSize.y * (selection + 3);
-                else if (offset.y + rowSize.y * selection < 0)
-                    offset.y = -rowSize.y * selection;
-            }
-        }
+        else if (offset.y + rowSize.y * selection < 0)
+            offset.y = -rowSize.y * selection;
+    }
+}
 
 void DropDown::mouseDown(wxMouseEvent& event)
 {
@@ -497,11 +503,13 @@ void DropDown::mouseDown(wxMouseEvent& event)
         return;
     // force calc hover item again
     mouseMove(event);
+
     const wxSize size = GetSize();
     const int height = rowSize.y * int(texts.size());
     const wxRect rect = { size.x - slider_width, -offset.y * size.y / height, slider_width - 2,
                       size.y * size.y / height };
     slider_grabbed = rect.Contains(event.GetPosition());
+
     pressedDown = true;
     CaptureMouse();
     dragStart   = event.GetPosition();
@@ -541,7 +549,7 @@ void DropDown::mouseMove(wxMouseEvent &event)
         const int y_step = slider_grabbed ? -height / GetSize().y : 1;
 
         wxPoint pt2 = offset + (pt - dragStart)*y_step;
-        dragStart    = pt;
+        dragStart = pt;
         if (pt2.y > 0)
             pt2.y = 0;
         else if (pt2.y + rowSize.y * text_size < GetSize().y)

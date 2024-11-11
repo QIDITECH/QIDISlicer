@@ -1,6 +1,10 @@
 #include "StateHandler.hpp"
 
 #include <wx/window.h>
+#include <algorithm>
+
+#include "slic3r/GUI/Widgets/StateColor.hpp"
+
 wxDEFINE_EVENT(EVT_ENABLE_CHANGED, wxCommandEvent);
 
 StateHandler::StateHandler(wxWindow * owner)
@@ -69,7 +73,6 @@ void StateHandler::update_binds()
     bind_states_ = bind_states;
     for (auto &c : children_) c->update_binds();
 }
-
 
 StateHandler::StateHandler(StateHandler *parent, wxWindow *owner)
     : StateHandler(owner)

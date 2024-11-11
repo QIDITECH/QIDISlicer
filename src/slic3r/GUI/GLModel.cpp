@@ -104,7 +104,6 @@ void GLModel::Geometry::add_vertex(const Vec3f& position, const Vec3f& normal, c
     vertices.emplace_back(tex_coord.y());
 }
 
-#if ENABLE_OPENGL_ES
 void GLModel::Geometry::add_vertex(const Vec3f& position, const Vec3f& normal, const Vec3f& extra)
 {
     assert(format.vertex_layout == EVertexLayout::P3N3E3);
@@ -118,7 +117,6 @@ void GLModel::Geometry::add_vertex(const Vec3f& position, const Vec3f& normal, c
     vertices.emplace_back(extra.y());
     vertices.emplace_back(extra.z());
 }
-#endif // ENABLE_OPENGL_ES
 
 void GLModel::Geometry::add_vertex(const Vec4f& position)
 {
@@ -275,9 +273,7 @@ size_t GLModel::Geometry::vertex_stride_floats(const Format& format)
     case EVertexLayout::P3T2:   { return 5; }
     case EVertexLayout::P3N3:   { return 6; }
     case EVertexLayout::P3N3T2: { return 8; }
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3E3: { return 9; }
-#endif // ENABLE_OPENGL_ES
     case EVertexLayout::P4:     { return 4; }
     default:                    { assert(false); return 0; }
     };
@@ -292,12 +288,8 @@ size_t GLModel::Geometry::position_stride_floats(const Format& format)
     case EVertexLayout::P3:
     case EVertexLayout::P3T2:
     case EVertexLayout::P3N3:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3T2:
     case EVertexLayout::P3N3E3: { return 3; }
-#else
-    case EVertexLayout::P3N3T2: { return 3; }
-#endif // ENABLE_OPENGL_ES
     case EVertexLayout::P4:     { return 4; }
     default:                    { assert(false); return 0; }
     };
@@ -313,9 +305,7 @@ size_t GLModel::Geometry::position_offset_floats(const Format& format)
     case EVertexLayout::P3T2:
     case EVertexLayout::P3N3:
     case EVertexLayout::P3N3T2:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3E3:
-#endif // ENABLE_OPENGL_ES
     case EVertexLayout::P4:   { return 0; }
     default:                  { assert(false); return 0; }
     };
@@ -326,12 +316,8 @@ size_t GLModel::Geometry::normal_stride_floats(const Format& format)
     switch (format.vertex_layout)
     {
     case EVertexLayout::P3N3:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3T2:
     case EVertexLayout::P3N3E3: { return 3; }
-#else
-    case EVertexLayout::P3N3T2: { return 3; }
-#endif // ENABLE_OPENGL_ES
     default:                    { assert(false); return 0; }
     };
 }
@@ -341,12 +327,8 @@ size_t GLModel::Geometry::normal_offset_floats(const Format& format)
     switch (format.vertex_layout)
     {
     case EVertexLayout::P3N3:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3T2:
     case EVertexLayout::P3N3E3: { return 3; }
-#else
-    case EVertexLayout::P3N3T2: { return 3; }
-#endif // ENABLE_OPENGL_ES
     default:                    { assert(false); return 0; }
     };
 }
@@ -373,7 +355,6 @@ size_t GLModel::Geometry::tex_coord_offset_floats(const Format& format)
     };
 }
 
-#if ENABLE_OPENGL_ES
 size_t GLModel::Geometry::extra_stride_floats(const Format& format)
 {
     switch (format.vertex_layout)
@@ -391,7 +372,6 @@ size_t GLModel::Geometry::extra_offset_floats(const Format& format)
     default:                    { assert(false); return 0; }
     };
 }
-#endif // ENABLE_OPENGL_ES
 
 size_t GLModel::Geometry::index_stride_bytes(const Geometry& data)
 {
@@ -414,9 +394,7 @@ bool GLModel::Geometry::has_position(const Format& format)
     case EVertexLayout::P3T2:
     case EVertexLayout::P3N3:
     case EVertexLayout::P3N3T2:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3E3:
-#endif // ENABLE_OPENGL_ES
     case EVertexLayout::P4:   { return true; }
     default:                  { assert(false); return false; }
     };
@@ -432,12 +410,8 @@ bool GLModel::Geometry::has_normal(const Format& format)
     case EVertexLayout::P3T2:
     case EVertexLayout::P4:     { return false; }
     case EVertexLayout::P3N3:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3T2:
     case EVertexLayout::P3N3E3: { return true; }
-#else
-    case EVertexLayout::P3N3T2: { return true; }
-#endif // ENABLE_OPENGL_ES
     default:                    { assert(false); return false; }
     };
 }
@@ -452,15 +426,12 @@ bool GLModel::Geometry::has_tex_coord(const Format& format)
     case EVertexLayout::P2:
     case EVertexLayout::P3:
     case EVertexLayout::P3N3:
-#if ENABLE_OPENGL_ES
     case EVertexLayout::P3N3E3:
-#endif // ENABLE_OPENGL_ES
     case EVertexLayout::P4:     { return false; }
     default:                    { assert(false); return false; }
     };
 }
 
-#if ENABLE_OPENGL_ES
 bool GLModel::Geometry::has_extra(const Format& format)
 {
     switch (format.vertex_layout)
@@ -476,7 +447,6 @@ bool GLModel::Geometry::has_extra(const Format& format)
     default:                    { assert(false); return false; }
     };
 }
-#endif // ENABLE_OPENGL_ES
 
 #if ENABLE_GLMODEL_STATISTICS
 GLModel::Statistics GLModel::s_statistics;
@@ -711,12 +681,16 @@ void GLModel::reset()
         s_statistics.gpu_memory.vertices.current -= vertices_size_bytes();
 #endif // ENABLE_GLMODEL_STATISTICS
     }
-#if ENABLE_GL_CORE_PROFILE
-    if (m_render_data.vao_id > 0) {
-        glsafe(::glDeleteVertexArrays(1, &m_render_data.vao_id));
-        m_render_data.vao_id = 0;
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
+        if (m_render_data.vao_id > 0) {
+            glsafe(::glDeleteVertexArrays(1, &m_render_data.vao_id));
+            m_render_data.vao_id = 0;
+        }
+#if !SLIC3R_OPENGL_ES
     }
-#endif // ENABLE_GL_CORE_PROFILE
+#endif // !SLIC3R_OPENGL_ES
 
     m_render_data.vertices_count = 0;
     m_render_data.indices_count  = 0;
@@ -784,23 +758,22 @@ void GLModel::render(const std::pair<size_t, size_t>& range)
     const bool position = Geometry::has_position(data.format);
     const bool normal = Geometry::has_normal(data.format);
     const bool tex_coord = Geometry::has_tex_coord(data.format);
-#if ENABLE_OPENGL_ES
     const bool extra = Geometry::has_extra(data.format);
-#endif // ENABLE_OPENGL_ES
 
-#if ENABLE_GL_CORE_PROFILE
-    if (OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
         glsafe(::glBindVertexArray(m_render_data.vao_id));
+#if !SLIC3R_OPENGL_ES
+    }
+#endif // !SLIC3R_OPENGL_ES
     // the following binding is needed to set the vertex attributes
-#endif // ENABLE_GL_CORE_PROFILE
     glsafe(::glBindBuffer(GL_ARRAY_BUFFER, m_render_data.vbo_id));
 
     int position_id  = -1;
     int normal_id    = -1;
     int tex_coord_id = -1;
-#if ENABLE_OPENGL_ES
     int extra_id     = -1;
-#endif // ENABLE_OPENGL_ES
 
     if (position) {
         position_id = shader->get_attrib_location("v_position");
@@ -823,7 +796,6 @@ void GLModel::render(const std::pair<size_t, size_t>& range)
             glsafe(::glEnableVertexAttribArray(tex_coord_id));
         }
     }
-#if ENABLE_OPENGL_ES
     if (extra) {
         extra_id = shader->get_attrib_location("v_extra");
         if (extra_id != -1) {
@@ -831,23 +803,14 @@ void GLModel::render(const std::pair<size_t, size_t>& range)
             glsafe(::glEnableVertexAttribArray(extra_id));
         }
     }
-#endif // ENABLE_OPENGL_ES
 
     shader->set_uniform("uniform_color", data.color);
 
-#if ENABLE_GL_CORE_PROFILE
-    if (!OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
-#endif // ENABLE_GL_CORE_PROFILE
-        glsafe(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_render_data.ibo_id));
+    glsafe(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_render_data.ibo_id));
     glsafe(::glDrawElements(mode, range.second - range.first, index_type, (const void*)(range.first * Geometry::index_stride_bytes(data))));
-#if !ENABLE_GL_CORE_PROFILE
-    glsafe(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-#endif // !ENABLE_GL_CORE_PROFILE
 
-#if ENABLE_OPENGL_ES
     if (extra_id != -1)
         glsafe(::glDisableVertexAttribArray(extra_id));
-#endif // ENABLE_OPENGL_ES
     if (tex_coord_id != -1)
         glsafe(::glDisableVertexAttribArray(tex_coord_id));
     if (normal_id != -1)
@@ -856,10 +819,13 @@ void GLModel::render(const std::pair<size_t, size_t>& range)
         glsafe(::glDisableVertexAttribArray(position_id));
 
     glsafe(::glBindBuffer(GL_ARRAY_BUFFER, 0));
-#if ENABLE_GL_CORE_PROFILE
-    if (OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
         glsafe(::glBindVertexArray(0));
-#endif // ENABLE_GL_CORE_PROFILE
+#if !SLIC3R_OPENGL_ES
+    }
+#endif // !SLIC3R_OPENGL_ES
 
 #if ENABLE_GLMODEL_STATISTICS
     ++s_statistics.render_calls;
@@ -892,10 +858,13 @@ void GLModel::render_instanced(unsigned int instances_vbo, unsigned int instance
             return;
     }
 
-#if ENABLE_GL_CORE_PROFILE
-    if (OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
         glsafe(::glBindVertexArray(m_render_data.vao_id));
-#endif // ENABLE_GL_CORE_PROFILE
+#if !SLIC3R_OPENGL_ES
+    }
+#endif // !SLIC3R_OPENGL_ES
 
     glsafe(::glBindBuffer(GL_ARRAY_BUFFER, instances_vbo));
     const size_t instance_stride = 5 * sizeof(float);
@@ -916,9 +885,7 @@ void GLModel::render_instanced(unsigned int instances_vbo, unsigned int instance
     const bool position = Geometry::has_position(data.format);
     const bool normal   = Geometry::has_normal(data.format);
 
-#if ENABLE_GL_CORE_PROFILE
     // the following binding is needed to set the vertex attributes
-#endif // ENABLE_GL_CORE_PROFILE
     glsafe(::glBindBuffer(GL_ARRAY_BUFFER, m_render_data.vbo_id));
 
     if (position) {
@@ -933,13 +900,7 @@ void GLModel::render_instanced(unsigned int instances_vbo, unsigned int instance
 
     shader->set_uniform("uniform_color", data.color);
 
-#if !ENABLE_GL_CORE_PROFILE
-    glsafe(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_render_data.ibo_id));
-#endif // !ENABLE_GL_CORE_PROFILE
     glsafe(::glDrawElementsInstanced(mode, indices_count(), index_type, (const void*)0, instances_count));
-#if !ENABLE_GL_CORE_PROFILE
-    glsafe(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-#endif // !ENABLE_GL_CORE_PROFILE
 
     if (normal)
         glsafe(::glDisableVertexAttribArray(normal_id));
@@ -950,10 +911,13 @@ void GLModel::render_instanced(unsigned int instances_vbo, unsigned int instance
     glsafe(::glDisableVertexAttribArray(offset_id));
 
     glsafe(::glBindBuffer(GL_ARRAY_BUFFER, 0));
-#if ENABLE_GL_CORE_PROFILE
-    if (OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
         glsafe(::glBindVertexArray(0));
-#endif // ENABLE_GL_CORE_PROFILE
+#if !SLIC3R_OPENGL_ES
+    }
+#endif // !SLIC3R_OPENGL_ES
 
 #if ENABLE_GLMODEL_STATISTICS
     ++s_statistics.render_instanced_calls;
@@ -973,12 +937,14 @@ bool GLModel::send_to_gpu()
         return false;
     }
 
-#if ENABLE_GL_CORE_PROFILE
-    if (OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0)) {
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
         glsafe(::glGenVertexArrays(1, &m_render_data.vao_id));
         glsafe(::glBindVertexArray(m_render_data.vao_id));
+#if !SLIC3R_OPENGL_ES
     }
-#endif // ENABLE_GL_CORE_PROFILE
+#endif // !SLIC3R_OPENGL_ES
 
     // vertices
     glsafe(::glGenBuffers(1, &m_render_data.vbo_id));
@@ -1019,11 +985,6 @@ bool GLModel::send_to_gpu()
         glsafe(::glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.indices_size_bytes(), data.indices.data(), GL_STATIC_DRAW));
     }
 
-#if ENABLE_GL_CORE_PROFILE
-    if (!OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
-#endif // ENABLE_GL_CORE_PROFILE
-        glsafe(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-
     m_render_data.indices_count = indices_count;
 #if ENABLE_GLMODEL_STATISTICS
     s_statistics.gpu_memory.indices.current += data.indices_size_bytes();
@@ -1031,10 +992,13 @@ bool GLModel::send_to_gpu()
 #endif // ENABLE_GLMODEL_STATISTICS
     data.indices = std::vector<unsigned int>();
 
-#if ENABLE_GL_CORE_PROFILE
-    if (OpenGLManager::get_gl_info().is_version_greater_or_equal_to(3, 0))
+#if !SLIC3R_OPENGL_ES
+    if (OpenGLManager::get_gl_info().is_core_profile()) {
+#endif // !SLIC3R_OPENGL_ES
         glsafe(::glBindVertexArray(0));
-#endif // ENABLE_GL_CORE_PROFILE
+#if !SLIC3R_OPENGL_ES
+    }
+#endif // !SLIC3R_OPENGL_ES
 
     return true;
 }
