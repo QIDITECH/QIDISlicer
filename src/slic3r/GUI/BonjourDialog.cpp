@@ -21,7 +21,6 @@
 #include "slic3r/Utils/Bonjour.hpp"
 #include "slic3r/Utils/Udp.hpp"
 
-
 namespace Slic3r {
 
 
@@ -46,7 +45,8 @@ class UdpReplyEvent : public wxEvent
 public:
     UdpReply reply;
 
-    UdpReplyEvent(wxEventType eventType, int winid, UdpReply &&reply) : wxEvent(winid, eventType), reply(std::move(reply)) {}
+    UdpReplyEvent(wxEventType eventType, int winid, UdpReply &&reply)
+        : wxEvent(winid, eventType), reply(std::move(reply)) {}
 
     virtual wxEvent *Clone() const { return new UdpReplyEvent(*this); }
 };
@@ -62,7 +62,7 @@ wxDECLARE_EVENT(EVT_BONJOUR_COMPLETE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_BONJOUR_COMPLETE, wxCommandEvent);
 
 class ReplySet: public std::set<BonjourReply> {};
-class UdpReplySet : public std::set<UdpReply> {};
+class UdpReplySet: public std::set<UdpReply> {};
 
 struct LifetimeGuard
 {
@@ -75,8 +75,8 @@ struct LifetimeGuard
 BonjourDialog::BonjourDialog(wxWindow *parent, Slic3r::PrinterTechnology tech)
 	: wxDialog(parent, wxID_ANY, _(L("Network lookup")), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
 	, list(new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxSIMPLE_BORDER))
-    , replies(new ReplySet)
-    , udp_replies(new UdpReplySet)
+	, replies(new ReplySet)
+	, udp_replies(new UdpReplySet)
 	, label(new wxStaticText(this, wxID_ANY, ""))
 	, timer(new wxTimer())
 	, timer_state(0)
@@ -111,12 +111,12 @@ BonjourDialog::BonjourDialog(wxWindow *parent, Slic3r::PrinterTechnology tech)
 
 	Bind(EVT_BONJOUR_REPLY, &BonjourDialog::on_reply, this);
 
-    Bind(EVT_UDP_REPLY, &BonjourDialog::on_udp_reply, this);
+	Bind(EVT_UDP_REPLY, &BonjourDialog::on_udp_reply, this);
 
     // B29
-    Bind(EVT_BONJOUR_COMPLETE, [this](wxCommandEvent &) {
-        this->timer_state = 0;
-    });
+	Bind(EVT_BONJOUR_COMPLETE, [this](wxCommandEvent &) {
+		this->timer_state = 0;
+	});
 
 	Bind(wxEVT_TIMER, &BonjourDialog::on_timer, this);
 	GUI::wxGetApp().UpdateDlgDarkUI(this);
@@ -143,31 +143,30 @@ bool BonjourDialog::show_and_lookup()
 	// so that both threads can access it safely.
 	auto dguard = std::make_shared<LifetimeGuard>(this);
 
-	// B29
-	Udp::TxtKeys udp_txt_keys{"version", "model"};
+    // B29
+    Udp::TxtKeys udp_txt_keys{"version", "model"};
 
     udp = Udp("octoprint")
               .set_txt_keys(std::move(udp_txt_keys))
-                  .set_retries(3)
-                  .set_timeout(4)
-                  .on_udp_reply([dguard](UdpReply &&reply) {
-                      std::lock_guard<std::mutex> lock_guard(dguard->mutex);
-                      auto                        dialog = dguard->dialog;
-                      if (dialog != nullptr) {
-                          auto evt = new UdpReplyEvent(EVT_UDP_REPLY, dialog->GetId(), std::move(reply));
-                          wxQueueEvent(dialog, evt);
-                      }
-                  })
-                  .on_complete([dguard]() {
-                      std::lock_guard<std::mutex> lock_guard(dguard->mutex);
-                      auto                        dialog = dguard->dialog;
-                      if (dialog != nullptr) {
-                          auto evt = new wxCommandEvent(EVT_UDP_COMPLETE, dialog->GetId());
-                          wxQueueEvent(dialog, evt);
-                      }
-                  })
-                  .lookup();
-
+              .set_retries(3)
+              .set_timeout(4)
+              .on_udp_reply([dguard](UdpReply &&reply) {
+                  std::lock_guard<std::mutex> lock_guard(dguard->mutex);
+                  auto dialog = dguard->dialog;
+                  if (dialog != nullptr) {
+                      auto evt = new UdpReplyEvent(EVT_UDP_REPLY, dialog->GetId(), std::move(reply));
+                      wxQueueEvent(dialog, evt);
+                  }
+              })
+              .on_complete([dguard]() {
+                  std::lock_guard<std::mutex> lock_guard(dguard->mutex);
+                  auto dialog = dguard->dialog;
+                  if (dialog != nullptr) {
+                      auto evt = new wxCommandEvent(EVT_UDP_COMPLETE, dialog->GetId());
+                      wxQueueEvent(dialog, evt);
+                  }
+              })
+              .lookup();
 
 	// Note: More can be done here when we support discovery of hosts other than Octoprint and SL1
 	Bonjour::TxtKeys txt_keys { "version", "model" };
@@ -265,8 +264,7 @@ void BonjourDialog::on_reply(BonjourReplyEvent &e)
 }
 
 // B29
-void BonjourDialog::on_udp_reply(UdpReplyEvent &e)
-{
+void BonjourDialog::on_udp_reply(UdpReplyEvent &e) {
     if (udp_replies->find(e.reply) != udp_replies->end()) {
         // We already have this reply
         return;
@@ -312,7 +310,6 @@ void BonjourDialog::on_udp_reply(UdpReplyEvent &e)
         }
     }
 }
-
 
 void BonjourDialog::on_timer(wxTimerEvent &)
 {

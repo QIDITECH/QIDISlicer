@@ -4,6 +4,7 @@
 #include "libslic3r/Config.hpp" //ConfigOptionMode
 #include "GUI_Factories.hpp"
 #include "I18N.hpp"
+//y15
 #include "GUI_App.hpp"
 #include "./libslic3r/AppConfig.hpp"
 
@@ -12,6 +13,7 @@ using namespace Slic3r::GUI;
 TopBarMenus::TopBarMenus()
 {
     CreateAccountMenu();
+    //y15
     // UpdateAccountMenu();
     UpdateAccountState(!wxGetApp().app_config->get("user_token").empty());
 
@@ -106,6 +108,7 @@ void TopBarMenus::UpdateAccountMenu()
     }
 }
 
+//y15
 void TopBarMenus::UpdateAccountState(bool state)
 {
     if(state)

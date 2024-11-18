@@ -76,10 +76,8 @@ public:
     void        set_current_printer_data(const std::string& data) { m_current_printer_data_json_from_connect = data; }
 
     void        set_refresh_time(int seconds) { m_communication->set_refresh_time(seconds); }
-
-    void set_username(const std::string& username);
-
 private:
+    void set_username(const std::string& username);
    
     std::string m_instance_hash; // used in avatar path
 

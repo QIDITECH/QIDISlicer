@@ -59,13 +59,21 @@
 #include "UnsavedChangesDialog.hpp"
 #include "UpdatesUIManager.hpp"
 #include "PresetArchiveDatabase.hpp"
-#include "Plater.hpp"
+#include "Plater.hpp" // #ysFIXME - implement getter for preset_archive_database from GetApp()???
 #include "slic3r/Utils/AppUpdater.hpp"
 #include "slic3r/GUI/I18N.hpp"
 #include "slic3r/Config/Version.hpp"
 #include "WebUserLoginDialog.hpp"
 
 
+/* ysFIXME - delete after testing and release
+// it looks like this workaround is no need any more after update of the wxWidgets to 3.2.0
+#if defined(__linux__) && defined(__WXGTK3__)
+#define wxLinux_gtk3 true
+#else
+#define wxLinux_gtk3 false
+#endif //defined(__linux__) && defined(__WXGTK3__)
+*/
 
 namespace Slic3r {
 namespace GUI {
@@ -73,6 +81,7 @@ namespace GUI {
 
 using Config::Snapshot;
 using Config::SnapshotDB;
+
 
 
 ConfigWizardLoadingDialog::ConfigWizardLoadingDialog(wxWindow* parent, const wxString& message)
@@ -561,6 +570,7 @@ ConfigWizardPage::ConfigWizardPage(ConfigWizard *parent, wxString title, wxStrin
     // Update!!! -> it looks like this workaround is no need any more after update of the wxWidgets to 3.2.0
 
     // There is strange layout on Linux with GTK3, 
+    // see https://github.com/prusa3d/PrusaSlicer/issues/5103 and https://github.com/prusa3d/PrusaSlicer/issues/4861
     // So, non-active pages will be hidden later, on wxEVT_SHOW, after completed Layout() for all pages 
     if (!wxLinux_gtk3)
     */
@@ -903,6 +913,7 @@ PageMaterials::PageMaterials(ConfigWizard *parent, Materials *materials, wxStrin
 
     html_window = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition,
         wxSize(60 * em, 20 * em), wxHW_SCROLLBAR_AUTO);
+    //y15
     // html_window->Bind(wxEVT_HTML_LINK_CLICKED, [](wxHtmlLinkEvent& event) {
     //     wxGetApp().open_browser_with_warning_dialog(event.GetLinkInfo().GetHref());
     //     event.Skip(false);
@@ -1138,7 +1149,7 @@ void PageMaterials::update_lists(int sel_type, int sel_vendor, int last_selected
     bool templates_available = list_printer->size() > 1 && list_printer->get_data(1) == TEMPLATES;
 
     // Does our wxWidgets version support operator== for wxArrayInt ?
-    // https://github.com/qidi3d/QIDISlicer/issues/5152#issuecomment-787208614
+    // https://github.com/QIDITECH/QIDISlicer/issues/5152#issuecomment-787208614
 #if wxCHECK_VERSION(3, 1, 1)
     if (sel_printers != sel_printers_prev) {
 #else
@@ -2589,7 +2600,7 @@ void ConfigWizard::priv::load_pages()
 
     index->add_page(page_welcome);
     index->add_page(page_login);
-
+//y15
 //    index->add_page(page_update_manager);
 //
 //    if (is_config_from_archive) {
@@ -2667,6 +2678,7 @@ void ConfigWizard::priv::load_pages()
 //            index->go_to(former_active);   // Will restore the active item/page if possible
 //    }
 
+//y15
      // Printers
     if (!only_sla_mode)
         index->add_page(page_fff);
@@ -2866,6 +2878,7 @@ void ConfigWizard::priv::set_start_page(ConfigWizard::StartPage start_page)
     }
 }
 
+//y15
 void ConfigWizard::priv::create_3rdparty_pages()
 {
     for (const auto &pair : bundles) {
@@ -2960,6 +2973,7 @@ void ConfigWizard::priv::create_vendor_printers_page(const std::string& repo_id,
     {
         // multiple vendor repository
         auto repo = get_repo(repo_id);
+        //y15
         //assert(repo);
         //repo->printers_pages.insert({vendor->id, {pageFFF, pageSLA}});
     }
@@ -3170,6 +3184,7 @@ void ConfigWizard::priv::on_3rdparty_install(const VendorProfile *vendor, bool i
 
 bool ConfigWizard::priv::can_finish()
 {
+    //y15
     // if (index->active_page() == page_update_manager)
     //     return false;
     // Set enabling fo "Finish" button -> there should to be selected at least one printer
@@ -3178,6 +3193,7 @@ bool ConfigWizard::priv::can_finish()
 
 bool ConfigWizard::priv::can_go_next()
 {
+    //y15
     // if (index->active_page() == page_update_manager)
     //     return page_update_manager->manager->has_selections();
     return true;
@@ -3186,7 +3202,7 @@ bool ConfigWizard::priv::can_go_next()
 bool ConfigWizard::priv::can_show_next()
 {
     const bool is_last = index->active_is_last();
-
+    //y15
     // if (index->active_page() == page_update_manager && is_last)
     //     return true;
 
@@ -3195,6 +3211,7 @@ bool ConfigWizard::priv::can_show_next()
 
 bool ConfigWizard::priv::can_select_all()
 {
+    //y15
     // if (index->active_page() == page_update_manager)
     //     return false;
     // set enabling for "Select all..." -> there should to be exist at least one printer page
@@ -3682,7 +3699,7 @@ bool ConfigWizard::priv::apply_config(AppConfig *app_config, PresetBundle *prese
     app_config->set("associate_stl", page_files_association->associate_stl() ? "1" : "0");
 //Y
     app_config->set("associate_step", page_files_association->associate_step() ? "1" : "0");
-    //    app_config->set("associate_gcode", page_files_association->associate_gcode() ? "1" : "0");
+//    app_config->set("associate_gcode", page_files_association->associate_gcode() ? "1" : "0");
 
     if (wxGetApp().is_editor()) {
         if (page_files_association->associate_3mf())
@@ -3749,6 +3766,7 @@ void ConfigWizard::priv::update_presets_in_config(const std::string& section, co
 
 bool ConfigWizard::priv::check_fff_selected()
 {
+    //y15
     // for (const auto page : pages_fff)
     //     if (page->any_selected())
     //         return true;
@@ -3867,9 +3885,8 @@ static void unselect(PagePrinters* page)
 
 bool ConfigWizard::priv::can_clear_printer_pages()
 {
+    //y15
     // const auto& selected_uuids = page_update_manager->manager->get_selected_uuids();
-
-    wxString msg;
 
     //for (Repository& repo : repositories) {
     //    for (auto& [name, printers] : repo.printers_pages) {
@@ -3883,6 +3900,7 @@ bool ConfigWizard::priv::can_clear_printer_pages()
     //    }
     //}
 
+    wxString msg;
     if (msg.IsEmpty())
         return true;
 
@@ -4094,10 +4112,12 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
 
     p->add_page(p->page_welcome = new PageWelcome(this));
     p->add_page(p->page_login = new ConfigWizardWebViewPage(this));
+    //y15
     // p->add_page(p->page_update_manager = new PageUpdateManager(this));
 
     // other pages will be loaded later after confirm repositories selection
 
+    //y15
     const auto qidi_it = p->bundles.find("QIDITechnology");
     wxCHECK_RET(qidi_it != p->bundles.cend(), "Vendor QIDITechnology not found");
     const VendorProfile* vendor_qidi = qidi_it->second.vendor_profile;
@@ -4108,7 +4128,6 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
         p->add_page(p->page_fff);
         p->page_fff->is_primary_printer_page = true;
     }
-
 
     p->page_msla = new PagePrinters(this, _L("QIDI MSLA Technology Printers"), "QIDI MSLA", *vendor_qidi, 0, T_SLA);
     p->add_page(p->page_msla);
@@ -4149,6 +4168,7 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
     p->add_page(p->page_diams    = new PageDiameters(this));
     p->add_page(p->page_temps    = new PageTemperatures(this));
 
+    //y15
     p->load_pages();
     p->index->go_to(size_t{ 0 });
 
@@ -4173,13 +4193,6 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
         evt.Enable(p->can_go_next());
     });
 
-    //p->page_login->Bind(wxEVT_WEBVIEW_NAVIGATED, [this](wxWebViewEvent& evt)
-    //    {
-    //        wxString url = evt.GetURL();
-    //        if (url.ends_with(_L("userCenter")))
-    //            this->p->index->go_next();
-    //    });
-
     p->btn_next->Bind(wxEVT_BUTTON, [this](const wxCommandEvent &)
     {
         // check, that there is selected at least one filament/material
@@ -4190,6 +4203,7 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
         	! p->check_and_install_missing_materials(dynamic_cast<PageMaterials*>(active_page)->materials->technology))
         	// In that case don't leave the page and the function above queried the user whether to install default materials.
             return;
+        //y15
         // if (active_page == p->page_update_manager && p->index->active_is_last()) {
         //     size_t next_active = p->index->pages_cnt();
         //     p->page_update_manager->Hide();
@@ -4226,7 +4240,7 @@ ConfigWizard::ConfigWizard(wxWindow *parent)
 
         p->index->go_to(p->page_mode);
     });
-
+    //y15
     // p->btn_sel_all->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& evt)
     // {
     //     evt.Enable(p->can_select_all());
@@ -4270,6 +4284,7 @@ bool ConfigWizard::run(RunReason reason, StartPage start_page)
     p->set_run_reason(reason);
     p->set_start_page(start_page);
     p->is_config_from_archive = reason == RR_USER;
+    //y15
     // p->set_config_updated_from_archive(p->is_config_from_archive, false);
 
     if (ShowModal() == wxID_OK) {
@@ -4297,6 +4312,7 @@ void ConfigWizard::update_login()
         // repos changed - we need rebuild
         wxGetApp().plater()->get_preset_archive_database()->sync_blocking();
         // now change PageUpdateManager
+        //y15
         // p->page_update_manager->manager->update();
     }
 }

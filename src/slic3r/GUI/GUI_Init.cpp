@@ -23,6 +23,7 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/console.hpp>
+
 #if __APPLE__
     #include <signal.h>
 #endif // __APPLE__

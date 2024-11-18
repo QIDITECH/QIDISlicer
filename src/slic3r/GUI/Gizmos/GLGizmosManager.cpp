@@ -34,7 +34,7 @@
 namespace Slic3r {
 namespace GUI {
 
-const float GLGizmosManager::Default_Icons_Size = 52;// 64;
+const float GLGizmosManager::Default_Icons_Size = 64;
 
 GLGizmosManager::GLGizmosManager(GLCanvas3D& parent)
     : m_parent(parent)
@@ -836,10 +836,9 @@ void GLGizmosManager::do_render_overlay() const
 
         const unsigned int sprite_id = gizmo->get_sprite_id();
         // higlighted state needs to be decided first so its highlighting in every other state
-        // const int icon_idx = (m_highlight.first == idx ? (m_highlight.second ? 4 : 5) : (m_current == idx) ? /*2*/1 : ((m_hover == idx) ? 1 : (gizmo->is_activable() ? 0 : 3)));
         //y14
         const int icon_idx = (m_highlight.first == idx ? (m_highlight.second ? 4 : 5) : (m_current == idx) ? 2 : ((m_hover == idx) ? 1 : (gizmo->is_activable() ? 0 : 3)));
-        
+
         const float u_left   = u_offset + icon_idx * du;
         const float u_right  = u_left + du - u_offset;
         const float v_top    = v_offset + sprite_id * dv;

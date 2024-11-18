@@ -1,4 +1,3 @@
-
 #ifndef slic3r_ImGUI_DoubleSlider_hpp_
 #define slic3r_ImGUI_DoubleSlider_hpp_
 

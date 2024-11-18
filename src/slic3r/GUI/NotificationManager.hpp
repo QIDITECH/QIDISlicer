@@ -336,6 +336,7 @@ private:
 			Finished,         // Requesting Render
 			Hovered,		  // Followed by Shown 
 			Paused,
+            //y
 			Exporting
 		};
 
@@ -923,7 +924,8 @@ private:
     {NotificationType::URLNotRegistered
 		, NotificationLevel::RegularNotificationLevel
 		, 10
-		, _u8L("QIDISlicer recieved a download request from Printables.com, but it's not allowed. You can allow it")
+		// TRN: The text is followed by a hyperlink saying "here." It is necessary to split it in two phrases, sorry.
+		, _u8L("QIDISlicer received a download request from Printables.com, but it's not allowed. You can allow it")
 		, _u8L("here.")
 		,  [](wxEvtHandler* evnthndlr) {
 			wxGetApp().open_preferences("downloader_url_registered", "Other");
@@ -931,7 +933,7 @@ private:
 		} },
 
 			//{NotificationType::NewAppAvailable, NotificationLevel::ImportantNotificationLevel, 20,  _u8L("New version is available."),  _u8L("See Releases page."), [](wxEvtHandler* evnthndlr) {
-			//	wxGetApp().open_browser_with_warning_dialog("https://github.com/qidi3d/QIDISlicer/releases"); return true; }},
+			//	wxGetApp().open_browser_with_warning_dialog("https://github.com/QIDITECH/QIDISlicer/releases"); return true; }},
 			//{NotificationType::NewAppAvailable, NotificationLevel::ImportantNotificationLevel, 20,  _u8L("New vesion of QIDISlicer is available.",  _u8L("Download page.") },
 			//{NotificationType::LoadingFailed, NotificationLevel::RegularNotificationLevel, 20,  _u8L("Loading of model has Failed") },
 			//{NotificationType::DeviceEjected, NotificationLevel::RegularNotificationLevel, 10,  _u8L("Removable device has been safely ejected")} // if we want changeble text (like here name of device), we need to do it as CustomNotification

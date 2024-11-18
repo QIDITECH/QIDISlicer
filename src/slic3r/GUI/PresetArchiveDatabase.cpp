@@ -251,8 +251,7 @@ bool OnlineArchiveRepository::get_file_inner(const std::string& url, const fs::p
 
 bool OnlineArchiveRepository::get_archive(const fs::path& target_path) const
 {
-	//y15
-	return get_file_inner(m_data.index_url.empty() ? m_data.url + "vendor_indices.zip" : m_data.index_url + "vendor_indices.zip", target_path);
+	return get_file_inner(m_data.index_url.empty() ? m_data.url + "vendor_indices.zip" : m_data.index_url, target_path);
 }
 
 bool OnlineArchiveRepository::get_file(const std::string& source_subpath, const fs::path& target_path, const std::string& repository_id) const

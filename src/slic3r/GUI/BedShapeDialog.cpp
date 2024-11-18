@@ -21,9 +21,9 @@ namespace Slic3r {
 namespace GUI {
 
 //B52
-BedShape::BedShape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2)
+BedShape::BedShape(const ConfigOptionPoints& points1, const ConfigOptionPoints& points2)
 {
-    m_build_volume = {points1.values, 0., points2.values};
+    m_build_volume = { points1.values, 0., points2.values};
 }
 
 static std::string get_option_label(BedShape::Parameter param)
@@ -299,8 +299,6 @@ void BedShapePanel::build_panel(const ConfigOptionPoints& default_pt, const Conf
     left_sizer->Add(exclude_panel, 0, wxEXPAND);
     left_sizer->Add(texture_panel, 0, wxEXPAND);
     left_sizer->Add(model_panel, 0, wxEXPAND);
-    left_sizer->Add(texture_panel, 1, wxEXPAND);
-    left_sizer->Add(model_panel, 1, wxEXPAND);
 
     wxSizer* top_sizer = new wxBoxSizer(wxHORIZONTAL);
     top_sizer->Add(left_sizer, 0, wxEXPAND | wxLEFT | wxTOP | wxBOTTOM, 10);
@@ -348,7 +346,7 @@ wxSizer* BedShapePanel::init_exclude_sizer()
     wxGetApp().UpdateDarkUI(panel_0, true);
     exclude_optgroup_0 = std::make_shared<ConfigOptionsGroup>(panel_0, _L("Exclude area 1"));
     exclude_optgroup_0->label_width = 10;
-    exclude_optgroup_0->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    exclude_optgroup_0->on_change = [this](t_config_option_key opt_key, boost::any value) {
         update_shape();
     };
     BedShape::append_option_line(exclude_optgroup_0, BedShape::Parameter::ExcludeMax);
@@ -360,7 +358,7 @@ wxSizer* BedShapePanel::init_exclude_sizer()
     wxGetApp().UpdateDarkUI(panel_1, true);
     exclude_optgroup_1 = std::make_shared<ConfigOptionsGroup>(panel_1, _L("Exclude area 2"));
     exclude_optgroup_1->label_width = 10;
-    exclude_optgroup_1->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    exclude_optgroup_1->on_change = [this](t_config_option_key opt_key, boost::any value) {
         update_shape();
     };
     BedShape::append_option_line(exclude_optgroup_1, BedShape::Parameter::ExcludeMax);

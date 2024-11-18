@@ -22,10 +22,11 @@
 #include "Moonraker.hpp"
 #include "QIDIConnect.hpp"
 #include "../GUI/PrintHostDialogs.hpp"
-#include "../GUI/GUI_App.hpp"
 
 // B64
 #include <boost/thread.hpp>
+#include "../GUI/GUI_App.hpp"
+
 namespace fs = boost::filesystem;
 using boost::optional;
 using Slic3r::GUI::PrintHostQueueDialog;
@@ -221,6 +222,7 @@ void PrintHostJobQueue::priv::bg_thread_main()
 
             remove_source();
             job_id++;
+            //B64
             if (channel_jobs.size_hint() == 0) {
                 GUI::wxGetApp().plater()->resetUploadCount();
             }
@@ -237,7 +239,6 @@ void PrintHostJobQueue::priv::bg_thread_main()
     }
 }
 
-//B64
 void PrintHostJobQueue::priv::progress_fn(Http::Progress progress, bool &cancel)
 {
     if (cancel) {
@@ -278,6 +279,7 @@ void PrintHostJobQueue::priv::progress_fn(Http::Progress progress, bool &cancel)
             emit_progress(gui_progress);
             prev_progress = gui_progress;
         }
+        //B64
         for (int i = 0; i < vec_jobs.size(); i++) {
             std::chrono::system_clock::time_point curr_time = std::chrono::system_clock::now();
             auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(curr_time - vec_jobs[i].create_time);
@@ -316,7 +318,7 @@ bool PrintHostJobQueue::priv::cancel_fn()
     }
     return cancel;
 }
-//B64
+
 void PrintHostJobQueue::priv::error_fn(wxString error)
 {
     // check if transfer was not canceled before error occured - than do not show the error
@@ -406,7 +408,7 @@ void PrintHostJobQueue::priv::perform_job(PrintHostJob the_job)
         if (success) {
             emit_progress(100);
         }
-     }
+    }
 }
 
 //B64

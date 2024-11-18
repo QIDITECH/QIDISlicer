@@ -1,4 +1,3 @@
-
 #include "Plater.hpp"
 #include "slic3r/GUI/Jobs/UIThreadWorker.hpp"
 
@@ -12,7 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/optional.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/fstream.hpp> // IWYU pragma: keep
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/log/trivial.hpp>
@@ -34,12 +33,6 @@
 #include <wx/debug.h>
 #include <wx/busyinfo.h>
 #include <wx/stdpaths.h>
-#ifdef _WIN32
-#include <wx/richtooltip.h>
-#include <wx/custombgwin.h>
-#include <wx/popupwin.h>
-#endif
-
 #if wxUSE_SECRETSTORE 
 #include <wx/secretstore.h>
 #endif
@@ -53,16 +46,13 @@
 #include "libslic3r/Format/OBJ.hpp"
 #include "libslic3r/GCode/ThumbnailData.hpp"
 #include "libslic3r/Model.hpp"
-#include "libslic3r/SLA/Hollowing.hpp"
 #include "libslic3r/SLA/SupportPoint.hpp"
 #include "libslic3r/SLA/ReprojectPointsOnMesh.hpp"
-#include "libslic3r/Polygon.hpp"
 #include "libslic3r/Print.hpp"
 #include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/SLAPrint.hpp"
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/PresetBundle.hpp"
-#include "libslic3r/ClipperUtils.hpp"
 #include "libslic3r/miniz_extension.hpp"
 
 // For stl export
@@ -73,9 +63,6 @@
 #include "GUI_App.hpp"
 #include "GUI_ObjectList.hpp"
 #include "GUI_ObjectManipulation.hpp"
-#include "GUI_ObjectLayers.hpp"
-#include "GUI_Utils.hpp"
-#include "GUI_Geometry.hpp"
 #include "GUI_Utils.hpp"
 #include "GUI_Factories.hpp"
 #include "wxExtensions.hpp"
@@ -90,11 +77,9 @@
 #include "Camera.hpp"
 #include "Mouse3DController.hpp"
 #include "Tab.hpp"
-//#include "Jobs/ArrangeJob.hpp"
 #include "Jobs/ArrangeJob2.hpp"
 #include "ConfigWizardWebViewPage.hpp"
 
-//#include "Jobs/FillBedJob.hpp"
 #include "Jobs/RotoptimizeJob.hpp"
 #include "Jobs/SLAImportJob.hpp"
 #include "Jobs/SLAImportDialog.hpp"
@@ -103,10 +88,8 @@
 #include "Jobs/BoostThreadWorker.hpp"
 #include "BackgroundSlicingProcess.hpp"
 #include "PrintHostDialogs.hpp"
-#include "ConfigWizard.hpp"
 #include "../Utils/ASCIIFolding.hpp"
 #include "../Utils/PrintHost.hpp"
-
 #include "../Utils/UndoRedo.hpp"
 #include "../Utils/PresetUpdater.hpp"
 #include "../Utils/Process.hpp"
@@ -537,12 +520,7 @@ struct Plater::priv
     // fills the m_bed.m_grid_lines and sets m_bed.m_origin.
     // Sets m_bed.m_polygon to limit the object placement.
     //B52
-    void set_bed_shape(const Pointfs& shape,
-        const double       max_print_height,
-        const std::string& custom_texture,
-        const std::string& custom_model,
-        const Pointfs& exclude_bed_shape,
-        bool               force_as_custom = false);
+    void set_bed_shape(const Pointfs& shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, const Pointfs& exclude_bed_shape, bool force_as_custom = false);
 
     bool can_delete() const;
     bool can_delete_all() const;
@@ -943,6 +921,7 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
             this->show_action_buttons(this->ready_to_slice);
         });
 
+        //y15
         // this->q->Bind(EVT_UA_ID_USER_SUCCESS, [this](UserAccountSuccessEvent& evt) {
         //     if (login_dialog != nullptr) {
         //         login_dialog->EndModal(wxID_CANCEL);
@@ -2327,32 +2306,6 @@ void Plater::priv::export_gcode(fs::path output_path, bool output_path_on_remova
     // If the SLA processing of just a single object's supports is running, restart slicing for the whole object.
     this->background_process.set_task(PrintBase::TaskParams());
     this->restart_background_process(priv::UPDATE_BACKGROUND_PROCESS_FORCE_EXPORT);
-
-    //Y6 PrintHint
-    if(wxGetApp().get_mode() == comSimple) {
-        std::string filament_type;
-        bool ShowPrintHint = false;
-        const PrintStatistics& ps = this->fff_print.print_statistics();
-        const auto& extruders_filaments = wxGetApp().preset_bundle->extruders_filaments;
-        std::list<std::string> FilamentsHintList = {"PETG", "PLA", "TPU"};
-
-        for (const auto& [filament_id, filament_vol] : ps.filament_stats) {
-            assert(filament_id < extruders_filaments.size());
-            if (const Preset* preset = extruders_filaments[filament_id].get_selected_preset()) {
-                filament_type = preset->config.opt_string("filament_type", filament_id);
-                if (std::find(FilamentsHintList.begin(), FilamentsHintList.end(), filament_type) != FilamentsHintList.end()) {
-                    ShowPrintHint = true;
-                    break;
-                }
-            }
-        }
-
-        if (ShowPrintHint) {
-            std::string message;
-            message = _u8L("Opening the front door and top cover before printing can improve heat dissipation, obtain better print quality, and prevent extruder blockage.");
-            notification_manager->push_notification(message);
-        }
-    }
 }
 
 unsigned int Plater::priv::update_restart_background_process(bool force_update_scene, bool force_update_preview)
@@ -2943,11 +2896,11 @@ void Plater::priv::on_slicing_update(SlicingStatusEvent &evt)
             const std::string message_dial = GUI::format("%1% %2% %3%"
                 , _L_PLURAL("You are using template filament preset.", "You are using template filament presets.", templ_cnt)
                 , _u8L("Please note that template presets are not customized for specific printer and should only be used as a starting point for creating your own user presets.")
-                , "<a href=https://help.qidi3d.com/article/template-filaments_467599>https://help.qidi3d.com/</a>"
+                , "<a href=https://wiki.qidi3d.com/article/template-filaments_467599>https://wiki.qidi3d.com/</a>"
             );
             BOOST_LOG_TRIVIAL(warning) << message_notif;
-            notification_manager->push_slicing_warning_notification(message_notif, false, 0, 0, "https://help.qidi3d.com/", 
-                [](wxEvtHandler* evnthndlr) { wxGetApp().open_browser_with_warning_dialog("https://help.qidi3d.com/article/template-filaments_467599"); return false; }
+            notification_manager->push_slicing_warning_notification(message_notif, false, 0, 0, "https://wiki.qidi3d.com/", 
+                [](wxEvtHandler* evnthndlr) { wxGetApp().open_browser_with_warning_dialog("https://wiki.qidi3d.com/article/template-filaments_467599"); return false; }
                 );
             add_warning({ PrintStateBase::WarningLevel::CRITICAL, true, message_dial, 0}, 0);
         }
@@ -3611,12 +3564,7 @@ bool Plater::priv::can_reload_from_disk() const
 }
 
 //B52
-void Plater::priv::set_bed_shape(const Pointfs& shape,
-    const double       max_print_height,
-    const std::string& custom_texture,
-    const std::string& custom_model,
-    const Pointfs& exclude_bed_shape,
-    bool               force_as_custom)
+void Plater::priv::set_bed_shape(const Pointfs& shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, const Pointfs& exclude_bed_shape, bool force_as_custom)
 {
 
     bool new_shape = bed.set_shape(shape, max_print_height, custom_texture, custom_model, exclude_bed_shape, force_as_custom);
@@ -3764,6 +3712,7 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
     const auto print_host_opt = selected_printer_config ? selected_printer_config->option<ConfigOptionString>("print_host") : nullptr;
     const bool send_gcode_shown = print_host_opt != nullptr && !print_host_opt->value.empty();
     const bool connect_gcode_shown = print_host_opt == nullptr && can_show_upload_to_connect();
+    //y
     auto m_devices = wxGetApp().get_devices();
     const bool link_has_machine = m_devices.size() > 0;
 
@@ -3772,7 +3721,9 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
     {
 	    RemovableDriveManager::RemovableDrivesStatus removable_media_status = wxGetApp().removable_drive_manager()->status();
 		if (sidebar->show_reslice(false) |
-			sidebar->show_export(true) | sidebar->show_send(send_gcode_shown | link_has_machine) |
+			sidebar->show_export(true) |
+			sidebar->show_send(send_gcode_shown | link_has_machine) |
+            //y15
             // sidebar->show_connect(connect_gcode_shown) |
 			sidebar->show_export_removable(removable_media_status.has_removable_drives))
             sidebar->Layout();
@@ -3785,7 +3736,8 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
         if (sidebar->show_reslice(ready_to_slice) |
             sidebar->show_export(!ready_to_slice) |
             sidebar->show_send((send_gcode_shown | link_has_machine) && !ready_to_slice) |
-            sidebar->show_connect(connect_gcode_shown && !ready_to_slice) |
+            //y15
+            // sidebar->show_connect(connect_gcode_shown && !ready_to_slice) |
 			sidebar->show_export_removable(!ready_to_slice && removable_media_status.has_removable_drives))
             sidebar->Layout();
     }
@@ -6069,6 +6021,8 @@ static void alert_when_exporting_binary_gcode(bool binary_output, const std::str
     }
 }
 
+
+
 void Plater::export_gcode(bool prefer_removable)
 {
     if (p->model.objects.empty())
@@ -6747,6 +6701,7 @@ std::string Plater::get_upload_filename()
     return default_output_file.filename().string();
 }
 
+//y15
 void Plater::send_gcode()
 {
     // if physical_printer is selected, send gcode for this printer
@@ -6759,13 +6714,29 @@ void Plater::send_gcode()
 
     // Obtain default output path
     fs::path default_output_file;
-    default_output_file = get_upload_filename();
+    try {
+        // Update the background processing, so that the placeholder parser will get the correct values for the ouput file template.
+        // Also if there is something wrong with the current configuration, a pop-up dialog will be shown and the export will not be performed.
+        unsigned int state = this->p->update_restart_background_process(false, false);
+        if (state & priv::UPDATE_BACKGROUND_PROCESS_INVALID)
+            return;
+        default_output_file = this->p->background_process.output_filepath_for_project(into_path(get_project_filename(".3mf")));
+    } catch (const Slic3r::PlaceholderParserError& ex) {
+        // Show the error with monospaced font.
+        show_error(this, ex.what(), true);
+        return;
+    } catch (const std::exception& ex) {
+        show_error(this, ex.what(), false);
+        return;
+    }
+    default_output_file = fs::path(Slic3r::fold_utf8_to_ascii(default_output_file.string()));
 
     // Repetier specific: Query the server for the list of file groups.
     wxArrayString groups;
     // QIDILink specific: Query the server for the list of file groups.
     wxArrayString storage_paths;
     wxArrayString storage_names;
+    //y15
     bool          only_link = false;
     if (physical_printer_config) {
         PrintHostJob upload_job(physical_printer_config);
@@ -6784,8 +6755,8 @@ void Plater::send_gcode()
         only_link = true;
     }
     max_send_number = std::stoi(wxGetApp().app_config->get("max_send"));
-     //B61   
-     PrintHostSendDialog dlg(default_output_file, PrintHostPostUploadAction::StartPrint, groups, storage_paths, storage_names, this,
+    //B61   
+    PrintHostSendDialog dlg(default_output_file, PrintHostPostUploadAction::StartPrint, groups, storage_paths, storage_names, this,
                             (this->fff_print().print_statistics()), only_link);
     if (dlg.ShowModal() == wxID_OK) {
         if (printer_technology() == ptFFF) {
@@ -6832,13 +6803,6 @@ void Plater::send_gcode()
                 upload_job.upload_data.storage     = dlg.storage();
                 upload_job.create_time             = std::chrono::system_clock::now();
 
-                //if (diff.count() < 0)
-                //    upload_job.sendinginterval = UploadCount / std::stoi(wxGetApp().app_config->get("max_send")) *
-                //                                     std::stoi(wxGetApp().app_config->get("sending_interval")) * 60 -
-                //                                 diff.count();
-                //else
-                //    upload_job.sendinginterval = UploadCount / std::stoi(wxGetApp().app_config->get("max_send")) *
-                //                                 std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
                 if (UploadCount != 0 && UploadCount % std::stoi(wxGetApp().app_config->get("max_send")) == 0) {
                     m_sending_interval += std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
                 }
@@ -6876,14 +6840,6 @@ void Plater::send_gcode()
         upload_job.upload_data.storage     = dlg.storage();
                 upload_job.create_time             = std::chrono::system_clock::now();
 
-                //if (diff.count() < 0)
-                //    upload_job.sendinginterval = UploadCount / std::stoi(wxGetApp().app_config->get("max_send")) *
-                //                                     std::stoi(wxGetApp().app_config->get("sending_interval")) * 60 -
-                //                                 diff.count()+4;
-                //else
-                //    upload_job.sendinginterval = UploadCount / std::stoi(wxGetApp().app_config->get("max_send")) *
-                //                                 std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
-
                 if (UploadCount != 0 && UploadCount % std::stoi(wxGetApp().app_config->get("max_send")) == 0) {
                     m_sending_interval += std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
                 }
@@ -6897,11 +6853,8 @@ void Plater::send_gcode()
                 return;
         }
 
-                //std::chrono::seconds seconds_to_add(upload_job.sendinginterval);
-
-                //m_time_p = upload_job.create_time + seconds_to_add;
         p->export_gcode(fs::path(), false, std::move(upload_job));
-                UploadCount++;
+        UploadCount++;
     }
 }
 #endif
@@ -7017,8 +6970,7 @@ void Plater::on_config_change(const DynamicPrintConfig &config)
             p->preview->get_canvas3d()->reset_volumes();
         }
         //B52
-        else if (opt_key == "bed_shape" || opt_key == "bed_custom_texture" || opt_key == "bed_custom_model" ||
-                 opt_key == "bed_exclude_area") {
+        else if (opt_key == "bed_shape" || opt_key == "bed_custom_texture" || opt_key == "bed_custom_model" || opt_key == "bed_exclude_area") {
             bed_shape_changed = true;
             update_scheduled = true;
         }
@@ -7079,12 +7031,7 @@ void Plater::set_bed_shape() const
 }
 
 //B52
-void Plater::set_bed_shape(const Pointfs& shape,
-    const double       max_print_height,
-    const std::string& custom_texture,
-    const std::string& custom_model,
-    const Pointfs& exclude_bed_shape,
-    bool               force_as_custom) const
+void Plater::set_bed_shape(const Pointfs& shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, const Pointfs& exclude_bed_shape, bool force_as_custom) const
 {
     p->set_bed_shape(shape, max_print_height, custom_texture, custom_model, exclude_bed_shape, force_as_custom);
 }
@@ -7092,9 +7039,7 @@ void Plater::set_bed_shape(const Pointfs& shape,
 //B52
 void Plater::set_default_bed_shape() const
 {
-    set_bed_shape({ {0.0, 0.0}, {200.0, 0.0}, {200.0, 200.0}, {0.0, 200.0} }, 0.0, {}, {}, {
-        {0.0, 0.0}
-        }, true);
+    set_bed_shape({ {0.0, 0.0}, {200.0, 0.0}, {200.0, 200.0}, {0.0, 200.0} }, 0.0, {}, {}, {{0.0, 0.0}}, true);
 }
 
 void Plater::force_filament_colors_update()
@@ -7713,14 +7658,12 @@ void Plater::toggle_remember_user_account_session()
 
 void Plater::act_with_user_account()
 {
+    //y
     std::string current_user_token = wxGetApp().app_config->get("user_token");
     if (current_user_token.empty())
         wxGetApp().ShowUserLogin(true);
     else
-    {
-
         wxGetApp().SetOnlineLogin(false);
-    }
 }
 
 void Plater::init_notification_manager()

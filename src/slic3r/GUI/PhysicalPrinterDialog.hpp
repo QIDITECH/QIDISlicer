@@ -72,6 +72,8 @@ class PhysicalPrinterDialog : public DPIDialog
     ScalableButton*     m_printhost_test_btn            {nullptr};
     ScalableButton*     m_printhost_cafile_browse_btn   {nullptr};
     ScalableButton*     m_printhost_port_browse_btn     {nullptr};
+    //y15
+    // ScalableButton*     m_api_key_copy_btn              {nullptr};
 
     wxBoxSizer*         m_presets_sizer                 {nullptr};
 
@@ -88,7 +90,7 @@ class PhysicalPrinterDialog : public DPIDialog
 
 public:
     //y3
-    PhysicalPrinterDialog(wxWindow *parent, wxString printer_name, std::set<std::string> exit_host);
+    PhysicalPrinterDialog(wxWindow* parent, wxString printer_name, std::set<std::string> exit_host);
     ~PhysicalPrinterDialog();
 
     void        update(bool printer_change = false);
@@ -106,7 +108,6 @@ public:
     std::string get_name();
     std::string get_host();
 
-
 protected:
     void on_dpi_changed(const wxRect& suggested_rect) override;
     void on_sys_color_changed() override;
@@ -117,7 +118,6 @@ private:
     std::string           old_name;
 
 };
-
 
 } // namespace GUI
 } // namespace Slic3r

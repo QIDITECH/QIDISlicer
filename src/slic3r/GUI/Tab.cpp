@@ -1,4 +1,3 @@
-
 // #include "libslic3r/GCodeSender.hpp"
 #include "slic3r/GUI/BedShapeDialog.hpp"
 #include "slic3r/Utils/Serial.hpp"
@@ -1455,11 +1454,6 @@ void TabPrint::build()
         optgroup->append_single_option_line("thick_bridges", category_path + "thick_bridges");
         optgroup->append_single_option_line("overhangs", category_path + "detect-bridging-perimeters");
 
-        //w38
-        optgroup->append_single_option_line("overhang_reverse");
-        optgroup->append_single_option_line("overhang_reverse_internal_only");
-        optgroup->append_single_option_line("overhang_reverse_threshold");
-
         optgroup = page->new_optgroup(L("Advanced"));
         optgroup->append_single_option_line("seam_position", category_path + "seam-position");
         //Y21
@@ -2194,8 +2188,6 @@ void TabFilament::build()
         optgroup->append_single_option_line("filament_diameter");
         optgroup->append_single_option_line("extrusion_multiplier");
         optgroup->append_single_option_line("filament_density");
-        //Y23
-        optgroup->append_single_option_line("filament_shrink");
         optgroup->append_single_option_line("filament_cost");
         optgroup->append_single_option_line("filament_spool_weight");
 
@@ -2260,7 +2252,6 @@ void TabFilament::build()
         optgroup->append_line(line);
 
         optgroup->append_single_option_line("bridge_fan_speed", category_path + "fan-settings");
-        optgroup->append_single_option_line("disable_fan_first_layers", category_path + "fan-settings");
         //B15//Y26
         line = { L("Rapido Cooling Fan Speed"), "" };
         line.append_option(optgroup->get_option("enable_auxiliary_fan"));
@@ -3691,7 +3682,7 @@ void TabPrinter::toggle_options()
         // some options only apply when not using firmware retraction
         vec.resize(0);
         //w15
-        vec = {"retract_speed", "deretract_speed", "retract_before_wipe", "retract_restart_extra", "wipe", "wipe_distance"};
+        vec = { "retract_speed", "deretract_speed", "retract_before_wipe", "retract_restart_extra", "wipe", "wipe_distance"};
         for (auto el : vec)
             toggle_option(el, retraction && !use_firmware_retraction, i);
 
@@ -3808,6 +3799,7 @@ void Tab::load_current_preset()
         else
             wxGetApp().sidebar().update_objects_list_extruder_column(1);
         // Check and show "Physical printer" page if needed
+        //y15
         // wxGetApp().show_printer_webview_tab();
     }
     // Reload preset pages with the new configuration values.
@@ -3865,9 +3857,6 @@ void Tab::load_current_preset()
             on_presets_changed();
             if (m_type == Preset::TYPE_SLA_PRINT || m_type == Preset::TYPE_PRINT)
                 update_frequently_changed_parameters();
-//Y26
-            else if (m_type == Preset::TYPE_FILAMENT)
-                update_frequently_filament_changed_parameters();
         }
 
         m_opt_status_value = (m_presets->get_selected_preset_parent() ? osSystemValue : 0) | osInitValue;
@@ -4559,6 +4548,7 @@ void Tab::delete_preset()
         if (printer.preset_names.size() == 1) {
             if (m_presets_choice->del_physical_printer(_L("It's a last preset for this physical printer."))) {
                 // Hide "Physical printer" page
+                //y15
                 // wxGetApp().show_printer_webview_tab();
                 Layout();
             }
@@ -5096,6 +5086,8 @@ wxSizer* TabPrinter::create_bed_shape_widget(wxWindow* parent)
                 *m_config->option<ConfigOptionPoints>("bed_exclude_area"),
                 *m_config->option<ConfigOptionString>("bed_custom_texture"),
                 *m_config->option<ConfigOptionString>("bed_custom_model"));
+            //y15
+            dlg.CentreOnScreen();
             if (dlg.ShowModal() == wxID_OK) {
                 const std::vector<Vec2d>& shape = dlg.get_shape();
                 //Y20 //B52

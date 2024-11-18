@@ -58,12 +58,7 @@ public:
     //FIXME if the build volume max print height is updated, this function still returns zero
     // as this class does not use it, thus there is no need to update the UI.
     //B52
-    bool set_shape(const Pointfs &    bed_shape,
-                   const double       max_print_height,
-                   const std::string &custom_texture,
-                   const std::string &custom_model,
-                   const Pointfs &    exclude_bed_shape,
-                   bool               force_as_custom = false);
+    bool set_shape(const Pointfs& bed_shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, const Pointfs& exclude_bed_shape, bool force_as_custom = false);
 
     // Build volume geometry for various collision detection tasks.
     const BuildVolume& build_volume() const { return m_build_volume; }

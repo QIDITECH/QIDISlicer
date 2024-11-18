@@ -145,21 +145,30 @@ static const std::map<const wchar_t, std::string> font_icons_large = {
     {ImGui::SlaViewProcessed        , "sla_view_processed"              },
 };
 
+static const std::map<const wchar_t, std::string> font_icons_medium = {
+    //y14
+    {ImGui::Lock                    , "lock"                            },
+    {ImGui::LockHovered             , "lock"                            },
+    {ImGui::Unlock                  , "lock_open"                       },
+    {ImGui::UnlockHovered           , "lock_open_f"                     },
+    {ImGui::DSRevert                , "undo"                            },
+    {ImGui::DSRevertHovered         , "undo_f"                          },
+    {ImGui::DSSettings              , "cog"                             },
+    {ImGui::DSSettingsHovered       , "cog_f"                           },
+
+    {ImGui::ErrorTick               , "error_tick"                      },
+    {ImGui::ErrorTickHovered        , "error_tick_f"                    },
+    {ImGui::PausePrint              , "pause_print"                     },
+    {ImGui::PausePrintHovered       , "pause_print_f"                   },
+    {ImGui::EditGCode               , "edit_gcode"                      },
+    {ImGui::EditGCodeHovered        , "edit_gcode_f"                    },
+    {ImGui::RemoveTick              , "colorchange_del"                 },
+    {ImGui::RemoveTickHovered       , "colorchange_del_f"               },
+};
+
 static const std::map<const wchar_t, std::string> font_icons_extra_large = {
     {ImGui::ClippyMarker            , "notification_clippy"             },
 };
-
-const ImVec4 ImGuiWrapper::COL_GREY_DARK         = { 0.33f, 0.33f, 0.33f, 1.0f };
-const ImVec4 ImGuiWrapper::COL_GREY_LIGHT        = { 0.4f, 0.4f, 0.4f, 1.0f };
-//B18
-const ImVec4 ImGuiWrapper::COL_WHITE_LIGHT        = { 1.0f, 1.0f, 1.0f, 1.0f };
-const ImVec4 ImGuiWrapper::COL_BLUE_LIGHT        = { 0.27f, 0.47f, 1.0f, 1.0f };
-const ImVec4 ImGuiWrapper::COL_ORANGE_DARK       = { 0.67f, 0.36f, 0.19f, 1.0f };
-const ImVec4 ImGuiWrapper::COL_ORANGE_LIGHT      = to_ImVec4(ColorRGBA::ORANGE());
-const ImVec4 ImGuiWrapper::COL_WINDOW_BACKGROUND = { 0.13f, 0.13f, 0.13f, 0.8f };
-const ImVec4 ImGuiWrapper::COL_BUTTON_BACKGROUND = COL_BLUE_LIGHT;
-const ImVec4 ImGuiWrapper::COL_BUTTON_HOVERED    = COL_BLUE_LIGHT;
-const ImVec4 ImGuiWrapper::COL_BUTTON_ACTIVE     = COL_BUTTON_HOVERED;
 
 ImGuiWrapper::ImGuiWrapper()
 {
@@ -1127,6 +1136,8 @@ void ImGuiWrapper::init_font(bool compress)
     builder.AddChar(ImWchar(0x2026)); // …
 
     if (s_font_cjk) {
+        // contains characters not in the ImGui ranges for simplified Chinese. Add them manually.
+        // This should no longer be needed because the following block would add them automatically.
         builder.AddChar(ImWchar(0x5ED3));
         builder.AddChar(ImWchar(0x8F91));
     }
@@ -1292,7 +1303,6 @@ void ImGuiWrapper::init_style()
     };
 
     // Window
-    //B18
     style.WindowRounding = 4.0f;
     set_color(ImGuiCol_WindowBg,        ImGuiPureWrap::COL_WINDOW_BACKGROUND);
     set_color(ImGuiCol_TitleBgActive,   ImGuiPureWrap::COL_BLUE_DARK);
@@ -1303,7 +1313,6 @@ void ImGuiWrapper::init_style()
     set_color(ImGuiCol_FrameBgActive,   ImGuiPureWrap::COL_GREY_LIGHT);
 
     // Text selection
-    //B18
     set_color(ImGuiCol_TextSelectedBg,  ImGuiPureWrap::COL_BLUE_DARK);
 
     // Buttons
@@ -1312,26 +1321,21 @@ void ImGuiWrapper::init_style()
     set_color(ImGuiCol_ButtonActive,    ImGuiPureWrap::COL_BUTTON_ACTIVE);
 
     // Checkbox
-    //B18
     set_color(ImGuiCol_CheckMark,       ImGuiPureWrap::COL_BLUE_LIGHT);
 
     // ComboBox items
-    //B18
     set_color(ImGuiCol_Header,          ImGuiPureWrap::COL_BLUE_DARK);
     set_color(ImGuiCol_HeaderHovered,   ImGuiPureWrap::COL_BLUE_LIGHT);
     set_color(ImGuiCol_HeaderActive,    ImGuiPureWrap::COL_BLUE_LIGHT);
 
     // Slider
-    //B18
     set_color(ImGuiCol_SliderGrab,      ImGuiPureWrap::COL_BLUE_DARK);
     set_color(ImGuiCol_SliderGrabActive,ImGuiPureWrap::COL_BLUE_LIGHT);
 
     // Separator
-    //B18
     set_color(ImGuiCol_Separator,       ImGuiPureWrap::COL_BLUE_LIGHT);
 
     // Tabs
-    //B18
     set_color(ImGuiCol_Tab,                 ImGuiPureWrap::COL_BLUE_DARK);
     set_color(ImGuiCol_TabHovered,          ImGuiPureWrap::COL_BLUE_LIGHT);
     set_color(ImGuiCol_TabActive,           ImGuiPureWrap::COL_BLUE_LIGHT);
@@ -1339,7 +1343,6 @@ void ImGuiWrapper::init_style()
     set_color(ImGuiCol_TabUnfocusedActive,  ImGuiPureWrap::COL_GREY_LIGHT);
 
     // Scrollbars
-    //B18
     set_color(ImGuiCol_ScrollbarGrab,       ImGuiPureWrap::COL_BLUE_LIGHT);
     set_color(ImGuiCol_ScrollbarGrabHovered,ImGuiPureWrap::COL_BLUE_LIGHT);
     set_color(ImGuiCol_ScrollbarGrabActive, ImGuiPureWrap::COL_BLUE_LIGHT);

@@ -139,7 +139,6 @@ class MainFrame : public DPIFrame
     {
         Unknown,
         Old,
-        New,
         Dlg,
         GCodeViewer
     };
@@ -225,20 +224,21 @@ public:
 
     void    refresh_account_menu(bool avatar = false);
 
-    PrintHostQueueDialog *printhost_queue_dlg() { return m_printhost_queue_dlg; }
+    PrintHostQueueDialog* printhost_queue_dlg() { return m_printhost_queue_dlg; }
 
-    Plater *m_plater{nullptr};
-    FRF_Calibration_Dlg *m_frf_calib_dlg{nullptr};
+    Plater*               m_plater { nullptr };
     //B34
-    PA_Calibration_Dlg *m_pa_calib_dlg{nullptr};
-    MVS_Calibration_Dlg *m_mvs_calib_dlg{nullptr};
+    FRF_Calibration_Dlg*  m_frf_calib_dlg{nullptr};
+    //B34
+    PA_Calibration_Dlg*   m_pa_calib_dlg{nullptr};
+    MVS_Calibration_Dlg*  m_mvs_calib_dlg{nullptr};
     //B4
     wxString              tem_host;
-    PrinterWebView *      m_printer_view{nullptr};
+    PrinterWebView*       m_printer_view{nullptr};
     //B28
-    GuideWebView *        m_guide_view{nullptr};
+    GuideWebView*         m_guide_view{nullptr};
     //B45
-    PresetCollection *m_collection{nullptr};
+    PresetCollection*     m_collection{nullptr};
 
     TopBar*               m_tmp_top_bar { nullptr };
     TopBar*               m_tabpanel { nullptr };

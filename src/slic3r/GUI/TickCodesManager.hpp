@@ -1,4 +1,3 @@
-
 #ifndef slic3r_GUI_TickCodesManager_hpp_
 #define slic3r_GUI_TickCodesManager_hpp_
 

@@ -1,5 +1,3 @@
-
-
 #include "FrequentlyChangedParameters.hpp"
 #include "Plater.hpp"
 

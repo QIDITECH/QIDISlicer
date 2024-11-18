@@ -23,10 +23,9 @@ wxWebView* WebView::CreateWebView(wxWindow * parent, const wxString& url, const 
         wxString correct_url = url.empty() ? wxString("") : wxURI(url).BuildURI();
 
 #ifdef __WIN32__
+        //y15
         //webView->SetUserAgent(SLIC3R_APP_FULL_NAME);
-        // webView->SetUserAgent("QIDISlicer/v1.1.7");
-        //webView->SetUserAgent(wxString::Format("QIDI-Slicer/v%s (%s) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)",
-        //    SLIC3R_VERSION, Slic3r::GUI::wxGetApp().dark_mode() ? "dark" : "light"));
+
         webView->Create(parent, wxID_ANY, correct_url, wxDefaultPosition, wxDefaultSize);
         //We register the wxfs:// protocol for testing purposes
         //webView->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewArchiveHandler("wxfs")));

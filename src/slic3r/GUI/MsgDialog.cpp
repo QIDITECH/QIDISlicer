@@ -75,9 +75,7 @@ MsgDialog::MsgDialog(wxWindow *parent, const wxString &title, const wxString &he
     main_sizer->Add(topsizer, 1, wxEXPAND);
     main_sizer->Add(new StaticLine(this), 0, wxEXPAND | wxLEFT | wxRIGHT, HORIZ_SPACING);
     main_sizer->Add(btn_sizer, 0, wxALL | wxEXPAND, VERT_SPACING);
-    //B50
-    // if (style & wxOK)
-    //     add_button(wxID_OK, true);
+
     //B61
     if (title != "App Update available" and title != _L("Send G-Code to printer host")) {
         apply_style(style);
@@ -114,7 +112,6 @@ wxButton* MsgDialog::get_button(wxWindowID btn_id){
     return static_cast<wxButton*>(FindWindowById(btn_id, this));
 }
 
-//B44
 void MsgDialog::apply_style(long style)
 {
     if (style & wxOK)       add_button(wxID_OK, true);
@@ -211,13 +208,6 @@ static void add_msg_content(MsgDialog* parent, wxBoxSizer* content_sizer, const 
     if (content.is_monospaced_font)
         // Code formatting will be preserved. This is useful for reporting errors from the placeholder parser.
         msg_escaped = std::string("<pre><code>") + msg_escaped + "</code></pre>";
-//Y
-    bool is_that_msg = false;
-    std::string that_msg;
-    that_msg = msg_escaped.substr(0, 46);
-    if (that_msg == "Downloading QIDISlicer version file has failed")
-        is_that_msg = true;
-    bool is_errort = false;//priv::http_get_file();
     html->SetPage(format_wxstr("<html>"
                                     "<body bgcolor=%1% link=%2%>"
                                         "<font color=%2%>"
@@ -247,8 +237,8 @@ void ErrorDialog::create(const HtmlContent& content, int icon_width)
 {
     add_msg_content(this, content_sizer, content);
 
-	// Use a small bitmap with monospaced font, as the error text will not be wrapped.
-	logo->SetBitmap(*get_bmp_bundle("QIDISlicer_192px_grayscale.png", icon_width));
+    // Use a small bitmap with monospaced font, as the error text will not be wrapped.
+    logo->SetBitmap(*get_bmp_bundle("QIDISlicer_192px_grayscale.png", icon_width));
 
     SetMaxSize(wxSize(-1, CONTENT_MAX_HEIGHT*wxGetApp().em_unit()));
 

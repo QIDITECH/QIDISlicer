@@ -11,14 +11,13 @@
 SwitchButton::SwitchButton(wxWindow* parent, const wxString& name, wxWindowID id)
 	: BitmapToggleButton(parent, name, id)
     , m_on(this, "toggle_on", 28, 16)
-    , m_off(this, "toggle_off", 28, 16)
+	, m_off(this, "toggle_off", 28, 16)
     , text_color(std::pair{ 0x4479FB, (int) StateColor::Checked}, std::pair{0x6B6B6B, (int) StateColor::Normal})
-    , track_color(0x333337)
+	, track_color(0x333337)
     , thumb_color(std::pair{0x4479FB, (int) StateColor::Checked}, std::pair{0x333337, (int) StateColor::Normal})
 {
 	Rescale();
 }
-
 
 void SwitchButton::SetLabels(wxString const& lbl_on, wxString const& lbl_off)
 {
@@ -82,14 +81,11 @@ void SwitchButton::Rescale()
 			auto size = textSize[1];
 			if (size.x > thumbSize.x) thumbSize.x = size.x;
 			else size.x = thumbSize.x;
-			//thumbSize.x += BS * 12 *10;
-			//thumbSize.y += BS * 6;
-            thumbSize.x = m_size/2;
+			thumbSize.x = m_size/2;
 			//y3
-            thumbSize.y = 30;
-            trackSize.x = m_size;
+			thumbSize.y = 30;
+			trackSize.x = m_size;
 			trackSize.y = 35;
-
             auto maxWidth = GetMaxWidth();
 #ifdef __WXOSX__
             maxWidth *= scale;
@@ -105,7 +101,6 @@ void SwitchButton::Rescale()
 			memdc.SelectObject(bmp);
 			memdc.SetBackground(wxBrush(GetBackgroundColour()));
 			memdc.Clear();
-            //memdc.SetFont(dc.GetFont());
             memdc.SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
 			auto state = i == 0 ? StateColor::Enabled : (StateColor::Checked | StateColor::Enabled);
             {
@@ -127,20 +122,11 @@ void SwitchButton::Rescale()
                 dc2.SetPen(wxPen(wxColour(66, 66, 69), 1));
                 dc2.DrawLine(trackSize.x / 2, 1, trackSize.x / 2, thumbSize.y - 1);
                 dc2.DrawLine(0, thumbSize.y, trackSize.x, thumbSize.y);
-
 			}
             memdc.SetTextForeground(text_color.colorForStates(state ^ StateColor::Checked));
             memdc.DrawText(labels[0], {BS + (thumbSize.x - textSize[0].x) / 2 - 7, BS + (thumbSize.y - textSize[0].y) / 2 - 4 * BS});
             memdc.SetTextForeground(text_color.colorForStates(state));
             memdc.DrawText(labels[1], {trackSize.x - thumbSize.x - BS + (thumbSize.x - textSize[1].x) / 2 - 4, BS + (thumbSize.y - textSize[1].y) / 2 - 4 * BS});
-
-			//memdc.SetPen(wxPen(wxColour(68, 121, 251)));
-   //         if (!GetValue())
-   //             memdc.DrawLine(BS + BS * 10 * 7, thumbSize.y, BS + BS * 10 * 10, thumbSize.y);
-   //         else
-   //             memdc.DrawLine(trackSize.x - thumbSize.x + BS * 10 * 7 - BS * 4, thumbSize.y,
-   //                            trackSize.x - thumbSize.x + BS * 10 * 10 - BS * 4, thumbSize.y);
-
 			memdc.SelectObject(wxNullBitmap);
 #ifdef __WXOSX__
             bmp = wxBitmap(bmp.ConvertToImage(), -1, scale);

@@ -8,6 +8,7 @@
 
 #include <wx/button.h>
 #include <wx/sizer.h>
+//y15
 #include "./libslic3r/AppConfig.hpp"
 
 wxDEFINE_EVENT(wxCUSTOMEVT_TOPBAR_SEL_CHANGED, wxCommandEvent);
@@ -211,11 +212,14 @@ void TopBarItemsCtrl::ButtonWithPopup::SetLabel(const wxString& label)
 
 void TopBarItemsCtrl::UpdateAccountButton(bool avatar/* = false*/)
 {
+    //y15
     std::string top_user_name = wxGetApp().app_config->get("user_name");
     std::string top_user_head = wxGetApp().app_config->get("user_head_name");
 
     const wxString user_name = !top_user_name.empty() ? from_u8(top_user_name) : _L("Log in");
     m_account_btn->SetToolTip(user_name);
+
+    //y15
     //if (!top_user_name.empty()) 
     //{
     //    if (!top_user_name.empty())
@@ -232,25 +236,6 @@ void TopBarItemsCtrl::UpdateAccountButton(bool avatar/* = false*/)
 
     m_account_btn->SetLabel(m_collapsed_btns ? "" : user_name);
     this->Layout();
-
-    //TopBarMenus::UserAccountInfo  user_account = m_menus->get_user_account_info();
-    //const wxString user_name = user_account.is_logged ? from_u8(user_account.user_name) : _L("Log in");
-    //m_account_btn->SetToolTip(user_name);
-    //if (avatar) {
-    //    if (user_account.is_logged) {
-    //        ScalableBitmap new_logo(this, user_account.avatar_path, wxSize(login_icon_sz, login_icon_sz));
-    //        if (new_logo.IsOk())
-    //            m_account_btn->SetBitmapBundle(new_logo.bmp());
-    //        else
-    //            m_account_btn->SetBitmapBundle(*get_bmp_bundle("user", login_icon_sz));
-    //    }
-    //    else {
-    //        m_account_btn->SetBitmapBundle(*get_bmp_bundle("user", login_icon_sz));
-    //    }
-    //}
-
-    //m_account_btn->SetLabel(m_collapsed_btns ? "" : user_name);
-    //this->Layout();
 }
 
 void TopBarItemsCtrl::UnselectPopupButtons()

@@ -1,3 +1,7 @@
+///|/ Copyright (c) Prusa Research 2021 - 2022 Oleksandra Iushchenko @YuSanka, Lukáš Hejl @hejllukas
+///|/
+///|/ PrusaSlicer is released under the terms of the AGPLv3 or higher
+///|/
 #include "Notebook.hpp"
 
 #ifdef _WIN32
@@ -41,7 +45,6 @@ void ButtonsListCtrl::OnPaint(wxPaintEvent&)
 
     const wxColour& selected_btn_bg  = Slic3r::GUI::wxGetApp().get_color_selected_btn_bg();
     // B10
-    // const wxColour& default_btn_bg = Slic3r::GUI::wxGetApp().get_color_hovered_btn_label();
     const wxColour& default_btn_bg   = Slic3r::GUI::wxGetApp().get_tap_highlight_default_clr();
     const wxColour& btn_marker_color = Slic3r::GUI::wxGetApp().get_color_hovered_btn_label();
 

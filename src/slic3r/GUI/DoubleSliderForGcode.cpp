@@ -1,4 +1,3 @@
-
 #include "DoubleSliderForGcode.hpp"
 
 #include <algorithm>

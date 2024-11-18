@@ -94,10 +94,9 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
                 ext_order.emplace_back(ee->role() == ExtrusionRole::ExternalPerimeter);
             REQUIRE(ext_order == data.ext_order);
         }
-        //w38
         THEN("expected number of internal contour loops") {
             size_t cinternal = std::count_if(loops.entities.begin(), loops.entities.end(), 
-                [](const ExtrusionEntity *ee){ return dynamic_cast<const ExtrusionLoop*>(ee)->loop_role() == elrDefault; });
+                [](const ExtrusionEntity *ee){ return dynamic_cast<const ExtrusionLoop*>(ee)->loop_role() == elrContourInternalPerimeter; });
             REQUIRE(cinternal == data.cinternal);
         }
         THEN("expected number of ccw loops") {

@@ -8,7 +8,7 @@
 #include "MainFrame.hpp"
 #include "format.hpp"
 
-#include <wx/clipbrd.h>
+#include <wx/clipbrd.h> // IWYU pragma: keep
 
 namespace Slic3r { 
 namespace GUI {
@@ -223,16 +223,16 @@ AboutDialog::AboutDialog()
 	auto main_sizer = new wxBoxSizer(wxVERTICAL);
 	main_sizer->Add(hsizer, 0, wxEXPAND | wxALL, 20);
 
-    // logo
+    //y15
     m_logo = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("QIDI_Back", 99));
     //hsizer->Add(m_logo, 1, wxALIGN_CENTER_VERTICAL);
-    //Rectangle
-
+    
     wxBoxSizer* vsizer = new wxBoxSizer(wxVERTICAL); 	
     vsizer->Add(m_logo, 1, wxTOP | wxLEFT | wxRIGHT | wxEXPAND, -50);
     hsizer->AddSpacer(15);
     hsizer->Add(vsizer, 2, wxEXPAND|wxLEFT, 0);
-    
+
+    //y15
     // title
     /*{
         wxStaticText* title = new wxStaticText(this, wxID_ANY, wxGetApp().is_editor() ? SLIC3R_APP_NAME : GCODEVIEWER_APP_NAME, wxDefaultPosition, wxDefaultSize);
@@ -273,7 +273,7 @@ AboutDialog::AboutDialog()
         m_html->SetBorders(2);
         const wxString copyright_str    = _L("Copyright");
         // TRN AboutDialog: "Slic3r %1% GNU Affero General Public License"
-        const wxString a_url_str        = _L("Amazon : https://www.amazon.com/stores/page/220AF7CA-5334-4ECA-8E62-B6C8A068E7AC");
+        //Y
         const wxString s_url_str        = _L("Shopify : https://qidi3d.com/");
         const wxString is_lecensed_str  = _L("is licensed under the");
         const wxString license_str      = _L("GNU Affero General Public License, version 3");
@@ -286,19 +286,18 @@ AboutDialog::AboutDialog()
             "<font color=%3%>"
             "%4%"
             "<br /><br />"
-            "<a href=\"https://www.amazon.com/stores/page/220AF7CA-5334-4ECA-8E62-B6C8A068E7AC\">%5%</a> <br />"
-            "<a href=\"https://qidi3d.com/\">%6%</a>"
+            "<a href=\"https://qidi3d.com/\">%5%</a>"
             "<br /><br />"
-            "%7%<br />"
-            "%12% &copy; 2023-2024 QIDI Technology. <br />"
-            "%8% &copy; 2016-2024 Prusa Research. <br />"
-            "%9% &copy; 2011-2018 Alessandro Ranellucci. <br />"
-            "<a href=\"http://slic3r.org/\">Slic3r</a> %10% "
-            "<a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">%11%</a>."
+            "%6%<br />"
+            "%11% &copy; 2023-2024 QIDI Technology. <br />"
+            "%7% &copy; 2016-2024 Prusa Research. <br />"
+            "%8% &copy; 2011-2018 Alessandro Ranellucci. <br />"
+            "<a href=\"http://slic3r.org/\">Slic3r</a> %9% "
+            "<a href=\"http://www.gnu.org/licenses/agpl-3.0.html\">%10%</a>."
             "</font>"
             "</body>"
             "</html>", bgr_clr_str, text_clr_str, text_clr_str
-            , contributors_str, a_url_str, s_url_str ,version_str
+            , contributors_str, s_url_str ,version_str
             , copyright_str, copyright_str
             , is_lecensed_str, license_str, copyright_str);
         m_html->SetPage(text);

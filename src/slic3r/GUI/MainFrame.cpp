@@ -39,7 +39,7 @@
 #include "Plater.hpp"
 #include "../Utils/Process.hpp"
 #include "format.hpp"
-#include "slic3r/GUI/InstanceCheck.hpp"
+#include "slic3r/GUI/InstanceCheck.hpp" // IWYU pragma: keep
 
 #include <fstream>
 #include <string_view>
@@ -74,10 +74,6 @@
 #endif
 namespace Slic3r {
 namespace GUI {
-wxDEFINE_EVENT(EVT_LOAD_URL, wxCommandEvent);
-wxDEFINE_EVENT(EVT_LOAD_PRINTER_URL, wxCommandEvent);
-
-
 
 enum class ERescaleTarget
 {
@@ -270,8 +266,10 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_S
             event.Veto();
             return;
         }
-        //B64
-        m_printer_view->StopStatusThread();
+
+        //B64//y15
+        if (!wxGetApp().is_gcode_viewer())
+            m_printer_view->StopStatusThread();
         this->shutdown();
         // propagate event
         event.Skip();
@@ -377,7 +375,6 @@ void MainFrame::update_layout()
 
     ESettingsLayout layout = wxGetApp().is_gcode_viewer() ? ESettingsLayout::GCodeViewer :
         (wxGetApp().app_config->get_bool("old_settings_layout_mode") ? ESettingsLayout::Old :
-         // wxGetApp().app_config->get_bool("new_settings_layout_mode") ? ( wxGetApp().tabs_as_menu() ? ESettingsLayout::Old : ESettingsLayout::New) :
          wxGetApp().app_config->get_bool("dlg_settings_layout_mode") ? ESettingsLayout::Dlg : ESettingsLayout::Old);
 
     if (m_layout == layout)
@@ -520,7 +517,6 @@ void MainFrame::shutdown()
         m_plater->unbind_canvas_event_handlers();
 
         // Cleanup of canvases' volumes needs to be done here or a crash may happen on some Linux Debian flavours
-        // see: https://github.com/qidi3d/QIDISlicer/issues/3964
         m_plater->reset_canvas_volumes();
     }
 
@@ -605,10 +601,71 @@ void MainFrame::update_title()
 
     title += wxString(build_id);
     if (wxGetApp().is_editor())
-        //B8
-        title += (" ");
+        title += (" " + _L("based on Slic3r"));
 
     SetTitle(title);
+}
+
+static wxString GetTooltipForSettingsButton(PrinterTechnology pt)
+{
+    std::string tooltip = _u8L("Switch to Settings") + "\n" + "[" + shortkey_ctrl_prefix() + "2] - " + _u8L("Print Settings Tab") +
+                                                       "\n" + "[" + shortkey_ctrl_prefix() + "3] - " + (pt == ptFFF ? _u8L("Filament Settings Tab") : _u8L("Material Settings Tab")) +
+                                                       "\n" + "[" + shortkey_ctrl_prefix() + "4] - " + _u8L("Printer Settings Tab");
+    return from_u8(tooltip);
+}
+
+void MainFrame::update_topbars()
+{
+    if (wxGetApp().is_gcode_viewer())
+        return;
+
+    const bool show_login = !wxGetApp().app_config->has("show_login_button") || wxGetApp().app_config->get_bool("show_login_button");
+    m_tmp_top_bar->ShowUserAccount(show_login);
+    m_tabpanel->ShowUserAccount(show_login);
+
+    if (!show_login) {
+        if (auto user_account = wxGetApp().plater()->get_user_account();
+            user_account && user_account->is_logged())
+            user_account->do_logout();
+    }
+}
+
+void MainFrame::set_callbacks_for_topbar_menus()
+{
+    m_bar_menus.set_workspaces_menu_callbacks(
+        []()                             -> int         { return wxGetApp().get_mode(); },
+        [](/*ConfigOptionMode*/int mode) -> void        { wxGetApp().save_mode(mode); },
+        [](/*ConfigOptionMode*/int mode) -> std::string { return wxGetApp().get_mode_btn_color(mode); }
+    );
+
+    m_bar_menus.set_account_menu_callbacks(
+        []() -> void { wxGetApp().plater()->act_with_user_account(); },
+        [this]() -> void {
+            wxString preferences_item = _L("Show Log in button in application top bar");
+            wxString msg =
+                _L("QIDISlicer will remember your choice.") + "\n\n" +
+                format_wxstr(_L("Visit \"Preferences\" and check \"%1%\"\nto changes your choice."), preferences_item);
+
+            MessageDialog msg_dlg(this, msg, _L("QIDISlicer: Don't ask me again"), wxOK | wxCANCEL | wxICON_INFORMATION);
+            if (msg_dlg.ShowModal() == wxID_OK) {
+                wxGetApp().app_config->set("show_login_button", "0");
+
+                m_bar_menus.RemoveHideLoginItem();
+                update_topbars();
+            }
+        },
+        []() -> TopBarMenus::UserAccountInfo {
+            if (auto user_account = wxGetApp().plater()->get_user_account())
+                return { user_account->is_logged(),
+                         user_account->get_username(),
+                         user_account->get_avatar_path(true) };
+            return TopBarMenus::UserAccountInfo();
+        }
+    );
+
+    // we need "Hide Log in button" menu item only till "show_login_button" wasn't changed
+    if (wxGetApp().app_config->has("show_login_button"))
+        m_bar_menus.RemoveHideLoginItem();
 }
 
 void MainFrame::init_tabpanel()
@@ -645,6 +702,7 @@ void MainFrame::init_tabpanel()
         size_t current_selected_tab = m_tabpanel->GetSelection();
         Tab* tab = dynamic_cast<Tab*>(panel);
 
+        //y15
         if (tab != nullptr)
         {
             // There shouldn't be a case, when we try to select a tab, which doesn't support a printer technology
@@ -837,7 +895,6 @@ void MainFrame::remove_connect_webview_tab()
 
 void MainFrame::show_printer_webview_tab(DynamicPrintConfig* dpc)
 {
-#if 0
     // if physical printer is selected
     if (dpc && dpc->option<ConfigOptionEnum<PrintHostType>>("host_type")->value != htQIDIConnect) {
         std::string url = dpc->opt_string("print_host");
@@ -867,7 +924,6 @@ void MainFrame::show_printer_webview_tab(DynamicPrintConfig* dpc)
             select_tab(size_t(0));
         remove_printer_webview_tab();
     }
-#endif
 }
 
 void MainFrame::add_printer_webview_tab(const wxString& url)
@@ -921,6 +977,7 @@ void MainFrame::set_printer_webview_credentials(const std::string& usr, const st
 void Slic3r::GUI::MainFrame::refresh_account_menu(bool avatar/* = false */)
 {
     // Update User name in TopBar
+    //y15
     m_bar_menus.UpdateAccountState(avatar);
 
     m_tabpanel->GetTopBarItemsCtrl()->UpdateAccountButton(avatar);
@@ -1248,16 +1305,16 @@ static wxMenu* generate_help_menu()
     // TRN Item from "Help" menu
 //    append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("&Quick Start"), SLIC3R_APP_NAME),
 //        wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
-//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://help.qidi3d.com/article/first-print-with-qidislicer_1753", nullptr, false); });
+//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://wiki.qidi3d.com/article/first-print-with-qidislicer_1753", nullptr, false); });
     // TRN Item from "Help" menu
 //    append_menu_item(helpMenu, wxID_ANY, wxString::Format(_L("Sample &G-codes and Models"), SLIC3R_APP_NAME),
 //        wxString::Format(_L("Open the %s website in your browser"), SLIC3R_APP_NAME),
-//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://help.qidi3d.com/article/sample-g-codes_529630", nullptr, false); });
+//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://wiki.qidi3d.com/article/sample-g-codes_529630", nullptr, false); });
 //    helpMenu->AppendSeparator();
 //    append_menu_item(helpMenu, wxID_ANY, _L("QIDI 3D &Drivers"), _L("Open the QIDI3D drivers download page in your browser"),
 //        [](wxCommandEvent&) { wxGetApp().open_web_page_localized("https://www.qidi3d.com/downloads"); });
 //    append_menu_item(helpMenu, wxID_ANY, _L("Software &Releases"), _L("Open the software releases page in your browser"),
-//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://github.com/qidi3d/QIDISlicer/releases", nullptr, false); });
+//        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://github.com/QIDITECH/QIDISlicer/releases", nullptr, false); });
 //#        my $versioncheck = $self->_append_menu_item($helpMenu, "Check for &Updates...", "Check for new Slic3r versions", sub{
 //#            wxTheApp->check_version(1);
 //#        });
@@ -1687,6 +1744,7 @@ void MainFrame::init_menubar_as_editor()
     m_bar_menus.AppendMenuItem(helpMenu, _L("&Help"));
 
 #else
+
     // menubar
     // assign menubar to frame after appending items, otherwise special items
     // will not be handled correctly
@@ -1770,7 +1828,7 @@ void MainFrame::init_menubar_as_gcodeviewer()
             [this]() {return can_export_toolpaths(); }, this);
         append_menu_item(fileMenu, wxID_ANY, _L("Open &QIDISlicer") + dots, _L("Open QIDISlicer"),
             [](wxCommandEvent&) { start_new_slicer(); }, "", nullptr,
-            []() {return true; }, this);
+            []() { return true; }, this);
         fileMenu->AppendSeparator();
         append_menu_item(fileMenu, wxID_EXIT, _L("&Quit"), wxString::Format(_L("Quit %s"), SLIC3R_APP_NAME),
             [this](wxCommandEvent&) { Close(false); });
@@ -1873,50 +1931,6 @@ void MainFrame::export_config()
     if (dlg.ShowModal() == wxID_OK)
         file = dlg.GetPath();
     if (!file.IsEmpty()) {
-//#if wxUSE_SECRETSTORE
-//        bool passwords_to_plain = false;
-//        bool passwords_dialog_shown = false;
-//#endif
-//        // callback function thats going to be passed to preset bundle (so preset bundle doesnt have to include WX secret lib)
-//        std::function<bool(const std::string&, const std::string&, std::string&)> load_password = [&](const std::string& printer_id, const std::string& opt, std::string& out_psswd)->bool{
-//            out_psswd = std::string();
-//#if wxUSE_SECRETSTORE
-//            // First password prompts user with dialog
-//            if (!passwords_dialog_shown) {
-//                wxString msg = _L("Some of the exported printers contain passwords, which are stored in the system password store." 
-//                                  " Do you want to include the passwords in the plain text form in the exported file?");
-//                MessageDialog dlg_psswd(this, msg, wxMessageBoxCaptionStr, wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION);
-//                if (dlg_psswd.ShowModal() == wxID_YES)
-//                    passwords_to_plain = true;
-//                passwords_dialog_shown = true;
-//            }
-//            if (!passwords_to_plain)
-//                return false;
-//            wxSecretStore store = wxSecretStore::GetDefault();
-//            wxString errmsg;
-//            if (!store.IsOk(&errmsg)) {
-//                std::string msg = GUI::format("%1% (%2%).", _u8L("Failed to load credentials from the system password store."), errmsg);
-//                BOOST_LOG_TRIVIAL(error) << msg;
-//                show_error(nullptr, msg);
-//                // Do not try again. System store is not reachable.
-//                passwords_to_plain = false;
-//                return false;
-//            }
-//            const wxString service = GUI::format_wxstr(L"%1%/PhysicalPrinter/%2%/%3%", SLIC3R_APP_NAME, printer_id, opt);
-//            wxString username;
-//            wxSecretValue password;
-//            if (!store.Load(service, username, password)) {
-//                std::string msg = GUI::format(_u8L("Failed to load credentials from the system password store for printer %1%."), printer_id);
-//                BOOST_LOG_TRIVIAL(error) << msg;
-//                show_error(nullptr, msg);
-//                return false;
-//            }
-//            out_psswd = into_u8(password.GetAsString());
-//            return true;
-//#else
-//            return false;
-//#endif // wxUSE_SECRETSTORE 
-//        };
         wxGetApp().app_config->update_config_dir(get_dir_name(file));
         m_last_config = file;
         config.save(file.ToUTF8().data());
@@ -2148,55 +2162,15 @@ void MainFrame::select_tab(size_t tab/* = size_t(-1)*/)
 
     // Controls on page are created on active page of active tab now.
     // We should select/activate tab before its showing to avoid an UI-flickering
-    //B45
-
     auto select = [this, tab](bool was_hidden) {
         // when tab == -1, it means we should show the last selected tab
         size_t new_selection = tab == (size_t)(-1) ? m_last_selected_tab : (m_layout == ESettingsLayout::Dlg && tab != 0) ? tab - 1 : tab;
-        //B4 //B64
+        // B30
         if (m_tabpanel->GetSelection() == 4) {
-            PresetBundle &preset_bundle = *wxGetApp().preset_bundle;
-        PhysicalPrinterCollection &ph_printers = preset_bundle.physical_printers;
-
-        std::vector<std::string> vec1;
-        std::vector<std::string> vec2;
-            for (PhysicalPrinterCollection::ConstIterator it = ph_printers.begin(); it != ph_printers.end(); ++it) {
-                for (const std::string &preset_name : it->get_preset_names()) {
-
-                std::string full_name = it->get_full_name(preset_name);
-                vec1.push_back(full_name);
-                }
-            }
-
-        for (DeviceButton *button : m_printer_view->GetButton()) {
-            vec2.push_back(button->GetLabel().ToStdString());
-            }
-
-        bool result1 = std::equal(vec1.begin(), vec1.end(), vec2.begin(), vec2.end()); 
-        vec1.clear();
-        vec2.clear();
-//#if QDT_RELEASE_TO_PUBLIC
-//        wxString    msg;
-//        QIDINetwork m_qidinetwork;
-//        m_qidinetwork.get_device_list(msg);
-//        auto m_devices = wxGetApp().get_devices();
-//        for (const auto &device : m_devices) {
-//            vec1.push_back(device.device_name);
-//        }
-//        for (DeviceButton *button : m_printer_view->GetNetButton()) {
-//            vec2.push_back(button->GetLabel().ToStdString());
-                    //}
-//        bool result2 = std::equal(vec1.begin(), vec1.end(), vec2.begin(), vec2.end());
-//#endif
-        bool result2 = true;
-        // m_printer_view->SetPresetChanged(!result1 || !result2);
-
-        //B64            
             m_printer_view->SetPauseThread(false);
             m_printer_view->Layout();
         }
-        // B30
-        if (m_tabpanel->GetSelection() != (int) new_selection)
+        if (m_tabpanel->GetSelection() != (int)new_selection)
             m_tabpanel->SetSelection(new_selection);
 
         if (tab == 0 && m_layout == ESettingsLayout::Old)
@@ -2394,6 +2368,7 @@ SettingsDialog::SettingsDialog(MainFrame* mainframe)
                 case '2': { m_main_frame->select_tab(1); break; }
                 case '3': { m_main_frame->select_tab(2); break; }
                 case '4': { m_main_frame->select_tab(3); break; }
+                //y15
                 case '5': { m_main_frame->select_tab(4); break; }
                 case '6': { m_main_frame->select_tab(5); break; }
 #ifdef __APPLE__

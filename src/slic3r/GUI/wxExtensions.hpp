@@ -127,8 +127,6 @@ public:
 
     void                SetBitmap(const wxBitmapBundle& bmp) { m_bmp = bmp; }
     wxSize              GetSize()   const { return get_preferred_size(m_bmp, m_parent); }
-    //B34
-    //void msw_rescale();
     int                 GetWidth()  const { return GetSize().GetWidth(); }
     int                 GetHeight() const { return GetSize().GetHeight(); }
     bool                IsOk()      const { return m_bmp.IsOk(); }
@@ -140,9 +138,6 @@ private:
     std::string     m_icon_name = "";
     int             m_bmp_width{ 16 };
     int             m_bmp_height{ -1 };
-    //B34
-    bool m_grayscale{false};
-    bool m_resize{false};
 };
 
 

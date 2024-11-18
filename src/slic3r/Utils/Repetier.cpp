@@ -41,7 +41,7 @@ static bool validate_repetier(const boost::optional<std::string>& name,
                               const boost::optional<std::string>& soft)
 {
     if (soft) {
-        // See https://github.com/qidi3d/QIDISlicer/issues/7807:
+        // See https://github.com/QIDITECH/QIDISlicer/issues/7807:
         // Repetier allows "rebranding", so the "name" value is not reliable when detecting
         // server type. Newer Repetier versions send "software", which should be invariant.
         return ((*soft) == "Repetier-Server");
@@ -148,7 +148,7 @@ bool Repetier::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Error
 
     if(upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
         http.form_add("name", upload_filename.string());
-        http.form_add("autostart", "true"); // See https://github.com/qidi3d/QIDISlicer/issues/7807#issuecomment-1235519371
+        http.form_add("autostart", "true"); // See https://github.com/QIDITECH/QIDISlicer/issues/7807#issuecomment-1235519371
     }
 
     http.form_add("a", "upload")

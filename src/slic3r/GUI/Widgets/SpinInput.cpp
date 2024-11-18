@@ -595,7 +595,6 @@ void SpinInputDouble::onTextEnter(wxCommandEvent &event)
         val = value;
         wxString str_val = wxString::FromDouble(value, digits);
         text_ctrl->SetValue(str_val);
-
     }
     if (!Slic3r::is_approx(value, val)) {
         SetValue(value);

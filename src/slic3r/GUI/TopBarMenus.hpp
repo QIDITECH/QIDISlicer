@@ -45,7 +45,9 @@ public:
     void ApplyWorkspacesMenu();
     void CreateAccountMenu();
     void UpdateAccountMenu();
+    //y15
     void UpdateAccountState(bool state);
+
     void RemoveHideLoginItem();
 
     void Popup(TopBarItemsCtrl* popup_ctrl, wxMenu* menu, wxPoint pos);

@@ -7,7 +7,7 @@
 #include <sstream>
 #include <exception>
 #include <random>
-#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/fstream.hpp> // IWYU pragma: keep
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>

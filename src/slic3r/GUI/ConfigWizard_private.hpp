@@ -456,6 +456,7 @@ struct PageFilesAssociation : ConfigWizardPage
 private:
     wxCheckBox* cb_3mf{ nullptr };
     wxCheckBox* cb_stl{ nullptr };
+    //Y
     wxCheckBox* cb_step{ nullptr };
 //    wxCheckBox* cb_gcode;
 
@@ -464,6 +465,7 @@ public:
 
     bool associate_3mf() const { return cb_3mf->IsChecked(); }
     bool associate_stl() const { return cb_stl->IsChecked(); }
+    //Y
     bool associate_step() const { return cb_step->IsChecked(); }
 //    bool associate_gcode() const { return cb_gcode->IsChecked(); }
 };
@@ -630,6 +632,7 @@ struct ConfigWizard::priv
     wxButton *btn_cancel = nullptr;
 
     PageWelcome      *page_welcome = nullptr;
+    //y15
     PagePrinters     *page_fff = nullptr;
     PagePrinters     *page_msla = nullptr;
     ConfigWizardWebViewPage *page_login = nullptr;
@@ -644,6 +647,7 @@ struct ConfigWizard::priv
     PageFilesAssociation* page_files_association = nullptr;
 #endif // _WIN32
     PageMode         *page_mode = nullptr;
+    //y15
     PageVendors* page_vendors = nullptr;
     Pages3rdparty     pages_3rdparty;
 
@@ -687,6 +691,7 @@ struct ConfigWizard::priv
     void add_page(ConfigWizardPage *page);
     void enable_next(bool enable);
     void set_start_page(ConfigWizard::StartPage start_page);
+    //y15
     void create_3rdparty_pages();
     void create_vendor_printers_page(const std::string& repo_id, const VendorProfile* vendor, bool install = false, bool from_single_vendor_repo = false);
     void set_run_reason(RunReason run_reason);

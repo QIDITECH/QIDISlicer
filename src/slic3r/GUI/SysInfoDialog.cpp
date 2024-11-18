@@ -11,7 +11,7 @@
 
 #include <Eigen/Core>
 
-#include <wx/clipbrd.h>
+#include <wx/clipbrd.h> // IWYU pragma: keep
 #include <wx/platinfo.h>
 #include "GUI_App.hpp"
 #include "MainFrame.hpp"

@@ -23,7 +23,6 @@
 #include <boost/dll.hpp>
 
 #include <sstream>
-// #include <slic3r/GUI/Widgets/WebView.hpp>
 #include "WebView.hpp"
 #if QDT_RELEASE_TO_PUBLIC
 #include "../QIDI/QIDINetwork.hpp"

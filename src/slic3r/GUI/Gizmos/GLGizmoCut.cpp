@@ -1893,7 +1893,7 @@ GLGizmoCut3D::PartSelection::PartSelection(const ModelObject* mo, const Transfor
 
     // split to parts
     for (int id = int(volumes.size())-1; id >= 0; id--)
-        if (volumes[id]->is_splittable() && volumes[id]->is_model_part())
+        if (volumes[id]->is_splittable() && volumes[id]->is_model_part()) // we have to split just solid volumes
             volumes[id]->split(1);
 
     m_parts.clear();
@@ -2284,7 +2284,7 @@ void GLGizmoCut3D::render_connectors_input_window(CutConnectors &connectors)
 
     ImGui::AlignTextToFramePadding();
     ImGuiPureWrap::text_colored(ImGuiPureWrap::COL_BLUE_LIGHT, m_labels_map["Connectors"]);
-    
+
     m_imgui->disabled_begin(connectors.empty());
     ImGui::SameLine(m_label_width);
     const wxString act_name = _L("Remove connectors");

@@ -212,18 +212,7 @@ void GCodeViewer::SequentialView::Marker::init()
     m_model.set_color({ 1.0f, 1.0f, 1.0f, 0.5f });
 }
 
-void GCodeViewer::SequentialView::Marker::set_world_position(const Vec3f& position)
-{    
-    m_world_position = position;
-    m_world_transform = (Geometry::translation_transform((position + m_model_z_offset * Vec3f::UnitZ()).cast<double>()) *
-      Geometry::translation_transform(m_model.get_bounding_box().size().z() * Vec3d::UnitZ()) * Geometry::rotation_transform({ M_PI, 0.0, 0.0 })).cast<float>();
-}
-
-////B43
-void GCodeViewer::SequentialView::Marker::update_curr_move(GCodeProcessorResult::MoveVertex move) { m_curr_move = move; }
-
-//B43
-void GCodeViewer::SequentialView::Marker::render(EViewType &view_type)
+void GCodeViewer::SequentialView::Marker::render()
 {
     if (!m_visible)
         return;
@@ -677,12 +666,12 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, s
         assert(m_lines_cache.size() == m_cache_range.size());
     };
     //B18
-    static const ImVec4 LINE_NUMBER_COLOR    = ImGuiWrapper::COL_BLUE_LIGHT;
-    static const ImVec4 SELECTION_RECT_COLOR = ImGuiWrapper::COL_BLUE_LIGHT;
-    static const ImVec4 COMMAND_COLOR        = { 0.8f, 0.8f, 0.0f, 1.0f };
-    static const ImVec4 PARAMETERS_COLOR     = { 1.0f, 1.0f, 1.0f, 1.0f };
-    static const ImVec4 COMMENT_COLOR        = { 0.27f, 0.47f, 1.0f, 1.0f };
-    static const ImVec4 ELLIPSIS_COLOR       = { 0.0f, 0.7f, 0.0f, 1.0f };
+    static const ImVec4 LINE_NUMBER_COLOR = ImGuiPureWrap::COL_BLUE_LIGHT;
+    static const ImVec4 SELECTION_RECT_COLOR = ImGuiPureWrap::COL_BLUE_LIGHT;
+    static const ImVec4 COMMAND_COLOR    = { 0.8f, 0.8f, 0.0f, 1.0f };
+    static const ImVec4 PARAMETERS_COLOR = { 1.0f, 1.0f, 1.0f, 1.0f };
+    static const ImVec4 COMMENT_COLOR    = { 0.27f, 0.47f, 1.0f, 1.0f };
+    static const ImVec4 ELLIPSIS_COLOR   = { 0.0f, 0.7f, 0.0f, 1.0f };
 
     if (!m_visible || m_filename.empty() || m_lines_ends.empty() || curr_line_id == 0)
         return;
@@ -815,8 +804,8 @@ void GCodeViewer::SequentialView::GCodeWindow::render(float top, float bottom, s
         imgui.set_requires_extra_frame();
     }
 }
-//B43
-void GCodeViewer::SequentialView::render(float legend_height, EViewType &view_type)
+
+void GCodeViewer::SequentialView::render(float legend_height, const libvgcode::Viewer* viewer, uint32_t gcode_id)
 {
 #if VGCODE_ENABLE_COG_AND_TOOL_MARKERS
     if (viewer == nullptr)
@@ -839,87 +828,188 @@ void GCodeViewer::init()
     if (m_gl_data_initialized)
         return;
 
-    // initializes opengl data of TBuffers
-    for (size_t i = 0; i < m_buffers.size(); ++i) {
-        TBuffer& buffer = m_buffers[i];
-        EMoveType type = buffer_type(i);
-        switch (type)
-        {
-        default: { break; }
-        case EMoveType::Tool_change:
-        case EMoveType::Color_change:
-        case EMoveType::Pause_Print:
-        case EMoveType::Custom_GCode:
-        case EMoveType::Retract:
-        case EMoveType::Unretract:
-        case EMoveType::Seam: {
-#if !DISABLE_GCODEVIEWER_INSTANCED_MODELS
-            if (wxGetApp().is_gl_version_greater_or_equal_to(3, 3)) {
-                buffer.render_primitive_type = TBuffer::ERenderPrimitiveType::InstancedModel;
-                buffer.shader = "gouraud_light_instanced";
-                buffer.model.model.init_from(diamond(16));
-                buffer.model.color = option_color(type);
-                buffer.model.instances.format = InstanceVBuffer::EFormat::InstancedModel;
-            }
-            else {
-#endif // !DISABLE_GCODEVIEWER_INSTANCED_MODELS
-                buffer.render_primitive_type = TBuffer::ERenderPrimitiveType::BatchedModel;
-                buffer.vertices.format = VBuffer::EFormat::PositionNormal3;
-                buffer.shader = "gouraud_light";
-                buffer.model.data = diamond(16);
-                buffer.model.color = option_color(type);
-                buffer.model.instances.format = InstanceVBuffer::EFormat::BatchedModel;
-#if !DISABLE_GCODEVIEWER_INSTANCED_MODELS
-            }
-#endif // !DISABLE_GCODEVIEWER_INSTANCED_MODELS
-                break;
-        }
-        case EMoveType::Wipe:
-        case EMoveType::Extrude: {
-            buffer.render_primitive_type = TBuffer::ERenderPrimitiveType::Triangle;
-            buffer.vertices.format = VBuffer::EFormat::PositionNormal3;
-            buffer.shader = "gouraud_light";
-            break;
-        }
-        case EMoveType::Travel: {
-            buffer.render_primitive_type = TBuffer::ERenderPrimitiveType::Line;
-            buffer.vertices.format = VBuffer::EFormat::Position;
-#if ENABLE_GL_CORE_PROFILE
-            // on MAC using the geometry shader of dashed_thick_lines is too slow
-            buffer.shader = "flat";
-//            buffer.shader = OpenGLManager::get_gl_info().is_core_profile() ? "dashed_thick_lines" : "flat";
-#else
-            buffer.shader = "flat";
-#endif // ENABLE_GL_CORE_PROFILE
-            break;
-        }
-        }
-//Y13
-        set_toolpath_move_type_visible(EMoveType::Seam, true);
-        set_toolpath_move_type_visible(EMoveType::Extrude, true);
-    }
-
     // initializes tool marker
     m_sequential_view.marker.init();
 
     m_gl_data_initialized = true;
+
+    try
+    {
+        m_viewer.init(reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+        glcheck();
+    }
+    catch (const std::exception& e)
+    {
+        MessageDialog msg_dlg(wxGetApp().plater(), e.what(), _L("Error"), wxICON_ERROR | wxOK);
+        msg_dlg.ShowModal();
+    }
 }
 
-void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& print)
+void GCodeViewer::load_as_gcode(const GCodeProcessorResult& gcode_result, const Print& print, const std::vector<std::string>& str_tool_colors,
+    const std::vector<std::string>& str_color_print_colors)
 {
+    m_loaded_as_preview = false;
+
+    const bool current_top_layer_only = m_viewer.is_top_layer_only_view_range();
+    const bool required_top_layer_only = get_app_config()->get_bool("seq_top_layer_only");
+    if (current_top_layer_only != required_top_layer_only)
+        m_viewer.toggle_top_layer_only_view_range();
+
     // avoid processing if called with the same gcode_result
-    if (m_last_result_id == gcode_result.id &&
-        (m_last_view_type == m_view_type || (m_last_view_type != EViewType::VolumetricRate && m_view_type != EViewType::VolumetricRate)))
+    if (m_last_result_id == gcode_result.id && wxGetApp().is_editor()) {
+        // collect tool colors
+        libvgcode::Palette tools_colors;
+        tools_colors.reserve(str_tool_colors.size());
+        for (const std::string& color : str_tool_colors) {
+            tools_colors.emplace_back(libvgcode::convert(color));
+        }
+        m_viewer.set_tool_colors(tools_colors);
+
+        // collect color print colors
+        libvgcode::Palette color_print_colors;
+        const std::vector<std::string>& str_colors = str_color_print_colors.empty() ? str_tool_colors : str_color_print_colors;
+        for (const std::string& color : str_colors) {
+            color_print_colors.emplace_back(libvgcode::convert(color));
+        }
+        m_viewer.set_color_print_colors(color_print_colors);
         return;
+    }
 
     m_last_result_id = gcode_result.id;
-    m_last_view_type = m_view_type;
 
     // release gpu memory, if used
-    reset(); 
+    reset();
 
-    //B43
-    m_gcode_result = &gcode_result;
+    // convert data from QIDISlicer format to libvgcode format
+    libvgcode::GCodeInputData data = libvgcode::convert(gcode_result, str_tool_colors, str_color_print_colors, m_viewer);
+
+//#define ENABLE_DATA_EXPORT 1
+//#if ENABLE_DATA_EXPORT
+//    auto extrusion_role_to_string = [](libvgcode::EGCodeExtrusionRole role) {
+//        switch (role) {
+//        case libvgcode::EGCodeExtrusionRole::None:                     { return "EGCodeExtrusionRole::None"; }
+//        case libvgcode::EGCodeExtrusionRole::Perimeter:                { return "EGCodeExtrusionRole::Perimeter"; }
+//        case libvgcode::EGCodeExtrusionRole::ExternalPerimeter:        { return "EGCodeExtrusionRole::ExternalPerimeter"; }
+//        case libvgcode::EGCodeExtrusionRole::OverhangPerimeter:        { return "EGCodeExtrusionRole::OverhangPerimeter"; }
+//        case libvgcode::EGCodeExtrusionRole::InternalInfill:           { return "EGCodeExtrusionRole::InternalInfill"; }
+//        case libvgcode::EGCodeExtrusionRole::SolidInfill:              { return "EGCodeExtrusionRole::SolidInfill"; }
+//        case libvgcode::EGCodeExtrusionRole::TopSolidInfill:           { return "EGCodeExtrusionRole::TopSolidInfill"; }
+//        case libvgcode::EGCodeExtrusionRole::Ironing:                  { return "EGCodeExtrusionRole::Ironing"; }
+//        case libvgcode::EGCodeExtrusionRole::BridgeInfill:             { return "EGCodeExtrusionRole::BridgeInfill"; }
+//        case libvgcode::EGCodeExtrusionRole::GapFill:                  { return "EGCodeExtrusionRole::GapFill"; }
+//        case libvgcode::EGCodeExtrusionRole::Skirt:                    { return "EGCodeExtrusionRole::Skirt"; }
+//        case libvgcode::EGCodeExtrusionRole::SupportMaterial:          { return "EGCodeExtrusionRole::SupportMaterial"; }
+//        case libvgcode::EGCodeExtrusionRole::SupportMaterialInterface: { return "EGCodeExtrusionRole::SupportMaterialInterface"; }
+//        case libvgcode::EGCodeExtrusionRole::WipeTower:                { return "EGCodeExtrusionRole::WipeTower"; }
+//        case libvgcode::EGCodeExtrusionRole::Custom:                   { return "EGCodeExtrusionRole::Custom"; }
+//        case libvgcode::EGCodeExtrusionRole::COUNT:                    { return "EGCodeExtrusionRole::COUNT"; }
+//        }
+//    };
+//
+//    auto move_type_to_string = [](libvgcode::EMoveType type) {
+//        switch (type) {
+//        case libvgcode::EMoveType::Noop:        { return "EMoveType::Noop"; }
+//        case libvgcode::EMoveType::Retract:     { return "EMoveType::Retract"; }
+//        case libvgcode::EMoveType::Unretract:   { return "EMoveType::Unretract"; }
+//        case libvgcode::EMoveType::Seam:        { return "EMoveType::Seam"; }
+//        case libvgcode::EMoveType::ToolChange:  { return "EMoveType::ToolChange"; }
+//        case libvgcode::EMoveType::ColorChange: { return "EMoveType::ColorChange"; }
+//        case libvgcode::EMoveType::PausePrint:  { return "EMoveType::PausePrint"; }
+//        case libvgcode::EMoveType::CustomGCode: { return "EMoveType::CustomGCode"; }
+//        case libvgcode::EMoveType::Travel:      { return "EMoveType::Travel"; }
+//        case libvgcode::EMoveType::Wipe:        { return "EMoveType::Wipe"; }
+//        case libvgcode::EMoveType::Extrude:     { return "EMoveType::Extrude"; }
+//        case libvgcode::EMoveType::COUNT:       { return "EMoveType::COUNT"; }
+//        }
+//    };
+//
+//    FilePtr out{ boost::nowide::fopen("C:/qidi/slicer/test_output/spe1872/test.data", "wb") };
+//    if (out.f != nullptr) {
+//        const uint32_t vertices_count = static_cast<uint32_t>(data.vertices.size());
+//        fwrite((void*)&vertices_count, 1, sizeof(uint32_t), out.f);
+//        for (const libvgcode::PathVertex& v : data.vertices) {
+//            fwrite((void*)&v.position[0], 1, sizeof(float), out.f);
+//            fwrite((void*)&v.position[1], 1, sizeof(float), out.f);
+//            fwrite((void*)&v.position[2], 1, sizeof(float), out.f);
+//            fwrite((void*)&v.height, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.width, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.feedrate, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.actual_feedrate, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.mm3_per_mm, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.fan_speed, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.temperature, 1, sizeof(float), out.f);
+//            fwrite((void*)&v.role, 1, sizeof(uint8_t), out.f);
+//            fwrite((void*)&v.type, 1, sizeof(uint8_t), out.f);
+//            fwrite((void*)&v.gcode_id, 1, sizeof(uint32_t), out.f);
+//            fwrite((void*)&v.layer_id, 1, sizeof(uint32_t), out.f);
+//            fwrite((void*)&v.extruder_id, 1, sizeof(uint32_t), out.f);
+//            fwrite((void*)&v.color_id, 1, sizeof(uint32_t), out.f);
+//            fwrite((void*)&v.times[0], 1, sizeof(float), out.f);
+//            fwrite((void*)&v.times[1], 1, sizeof(float), out.f);
+//#if VGCODE_ENABLE_COG_AND_TOOL_MARKERS
+//            const float weight = v.weight;
+//#else
+//            const float weight = 0.0f;
+//#endif // VGCODE_ENABLE_COG_AND_TOOL_MARKERS
+//            fwrite((void*)&weight, 1, sizeof(float), out.f);
+//        }
+//
+//        const uint8_t spiral_vase_mode = data.spiral_vase_mode ? 1 : 0;
+//        fwrite((void*)&spiral_vase_mode, 1, sizeof(uint8_t), out.f);
+//
+//        const uint32_t tool_colors_count = static_cast<uint32_t>(data.tools_colors.size());
+//        fwrite((void*)&tool_colors_count, 1, sizeof(uint32_t), out.f);
+//        for (const libvgcode::Color& c : data.tools_colors) {
+//            fwrite((void*)&c[0], 1, sizeof(uint8_t), out.f);
+//            fwrite((void*)&c[1], 1, sizeof(uint8_t), out.f);
+//            fwrite((void*)&c[2], 1, sizeof(uint8_t), out.f);
+//        }
+//
+//        const uint32_t color_print_colors_count = static_cast<uint32_t>(data.color_print_colors.size());
+//        fwrite((void*)&color_print_colors_count, 1, sizeof(uint32_t), out.f);
+//        for (const libvgcode::Color& c : data.color_print_colors) {
+//            fwrite((void*)&c[0], 1, sizeof(uint8_t), out.f);
+//            fwrite((void*)&c[1], 1, sizeof(uint8_t), out.f);
+//            fwrite((void*)&c[2], 1, sizeof(uint8_t), out.f);
+//        }
+//    }
+//#endif // ENABLE_DATA_EXPORT
+
+    // send data to the viewer
+    m_viewer.reset_default_extrusion_roles_colors();
+    m_viewer.load(std::move(data));
+
+#if !VGCODE_ENABLE_COG_AND_TOOL_MARKERS
+    const size_t vertices_count = m_viewer.get_vertices_count();
+    m_cog.reset();
+    for (size_t i = 1; i < vertices_count; ++i) {
+        const libvgcode::PathVertex& curr = m_viewer.get_vertex_at(i);
+        if (curr.type == libvgcode::EMoveType::Extrude &&
+            curr.role != libvgcode::EGCodeExtrusionRole::Skirt &&
+            curr.role != libvgcode::EGCodeExtrusionRole::SupportMaterial &&
+            curr.role != libvgcode::EGCodeExtrusionRole::SupportMaterialInterface &&
+            curr.role != libvgcode::EGCodeExtrusionRole::WipeTower &&
+            curr.role != libvgcode::EGCodeExtrusionRole::Custom) {
+            const Vec3d curr_pos = libvgcode::convert(curr.position).cast<double>();
+            const Vec3d prev_pos = libvgcode::convert(m_viewer.get_vertex_at(i - 1).position).cast<double>();
+            m_cog.add_segment(curr_pos, prev_pos, gcode_result.filament_densities[curr.extruder_id] * curr.mm3_per_mm * (curr_pos - prev_pos).norm());
+        }
+    }
+#endif // !VGCODE_ENABLE_COG_AND_TOOL_MARKERS
+
+    const libvgcode::AABox bbox = wxGetApp().is_gcode_viewer() ?
+        m_viewer.get_bounding_box() :
+        m_viewer.get_extrusion_bounding_box({
+            libvgcode::EGCodeExtrusionRole::Perimeter, libvgcode::EGCodeExtrusionRole::ExternalPerimeter, libvgcode::EGCodeExtrusionRole::OverhangPerimeter,
+            libvgcode::EGCodeExtrusionRole::InternalInfill, libvgcode::EGCodeExtrusionRole::SolidInfill, libvgcode::EGCodeExtrusionRole::TopSolidInfill,
+            libvgcode::EGCodeExtrusionRole::Ironing, libvgcode::EGCodeExtrusionRole::BridgeInfill, libvgcode::EGCodeExtrusionRole::GapFill,
+            libvgcode::EGCodeExtrusionRole::Skirt, libvgcode::EGCodeExtrusionRole::SupportMaterial, libvgcode::EGCodeExtrusionRole::SupportMaterialInterface,
+            libvgcode::EGCodeExtrusionRole::WipeTower
+        });
+    m_paths_bounding_box = BoundingBoxf3(libvgcode::convert(bbox[0]).cast<double>(), libvgcode::convert(bbox[1]).cast<double>());
+
+    if (wxGetApp().is_editor())
+        m_contained_in_bed = wxGetApp().plater()->build_volume().all_paths_inside(gcode_result, m_paths_bounding_box);
 
     m_extruders_count = gcode_result.extruders_count;
     m_sequential_view.gcode_window.load_gcode(gcode_result);
@@ -978,8 +1068,7 @@ void GCodeViewer::load(const GCodeProcessorResult& gcode_result, const Print& pr
         }
 
         //B52
-        wxGetApp().plater()->set_bed_shape(bed_shape, gcode_result.max_print_height, texture, model,
-                                           {{0.,0.}},gcode_result.bed_shape.empty());
+        wxGetApp().plater()->set_bed_shape(bed_shape, gcode_result.max_print_height, texture, model, {{0.,0.}}, gcode_result.bed_shape.empty());
     }
 
     m_print_statistics = gcode_result.print_statistics;
@@ -1056,14 +1145,9 @@ void GCodeViewer::render()
             const libvgcode::PathVertex& curr_vertex = m_viewer.get_current_vertex();
             m_sequential_view.marker.set_world_position(libvgcode::convert(curr_vertex.position));
             m_sequential_view.marker.set_z_offset(m_z_offset);
-            //B43
-            m_sequential_view.render(legend_height, m_view_type);
+            m_sequential_view.render(legend_height, &m_viewer, curr_vertex.gcode_id);
         }
     }
-#if ENABLE_GCODE_VIEWER_STATISTICS
-    render_statistics();
-#endif // ENABLE_GCODE_VIEWER_STATISTICS
-}
 
 #if VGCODE_ENABLE_COG_AND_TOOL_MARKERS
     if (is_legend_shown()) {
@@ -2664,10 +2748,11 @@ void GCodeViewer::render_legend(float& legend_height)
         if (ImGui::BeginTable("Times", 2)) {
             const std::vector<float> layers_times = get_layers_times();
             if (!layers_times.empty())
-                add_strings_row_to_table(_u8L("First layer") + ":", ImGuiPSWrap::to_ImVec4(ColorRGBA::WHITE()),
+                //y15
+                add_strings_row_to_table(_u8L("First layer") + ":", ImGuiPureWrap::COL_WHITE_LIGHT,
                     short_time_ui(get_time_dhms(layers_times.front())), ImGuiPSWrap::to_ImVec4(ColorRGBA::WHITE()));
 
-            add_strings_row_to_table(_u8L("Total") + ":", ImGuiPSWrap::to_ImVec4(ColorRGBA::WHITE()),
+            add_strings_row_to_table(_u8L("Total") + ":", ImGuiPureWrap::COL_WHITE_LIGHT,
                 short_time_ui(get_time_dhms(time_mode.time)), ImGuiPSWrap::to_ImVec4(ColorRGBA::WHITE()));
 
             ImGui::EndTable();

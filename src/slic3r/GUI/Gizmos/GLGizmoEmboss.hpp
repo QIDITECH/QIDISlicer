@@ -52,8 +52,6 @@ public:
     /// </summary>
     /// <param name="volume_type">Object part / Negative volume / Modifier</param>
     bool create_volume(ModelVolumeType volume_type);
-    //B34
-    void change_height(double height);
 
     /// <summary>
     /// Handle pressing of shortcut
@@ -190,7 +188,9 @@ private:
 
     // initialize data for create volume in job
     Emboss::CreateVolumeParams create_input(ModelVolumeType volume_type);
-    // Emboss::CreateVolumeParams create_input(GLCanvas3D &canvas, const StyleManager::Style &style, RaycastManager &raycaster, ModelVolumeType volume_type);
+
+    //w43
+    Emboss::CreateVolumeParams create_input(ModelVolumeType volume_type, const std::string num_text);
 
     struct GuiCfg;
     std::unique_ptr<const GuiCfg> m_gui_cfg;

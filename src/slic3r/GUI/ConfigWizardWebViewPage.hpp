@@ -56,6 +56,7 @@ public:
     void load_error_page();
     // returns true if logged in - wizard needs to update repos
     bool login_changed();
+    //y15
     void is_login(wxWebViewEvent& evt);
 
 private:

@@ -1,4 +1,3 @@
-
 #ifndef slic3r_Sidebar_hpp_
 #define slic3r_Sidebar_hpp_
 

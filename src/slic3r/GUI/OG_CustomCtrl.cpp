@@ -581,7 +581,6 @@ void OG_CustomCtrl::CtrlLine::render(wxDC& dc, wxCoord v_pos)
 
     Field* field = ctrl->opt_group->get_field(og_line.get_options().front().opt_id);
 
-
     const bool suppress_hyperlinks = get_app_config()->get_bool("suppress_hyperlinks");
     if (draw_just_act_buttons) {
         if (field) {

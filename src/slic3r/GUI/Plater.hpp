@@ -15,6 +15,7 @@
 #include "Jobs/Job.hpp"
 #include "Jobs/Worker.hpp"
 
+//y
 #include "libslic3r/GCode/ThumbnailData.hpp"
 
 class wxString;
@@ -206,8 +207,6 @@ public:
 
     void apply_cut_object_to_model(size_t init_obj_idx, const ModelObjectPtrs& cut_objects);
 
-    //B61
-    ThumbnailData get_thumbnailldate();
     //B64
     ThumbnailData get_thumbnailldate_send();
     void export_gcode(bool prefer_removable);
@@ -233,6 +232,7 @@ public:
     bool is_background_process_update_scheduled() const;
     void suppress_background_process(const bool stop_background_process) ;
     void send_gcode();
+    //y15
     // void send_gcode_inner(DynamicPrintConfig* physical_printer_config);
 	void eject_drive();
     void connect_gcode();
@@ -360,14 +360,9 @@ public:
     const Mouse3DController& get_mouse3d_controller() const;
     Mouse3DController& get_mouse3d_controller();
 
-    void set_bed_shape() const;
+	void set_bed_shape() const;
     //B52
-    void set_bed_shape(const Pointfs& shape,
-        const double       max_print_height,
-        const std::string& custom_texture,
-        const std::string& custom_model,
-        const Pointfs& exclude_bed_shape,
-        bool               force_as_custom = false) const;
+    void set_bed_shape(const Pointfs& shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, const Pointfs& exclude_bed_shape, bool force_as_custom = false) const;
     void set_default_bed_shape() const;
 
     NotificationManager* get_notification_manager();
@@ -448,7 +443,7 @@ public:
     wxMenu* instance_menu();
     wxMenu* layer_menu();
     wxMenu* multi_selection_menu();
-
+    //y
     void        resetUploadCount()
     {
         UploadCount = 0;

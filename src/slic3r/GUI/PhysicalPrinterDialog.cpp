@@ -94,6 +94,7 @@ PresetForPrinter::PresetForPrinter(PhysicalPrinterDialog* parent, const std::str
 
     wxBoxSizer* preset_sizer = new wxBoxSizer(wxHORIZONTAL);
     preset_sizer->Add(m_presets_list        , 1, wxEXPAND);
+    //y15
     // preset_sizer->Add(m_delete_preset_btn   , 0, wxEXPAND | wxLEFT, BORDER_W);
 
     wxBoxSizer* name_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -107,6 +108,7 @@ PresetForPrinter::PresetForPrinter(PhysicalPrinterDialog* parent, const std::str
 PresetForPrinter::~PresetForPrinter()
 {
     m_presets_list->Destroy();
+    //y15
     // m_delete_preset_btn->Destroy();
     m_info_line->Destroy();
     m_full_printer_name->Destroy();
@@ -132,6 +134,7 @@ std::string PresetForPrinter::get_preset_name()
 
 void PresetForPrinter::SuppressDelete()
 {
+    //y15
     //m_delete_preset_btn->Enable(false);
     
     // this case means that now we have only one related preset for the printer
@@ -142,6 +145,7 @@ void PresetForPrinter::SuppressDelete()
 
 void PresetForPrinter::AllowDelete()
 {
+    //y15
     //if (!m_delete_preset_btn->IsEnabled())
     //    m_delete_preset_btn->Enable();
 
@@ -152,7 +156,80 @@ void PresetForPrinter::AllowDelete()
 void PresetForPrinter::on_sys_color_changed()
 {
     m_presets_list->sys_color_changed();
+    //y15
     // m_delete_preset_btn->sys_color_changed();
+}
+
+namespace {
+
+bool is_secret_store_ok()
+{
+#if wxUSE_SECRETSTORE 
+    wxSecretStore store = wxSecretStore::GetDefault();
+    wxString errmsg;
+    if (!store.IsOk(&errmsg)) {
+        BOOST_LOG_TRIVIAL(warning) << "wxSecretStore is not supported: " << errmsg;
+        return false;
+    }
+    return true;
+#else
+    return false;
+#endif
+}
+bool save_secret(const std::string& id, const std::string& opt, const std::string& usr, const std::string& psswd)
+{
+#if wxUSE_SECRETSTORE 
+    wxSecretStore store = wxSecretStore::GetDefault();
+    wxString errmsg;
+    if (!store.IsOk(&errmsg)) {
+        std::string msg = GUI::format("%1% (%2%).", _u8L("This system doesn't support storing passwords securely"), errmsg);
+        BOOST_LOG_TRIVIAL(error) << msg;
+        show_error(nullptr, msg);
+        return false;
+    }
+    const wxString service = GUI::format_wxstr(L"%1%/PhysicalPrinter/%2%/%3%", SLIC3R_APP_NAME, id, opt);
+    const wxString username = boost::nowide::widen(usr);
+    const wxSecretValue password(boost::nowide::widen(psswd));
+    if (!store.Save(service, username, password)) {
+        std::string msg(_u8L("Failed to save credentials to the system password store."));
+        BOOST_LOG_TRIVIAL(error) << msg;
+        show_error(nullptr, msg);
+        return false;
+    }
+    return true;
+#else
+    BOOST_LOG_TRIVIAL(error) << "wxUSE_SECRETSTORE not supported. Cannot save password to the system store.";
+    return false;
+#endif // wxUSE_SECRETSTORE 
+}
+bool load_secret(const std::string& id, const std::string& opt, std::string& usr, std::string& psswd)
+{
+#if wxUSE_SECRETSTORE
+    wxSecretStore store = wxSecretStore::GetDefault();
+    wxString errmsg;
+    if (!store.IsOk(&errmsg)) {
+        std::string msg = GUI::format("%1% (%2%).", _u8L("This system doesn't support storing passwords securely"), errmsg);
+        BOOST_LOG_TRIVIAL(error) << msg;
+        show_error(nullptr, msg);
+        return false;
+    }
+    const wxString service = GUI::format_wxstr(L"%1%/PhysicalPrinter/%2%/%3%", SLIC3R_APP_NAME, id, opt);
+    wxString username;
+    wxSecretValue password;
+    if (!store.Load(service, username, password)) {
+        std::string msg(_u8L("Failed to load credentials from the system password store."));
+        BOOST_LOG_TRIVIAL(error) << msg;
+        show_error(nullptr, msg);
+        return false;
+    }
+    usr = into_u8(username);
+    psswd = into_u8(password.GetAsString());
+    return true;
+#else
+    BOOST_LOG_TRIVIAL(error) << "wxUSE_SECRETSTORE not supported. Cannot load password from the system store.";
+    return false;
+#endif // wxUSE_SECRETSTORE 
+}
 }
 
 
@@ -161,7 +238,7 @@ void PresetForPrinter::on_sys_color_changed()
 //------------------------------------------
 
 //y3
-PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow *parent, wxString printer_name, std::set<std::string> exit_host) :
+PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow* parent, wxString printer_name, std::set<std::string> exit_host) :
     DPIDialog(parent, wxID_ANY, _L("Physical Printer"), wxDefaultPosition, wxSize(45 * wxGetApp().em_unit(), -1), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_printer("", wxGetApp().preset_bundle->physical_printers.default_config())
 {
@@ -177,14 +254,17 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow *parent, wxString printer_
     else {
         std::string full_name = into_u8(printer_name);
         printer_name = from_u8(PhysicalPrinter::get_short_name(full_name));
+        //y15
         old_name = into_u8(printer_name);
         new_printer = false;
     }
-
+    
+    //y15
     m_exit_host = exit_host;
 
     wxStaticText* label_top = new wxStaticText(this, wxID_ANY, _L("Descriptive name for the printer") + ":");
 
+    //y15
    /* m_add_preset_btn = new ScalableButton(this, wxID_ANY, "add_copies");
     m_add_preset_btn->SetFont(wxGetApp().normal_font());
     m_add_preset_btn->SetToolTip(_L("Add preset for this printer device")); 
@@ -208,6 +288,21 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow *parent, wxString printer_
         const std::set<std::string>& preset_names = printer->get_preset_names();
         for (const std::string& preset_name : preset_names)
             m_presets.emplace_back(new PresetForPrinter(this, preset_name));
+//y15
+//        // "stored" indicates data are stored secretly, load them from store.
+//        if (m_printer.config.opt_string("printhost_password") == "stored" && m_printer.config.opt_string("printhost_password") == "stored") {
+//            std::string username;
+//            std::string password;
+//            if (load_secret(m_printer.name, "printhost_password", username, password)) {
+//                if (!username.empty())
+//                    m_printer.config.opt_string("printhost_user") = username;
+//                if (!password.empty())
+//                    m_printer.config.opt_string("printhost_password") = password;
+//            } else {
+//                m_printer.config.opt_string("printhost_user") = std::string();
+//                m_printer.config.opt_string("printhost_password") = std::string();
+//            }
+//        }
     }
 
     if (m_presets.size() == 1)
@@ -229,6 +324,7 @@ PhysicalPrinterDialog::PhysicalPrinterDialog(wxWindow *parent, wxString printer_
 
     wxBoxSizer* nameSizer = new wxBoxSizer(wxHORIZONTAL);
     nameSizer->Add(m_printer_name, 1, wxEXPAND);
+    //y15
     // nameSizer->Add(m_add_preset_btn, 0, wxEXPAND | wxLEFT, BORDER_W);
 
     m_presets_sizer = new wxBoxSizer(wxVERTICAL);
@@ -287,7 +383,7 @@ void PhysicalPrinterDialog::update_printers()
 
 void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgroup)
 {
-    m_optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value) {
+    m_optgroup->on_change = [this](t_config_option_key opt_key, boost::any value) {
         if (opt_key == "host_type" || opt_key == "printhost_authorization_type")
             this->update();
         if (opt_key == "print_host")
@@ -354,6 +450,21 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
         return sizer;
     };
 
+//y15
+//    auto api_key_copy = [=](wxWindow* parent) {
+//        auto sizer = create_sizer_with_btn(parent, &m_api_key_copy_btn, "copy", _L("Copy"));
+//        m_api_key_copy_btn->Bind(wxEVT_BUTTON, [=](wxCommandEvent& e) {
+//            if (Field* apikey_field = m_optgroup->get_field("printhost_apikey"); apikey_field) {
+//                if (wxTextCtrl* temp = dynamic_cast<wxTextCtrl*>(apikey_field->getWindow()); temp ) {
+//                    wxTheClipboard->Open();
+//                    wxTheClipboard->SetData(new wxTextDataObject(temp->GetValue()));
+//                    wxTheClipboard->Close();
+//                }
+//            }
+//        });
+//        return sizer;
+//    };
+
     // Set a wider width for a better alignment
     Option option = m_optgroup->get_option("print_host");
     option.opt.width = Field::def_width_wider();
@@ -366,6 +477,7 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
 
     option = m_optgroup->get_option("printhost_apikey");
     option.opt.width = Field::def_width_wider();
+    //y15
     m_optgroup->append_single_option_line(option);
 
     option = m_optgroup->get_option("printhost_port");
@@ -428,6 +540,39 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
         m_optgroup->append_line(line);
     }
 
+//y15
+//    // Text line with info how passwords and api keys are stored 
+//    if (is_secret_store_ok()) {
+//        Line line{ "", "" };
+//        line.full_width = 1;
+//        line.widget = [ca_file_hint](wxWindow* parent) {
+//            wxString info = GUI::format_wxstr(L"%1%:\n\t%2%\n"
+//                , _L("Storing passwords")
+//                , GUI::format_wxstr(_L("On this system, %1% uses the system password store to safely store and read passwords and API keys."), SLIC3R_APP_NAME));
+//            auto txt = new wxStaticText(parent, wxID_ANY, info);
+//            txt->SetFont(wxGetApp().normal_font());
+//            auto sizer = new wxBoxSizer(wxHORIZONTAL);
+//            sizer->Add(txt, 1, wxEXPAND);
+//            return sizer;
+//        };
+//        m_optgroup->append_line(line);
+//    } else {
+//        Line line{ "", "" };
+//        line.full_width = 1;
+//        line.widget = [ca_file_hint](wxWindow* parent) {
+//            wxString info = GUI::format_wxstr(L"%1%:\n\t%2%\n\t%3%\n"
+//                , _L("Storing passwords")
+//                , GUI::format_wxstr(_L("On this system, %1% cannot access the system password store."), SLIC3R_APP_NAME)
+//                , _L("Passwords and API keys are stored in plain text."));
+//            auto txt = new wxStaticText(parent, wxID_ANY, info);
+//            txt->SetFont(wxGetApp().normal_font());
+//            auto sizer = new wxBoxSizer(wxHORIZONTAL);
+//            sizer->Add(txt, 1, wxEXPAND);
+//            return sizer;
+//        };
+//        m_optgroup->append_line(line);
+//    }
+
     for (const std::string& opt_key : std::vector<std::string>{ "printhost_user", "printhost_password" }) {        
         option = m_optgroup->get_option(opt_key);
         option.opt.width = Field::def_width_wider();
@@ -445,6 +590,7 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
     const auto opt = m_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
     m_last_host_type = opt->value;
     m_opened_as_connect = (m_last_host_type == htQIDIConnect);
+
     Field* printhost_field = m_optgroup->get_field("print_host");
     if (printhost_field)
     {
@@ -466,7 +612,7 @@ void PhysicalPrinterDialog::build_printhost_settings(ConfigOptionsGroup* m_optgr
                 if (field)
                     field->propagate_value();
             }), temp->GetId());
-    }
+        }
     }
 
     // Always fill in the "printhost_port" combo box from the config and select it.
@@ -510,7 +656,7 @@ void PhysicalPrinterDialog::update(bool printer_change)
             for (const std::string& opt_key : std::vector<std::string>{ "printhost_user", "printhost_password" })
                 m_optgroup->hide_field(opt_key);
             supports_multiple_printers = opt && opt->value == htRepetier;
-                    }
+        }
         // Hide Browse and Test buttons for Connect
         if (opt->value == htQIDIConnect) {
             m_printhost_browse_btn->Hide();
@@ -519,8 +665,8 @@ void PhysicalPrinterDialog::update(bool printer_change)
             text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
             if (!m_opened_as_connect && printhost_win && m_last_host_type != htQIDIConnect){
                 m_stored_host = printhost_win->GetValue();
-                printhost_win->SetValue(L"https://connect.qidi3d.com");
-                }
+                printhost_win->SetValue(from_u8(Utils::ServiceConfig::instance().connect_url()));
+            }
         } else {
             m_printhost_browse_btn->Show();
             // hide QIDIConnect address and show hostname
@@ -593,7 +739,7 @@ void PhysicalPrinterDialog::update_host_type(bool printer_change)
     for (PresetForPrinter* prstft : m_presets) {
         std::string preset_name = prstft->get_preset_name();
         if (Preset* preset = wxGetApp().preset_bundle->printers.find_preset(preset_name)) {
-            std::string model_id = preset->config.opt_string("printer_model");            
+            std::string model_id = preset->config.opt_string("printer_model"); 
             if (preset->vendor) {
                 if (preset->vendor->name == "QIDI Technology") {
                     const std::vector<VendorProfile::PrinterModel>& models = preset->vendor->models;
@@ -732,6 +878,7 @@ void PhysicalPrinterDialog::on_dpi_changed(const wxRect& suggested_rect)
 
 void PhysicalPrinterDialog::on_sys_color_changed()
 {
+    //y15
     //m_add_preset_btn->sys_color_changed();
     m_printhost_browse_btn->sys_color_changed();
     m_printhost_test_btn->sys_color_changed();
@@ -744,7 +891,6 @@ void PhysicalPrinterDialog::on_sys_color_changed()
 
 void PhysicalPrinterDialog::OnOK(wxEvent& event)
 {
-
     //y3
     std::string now_host = boost::any_cast<std::string>(m_optgroup->get_field("print_host")->get_value());
     if (now_host.empty()) {
@@ -777,6 +923,7 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
     Field* printhost_field = m_optgroup->get_field("print_host");
     text_ctrl* printhost_win = printhost_field ? dynamic_cast<text_ctrl*>(printhost_field->getWindow()) : nullptr;
     const auto opt = m_config->option<ConfigOptionEnum<PrintHostType>>("host_type");
+    //y15
     if (opt->value == htMoonraker) {
         Field *    printhost_field = m_optgroup->get_field("print_host");
         text_ctrl *printhost_win   = printhost_field ? dynamic_cast<text_ctrl *>(printhost_field->getWindow()) : nullptr;
@@ -799,7 +946,6 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
         //y3
         wxString msg_text = from_u8((boost::format(_u8L("Printer with name \"%1%\" already exists.")) % existing->name/*printer_name*/).str());
         //msg_text += "\n" + _L("Replace?");
-        ////wxMessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxYES | wxNO);
         //MessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxYES | wxNO);
         MessageDialog dialog(nullptr, msg_text, _L("Warning"), wxICON_WARNING | wxOK);
         dialog.ShowModal();
@@ -846,6 +992,14 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
     //update printer name, if it was changed
     m_printer.set_name(into_u8(printer_name));
 
+//y15
+//    // save access data secretly
+//    if (!m_printer.config.opt_string("printhost_password").empty()) {
+//        if (save_secret(m_printer.name, "printhost_password", m_printer.config.opt_string("printhost_user"), m_printer.config.opt_string("printhost_password"))) {
+//            m_printer.config.opt_string("printhost_password", false) = "stored";
+//        }
+//    }
+
     // save new physical printer
     printers.save_printer(m_printer, renamed_from);
 
@@ -859,7 +1013,6 @@ void PhysicalPrinterDialog::OnOK(wxEvent& event)
         wxGetApp().get_tab(Preset::TYPE_PRINTER)->update_preset_choice();
 
     //B64
-    // wxGetApp().SetPresentChange(true);
     m_machine_name = into_u8(printer_name);
     m_machine_host = now_host;
     event.Skip();

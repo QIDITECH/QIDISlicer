@@ -7,7 +7,7 @@
 #include "wxExtensions.hpp"
 #include "ObjectDataViewModel.hpp"
 #include "libslic3r/Config.hpp"
-#include "slic3r/Utils/PrintHost.hpp"
+#include "slic3r/Utils/PrintHost.hpp" // IWYU pragma: keep
 #include "libslic3r/Config.hpp"
 #include "format.hpp"
 
@@ -243,7 +243,7 @@ bool NotificationManager::PopNotification::push_background_color()
 		return true;
 	}
 	if (m_data.level == NotificationLevel::ErrorNotificationLevel) {
-		// ImVec4 backcolor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
+		//B18
 		ImVec4 backcolor(0.27f, 0.47f, 1.0f, 0.5f);
         backcolor.x += 0.73f;
         backcolor.y -= 0.47f;
@@ -252,7 +252,7 @@ bool NotificationManager::PopNotification::push_background_color()
 		return true;
 	}
 	if (m_data.level == NotificationLevel::WarningNotificationLevel) {
-		// ImVec4 backcolor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
+		//B18
 		ImVec4 backcolor(0.27f, 0.47f, 1.0f, 0.5f);
         backcolor.x += 0.73f;
         backcolor.y += 0.03f;

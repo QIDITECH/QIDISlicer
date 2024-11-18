@@ -1,4 +1,3 @@
-
 #ifndef slic3r_ImGuiPureWrap_hpp_
 #define slic3r_ImGuiPureWrap_hpp_
 
@@ -151,15 +150,16 @@ namespace ImGuiPureWrap
 
     const ImVec4 COL_GREY_DARK         = { 0.33f, 0.33f, 0.33f, 1.0f };
     const ImVec4 COL_GREY_LIGHT        = { 0.4f, 0.4f, 0.4f, 1.0f };
-    const ImVec4 COL_ORANGE_DARK = { 0.67f, 0.36f, 0.19f, 1.0f };
-    const ImVec4 COL_ORANGE_LIGHT = { 0.923f, 0.504f, 0.264f, 1.0f };
-    const ImVec4 COL_BLUE_DARK       = {0.017f,0.326f,0.926f,1.0f};
-    const ImVec4 COL_BLUE_LIGHT      = { 0.27f, 0.47f, 1.0f, 1.0f };
+    const ImVec4 COL_ORANGE_DARK       = { 0.67f, 0.36f, 0.19f, 1.0f };
+    const ImVec4 COL_ORANGE_LIGHT      = { 0.923f, 0.504f, 0.264f, 1.0f };
+    //y15
+    const ImVec4 COL_BLUE_DARK         = {0.017f,0.326f,0.926f,1.0f};
+    const ImVec4 COL_BLUE_LIGHT        = { 0.27f, 0.47f, 1.0f, 1.0f };
     const ImVec4 COL_WINDOW_BACKGROUND = { 0.13f, 0.13f, 0.13f, 0.8f };
     const ImVec4 COL_BUTTON_BACKGROUND = COL_BLUE_DARK;
     const ImVec4 COL_BUTTON_HOVERED    = COL_BLUE_LIGHT;
     const ImVec4 COL_BUTTON_ACTIVE     = COL_BUTTON_HOVERED;
-    const ImVec4 COL_WHITE_LIGHT        = { 1.0f, 1.0f, 1.0f, 1.0f };
+    const ImVec4 COL_WHITE_LIGHT       = { 1.0f, 1.0f, 1.0f, 1.0f };
 }
 
 #endif // slic3r_ImGuiPureWrap_hpp_

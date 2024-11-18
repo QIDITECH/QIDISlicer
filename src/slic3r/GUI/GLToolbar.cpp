@@ -92,7 +92,7 @@ void GLToolbarItem::render(const GLCanvas3D& parent, unsigned int tex_id, float 
         GLTexture::Quad_UVs ret;
         // tiles in the texture are spaced by 1 pixel
         const float icon_size_px = (float)(tex_width - 1) / ((float)Num_States + (float)Num_Rendered_Highlight_States);
-
+        //y14
         const char render_state = (m_highlight_state ==  NotHighlighted ? m_state : Num_States + m_highlight_state);
         const float inv_tex_width = 1.0f / (float)tex_width;
         const float inv_tex_height = 1.0f / (float)tex_height;

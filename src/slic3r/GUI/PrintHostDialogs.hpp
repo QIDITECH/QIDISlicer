@@ -4,7 +4,6 @@
 #include <set>
 #include <string>
 #include <boost/filesystem/path.hpp>
-#include <wx/wx.h>
 
 #include <wx/string.h>
 #include <wx/event.h>
@@ -13,9 +12,11 @@
 #include "GUI_Utils.hpp"
 #include "MsgDialog.hpp"
 #include "../Utils/PrintHost.hpp"
+
 //B61
 #include "Plater.hpp"
 #include "libslic3r/Print.hpp"
+#include <wx/wx.h>
 
 class wxButton;
 class wxTextCtrl;
@@ -62,14 +63,7 @@ class PrintHostSendDialog : public GUI::MsgDialog
 {
 public:
     //B61
-    PrintHostSendDialog(const boost::filesystem::path &path,
-                        PrintHostPostUploadActions     post_actions,
-                        const wxArrayString &          groups,
-                        const wxArrayString &          storage_paths,
-                        const wxArrayString &          storage_names,
-                        Plater *                       plater,
-                        const PrintStatistics &        ps,
-                        bool                           onlyLik);
+    PrintHostSendDialog(const boost::filesystem::path &path, PrintHostPostUploadActions post_actions, const wxArrayString& groups, const wxArrayString& storage_paths, const wxArrayString& storage_names, Plater* plater, const PrintStatistics& ps, bool onlyLik);
     boost::filesystem::path filename() const;
     PrintHostPostUploadAction post_action() const;
     std::string group() const;

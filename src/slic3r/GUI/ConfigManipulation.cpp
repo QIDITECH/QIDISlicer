@@ -349,8 +349,8 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
 
     bool has_ironing = config->opt_bool("ironing");
     //w33
-    for (auto el : {"ironing_type", "ironing_flowrate", "ironing_spacing", "ironing_speed", "ironing_pattern"})
-        toggle_field(el, has_ironing);
+    for (auto el : { "ironing_type", "ironing_flowrate", "ironing_spacing", "ironing_speed", "ironing_pattern"})
+    	toggle_field(el, has_ironing);
 
     bool have_sequential_printing = config->opt_bool("complete_objects");
     for (auto el : { "extruder_clearance_radius", "extruder_clearance_height" })
@@ -381,14 +381,6 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig* config)
     toggle_field("min_feature_size", have_arachne);
     toggle_field("min_bead_width", have_arachne);
     toggle_field("thin_walls", !have_arachne);
-
-    //w38
-    bool has_detect_overhang_wall = config->opt_bool("overhangs");
-    bool has_overhang_reverse     = config->opt_bool("overhang_reverse");
-    bool allow_overhang_reverse   = has_detect_overhang_wall && !has_spiral_vase;
-    toggle_field("overhang_reverse", allow_overhang_reverse);
-    toggle_field("overhang_reverse_internal_only", allow_overhang_reverse && has_overhang_reverse);
-    toggle_field("overhang_reverse_threshold", allow_overhang_reverse && has_overhang_reverse);
 }
 
 void ConfigManipulation::toggle_print_sla_options(DynamicPrintConfig* config)

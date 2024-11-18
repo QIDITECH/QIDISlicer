@@ -36,7 +36,7 @@
 #include "format.hpp"
 
 // A workaround for a set of issues related to text fitting into gtk widgets:
-// See e.g.: https://github.com/qidi3d/QIDISlicer/issues/4584
+// See e.g.: https://github.com/QIDITECH/QIDISlicer/issues/4584
 #if defined(__WXGTK20__) || defined(__WXGTK3__)
     #include <glib-2.0/glib-object.h>
     #include <pango-1.0/pango/pango-layout.h>

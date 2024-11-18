@@ -14,7 +14,6 @@
 //B44
 #include <wx/webview.h>
 
-
 class wxBoxSizer;
 class wxCheckBox;
 
@@ -52,7 +51,6 @@ public:
 	AppUpdateAvailableDialog& operator=(AppUpdateAvailableDialog&&) = delete;
 	AppUpdateAvailableDialog& operator=(const AppUpdateAvailableDialog&) = delete;
 	virtual ~AppUpdateAvailableDialog();
-
 
 	// B44
     wxWebView *CreateTipView(wxWindow *parent);

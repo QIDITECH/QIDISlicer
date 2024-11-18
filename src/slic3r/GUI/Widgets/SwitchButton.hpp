@@ -29,8 +29,6 @@ public:
 
 	//B64
     void SetSize(int size);
-
-
 private:
 	void update() override;
 

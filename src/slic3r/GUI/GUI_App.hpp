@@ -114,7 +114,7 @@ class ConfigWizard;
 static wxString dots("…", wxConvUTF8);
 
 // Does our wxWidgets version support markup?
-// https://github.com/qidi3d/QIDISlicer/issues/4282#issuecomment-634676371
+// https://github.com/QIDITECH/QIDISlicer/issues/4282#issuecomment-634676371
 #if wxUSE_MARKUP && wxCHECK_VERSION(3, 1, 1)
     #define SUPPORTS_MARKUP
 #endif
@@ -122,7 +122,7 @@ static wxString dots("…", wxConvUTF8);
 
 // A wrapper class to allow ignoring some known warnings 
 // and not bothering users with redundant messages. 
-// see https://github.com/qidi3d/QIDISlicer/issues/12920
+// see https://github.com/QIDITECH/QIDISlicer/issues/12920
 class LogGui : public wxLogGui
 {
 protected:
@@ -235,6 +235,7 @@ public:
     // Process command line parameters cached in this->init_params,
     // load configs, STLs etc.
     void            post_init();
+    //y
     void            shutdown();
     // If formatted for github, plaintext with OpenGL extensions enclosed into <details>.
     // Otherwise HTML formatted for the system info dialog.
@@ -278,7 +279,7 @@ public:
     std::vector<wxColour>   get_mode_palette();
     void                    set_mode_palette(const std::vector<wxColour> &palette);
 
-// #ifdef _WIN32
+//#ifdef _WIN32
     const wxColour& get_label_highlight_clr()   { return m_color_highlight_label_default; }
     const wxColour& get_highlight_default_clr() { return m_color_highlight_default; }
     //B10
@@ -289,7 +290,7 @@ public:
 #ifdef _MSW_DARK_MODE
     void            force_menu_update();
 #endif //_MSW_DARK_MODE
-// #endif
+//#endif
     //B64
 #if QDT_RELEASE_TO_PUBLIC
     std::vector<Device> get_devices() { return m_devices; };
@@ -302,6 +303,7 @@ public:
     const wxFont&   code_font()             { return m_code_font; }
     const wxFont&   link_font()             { return m_link_font; }
     int             em_unit() const         { return m_em_unit; }
+    //y
     bool            tabs_as_menu() const;
     bool            suppress_round_corners() const;
     wxSize          get_min_size(wxWindow* display_win) const;
@@ -443,7 +445,7 @@ public:
 
     void            open_wifi_config_dialog(bool forced, const wxString& drive_path = {});
     bool            get_wifi_config_dialog_shown() const { return m_wifi_config_dialog_shown; }
-
+    
     //y3
     void            setExitHost(std::set<std::string> exit_host) { m_exit_host = exit_host; };
     std::set<std::string> getExitHost() { return m_exit_host; };
@@ -459,6 +461,7 @@ public:
     void            select_filament_from_connect(const std::string& cmd);
     void            handle_connect_request_printer_select(const std::string& cmd);
     void            handle_connect_request_printer_select_inner(const std::string& cmd);
+    //y
     // void            show_printer_webview_tab();
     // return true if preset vas invisible and we have to installed it to make it selectable
     bool            select_printer_preset(const Preset* printer_preset);

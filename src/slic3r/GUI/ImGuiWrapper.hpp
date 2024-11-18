@@ -116,7 +116,7 @@ public:
     /// <param name="draw_list">Define where to draw it</param>
     /// <param name="color">Color of polygon</param>
     /// <param name="thickness">Width of polygon line</param>
-    //B18
+    //y
     static void draw(const Polygon &polygon,
                      ImDrawList *   draw_list = ImGui::GetOverlayDrawList(),
                      ImU32 color     = ImGui::GetColorU32(ImGuiPureWrap::COL_BLUE_LIGHT),
@@ -127,18 +127,6 @@ public:
     void reset_requires_extra_frame() { m_requires_extra_frame = false; }
 
     ImFontAtlasCustomRect* GetTextureCustomRect(const wchar_t& tex_id);
-
-    static const ImVec4 COL_GREY_DARK;
-    static const ImVec4 COL_GREY_LIGHT;
-    //B18
-    static const ImVec4 COL_WHITE_LIGHT;
-    static const ImVec4 COL_BLUE_LIGHT;
-    static const ImVec4 COL_ORANGE_DARK;
-    static const ImVec4 COL_ORANGE_LIGHT;
-    static const ImVec4 COL_WINDOW_BACKGROUND;
-    static const ImVec4 COL_BUTTON_BACKGROUND;
-    static const ImVec4 COL_BUTTON_HOVERED;
-    static const ImVec4 COL_BUTTON_ACTIVE;
 
 private:
     void init_font(bool compress);

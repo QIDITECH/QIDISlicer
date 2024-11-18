@@ -383,7 +383,7 @@ bool OpenGLManager::init_gl()
                    "while OpenGL version %s, renderer %s, vendor %s was detected."), s_gl_info.get_version_string(), s_gl_info.get_renderer(), s_gl_info.get_vendor());
 #endif // SLIC3R_OPENGL_ES
             message += "\n";
-        	message += _L("You may need to update your graphics card driver.");
+          	message += _L("You may need to update your graphics card driver.");
 #ifdef _WIN32
             message += "\n";
             message += _L("As a workaround, you may run QIDISlicer with a software rendered 3D graphics by running qidi-slicer.exe with the --sw-renderer parameter.");
@@ -411,7 +411,7 @@ bool OpenGLManager::init_gl()
 
 #ifdef _WIN32
         // Since AMD driver version 22.7.1, there is probably some bug in the driver that causes the issue with the missing
-        // texture of the bed (see: https://github.com/qidi3d/QIDISlicer/issues/8417).
+        // texture of the bed (see: https://github.com/QIDITECH/QIDISlicer/issues/8417).
         // It seems that this issue only triggers when mipmaps are generated manually
         // (combined with a texture compression) with texture size not being power of two.
         // When mipmaps are generated through OpenGL function glGenerateMipmap() the driver works fine,

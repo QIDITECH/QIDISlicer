@@ -1,4 +1,3 @@
-
 #ifndef slic3r_GUI_DoubleSliderForGcode_hpp_
 #define slic3r_GUI_DoubleSliderForGcode_hpp_
 

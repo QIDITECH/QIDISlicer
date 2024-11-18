@@ -1,7 +1,7 @@
 #include "libslic3r/libslic3r.h"
 #include "GLCanvas3D.hpp"
 
-#include <igl/unproject.h>
+#include <igl/unproject.h> // IWYU pragma: keep
 #include <LocalesUtils.hpp>
 
 #include "libslic3r/BuildVolume.hpp"
@@ -71,19 +71,12 @@
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
-
 #include <imgui/imgui_internal.h>
 #include <slic3r/GUI/Gizmos/GLGizmoMmuSegmentation.hpp>
 
 static constexpr const float TRACKBALLSIZE = 0.8f;
 
 //B12
-/*
-static const Slic3r::ColorRGBA DEFAULT_BG_DARK_COLOR  = { 0.478f, 0.478f, 0.478f, 1.0f };
-static const Slic3r::ColorRGBA DEFAULT_BG_LIGHT_COLOR = { 0.753f, 0.753f, 0.753f, 1.0f };
-static const Slic3r::ColorRGBA ERROR_BG_DARK_COLOR    = { 0.478f, 0.192f, 0.039f, 1.0f };
-static const Slic3r::ColorRGBA ERROR_BG_LIGHT_COLOR   = { 0.753f, 0.192f, 0.039f, 1.0f };
-*/
 static const Slic3r::ColorRGBA DEFAULT_BG_DARK_COLOR   = {0.957f, 0.969f, 0.996f, 1.0f};
 static const Slic3r::ColorRGBA DEFAULT_BG_LIGHT_COLOR  = {0.957f, 0.969f, 0.996f, 1.0f};
 static const Slic3r::ColorRGBA DARKMODE_BG_DARK_COLOR  = {0.145f, 0.149f, 0.165f, 1.0f};
@@ -617,8 +610,8 @@ void GLCanvas3D::LayersEditing::generate_layer_height_texture()
     bool level_of_detail_2nd_level = true;
     m_layers_texture.cells = Slic3r::generate_layer_height_texture(
         *m_slicing_parameters, 
-        //w27
-        Slic3r::generate_object_layers(*m_slicing_parameters, m_layer_height_profile,false), 
+         //w27
+         Slic3r::generate_object_layers(*m_slicing_parameters, m_layer_height_profile,false), 
 		m_layers_texture.data.data(), m_layers_texture.height, m_layers_texture.width, level_of_detail_2nd_level);
     m_layers_texture.valid = true;
 }
@@ -1499,7 +1492,6 @@ bool GLCanvas3D::check_volumes_outside_state(GLVolumeCollection& volumes, ModelI
                 //FIXME doing test on convex hull until we learn to do test on non-convex polygons efficiently.
                 case BuildVolume::Type::Custom:
                     state = build_volume.object_state(volume_convex_mesh(*volume).its, volume->world_matrix().cast<float>(), volume_sinking(*volume));
-                    // state = build_volume.volume_state_bbox(volume_bbox(*volume));
                     break;
                 default:
                     // Ignore, don't produce any collision.
@@ -2508,8 +2500,6 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
         }
 
         //Y5 if ToolpathOutside, unable export button
-        //post_event(Event<bool>(EVT_GLCANVAS_ENABLE_ACTION_BUTTONS, 
-        //                       contained_min_one && !m_model->objects.empty() && !partlyOut));
         if (isToolpathOutside) {
             post_event(Event<bool>(EVT_GLCANVAS_ENABLE_EXPORT_BUTTONS, false));
         }
@@ -2547,6 +2537,7 @@ void GLCanvas3D::reload_scene(bool refresh_immediately, bool force_full_scene_re
         raycaster->set_active(v->is_active);
     }
 
+    // check activity/visibility of the modifiers in SLA mode
     for (GLVolume* volume : m_volumes.volumes)
         if (volume->object_idx() < (int)m_model->objects.size() && m_model->objects[volume->object_idx()]->instances[volume->instance_idx()]->is_printable()) {
             if (volume->is_active && volume->is_modifier && m_model->objects[volume->object_idx()]->volumes[volume->volume_idx()]->is_modifier())
@@ -3061,7 +3052,6 @@ void GLCanvas3D::on_key(wxKeyEvent& evt)
                 }
                 else if (! wxGetApp().is_gcode_viewer() && keyCode == WXK_TAB &&
                     // Use strong condition for modifiers state to avoid cases when Shift can be combined with other modifiers
-                    // (see https://github.com/qidi3d/QIDISlicer/issues/7799)
                     evt.GetModifiers() == wxMOD_SHIFT) {
                     // Collapse side-panel with Shift+Tab
                     post_event(SimpleEvent(EVT_GLCANVAS_COLLAPSE_SIDEBAR));
@@ -3217,7 +3207,6 @@ void GLCanvas3D::on_mouse_wheel(wxMouseEvent& evt)
 #ifdef __WXMSW__
 	// For some reason the Idle event is not being generated after the mouse scroll event in case of scrolling with the two fingers on the touch pad,
 	// if the event is not allowed to be passed further.
-	// https://github.com/qidi3d/QIDISlicer/issues/2750
     // evt.Skip() used to trigger the needed screen refresh, but it does no more. wxWakeUpIdle() seem to work now.
     wxWakeUpIdle();
 #endif /* __WXMSW__ */
@@ -6044,8 +6033,6 @@ bool GLCanvas3D::check_toolbar_icon_size(float init_scale, float& new_scale_to_s
     // calculate scale needed for items in all top toolbars
     // the std::max() is there because on some Linux dialects/virtual machines this code is called when the canvas has not been properly initialized yet,
     // leading to negative values for the scale.
-    // See: https://github.com/qidi3d/QIDISlicer/issues/8563
-    //      https://github.com/supermerill/SuperSlicer/issues/854
     const float new_h_scale = std::max((cnv_size.get_width() - noitems_width), 1.0f) / (items_cnt * GLToolbar::Default_Icons_Size);
 
     float   gizmos_height   = m_gizmos.get_scaled_total_height();
@@ -6299,6 +6286,8 @@ void GLCanvas3D::_render_camera_target()
 }
 #endif // ENABLE_SHOW_CAMERA_TARGET
 
+
+
 static void render_sla_layer_legend(const SLAPrint& print, int layer_idx, int cnv_width)
 {
     const std::vector<double>& areas = print.print_statistics().layers_areas;
@@ -6328,6 +6317,8 @@ static void render_sla_layer_legend(const SLAPrint& print, int layer_idx, int cn
         ImGuiPureWrap::end();
     }
 }
+
+
 
 void GLCanvas3D::_render_sla_slices()
 {
@@ -6674,7 +6665,7 @@ void GLCanvas3D::_set_warning_notification_if_needed(EWarning warning)
             }
         }
     }
-    
+
     //Y5
     if (show) {
         isToolpathOutside = true;

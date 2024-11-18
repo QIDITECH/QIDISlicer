@@ -332,7 +332,6 @@ wxBitmapBundle *get_bmp_bundle_of_login(const std::string &bmp_name_in,
     return bmp;
 }
 
-
 wxBitmapBundle* get_empty_bmp_bundle(int width, int height)
 {
     static Slic3r::GUI::BitmapCache cache;
@@ -561,15 +560,6 @@ void ScalableBitmap::sys_color_changed()
 {
     m_bmp = *get_bmp_bundle(m_icon_name, m_bmp_width, m_bmp_height);
 }
-
-
-//B34
-//void ScalableBitmap::msw_rescale()
-//{
-//
-//    m_bmp = create_scaled_bitmap(m_icon_name, m_parent, m_px_cnt, m_grayscale, std::string(), false, m_resize);
-//}
-
 
 // ----------------------------------------------------------------------------
 // QIDIButton

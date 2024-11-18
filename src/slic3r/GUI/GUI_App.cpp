@@ -1,6 +1,6 @@
 #include "libslic3r/Technologies.hpp"
 #include "GUI_App.hpp"
-#include "GUI_Init.hpp"
+#include "GUI_Init.hpp" // IWYU pragma: keep
 #include "GUI_ObjectList.hpp"
 #include "GUI_ObjectManipulation.hpp"
 #include "GUI_Factories.hpp"
@@ -75,18 +75,18 @@
 #include "slic3r/Config/Snapshot.hpp"
 #include "ConfigSnapshotDialog.hpp"
 #include "FirmwareDialog.hpp"
-#include "slic3r/GUI/Preferences.hpp"
+#include "slic3r/GUI/Preferences.hpp" // IWYU pragma: keep
 #include "Tab.hpp"
 #include "SysInfoDialog.hpp"
 #include "KBShortcutsDialog.hpp"
 #include "UpdateDialogs.hpp"
 #include "Mouse3DController.hpp"
 #include "RemovableDriveManager.hpp"
-#include "InstanceCheck.hpp"
+#include "InstanceCheck.hpp" // IWYU pragma: keep
 #include "NotificationManager.hpp"
 #include "UnsavedChangesDialog.hpp"
 #include "SavePresetDialog.hpp"
-#include "PrintHostDialogs.hpp"
+#include "PrintHostDialogs.hpp" // IWYU pragma: keep
 #include "DesktopIntegrationDialog.hpp"
 #include "SendSystemInfoDialog.hpp"
 #include "Downloader.hpp"
@@ -95,7 +95,7 @@
 #include "UserAccount.hpp"
 #include "UserAccountUtils.hpp"
 #include "WebViewDialog.hpp"
-#include "LoginDialog.hpp"
+#include "LoginDialog.hpp" // IWYU pragma: keep
 #include "PresetArchiveDatabase.hpp"
 
 #include "BitmapCache.hpp"
@@ -295,14 +295,11 @@ private:
             version = _L("Version") + " " + std::string(SLIC3R_VERSION);
 
             // credits infornation
+            // B11
             credits = title + " " +
-                      // B11
-                      _L("is based on Slic3r by Alessandro Ranellucci and the RepRap community.") + "\n";
-                //+
-                // _L("Developed by QIDI Technology.") + "\n\n" +
-                // title + " " + _L("is licensed under the") + " " + _L("GNU Affero General Public License, version 3") + ".\n\n" +
-                // _L("Contributions by Vojtech Bubnik, Enrico Turri, Oleksandra Iushchenko, Tamas Meszaros, Lukas Matena, Vojtech Kral, David Kocik and numerous others.") + "\n\n" +
-                // _L("Artwork model by Creative Tools");
+                      _L("is based on Slic3r by Alessandro Ranellucci and the RepRap community.") + "\n\n";
+                      //_L("Developed by QIDI Technology.") + "\n\n" +
+                      //_L("Licensed under GNU AGPLv3.") + "\n\n\n\n\n\n\n";
 
             title_font = version_font = credits_font = init_font;
         }
@@ -414,7 +411,6 @@ bool static check_old_linux_datadir(const wxString& app_name) {
     // If we are on Linux and the datadir does not exist yet, look into the old
     // location where the datadir was before version 2.3. If we find it there,
     // tell the user that he might wanna migrate to the new location.
-    // (https://github.com/qidi3d/QIDISlicer/issues/2911)
     // To be precise, the datadir should exist, it is created when single instance
     // lock happens. Instead of checking for existence, check the contents.
 
@@ -842,7 +838,7 @@ void GUI_App::post_init()
             //    // Also, we only want to show this when the wizard does not, so the new user
             //    // sees something else than "we want something" on the first start.
             //    show_send_system_info_dialog_if_needed();   
-            //}   
+            //}  
             // app version check is asynchronous and triggers blocking dialog window, better call it last
             this->app_version_check(false);
         });
@@ -924,20 +920,7 @@ static boost::optional<Semver> parse_semver_from_ini(const std::string& path)
 
 void GUI_App::init_app_config()
 {
-	// Profiles for the alpha are stored into the QIDISlicer-alpha directory to not mix with the current release.
-
-    SetAppName(SLIC3R_APP_FULL_NAME);
-//	SetAppName(SLIC3R_APP_KEY "-alpha");
-//B7
-    // SetAppName(SLIC3R_APP_KEY "-beta");
-
-
-//	SetAppDisplayName(SLIC3R_APP_NAME);
-
-	// Set the Slic3r data directory at the Slic3r XS module.
-	// Unix: ~/ .Slic3r
-	// Windows : "C:\Users\username\AppData\Roaming\Slic3r" or "C:\Documents and Settings\username\Application Data\Slic3r"
-	// Mac : "~/Library/Application Support/Slic3r"
+	SetAppName(SLIC3R_APP_FULL_NAME);
 
 	if (!app_config)
         app_config = new AppConfig(is_editor() ? AppConfig::EAppMode::Editor : AppConfig::EAppMode::GCodeViewer);
@@ -1440,7 +1423,7 @@ bool GUI_App::on_init_inner()
                         , NotificationManager::NotificationLevel::ImportantNotificationLevel
                         , Slic3r::format(_u8L("New prerelease version %1% is available."), evt_string)
                         , _u8L("See Releases page.")
-                        , [](wxEvtHandler* evnthndlr) {wxGetApp().open_browser_with_warning_dialog("https://github.com/qidi3d/QIDISlicer/releases"); return true; }
+                        , [](wxEvtHandler* evnthndlr) {wxGetApp().open_browser_with_warning_dialog("https://github.com/QIDITECH/QIDISlicer/releases"); return true; }
                     );
                 }
             }
@@ -1554,6 +1537,7 @@ bool GUI_App::on_init_inner()
     if (is_editor())
         update_mode(); // update view mode after fix of the object_list size
 
+    //y15
     // show_printer_webview_tab();
 
 #ifdef __APPLE__
@@ -1603,8 +1587,8 @@ bool GUI_App::on_init_inner()
                 "To avoid this problem, consider disabling \"%4%\" in \"Preferences\". "
                 "Otherwise, the application will most likely crash again next time."),
                 "<b>" + from_u8(crash_reason) + "</b>",
-                "<a href=http://github.com/qidi3d/QIDISlicer/issues/2939>#2939</a>",
-                "<a href=http://github.com/qidi3d/QIDISlicer/issues/5573>#5573</a>",
+                "<a href=http://github.com/QIDITECH/QIDISlicer/issues/2939>#2939</a>",
+                "<a href=http://github.com/QIDITECH/QIDISlicer/issues/5573>#5573</a>",
                 "<b>" + preferences_item + "</b>"),
             true, wxYES_NO);
 
@@ -1672,18 +1656,18 @@ void GUI_App::init_ui_colours()
     m_mode_palette                  = get_mode_default_palette();
 
     bool is_dark_mode = dark_mode();
-// #ifdef _WIN32
+//#ifdef _WIN32
     //B10
     m_color_label_default           = is_dark_mode ? wxColour(255, 255, 255): wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
     m_color_highlight_label_default = is_dark_mode ? wxColour(230, 230, 230): wxSystemSettings::GetColour(/*wxSYS_COLOUR_HIGHLIGHTTEXT*/wxSYS_COLOUR_WINDOWTEXT);
-    m_color_highlight_default       = is_dark_mode ? wxColour(68, 68, 68)    : wxColour(180, 201, 253);
+    m_color_highlight_default       = is_dark_mode ? wxColour(68, 68, 68)   : wxColour(180, 201, 253);
     m_tap_color_highlight_default   = is_dark_mode ? wxColour(43, 43, 43)   : wxColour(255, 255, 255);
     m_color_hovered_btn_label       = is_dark_mode ? wxColour(68, 121, 251) : wxColour(68, 121, 251);
-    m_color_default_btn_label       = is_dark_mode ? wxColour(68, 121, 251): wxColour(68, 121, 251);
+    m_color_default_btn_label       = is_dark_mode ? wxColour(68, 121, 251) : wxColour(68, 121, 251);
     m_color_selected_btn_bg         = is_dark_mode ? wxColour(68, 68, 68)   : wxColour(206, 209, 217);
-// #else
-//     m_color_label_default = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
-// #endif
+//#else
+//    m_color_label_default = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
+//#endif
     m_color_window_default          = is_dark_mode ? wxColour(43, 43, 43)   : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
 }
 
@@ -1926,7 +1910,8 @@ const std::string GUI_App::get_html_bg_color(wxWindow* html_parent)
     wxColour    bgr_clr = html_parent->GetBackgroundColour();
 #ifdef __APPLE__
     // On macOS 10.13 and older the background color returned by wxWidgets
-    // is wrong. wxSYS_COLOUR_WINDOW
+    // is wrong, which leads to https://github.com/QIDITECH/QIDISlicer/issues/7603
+    // and https://github.com/QIDITECH/QIDISlicer/issues/3775. wxSYS_COLOUR_WINDOW
     // may not match the window background exactly, but it seems to never end up
     // as black on black.
 
@@ -1970,6 +1955,7 @@ void GUI_App::set_mode_palette(const std::vector<wxColour>& palette)
     }
 }
 
+//y
 bool GUI_App::tabs_as_menu() const
 {
     return app_config->get_bool("tabs_as_menu"); // || dark_mode();
@@ -2052,8 +2038,10 @@ void GUI_App::check_printer_presets()
 void GUI_App::recreate_GUI(const wxString& msg_name)
 {
     m_is_recreating_gui = true;
-    // y1
+
+   // y1
     mainframe->m_printer_view->StopStatusThread();
+
     mainframe->shutdown();
 
     wxProgressDialog dlg(msg_name, msg_name, 100, nullptr, wxPD_AUTO_HIDE);
@@ -2135,6 +2123,7 @@ void GUI_App::shutdown()
     }
 }
 
+//y15
 void GUI_App::SetOnlineLogin(bool status)
 {
     if (!status)
@@ -2144,12 +2133,14 @@ void GUI_App::SetOnlineLogin(bool status)
         wxGetApp().app_config->set("user_name", "");
         wxGetApp().app_config->set("user_token", "");
     }
-   mainframe->m_printer_view->SetLoginStatus(status);
-   mainframe->refresh_account_menu(status);
+    mainframe->m_printer_view->SetLoginStatus(status);
+    mainframe->refresh_account_menu(status);
 }
 
+//y15
 void GUI_App::SetPresentChange(bool status)
 { mainframe->m_printer_view->SetPresetChanged(status); }
+
 // static method accepting a wxWindow object as first parameter
 bool GUI_App::catch_error(std::function<void()> cb,
     //                       wxMessageDialog* message_dialog,
@@ -3296,9 +3287,9 @@ wxString GUI_App::current_language_code_safe() const
 		{ "ja", 	"ja_JP", },
 		{ "ko", 	"ko_KR", },
 		{ "pl", 	"pl_PL", },
-		{ "uk", 	"uk_UA", },
-		{ "zh", 	"zh_CN", },
-		{ "ru", 	"ru_RU", },
+		//{ "uk", 	"uk_UA", },
+		//{ "zh", 	"zh_CN", },
+		//{ "ru", 	"ru_RU", },
 	};
 	wxString language_code = this->current_language_code().BeforeFirst('_');
 	auto it = mapping.find(language_code);
@@ -3332,8 +3323,11 @@ bool GUI_App::run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage
 {
     wxCHECK_MSG(mainframe != nullptr, false, "Internal error: Main frame not created / null");
 
+    //y15
+    std::string old_token = wxGetApp().app_config->get("user_token");
+
     // Cancel sync before starting wizard to prevent two downloads at same time.
-    // preset_updater->cancel_sync();
+    preset_updater->cancel_sync();
     // Show login dialog before wizard.
 #if 0
     bool user_was_logged = plater()->get_user_account()->is_logged();
@@ -3357,12 +3351,13 @@ bool GUI_App::run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage
     wxYield();
 
     // We have to update repos
-    // plater()->get_preset_archive_database()->sync_blocking();
+    //y15
+    //plater()->get_preset_archive_database()->sync_blocking();
 
     if (reason == ConfigWizard::RunReason::RR_USER) {
         // Since there might be new repos, we need to sync preset updater
-        preset_updater->cancel_sync();
         const SharedArchiveRepositoryVector &repos = plater()->get_preset_archive_database()->get_selected_archive_repositories();
+        //y15
         // preset_updater->sync_blocking(preset_bundle, this, repos);
         preset_updater->update_index_db();
         // Offer update installation.
@@ -3398,7 +3393,9 @@ bool GUI_App::run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage
             may_switch_to_SLA_preset(_L("Configuration is editing from ConfigWizard"));
     }
     //y14
-    wxGetApp().SetOnlineLogin(wxGetApp().app_config->get("user_token") != "");
+    std::string new_token = wxGetApp().app_config->get("user_token");
+    if(old_token != new_token)
+        wxGetApp().SetOnlineLogin(true);
     return res;
 }
 
@@ -3573,12 +3570,10 @@ void GUI_App::window_pos_sanitize(wxTopLevelWindow* window)
 
 bool GUI_App::config_wizard_startup()
 {
-    if (!m_app_conf_exists || preset_bundle->printers.only_default_printers()) 
-    {
+    if (!m_app_conf_exists || preset_bundle->printers.only_default_printers()) {
         run_wizard(ConfigWizard::RR_DATA_EMPTY);
         return true;
-    } 
-    else if (get_app_config()->legacy_datadir()) {
+    } else if (get_app_config()->legacy_datadir()) {
         // Looks like user has legacy pre-vendorbundle data directory,
         // explain what this is and run the wizard
 
@@ -3620,7 +3615,12 @@ bool GUI_App::check_updates(const bool invoked_by_user)
 	PresetUpdater::UpdateResult updater_result;
 	try {
         preset_updater->update_index_db();
-		updater_result = preset_updater->config_update(app_config->orig_version(), invoked_by_user ? PresetUpdater::UpdateParams::SHOW_TEXT_BOX : PresetUpdater::UpdateParams::SHOW_NOTIFICATION, plater()->get_preset_archive_database()->get_selected_archive_repositories());
+        //y15
+        Plater* hasplater = plater();
+        if (hasplater == NULL)
+            updater_result == PresetUpdater::R_INCOMPAT_EXIT;
+        else
+            updater_result = preset_updater->config_update(app_config->orig_version(), invoked_by_user ? PresetUpdater::UpdateParams::SHOW_TEXT_BOX : PresetUpdater::UpdateParams::SHOW_NOTIFICATION, plater()->get_preset_archive_database()->get_selected_archive_repositories());
 		if (updater_result == PresetUpdater::R_INCOMPAT_EXIT) {
 			mainframe->Close();
             // Applicaiton is closing.
@@ -3750,6 +3750,7 @@ void GUI_App::associate_stl_files()
     associate_file_type(L".stl", L"QIDI.Slicer.1", L"QIDISlicer", true);
 }
 
+//Y
 void GUI_App::associate_step_files()
 {
     associate_file_type(L".step", L"QIDI.Slicer.1", L"QIDISlicer", true);
@@ -4229,6 +4230,7 @@ void GUI_App::handle_connect_request_printer_select_inner(const std::string & ms
     select_filament_from_connect(msg);
 }
 
+//y15
 //void GUI_App::show_printer_webview_tab()
 //{
 //    mainframe->show_printer_webview_tab(preset_bundle->physical_printers.get_selected_printer_config());

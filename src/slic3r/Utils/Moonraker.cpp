@@ -65,15 +65,15 @@ std::string substitute_host(const std::string& orig_addr, std::string sub_addr)
     return out;
 }
 #endif
-} // namespace
+}
 //B55
-Moonraker::Moonraker(DynamicPrintConfig *config, bool add_port)
-    : m_host(add_port ? config->opt_string("print_host").find(":10088") == std::string::npos ? config->opt_string("print_host") + ":10088" :
-                                                                                               config->opt_string("print_host") :
-                        config->opt_string("print_host"))
-    , m_apikey(config->opt_string("printhost_apikey"))
-    , m_cafile(config->opt_string("printhost_cafile"))
-    , m_ssl_revoke_best_effort(config->opt_bool("printhost_ssl_ignore_revoke"))
+Moonraker::Moonraker(DynamicPrintConfig *config, bool add_port) :
+    m_host(add_port ? config->opt_string("print_host").find(":10088") == std::string::npos ? config->opt_string("print_host") + ":10088" :
+                                                                                             config->opt_string("print_host") :
+                        config->opt_string("print_host")),
+    m_apikey(config->opt_string("printhost_apikey")),
+    m_cafile(config->opt_string("printhost_cafile")),
+    m_ssl_revoke_best_effort(config->opt_bool("printhost_ssl_ignore_revoke"))
 {}
 //B64
 Moonraker::Moonraker(std::string host, std::string local_ip)
@@ -478,7 +478,7 @@ void Moonraker::set_auth(Http &http) const
     if (!m_cafile.empty())
         http.ca_file(m_cafile);
 }
-//B52
+
 std::string Moonraker::make_url(const std::string &path) const
 {
     if (m_host.find("http://") == 0 || m_host.find("https://") == 0) {

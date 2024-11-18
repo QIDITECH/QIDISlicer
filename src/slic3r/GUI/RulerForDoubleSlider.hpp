@@ -1,4 +1,3 @@
-
 #ifndef slic3r_GUI_RulerForDoubleSlider_hpp_
 #define slic3r_GUI_RulerForDoubleSlider_hpp_
 

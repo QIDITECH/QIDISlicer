@@ -218,7 +218,6 @@ bool GLTexture::load_from_svg_files_as_sprites_array(const std::vector<std::stri
             int offset = i * 4;
             if (sprite_white_only_data.data()[offset] != 0)
                 //B13
-                //::memset((void*)&sprite_white_only_data.data()[offset], 255, 3);
                 ::memset((void*)&sprite_white_only_data.data()[offset], 61, 1);
             if (sprite_white_only_data.data()[offset+1] != 0)
                 ::memset((void*)&sprite_white_only_data.data()[offset+1], 121, 1);
@@ -232,7 +231,6 @@ bool GLTexture::load_from_svg_files_as_sprites_array(const std::vector<std::stri
             int offset = i * 4;
             if (sprite_gray_only_data.data()[offset] != 0)
                 //B13
-                //::memset((void*)&sprite_gray_only_data.data()[offset], 128, 3);
                 ::memset((void*)&sprite_gray_only_data.data()[offset], 180, 1);
             if (sprite_gray_only_data.data()[offset+1] != 0)
                 ::memset((void*)&sprite_gray_only_data.data()[offset+1], 201, 1);

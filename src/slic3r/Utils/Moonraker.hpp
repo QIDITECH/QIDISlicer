@@ -40,7 +40,8 @@ public:
     bool has_auto_discovery() const override { return true; }
     bool can_test() const override { return true; }
     PrintHostPostUploadActions get_post_upload_actions() const override { return PrintHostPostUploadAction::StartPrint; }
-    std::string                get_host() const override { return m_show_ip != "" ? m_show_ip : m_host; }
+    //y
+    std::string get_host() const override { return m_show_ip != "" ? m_show_ip : m_host; }
     const std::string& get_apikey() const { return m_apikey; }
     const std::string& get_cafile() const { return m_cafile; }
     //y6

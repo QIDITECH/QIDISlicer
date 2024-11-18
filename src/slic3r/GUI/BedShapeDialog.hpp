@@ -91,7 +91,7 @@ private:
     wxPanel*    init_texture_panel();
     wxPanel*    init_model_panel();
     //B52
-    void                  set_shape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2);
+    void        set_shape(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2);
     //Y20 //B52
     void        set_exclude_area(const ConfigOptionPoints &points1, const ConfigOptionPoints &points2);
     void		update_preview();

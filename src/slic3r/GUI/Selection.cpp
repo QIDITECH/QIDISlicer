@@ -1251,6 +1251,10 @@ void Selection::scale_to_fit_print_volume(const BuildVolume& volume)
             remove_volumes(m_mode, to_remove);
     }
 
+    // FIXME: It should really only account for the model parts when scaling to fit. Not for modifiers,
+    // support enforcers / blockers and negative meshes.
+
+
     switch (volume.type())
     {
     case BuildVolume::Type::Rectangle: { undoredo_snapshot = fit_rectangle(volume, !undoredo_snapshot); break; }

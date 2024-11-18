@@ -205,7 +205,6 @@ const ColorRGBA GLVolume::SELECTED_COLOR         = ColorRGBA::GREEN();
 const ColorRGBA GLVolume::HOVER_SELECT_COLOR     = { 0.4f, 0.9f, 0.1f, 1.0f };
 const ColorRGBA GLVolume::HOVER_DESELECT_COLOR   = { 1.0f, 0.75f, 0.75f, 1.0f };
 //B22
-//const ColorRGBA GLVolume::OUTSIDE_COLOR          = { 0.0f, 0.38f, 0.8f, 1.0f };
 const ColorRGBA GLVolume::OUTSIDE_COLOR          = { 1.0f, 0.0f, 0.0f, 1.0f };
 const ColorRGBA GLVolume::SELECTED_OUTSIDE_COLOR = { 0.19f, 0.58f, 1.0f, 1.0f };
 const ColorRGBA GLVolume::DISABLED_COLOR         = ColorRGBA::DARK_GRAY();
@@ -265,6 +264,14 @@ void GLVolume::set_render_color(bool force_transparent)
         }
     }
     else {
+        //B22
+        /*if (hover == HS_Select)
+            set_render_color(HOVER_SELECT_COLOR);
+        else if (hover == HS_Deselect)
+            set_render_color(HOVER_DESELECT_COLOR);
+        else if (selected)
+            set_render_color(outside ? SELECTED_OUTSIDE_COLOR : SELECTED_COLOR);
+        else if (disabled)*/
         if (disabled)
             set_render_color(DISABLED_COLOR);
         else if (outside && shader_outside_printer_detection_enabled)

@@ -334,7 +334,6 @@ GLGizmoEmboss::GLGizmoEmboss(GLCanvas3D &parent)
 //B34
 void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mouse_pos, std::string str)
 {
-
     if (!init_create(volume_type))
     return ;
 
@@ -351,11 +350,10 @@ void GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d &mous
     m_style_manager.get_style().projection.depth = print_config->get_abs_value("layer_height");
 
     DataBasePtr base = create_emboss_data_base(str, m_style_manager, m_text_lines, m_parent.get_selection(), volume_type, m_job_cancel);
-    CreateVolumeParams input = create_input(m_parent, m_style_manager.get_style(), m_raycast_manager, volume_type);
 
-    start_create_volume_without_position(input, std::move(base));
-
-
+    //w43
+    CreateVolumeParams input = create_input(volume_type, str);
+    start_create_volume_without_position(input);
 }
 
 bool GLGizmoEmboss::create_volume(ModelVolumeType volume_type, const Vec2d& mouse_pos)
@@ -381,6 +379,21 @@ CreateVolumeParams GLGizmoEmboss::create_input(ModelVolumeType volume_type)
 {
     // NOTE: change style manager - be carefull with order changes
     DataBasePtr base = create_emboss_data_base(m_text, m_style_manager, m_text_lines, 
+        m_parent.get_selection(), volume_type, m_job_cancel);
+    
+    const StyleManager::Style &style = m_style_manager.get_style();
+    auto gizmo = static_cast<unsigned char>(GLGizmosManager::Emboss);
+    const GLVolume *gl_volume = get_first_hovered_gl_volume(m_parent);
+    Plater *plater = wxGetApp().plater();
+    return CreateVolumeParams{std::move(base), m_parent, plater->get_camera(), plater->build_volume(),
+        plater->get_ui_job_worker(), volume_type, m_raycast_manager, gizmo, gl_volume, style.distance, style.angle};
+}
+
+//w43
+CreateVolumeParams GLGizmoEmboss::create_input(ModelVolumeType volume_type ,const std::string num_text)
+{
+    // NOTE: change style manager - be carefull with order changes
+    DataBasePtr base = create_emboss_data_base(num_text, m_style_manager, m_text_lines, 
         m_parent.get_selection(), volume_type, m_job_cancel);
     
     const StyleManager::Style &style = m_style_manager.get_style();

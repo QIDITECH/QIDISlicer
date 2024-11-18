@@ -123,6 +123,7 @@ AppUpdateAvailableDialog::AppUpdateAvailableDialog(const Semver& ver_current, co
         content_sizer->AddSpacer(VERT_SPACING);
     }
 
+    //B
     AUAD_size = wxSize(850, 500);
     content_sizer->SetMinSize(AppUpdateAvailableDialog::AUAD_size);
 	//B
@@ -146,8 +147,6 @@ wxWebView *AppUpdateAvailableDialog::CreateTipView(wxWindow *parent)
     wxWebView *tipView = WebView::CreateWebView(parent, "");
     return tipView;
 }
-
-
 
 bool AppUpdateAvailableDialog::disable_version_check() const
 {
@@ -335,7 +334,6 @@ MsgUpdateConfig::MsgUpdateConfig(const std::vector<Update> &updates, bool force_
 
 		if (! update.changelog_url.empty() && update.version.prerelease() == nullptr) {
 			auto *line = new wxBoxSizer(wxHORIZONTAL);
-			// auto changelog_url = (boost::format(update.changelog_url) % lang_code).str();
 			//B51
 			auto changelog_url = "";
 			//line->AddSpacer(3*VERT_SPACING);
@@ -500,14 +498,6 @@ MsgDataLegacy::MsgDataLegacy() :
 	//content_sizer->Add(text2);
 	//content_sizer->Add(link);
 	//content_sizer->AddSpacer(VERT_SPACING);
-	auto *text2 = new wxStaticText(this, wxID_ANY, _(L("For more information please visit our wiki page:")));
-	static const wxString url("https://github.com/qidi3d/QIDISlicer/wiki/Slic3r-PE-1.40-configuration-update");
-	// The wiki page name is intentionally not localized:
-	// TRN %s = QIDISlicer
-	auto *link = new wxHyperlinkCtrl(this, wxID_ANY, format_wxstr(_L("%s 1.40 configuration update"), SLIC3R_APP_NAME), CONFIG_UPDATE_WIKI_URL);
-	content_sizer->Add(text2);
-	content_sizer->Add(link);
-	content_sizer->AddSpacer(VERT_SPACING);
 
 	finalize();
 }

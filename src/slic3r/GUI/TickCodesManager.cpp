@@ -1,4 +1,3 @@
-
 #include "TickCodesManager.hpp"
 
 #include <algorithm>

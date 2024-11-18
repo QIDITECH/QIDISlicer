@@ -1,4 +1,3 @@
-
 #ifndef slic3r_LibVGCodeWrapper_hpp_
 #define slic3r_LibVGCodeWrapper_hpp_
 

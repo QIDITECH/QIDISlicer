@@ -1,4 +1,3 @@
-
 #include "PresetComboBoxes.hpp"
 
 #include <cstddef>
@@ -48,7 +47,6 @@
 //B55
 #include "../Utils/PrintHost.hpp"
 // A workaround for a set of issues related to text fitting into gtk widgets:
-// See e.g.: https://github.com/qidi3d/QIDISlicer/issues/4584
 #if defined(__WXGTK20__) || defined(__WXGTK3__)
     #include <glib-2.0/glib-object.h>
     #include <pango-1.0/pango/pango-layout.h>
@@ -140,7 +138,6 @@ void PresetComboBox::init_from_bundle(PresetBundle* preset_bundle)
 
 void PresetComboBox::OnSelect(wxCommandEvent& evt)
 {
-    // see https://github.com/qidi3d/QIDISlicer/issues/3889
     // Under OSX: in case of use of a same names written in different case (like "ENDER" and "Ender")
     // m_presets_choice->GetSelection() will return first item, because search in PopupListCtrl is case-insensitive.
     // So, use GetSelection() from event parameter 
@@ -406,11 +403,13 @@ void PresetComboBox::update(std::string select_preset_name)
 }
 
 void PresetComboBox::edit_physical_printer()
-{   
+{
     //y3
     std::set<std::string> m_exit_host = wxGetApp().getExitHost();
     if (!m_preset_bundle->physical_printers.has_selection())
         return;
+    
+    //y3
     PhysicalPrinter &ph_printer = m_preset_bundle->physical_printers.get_selected_printer();
     std::string      ph_host    = ph_printer.config.opt_string("print_host");
     m_exit_host.erase(ph_host);
@@ -420,11 +419,10 @@ void PresetComboBox::edit_physical_printer()
         update();
         wxGetApp().SetPresentChange(true);
     }
-        
 }
 
 void PresetComboBox::add_physical_printer()
-{   
+{
     //y3
     std::set<std::string> m_exit_host = wxGetApp().getExitHost();
     if (PhysicalPrinterDialog(this->GetParent(), wxEmptyString, m_exit_host).ShowModal() == wxID_OK) {
@@ -435,8 +433,8 @@ void PresetComboBox::add_physical_printer()
 
 void PresetComboBox::open_physical_printer_url()
 {
-    const PhysicalPrinter &pp   = m_preset_bundle->physical_printers.get_selected_printer();
-    std::string            host = pp.config.opt_string("print_host");
+    const PhysicalPrinter& pp = m_preset_bundle->physical_printers.get_selected_printer();
+    std::string host = pp.config.opt_string("print_host");
     assert(!host.empty());
     //B55
     const DynamicPrintConfig *cfg = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config();
@@ -670,6 +668,7 @@ bool PresetComboBox::selection_is_changed_according_to_physical_printers()
             wxGetApp().sidebar().update_presets(m_type);
 
         // Check and show "Physical printer" page if needed
+        //y15
         // wxGetApp().show_printer_webview_tab();
 
         return true;
@@ -882,11 +881,7 @@ void PlaterPresetComboBox::show_add_menu()
 
     append_menu_item(menu, wxID_ANY, _L("Add physical printer"), "",
         [this](wxCommandEvent&) {
-            //y3
-            std::set<std::string> m_exit_host = wxGetApp().getExitHost();
-            PhysicalPrinterDialog dlg(this->GetParent(), wxEmptyString, m_exit_host);
-            if (dlg.ShowModal() == wxID_OK)
-                update();
+            add_physical_printer();
         }, "edit_uni", menu, []() { return true; }, wxGetApp().plater());
 
     wxGetApp().plater()->PopupMenu(menu);
@@ -1349,7 +1344,6 @@ void PlaterPresetComboBox::update()
 
 #ifdef __WXMSW__
     // Use this part of code just on Windows to avoid of some layout issues on Linux
-    // see https://github.com/qidi3d/QIDISlicer/issues/5163 and https://github.com/qidi3d/QIDISlicer/issues/5505
     // Update control min size after rescale (changed Display DPI under MSW)
     if (GetMinWidth() != 20 * m_em_unit)
         SetMinSize(wxSize(20 * m_em_unit, GetSize().GetHeight()));
@@ -1361,7 +1355,6 @@ void PlaterPresetComboBox::msw_rescale()
     PresetComboBox::msw_rescale();
 #ifdef __WXMSW__
     // Use this part of code just on Windows to avoid of some layout issues on Linux
-    // see https://github.com/qidi3d/QIDISlicer/issues/5163 and https://github.com/qidi3d/QIDISlicer/issues/5505
     // Update control min size after rescale (changed Display DPI under MSW)
     if (GetMinWidth() != 20 * m_em_unit)
         SetMinSize(wxSize(20 * m_em_unit, GetSize().GetHeight()));
@@ -1391,7 +1384,6 @@ TabPresetComboBox::TabPresetComboBox(wxWindow* parent, Preset::Type preset_type)
 
 void TabPresetComboBox::OnSelect(wxCommandEvent &evt)
 {
-    // see https://github.com/qidi3d/QIDISlicer/issues/3889
     // Under OSX: in case of use of a same names written in different case (like "ENDER" and "Ender")
     // m_presets_choice->GetSelection() will return first item, because search in PopupListCtrl is case-insensitive.
     // So, use GetSelection() from event parameter 
@@ -1419,7 +1411,6 @@ void TabPresetComboBox::OnSelect(wxCommandEvent &evt)
 #ifdef __WXMSW__
     // From the Win 2004 preset combobox lose a focus after change the preset selection
     // and that is why the up/down arrow doesn't work properly
-    // (see https://github.com/qidi3d/QIDISlicer/issues/5531 ).
     // So, set the focus to the combobox explicitly
     this->SetFocus();
 #endif

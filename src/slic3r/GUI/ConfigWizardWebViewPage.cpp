@@ -11,6 +11,7 @@
 
 #include <wx/webview.h>
 
+//y15
 #include <nlohmann/json.hpp>
 using namespace std;
 using namespace nlohmann;
@@ -32,6 +33,7 @@ ConfigWizardWebViewPage::ConfigWizardWebViewPage(ConfigWizard *parent)
     // Create the webview
     m_browser_sizer = new wxBoxSizer(wxHORIZONTAL);
 
+//y15
     wxString TargetUrl = "";
 
 #if QDT_RELEASE_TO_PUBLIC
@@ -39,12 +41,7 @@ ConfigWizardWebViewPage::ConfigWizardWebViewPage(ConfigWizard *parent)
     QIDINetwork m_qidinetwork;
     TargetUrl = m_qidinetwork.get_qidi_host();
 #endif
-
-    BOOST_LOG_TRIVIAL(error) << "login url = " << TargetUrl.ToStdString();
-//
-//    TargetUrl = "https://login_aliyun.qidi3dprinter.com/#/account/login";
-//    m_browser = WebView::CreateWebView(this, TargetUrl, {});
-    // wxString test_url = "https://www.baidu.com";
+    
     m_browser = WebView::CreateWebView(this, TargetUrl, {"wx"});
     if (!m_browser) {
         // TRN Config wizard page with a log in page.
@@ -65,7 +62,8 @@ ConfigWizardWebViewPage::ConfigWizardWebViewPage(ConfigWizard *parent)
     append(m_browser_sizer, 1, wxEXPAND);
 
     m_browser_sizer->Show(true);
-
+    
+    //y15
     this->Layout();
     // Connect the webview events
     // Bind(wxEVT_WEBVIEW_ERROR, &ConfigWizardWebViewPage::on_error, this, m_browser->GetId());
@@ -166,6 +164,7 @@ void ConfigWizardWebViewPage::on_navigation_request(wxWebViewEvent &evt)
     }
 }
 
+//y15
 void ConfigWizardWebViewPage::is_login(wxWebViewEvent& evt)
 {
     wxString str_input = evt.GetString();

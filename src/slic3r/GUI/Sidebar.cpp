@@ -1,4 +1,3 @@
-
 #include "Sidebar.hpp"
 #include "FrequentlyChangedParameters.hpp"
 #include "Plater.hpp"
@@ -430,7 +429,7 @@ Sidebar::Sidebar(Plater *parent)
     // Buttons underneath the scrolled area
 
     // rescalable bitmap buttons "Send to printer" and "Remove device" 
-
+    //y15
     auto init_scalable_btn = [this](ScalableButton** btn, const std::string& icon_name, wxString label, wxString tooltip = wxEmptyString)
     {
 #ifdef __APPLE__
@@ -439,6 +438,7 @@ Sidebar::Sidebar(Plater *parent)
         int bmp_px_cnt = 32;
 #endif //__APPLE__
         ScalableBitmap bmp = ScalableBitmap(this, icon_name, bmp_px_cnt);
+        //y15
         *btn = new ScalableButton(this, wxID_ANY, bmp, label, wxBU_EXACTFIT);
         wxGetApp().SetWindowVariantForButton((*btn));
 
@@ -457,6 +457,7 @@ Sidebar::Sidebar(Plater *parent)
         (*btn)->Hide();
     };
 
+    //y
     init_scalable_btn(&m_btn_send_gcode   , "export_gcode", _L("Send to printer"), _L("Send to printer") + " " +GUI::shortkey_ctrl_prefix() + "Shift+G");
 	init_scalable_btn(&m_btn_export_gcode_removable, "export_to_sd", _L("Export"), _L("Export to SD card / Flash drive") + " " + GUI::shortkey_ctrl_prefix() + "U");
 
@@ -485,7 +486,8 @@ Sidebar::Sidebar(Plater *parent)
 
     auto* complect_btns_sizer = new wxBoxSizer(wxHORIZONTAL);
     complect_btns_sizer->Add(m_btn_export_gcode, 1, wxEXPAND);
-    complect_btns_sizer->Add(m_btn_connect_gcode, 1, wxEXPAND | wxLEFT, margin_5);
+    //y15
+    // complect_btns_sizer->Add(m_btn_connect_gcode, 1, wxEXPAND | wxLEFT, margin_5);
     complect_btns_sizer->Add(m_btn_send_gcode, 0, wxLEFT, margin_5);
 	complect_btns_sizer->Add(m_btn_export_gcode_removable, 0, wxLEFT, margin_5);
 

@@ -43,7 +43,7 @@ void CoordAxes::render(const Transform3d& trafo, float emission_factor)
     shader->set_uniform("emission_factor", emission_factor);
 
     // Scale the axes if the camera is close to them to avoid issues
-    // such as https://github.com/qidi3d/QIDISlicer/issues/9483
+    // such as https://github.com/QIDITECH/QIDISlicer/issues/9483
     const Camera& camera = wxGetApp().plater()->get_camera();
     Transform3d scale_tr = Transform3d::Identity();
     scale_tr.scale(std::min(1., camera.get_inv_zoom() * 10.));

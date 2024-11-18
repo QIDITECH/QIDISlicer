@@ -1,4 +1,3 @@
-
 #include "UpdatesUIManager.hpp"
 #include "I18N.hpp"
 #include "wxExtensions.hpp"

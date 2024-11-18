@@ -110,7 +110,6 @@ public:
         {
             GLModel m_model;
             Vec3f m_world_position;
-            Transform3f m_world_transform;
             // For seams, the position of the marker is on the last endpoint of the toolpath containing it.
             // This offset is used to show the correct value of tool position in the "ToolPosition" window.
             // See implementation of render() method
@@ -149,9 +148,9 @@ public:
 
             bool is_visible() const { return m_visible; }
             void set_visible(bool visible) { m_visible = visible; }
-            //B43
-            void render(EViewType &view_type);
-            void update_curr_move(GCodeProcessorResult::MoveVertex move);
+
+            void render();
+            void render_position_window(const libvgcode::Viewer* viewer);
         };
 
         class GCodeWindow
@@ -216,10 +215,6 @@ private:
     BoundingBoxf3 m_shells_bounding_box;
     // bounding box of toolpaths + marker tools + shells
     BoundingBoxf3 m_max_bounding_box;
-
-    //B43
-    const GCodeProcessorResult *m_gcode_result;
-
     float m_max_print_height{ 0.0f };
     float m_z_offset{ 0.0f };
     size_t m_extruders_count;

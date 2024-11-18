@@ -564,7 +564,6 @@ void Camera::set_default_orientation()
     const double theta_rad = Geometry::deg2rad(-(double)m_zenit);
     //B3
     const double phi_rad = Geometry::deg2rad(0.0);
-    // const double phi_rad = Geometry::deg2rad(45.0);
     const double sin_theta = ::sin(theta_rad);
     const Vec3d camera_pos = m_target + m_distance * Vec3d(sin_theta * ::sin(phi_rad), sin_theta * ::cos(phi_rad), ::cos(theta_rad));
     m_view_rotation = Eigen::AngleAxisd(theta_rad, Vec3d::UnitX()) * Eigen::AngleAxisd(phi_rad, Vec3d::UnitZ());

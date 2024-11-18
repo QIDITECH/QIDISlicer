@@ -282,7 +282,6 @@ bool tags_check(const std::string& disabled_tags, const std::string& enabled_tag
 }
 void launch_browser_if_allowed(const std::string& url)
 {
-	return;
 	wxGetApp().open_browser_with_warning_dialog(url);
 }
 } //namespace
@@ -574,12 +573,11 @@ void NotificationManager::HintNotification::count_spaces()
 	
 	// no left button picture
 	//m_left_indentation = m_line_height;
-    //Y4
-	/*if (m_documentation_link.empty())
+
+	if (m_documentation_link.empty())
 		m_window_width_offset = m_left_indentation + m_line_height * 3.f;
 	else 
-		m_window_width_offset = m_left_indentation + m_line_height * 5.5f;*/
-	m_window_width_offset = m_left_indentation + m_line_height * 3.f;
+		m_window_width_offset = m_left_indentation + m_line_height * 5.5f;
 
 	m_window_width = m_line_height * 25;
 }
@@ -754,6 +752,8 @@ bool NotificationManager::HintNotification::on_text_click()
 
 void NotificationManager::HintNotification::render_text(const float win_size_x, const float win_size_y, const float win_pos_x, const float win_pos_y)
 {
+	//y15
+	count_lines();
     if (!m_has_hint_data) {
         retrieve_data();
 	}
@@ -885,11 +885,10 @@ void NotificationManager::HintNotification::render_close_button(const float win_
 	//render_right_arrow_button(imgui, win_size_x, win_size_y, win_pos_x, win_pos_y);
 	render_logo(win_size_x, win_size_y, win_pos_x, win_pos_y);
 	render_preferences_button(win_pos_x, win_pos_y);
-	//Y4
-	/*if (!m_documentation_link.empty() && !wxGetApp().app_config->get_bool("suppress_hyperlinks"))
+	if (!m_documentation_link.empty() && !wxGetApp().app_config->get_bool("suppress_hyperlinks"))
 	{
-		render_documentation_button(imgui, win_size_x, win_size_y, win_pos_x, win_pos_y);
-	}*/
+		render_documentation_button(win_size_x, win_size_y, win_pos_x, win_pos_y);
+	}
 	
 }
 

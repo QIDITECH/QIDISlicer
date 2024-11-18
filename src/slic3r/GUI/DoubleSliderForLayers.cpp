@@ -1,4 +1,3 @@
-
 #include "DoubleSliderForLayers.hpp"
 
 #include <boost/algorithm/string/classification.hpp>
@@ -108,7 +107,6 @@ void DSForLayers::SetLayersTimes(const std::vector<float>& layers_times, float t
 
     // Erase duplicates values from m_values and save it to the m_layers_values
     // They will be used for show the correct estimated time for MM print, when "No sparce layer" is enabled
-    // See https://github.com/qidi3d/QIDISlicer/issues/6232
     if (m_ticks.is_wipe_tower && m_values.size() != m_layers_times.size()) {
         m_layers_values = m_values;
         sort(m_layers_values.begin(), m_layers_values.end());
@@ -386,7 +384,6 @@ void DSForLayers::draw_ruler(const ImRect& slideable_region)
                 tick++;
             }
         }
-        // very short object or some non-trivial ruler with non-regular step (see https://github.com/qidi3d/QIDISlicer/issues/7263)
         else {
             if (step < 1) // step less then 1 px indicates very tall object with non-regular laayer step (probably in vase mode)
                 return;
@@ -1097,7 +1094,6 @@ std::string DSForLayers::get_label(int pos, LabelType label_type, const std::str
     // When "Print Settings -> Multiple Extruders -> No sparse layer" is enabled, then "Smart" Wipe Tower is used for wiping.
     // As a result, each layer with tool changes is splited for min 3 parts: first tool, wiping, second tool ...
     // So, vertical slider have to respect to this case.
-    // see https://github.com/qidi3d/QIDISlicer/issues/6232.
     // m_values contains data for all layer's parts,
     // but m_layers_values contains just unique Z values.
     // Use this function for correct conversion slider position to number of printed layer
@@ -1210,8 +1206,6 @@ std::string DSForLayers::get_tooltip(int tick/*=-1*/)
         std::string space = "   ";
         tooltip = space;
         auto format_gcode = [space](std::string gcode) -> std::string {
-            // when the tooltip is too long, it starts to flicker, see: https://github.com/qidi3d/QIDISlicer/issues/7368
-            // so we limit the number of lines shown
             std::vector<std::string> lines;
             boost::split(lines, gcode, boost::is_any_of("\n"), boost::token_compress_off);
             static const size_t MAX_LINES = 10;

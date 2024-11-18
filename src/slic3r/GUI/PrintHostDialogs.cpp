@@ -40,18 +40,8 @@ static const char *CONFIG_KEY_GROUP = "printhost_group";
 static const char* CONFIG_KEY_STORAGE = "printhost_storage";
 
 //B61
-PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
-                                         PrintHostPostUploadActions post_actions,
-                                         const wxArrayString &      groups,
-                                         const wxArrayString &      storage_paths,
-                                         const wxArrayString &      storage_names,
-                                         Plater *                   plater,
-                                         const PrintStatistics &    ps,
-                                         bool                       onlylink)
-    : MsgDialog(static_cast<wxWindow *>(wxGetApp().mainframe),
-                _L("Send G-Code to printer host"),
-                _L(""),
-                0) // Set style = 0 to avoid default creation of the "OK" button. 
+PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUploadActions post_actions, const wxArrayString &groups, const wxArrayString& storage_paths, const wxArrayString& storage_names, Plater* plater, const PrintStatistics& ps, bool onlylink)
+    : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Send G-Code to printer host"), _L(""), 0) // Set style = 0 to avoid default creation of the "OK" button. 
                                                                                                                                                                // All buttons will be added later in this constructor 
     , txt_filename(new wxTextCtrl(this, wxID_ANY))
     , combo_groups(!groups.IsEmpty() ? new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, groups, wxCB_READONLY) : nullptr)
@@ -354,14 +344,6 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
     wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(wxVERTICAL, this, _L(""));
     sizer2->Add(scrool_box_sizer2);
 
-
-
-    //hbox2->Add(scrool_box_sizer);
-
-    //hbox2->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
-
-    //hbox2->Add(scrool_box_sizer2);
-
     hbox2->Add(sizer1);
     hbox2->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
     hbox2->Add(sizer2);
@@ -411,7 +393,7 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
         m_valid_suffix = recent_path.substr(extension_start);
     // .gcode suffix control
     auto validate_path = [this](const wxString &path) -> bool {
-        if (! path.Lower().EndsWith(m_valid_suffix.Lower())) {
+        if (!path.Lower().EndsWith(m_valid_suffix.Lower())) {
             MessageDialog msg_wingow(this, wxString::Format(_L("Upload filename doesn't end with \"%s\". Do you wish to continue?"), m_valid_suffix), wxString(SLIC3R_APP_NAME), wxYES | wxNO);
             return msg_wingow.ShowModal() == wxID_YES;
         }
@@ -542,7 +524,6 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &           path,
 #ifdef __linux__
     // On Linux with GTK2 when text control lose the focus then selection (colored background) disappears but text color stay white
     // and as a result the text is invisible with light mode
-    // see https://github.com/qidi3d/QIDISlicer/issues/4532
     // Workaround: Unselect text selection explicitly on kill focus
     txt_filename->Bind(wxEVT_KILL_FOCUS, [this](wxEvent& e) {
         e.Skip();
@@ -619,20 +600,6 @@ wxBoxSizer *PrintHostSendDialog::create_item_input(
     sizer_input->Add(input, 0, wxALIGN_CENTER_VERTICAL, 0);
     sizer_input->Add(0, 0, 0, wxEXPAND | wxLEFT, 3);
     sizer_input->Add(second_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
-
-    //input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, param, input](wxCommandEvent &e) {
-    //    auto value = input->GetTextCtrl()->GetValue();
-    //    wxGetApp().app_config->set(param, std::string(value.mb_str()));
-    //    wxGetApp().app_config->save();
-    //    e.Skip();
-    //});
-
-    //input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, param, input](wxFocusEvent &e) {
-    //    auto value = input->GetTextCtrl()->GetValue();
-    //    wxGetApp().app_config->set(param, std::string(value.mb_str()));
-    //    wxGetApp().app_config->save();
-    //    e.Skip();
-    //});
 
     input->GetTextCtrl()->Bind(wxEVT_TEXT, [this, param, input](wxCommandEvent &e) {
         auto value = input->GetTextCtrl()->GetValue();
@@ -979,6 +946,7 @@ void PrintHostQueueDialog::on_error(Event &evt)
     wxCHECK_RET(evt.job_id < (size_t)job_list->GetItemCount(), "Out of bounds access to job list");
 
     set_state(evt.job_id, ST_ERROR);
+    //y
     std::string response_msg = into_u8(evt.status);
     wxString code_msg     = "";
     if (response_msg.find("HTTP 404:") != std::string::npos) {
@@ -994,7 +962,7 @@ void PrintHostQueueDialog::on_error(Event &evt)
     else
         code_msg = response_msg;
     
-    auto     errormsg = format_wxstr("%1%\n%2%", _L("Error uploading to print host") + ":", code_msg);
+    auto errormsg = format_wxstr("%1%\n%2%", _L("Error uploading to print host") + ":", code_msg);
     job_list->SetValue(wxVariant(0), evt.job_id, COL_PROGRESS);
     job_list->SetValue(wxVariant(errormsg), evt.job_id, COL_ERRORMSG);    // Stashes the error message into a hidden column for later
 

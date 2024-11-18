@@ -13,8 +13,8 @@
 
 #include <regex>
 #include <wx/numformatter.h>
-#include <wx/bookctrl.h>
-#include <wx/tooltip.h>
+#include <wx/bookctrl.h> // IWYU pragma: keep
+#include <wx/tooltip.h> // IWYU pragma: keep
 #include <wx/notebook.h>
 #include <wx/listbook.h>
 #include <wx/tokenzr.h>
@@ -256,7 +256,6 @@ void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true
         const char dec_sep_alt = dec_sep == '.' ? ',' : '.';
         // Replace the first incorrect separator in decimal number, 
         // if this value doesn't "N/A" value in some language
-        // see https://github.com/qidi3d/QIDISlicer/issues/6921
         if (!is_na_value && str.Replace(dec_sep_alt, dec_sep, false) != 0)
             set_value(str, false);
 
@@ -314,7 +313,6 @@ void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true
     case coFloatOrPercent: {
         if (m_opt.type == coFloatOrPercent && m_opt.opt_key == "first_layer_height" && !str.IsEmpty() && str.Last() == '%') {
             // Workaroud to avoid of using of the % for first layer height
-            // see https://github.com/qidi3d/QIDISlicer/issues/7418
             wxString label = m_opt.full_label.empty() ? _(m_opt.label) : _(m_opt.full_label);
             show_error(m_parent, format_wxstr(_L("%s doesn't support percentage"), label));
             const wxString stVal = double_to_string(0.01, 2);
@@ -1058,15 +1056,7 @@ void Choice::BUILD() {
 
 	// recast as a wxWindow to fit the calling convention
 	window = dynamic_cast<wxWindow*>(temp);
-//Y10
-    /*if (m_opt.enum_def) {
-        if (auto& labels = m_opt.enum_def->labels(); !labels.empty()) {
-            bool localized = m_opt.enum_def->has_labels();
-            for (const std::string& el : labels)
-                temp->Append(localized ? _(from_u8(el)) : from_u8(el));
-            set_selection();
-        }
-    }*/
+
     //B35
 #if defined(__WIN32__) || defined(__WXMAC__)
     if (m_opt.enum_def) {
@@ -1109,9 +1099,8 @@ void Choice::BUILD() {
                 temp->Append(localized ? _(from_u8(el)) : from_u8(el));
             set_selection();
         }
-    }
+	}
 #endif
-
 
     temp->Bind(wxEVT_MOUSEWHEEL, [this](wxMouseEvent& e) {
         if (m_suppress_scroll && !m_is_dropped)

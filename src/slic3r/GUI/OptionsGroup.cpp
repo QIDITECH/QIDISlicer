@@ -1,16 +1,15 @@
 #include "OptionsGroup.hpp"
 #include "Search.hpp"
 #include "GUI_App.hpp"
-#include "MainFrame.hpp"
 #include "OG_CustomCtrl.hpp"
 #include "format.hpp"
 
 #include <utility>
-#include <wx/bookctrl.h>
+#include <wx/bookctrl.h> // IWYU pragma: keep
 #include <wx/numformatter.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include "slic3r/GUI/Search.hpp"
+#include "slic3r/GUI/Search.hpp" // IWYU pragma: keep
 #include "libslic3r/Exception.hpp"
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/AppConfig.hpp"
@@ -235,7 +234,8 @@ void OptionsGroup::change_opt_value(DynamicPrintConfig& config, const t_config_o
             config.option<ConfigOptionEnumsGeneric>(opt_key)->set_at(vec_new, opt_index, 0);
             break; }
         case coPoints: {
-            if (opt_key == "bed_shape") {
+            //Y20 //B52
+            if (opt_key == "bed_shape" || opt_key == "bed_exclude_area") {
                 config.option<ConfigOptionPoints>(opt_key)->values = boost::any_cast<std::vector<Vec2d>>(value);
                 break;
             }
@@ -1164,7 +1164,7 @@ wxString OptionsGroup::get_url(const std::string& path_end)
     wxString language = wxGetApp().current_language_code_safe();
     wxString lang_marker = language.IsEmpty() ? "en" : language.BeforeFirst('_');
 
-    return wxString("https://help.qidi3d.com/") + lang_marker + wxString("/article/" + path_end);
+    return wxString("https://wiki.qidi3d.com/") + lang_marker + wxString("/article/" + path_end);
 }
 
 bool OptionsGroup::launch_browser(const std::string& path_end)

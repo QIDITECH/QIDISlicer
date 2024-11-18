@@ -1,4 +1,3 @@
-
 #include "ImGuiPureWrap.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>

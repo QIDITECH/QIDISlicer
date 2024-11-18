@@ -30,12 +30,7 @@ namespace Slic3r {
 namespace GUI {
 
 //B52
-bool Bed3D::set_shape(const Pointfs &    bed_shape,
-                      const double       max_print_height,
-                      const std::string &custom_texture,
-                      const std::string &custom_model,
-                      const Pointfs &    exclude_bed_shape,
-                      bool               force_as_custom)
+bool Bed3D::set_shape(const Pointfs& bed_shape, const double max_print_height, const std::string& custom_texture, const std::string& custom_model, const Pointfs & exclude_bed_shape, bool force_as_custom)
 {
     auto check_texture = [](const std::string& texture) {
         boost::system::error_code ec; // so the exists call does not throw (e.g. after a permission problem)
@@ -79,7 +74,7 @@ bool Bed3D::set_shape(const Pointfs &    bed_shape,
 
     m_type = type;
     //B52
-    m_build_volume = BuildVolume{bed_shape, max_print_height, exclude_bed_shape};
+    m_build_volume = BuildVolume { bed_shape, max_print_height, exclude_bed_shape};
     m_texture_filename = texture_filename;
     m_model_filename = model_filename;
     m_extended_bounding_box = this->calc_extended_bounding_box();
