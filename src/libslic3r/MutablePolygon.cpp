@@ -1,4 +1,5 @@
 #include "MutablePolygon.hpp"
+
 #include <cstdint>
 #include <utility>
 #include <cmath>

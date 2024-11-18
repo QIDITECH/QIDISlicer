@@ -913,8 +913,7 @@ bool TriangleSelector::select_triangle_recursive(int facet_idx, const Vec3i &nei
     return true;
 }
 
-void TriangleSelector::set_facet(int facet_idx, TriangleStateType state)
-{
+void TriangleSelector::set_facet(int facet_idx, TriangleStateType state) {
     assert(facet_idx < m_orig_size_indices);
     undivide_triangle(facet_idx);
     assert(! m_triangles[facet_idx].is_split());

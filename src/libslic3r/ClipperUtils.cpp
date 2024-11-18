@@ -74,8 +74,7 @@ namespace ClipperUtils {
     // Useful as an optimization for expensive ClipperLib operations, for example when clipping source polygons one by one
     // with a set of polygons covering the whole layer below.
     template<typename PointsType>
-    //w38
-    inline void clip_clipper_polygon_with_subject_bbox_templ(const PointsType &src, const BoundingBox &bbox, PointsType &out,const bool get_entire_polygons=false)
+    inline void clip_clipper_polygon_with_subject_bbox_templ(const PointsType &src, const BoundingBox &bbox, PointsType &out)
     {
         using PointType = typename PointsType::value_type;
 
@@ -130,8 +129,6 @@ namespace ClipperUtils {
 
     void clip_clipper_polygon_with_subject_bbox(const Points &src, const BoundingBox &bbox, Points &out)
         { clip_clipper_polygon_with_subject_bbox_templ(src, bbox, out); }
-    //w38
-    void clip_clipper_polygon_with_subject_bbox(const Points &src, const BoundingBox &bbox, Points &out, const bool get_entire_polygons) { clip_clipper_polygon_with_subject_bbox_templ(src, bbox, out, get_entire_polygons); }
     void clip_clipper_polygon_with_subject_bbox(const ZPoints &src, const BoundingBox &bbox, ZPoints &out)
         { clip_clipper_polygon_with_subject_bbox_templ(src, bbox, out); }
 
@@ -160,14 +157,6 @@ namespace ClipperUtils {
         return out;
     }
 
-    //w38
-    [[nodiscard]] Polygon clip_clipper_polygon_with_subject_bbox(const Polygon &src, const BoundingBox &bbox, const bool get_entire_polygons)
-    {
-        Polygon out;
-        clip_clipper_polygon_with_subject_bbox(src.points, bbox, out.points, get_entire_polygons);
-        return out;
-    }
-
     [[nodiscard]] Polygons clip_clipper_polygons_with_subject_bbox(const Polygons &src, const BoundingBox &bbox)
     {
         Polygons out;
@@ -191,36 +180,19 @@ namespace ClipperUtils {
             out.end());
         return out;
     }
-
-    //w38
-    [[nodiscard]] Polygons clip_clipper_polygons_with_subject_bbox(const ExPolygon &  src,
-                                                                   const BoundingBox &bbox,
-                                                                   const bool         get_entire_polygons)
-    {
-        Polygons out;
-        out.reserve(src.num_contours());
-        out.emplace_back(clip_clipper_polygon_with_subject_bbox(src.contour, bbox, get_entire_polygons));
-        for (const Polygon &p : src.holes)
-            out.emplace_back(clip_clipper_polygon_with_subject_bbox(p, bbox, get_entire_polygons));
-        out.erase(std::remove_if(out.begin(), out.end(), [](const Polygon &polygon) { return polygon.empty(); }), out.end());
-        return out;
-    }
-    //w38
-    [[nodiscard]] Polygons clip_clipper_polygons_with_subject_bbox(const ExPolygons & src,
-                                                                   const BoundingBox &bbox,
-                                                                   const bool         get_entire_polygons)
+    [[nodiscard]] Polygons clip_clipper_polygons_with_subject_bbox(const ExPolygons &src, const BoundingBox &bbox)
     {
         Polygons out;
         out.reserve(number_polygons(src));
         for (const ExPolygon &p : src) {
-            Polygons temp = clip_clipper_polygons_with_subject_bbox(p, bbox, get_entire_polygons);
+            Polygons temp = clip_clipper_polygons_with_subject_bbox(p, bbox);
             out.insert(out.end(), temp.begin(), temp.end());
         }
 
         out.erase(std::remove_if(out.begin(), out.end(), [](const Polygon &polygon) {return polygon.empty(); }), out.end());
         return out;
     }
- }
+}
 
 static ExPolygons PolyTreeToExPolygons(ClipperLib::PolyTree &&polytree)
 {

@@ -1,4 +1,5 @@
 #include "TriangleSetSampling.hpp"
+
 #include <boost/random/uniform_real_distribution.hpp>
 #include <oneapi/tbb/blocked_range.h>
 #include <oneapi/tbb/parallel_for.h>

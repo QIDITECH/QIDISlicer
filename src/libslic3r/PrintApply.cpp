@@ -1011,7 +1011,7 @@ Print::ApplyStatus Print::apply(const Model &model, DynamicPrintConfig new_full_
     t_config_option_keys print_diff       = print_config_diffs(m_config, new_full_config, filament_overrides);
     t_config_option_keys full_config_diff = full_print_config_diffs(m_full_print_config, new_full_config);
     // If just a physical printer was changed, but printer preset is the same, then there is no need to apply whole print
-    // see https://github.com/qidi3d/QIDISlicer/issues/8800
+    // see https://github.com/QIDITECH/QIDISlicer/issues/8800
     if (full_config_diff.size() == 1 && full_config_diff[0] == "physical_printer_settings_id")
         full_config_diff.clear();
 

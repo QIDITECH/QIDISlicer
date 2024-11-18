@@ -873,17 +873,7 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "wall_transition_angle"
             || opt_key == "wall_distribution_count"
             || opt_key == "min_feature_size"
-            || opt_key == "min_bead_width"
-            //w16
-            || opt_key == "top_one_wall_type"
-            //w17
-            || opt_key == "top_area_threshold"
-            //w23
-            || opt_key == "only_one_wall_first_layer"
-            //w38
-            || opt_key == "overhang_reverse"
-            || opt_key == "overhang_reverse_internal_only"
-            || opt_key == "overhang_reverse_threshold") {
+            || opt_key == "min_bead_width") {
             steps.emplace_back(posSlice);
         } else if (
                opt_key == "seam_position"
@@ -1613,15 +1603,12 @@ void PrintObject::discover_vertical_shells()
                         // Open to remove (filter out) regions narrower than a bit less than an infill extrusion line width.
                         // Such narrow regions are difficult to fill in with a gap fill algorithm (or Arachne), however they are most likely
                         // not needed for print stability / quality.
-                        //W11
-                        const float narrow_ensure_vertical_wall_thickness_region_radius = 0.65f * 0.7f * min_perimeter_infill_spacing;//0.7f*0.75f may error in complex model/ original parameter 0.5f * 0.65f 
+                        const float narrow_ensure_vertical_wall_thickness_region_radius = 0.5f * 0.65f * min_perimeter_infill_spacing;
                         // Then close gaps narrower than 1.2 * line width, such gaps are difficult to fill in with sparse infill,
                         // thus they will be merged into the solid infill.
-                        //W11
-                        const float narrow_sparse_infill_region_radius                  = 0.7f * 1.25f * min_perimeter_infill_spacing;//0.7f*1.25f may error in complex model /original parameter 0.5f * 1.2f 
+                        const float narrow_sparse_infill_region_radius                  = 0.5f * 1.2f * min_perimeter_infill_spacing;
                         // Finally expand the infill a bit to remove tiny gaps between solid infill and the other regions.
-                        //W11
-                        const float tiny_overlap_radius                                 = 0.19f        * min_perimeter_infill_spacing;// original parameter 0.2f       
+                        const float tiny_overlap_radius                                 = 0.2f        * min_perimeter_infill_spacing;
                         regularized_shell = shrink_ex(offset2_ex(union_ex(shell),
                             // Open to remove (filter out) regions narrower than an infill extrusion line width.
                             -narrow_ensure_vertical_wall_thickness_region_radius,
@@ -1651,10 +1638,8 @@ void PrintObject::discover_vertical_shells()
                         regularized_shell.erase(std::remove_if(regularized_shell.begin(), regularized_shell.end(),
                                                                [&internal_volume, &min_perimeter_infill_spacing,
                                                                 &object_volume](const ExPolygon &p) {
-                                                                    //W11
-                                                                   return (p.area() < min_perimeter_infill_spacing * scaled(2.0) ||//original parameter scaled(1.5)
-                                                                       //W11
-                                                                          (p.area() < min_perimeter_infill_spacing * scaled(10.0) &&//original parameter scaled(8.0) 
+                                                                   return (p.area() < min_perimeter_infill_spacing * scaled(1.5) ||
+                                                                           (p.area() < min_perimeter_infill_spacing * scaled(8.0) &&
                                                                             diff(to_polygons(p), object_volume).empty())) &&
                                                                           diff(internal_volume,
                                                                                expand(to_polygons(p), min_perimeter_infill_spacing))
@@ -2373,17 +2358,11 @@ void PrintObject::bridge_over_infill()
                 Polygons lightning_area;
                 Polygons expansion_area;
                 Polygons total_fill_area;
-                //w35
-                Polygons top_area;
                 for (const LayerRegion *region : layer->regions()) {
                     Polygons internal_polys = to_polygons(region->fill_surfaces().filter_by_types({stInternal, stInternalSolid}));
                     expansion_area.insert(expansion_area.end(), internal_polys.begin(), internal_polys.end());
                     Polygons fill_polys = to_polygons(region->fill_expolygons());
                     total_fill_area.insert(total_fill_area.end(), fill_polys.begin(), fill_polys.end());
-                    //w35
-                    Polygons top_polys = to_polygons(region->fill_surfaces().filter_by_type(stTop));
-                    top_area.insert(top_area.end(), top_polys.begin(), top_polys.end());
-
                     if (region->region().config().fill_pattern == ipLightning) {
                         Polygons l = to_polygons(region->fill_surfaces().filter_by_type(stInternal));
                         lightning_area.insert(lightning_area.end(), l.begin(), l.end());
@@ -2462,21 +2441,12 @@ void PrintObject::bridge_over_infill()
                             bridging_area = construct_anchored_polygon(area_to_be_bridge, to_lines(boundary_plines), flow, bridging_angle);
                         }
                     }
-                    //w35
-                    bridging_area = opening(bridging_area, flow.scaled_spacing());
-                    bridging_area = closing(bridging_area, flow.scaled_spacing());
-                    bridging_area = intersection(bridging_area, limiting_area);
-                    bridging_area = intersection(bridging_area, total_fill_area);
-                    bridging_area = diff(bridging_area, top_area);
-                    bridging_area  = opening(bridging_area, flow.scaled_spacing());
-                    bridging_area  = closing(bridging_area, flow.scaled_spacing());
-                    expansion_area = diff(expansion_area, bridging_area);
-                    
-                    //bridging_area          = opening(bridging_area, flow.scaled_spacing());
-                    //bridging_area          = closing(bridging_area, flow.scaled_spacing());
-                    //bridging_area          = intersection(bridging_area, limiting_area);
-                    //bridging_area          = intersection(bridging_area, total_fill_area);
-                    //expansion_area         = diff(expansion_area, bridging_area);
+
+                    bridging_area          = opening(bridging_area, flow.scaled_spacing());
+                    bridging_area          = closing(bridging_area, flow.scaled_spacing());
+                    bridging_area          = intersection(bridging_area, limiting_area);
+                    bridging_area          = intersection(bridging_area, total_fill_area);
+                    expansion_area         = diff(expansion_area, bridging_area);
 
 #ifdef DEBUG_BRIDGE_OVER_INFILL
                     debug_draw(std::to_string(lidx) + "_" + std::to_string(cluster_idx) + "_" + std::to_string(job_idx) + "_" + "_expanded_bridging" +  std::to_string(r),

@@ -348,7 +348,7 @@ GCodeGenerator::ObjectsLayerToPrint GCodeGenerator::collect_layers_to_print(cons
                 + layer_to_print.layer()->height
                 + std::max(0., extra_gap);
             // Negative support_contact_z is not taken into account, it can result in false positives in cases
-            // where previous layer has object extrusions too (https://github.com/qidi3d/QIDISlicer/issues/2752)
+            // where previous layer has object extrusions too (https://github.com/QIDITECH/QIDISlicer/issues/2752)
 
             if (has_extrusions && layer_to_print.print_z() > maximal_print_z + 2. * EPSILON)
                 warning_ranges.emplace_back(std::make_pair((last_extrusion_layer ? last_extrusion_layer->print_z() : 0.), layers_to_print.back().print_z()));
@@ -685,7 +685,7 @@ namespace DoExport {
                     {
                         // Minimal volumetric flow should not be calculated over ironing extrusions.
                         // Use following lambda instead of the built-it method.
-                        // https://github.com/qidi3d/QIDISlicer/issues/5082
+                        // https://github.com/QIDITECH/QIDISlicer/issues/5082
                         auto min_mm3_per_mm_no_ironing = [](const ExtrusionEntityCollection& eec) -> double {
                             double min = std::numeric_limits<double>::max();
                             for (const ExtrusionEntity* ee : eec.entities)
@@ -1193,13 +1193,14 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
 
     std::string start_gcode = this->placeholder_parser_process("start_gcode", print.config().start_gcode.value, initial_extruder_id);
 
-    // this->_print_first_layer_chamber_temperature(file, print, start_gcode, config().chamber_temperature.get_at(initial_extruder_id), false, false);
+    //w42
+    //this->_print_first_layer_chamber_temperature(file, print, start_gcode, config().chamber_temperature.get_at(initial_extruder_id), false, false);
+
     this->_print_first_layer_bed_temperature(file, print, start_gcode, initial_extruder_id, true);
     this->_print_first_layer_extruder_temperatures(file, print, start_gcode, initial_extruder_id, false);
 
     // adds tag for processor
     file.write_format(";%s%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Role).c_str(), gcode_extrusion_role_to_string(GCodeExtrusionRole::Custom).c_str());
-
 
     //B41
     if (this->config().gcode_flavor == gcfKlipper)
@@ -1214,6 +1215,10 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
     file.writeln(start_gcode);
 
     this->_print_first_layer_extruder_temperatures(file, print, start_gcode, initial_extruder_id, true);
+    this->_print_first_layer_chamber_temperature(file, print, start_gcode, config().chamber_minimal_temperature.get_at(initial_extruder_id), true, false);
+    //w42
+    //this->_print_first_layer_chamber_temperature(file, print, start_gcode, config().chamber_temperature.get_at(initial_extruder_id), false, false);
+
     print.throw_if_canceled();
 
     // Set other general things.
@@ -1331,7 +1336,7 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
                     }
                 } else {
                     // This is not Marlin, M1 command is probably not supported.
-                    // (See https://github.com/qidi3d/QIDISlicer/issues/5441.)
+                    // (See https://github.com/QIDITECH/QIDISlicer/issues/5441.)
                     if (overlap) {
                         print.active_step_add_warning(PrintStateBase::WarningLevel::CRITICAL,
                             _u8L("Your print is very close to the priming regions. "
@@ -1364,7 +1369,6 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
         m_writer.add_object_change_labels(gcode);
         file.write(gcode);
     }
-
 
     file.write(m_writer.set_fan(0));
     //B39
@@ -1913,22 +1917,22 @@ void GCodeGenerator::_print_first_layer_bed_temperature(GCodeOutputStream &file,
 // Only do that if the start G-code does not already contain any M-code controlling chamber temperature.
 // M141 - Set chamber Temperature
 // M191 - Set chamber Temperature and Wait
-// void GCodeGenerator::_print_first_layer_chamber_temperature(GCodeOutputStream &file, const Print &print, const std::string &gcode, int temp, bool wait, bool accurate)
-// {
-//     if (temp == 0)
-//         return;
-//     bool autoemit = print.config().autoemit_temperature_commands;
-//     // Is the bed temperature set by the provided custom G-code?
-//     int  temp_by_gcode     = -1;
-//     bool temp_set_by_gcode = custom_gcode_sets_temperature(gcode, 141, 191, false, temp_by_gcode);
-//     if (autoemit && temp_set_by_gcode && temp_by_gcode >= 0 && temp_by_gcode < 1000)
-//         temp = temp_by_gcode;
-//     // Always call m_writer.set_bed_temperature() so it will set the internal "current" state of the bed temp as if
-//     // the custom start G-code emited these.
-//     std::string set_temp_gcode = m_writer.set_chamber_temperature(temp, wait, accurate);
-//     if (autoemit && ! temp_set_by_gcode)
-//         file.write(set_temp_gcode);
-// }
+void GCodeGenerator::_print_first_layer_chamber_temperature(GCodeOutputStream &file, const Print &print, const std::string &gcode, int temp, bool wait, bool accurate)
+{
+    if (temp == 0)
+        return;
+    bool autoemit = print.config().autoemit_temperature_commands;
+    // Is the bed temperature set by the provided custom G-code?
+    int  temp_by_gcode     = -1;
+    bool temp_set_by_gcode = custom_gcode_sets_temperature(gcode, 141, 191, false, temp_by_gcode);
+    if (autoemit && temp_set_by_gcode && temp_by_gcode >= 0 && temp_by_gcode < 1000)
+        temp = temp_by_gcode;
+    // Always call m_writer.set_bed_temperature() so it will set the internal "current" state of the bed temp as if
+    // the custom start G-code emited these.
+    std::string set_temp_gcode = m_writer.set_chamber_temperature(temp, wait, accurate);
+    if (autoemit && ! temp_set_by_gcode)
+        file.write(set_temp_gcode);
+}
 
 
 
@@ -2153,14 +2157,14 @@ namespace Skirt {
             assert(valid);
             // This print_z has not been extruded yet (sequential print)
             // FIXME: The skirt_done should not be empty at this point. The check is a workaround
-            // of https://github.com/qidi3d/QIDISlicer/issues/5652, but it deserves a real fix.
+            // of https://github.com/QIDITECH/QIDISlicer/issues/5652, but it deserves a real fix.
             if (valid) {
 #if 0
                 // Prime just the first printing extruder. This is original Slic3r's implementation.
                 skirt_loops_per_extruder_out[layer_tools.extruders.front()] = std::pair<size_t, size_t>(0, print.config().skirts.value);
 #else
                 // Prime all extruders planned for this layer, see
-                // https://github.com/qidi3d/QIDISlicer/issues/469#issuecomment-322450619
+                // https://github.com/QIDITECH/QIDISlicer/issues/469#issuecomment-322450619
                 skirt_loops_per_extruder_all_printing(print, layer_tools, skirt_loops_per_extruder_out);
 #endif
                 assert(!skirt_done.empty());
@@ -2322,12 +2326,13 @@ struct SmoothPathGenerator {
             // loop; if polyline was shorter than the clipping distance we'd get a null
             // polyline, so we discard it in that case.
             const auto nozzle_diameter{config.nozzle_diameter.get_at(extruder_id)};
-            
             if (enable_loop_clipping) {
-                
                 //Y21
-                
-                clip_end(smooth_path, scale_(nozzle_diameter) * (config.seam_gap.value / 100), scaled<double>(GCode::ExtrusionOrder::min_gcode_segment_length));
+                clip_end(
+                    smooth_path,
+                    scale_(nozzle_diameter) * (config.seam_gap.value / 100),
+                    scaled<double>(GCode::ExtrusionOrder::min_gcode_segment_length)
+                );
             }
 
             assert(validate_smooth_path(smooth_path, !enable_loop_clipping));
@@ -2547,8 +2552,8 @@ LayerResult GCodeGenerator::process_layer(
                 gcode += m_writer.set_temperature(temperature, false, extruder.id());
         }
         gcode += m_writer.set_bed_temperature(print.config().bed_temperature.get_at(first_extruder_id));
-        //B24
-        gcode += m_writer.set_volume_temperature(print.config().volume_temperature.get_at(first_extruder_id));
+        //B24   //w42
+        gcode += m_writer.set_chamber_temperature(print.config().chamber_temperature.get_at(first_extruder_id), false, false);
         // Mark the temperature transition from 1st to 2nd layer to be finished.
         m_second_layer_things_done = true;
     }
@@ -2867,11 +2872,10 @@ std::string GCodeGenerator::change_layer(
             gcode += this->retract_and_wipe();
         }
 
-    //B38 //B46
-    m_writer.add_object_change_labels(gcode);
-    m_previous_layer_last_position = this->last_position ?
-        std::optional{to_3d(this->point_to_gcode(*this->last_position), previous_layer_z)} :
-        std::nullopt;
+        // Update from after wipe.
+        from = to_3d(this->point_to_gcode(*this->last_position), previous_layer_z);
+
+        gcode += this->get_ramping_layer_change_gcode(from, to, extruder_id);
 
         this->writer().update_position(to);
         this->last_position = this->gcode_to_point(unscaled(first_point));
@@ -2887,6 +2891,8 @@ std::string GCodeGenerator::change_layer(
             this->writer().update_position(position);
         }
     }
+    //B38 //B46
+    m_writer.add_object_change_labels(gcode);
 
     // forget last wiping path as wiping after raising Z is pointless
     m_wipe.reset_path();
@@ -2905,68 +2911,40 @@ std::string GCodeGenerator::extrude_smooth_path(
     for (auto el_it = smooth_path.begin(); el_it != smooth_path.end(); ++el_it) {
         const auto next_el_it = next(el_it);
 
-    //w38
-    if (m_config.spiral_vase && !is_hole) {
-        // if spiral vase, we have to ensure that all contour are in the same orientation.
-        new_loop_src.make_counter_clockwise();
-    }
-    Point seam_point = this->last_position.has_value() ? *this->last_position : Point::Zero();
-    if (!m_config.spiral_vase && comment_is_perimeter(description)) {
-        assert(m_layer != nullptr);
-        //w38
-        seam_point = m_seam_placer.place_seam(m_layer, new_loop_src, m_config.external_perimeters_first, seam_point);
-    }
-    // Because the G-code export has 1um resolution, don't generate segments shorter than 1.5 microns,
-    // thus empty path segments will not be produced by G-code export.
-    //w38
-    GCode::SmoothPath smooth_path = smooth_path_cache.resolve_or_fit_split_with_seam(
-        new_loop_src, is_hole, m_scaled_resolution, seam_point, scaled<double>(0.0015));
+        // By default, GCodeGenerator::_extrude() emit markers _BRIDGE_FAN_START, _BRIDGE_FAN_END and _RESET_FAN_SPEED for every extrusion.
+        // Together with split extrusions because of different ExtrusionAttributes, this could flood g-code with those markers and then
+        // produce an unnecessary number of duplicity M106.
+        // To prevent this, we control when each marker should be emitted by EmitModifiers, which allows determining when a bridge starts and ends,
+        // even when it is split into several extrusions.
+        if (el_it->path_attributes.role.is_bridge()) {
+            emit_modifiers.emit_bridge_fan_start = !is_bridge_extruded;
+            emit_modifiers.emit_bridge_fan_end   = next_el_it == smooth_path.end() || !next_el_it->path_attributes.role.is_bridge();
+            is_bridge_extruded                   = true;
+        } else if (is_bridge_extruded) {
+            emit_modifiers.emit_bridge_fan_start = false;
+            emit_modifiers.emit_bridge_fan_end   = false;
+            is_bridge_extruded                   = false;
+        }
 
-    // Clip the path to avoid the extruder to get exactly on the first point of the loop;
-    // if polyline was shorter than the clipping distance we'd get a null polyline, so
-    // we discard it in that case.
-    if (m_enable_loop_clipping)
-    //Y21
-        clip_end(smooth_path, scaled<double>(EXTRUDER_CONFIG(nozzle_diameter)) * (m_config.seam_gap.value / 100), scaled<double>(min_gcode_segment_length));
-
-    if (smooth_path.empty())
-        return {};
-
-    assert(validate_smooth_path(smooth_path, ! m_enable_loop_clipping));
-
-    // Apply the small perimeter speed.
-    //w38//Y27
-    bool is_small_perimeter_length = false;
-    if (new_loop_src.paths.front().role().is_perimeter() && new_loop_src.length() <= SMALL_PERIMETER_LENGTH && speed == -1) {
-        speed = m_config.small_perimeter_speed.get_abs_value(m_config.perimeter_speed);
-        is_small_perimeter_length = true;
-    }
-
-    // Extrude along the smooth path.
-    std::string gcode;
-//Y27
-    for (const GCode::SmoothPathElement &el : smooth_path) {
+        // Ensure that just for the last extrusion from the smooth path, the fan speed will be reset back
+        // to the value calculated by the CoolingBuffer.
+        if (next_el_it == smooth_path.end()) {
+            emit_modifiers.emit_fan_speed_reset = true;
+        }
+        //w41
         m_resonance_avoidance = !is_small_perimeter_length;
-        gcode += this->_extrude(el.path_attributes, el.path, description, speed);
+        gcode += this->_extrude(el_it->path_attributes, el_it->path, description, speed, emit_modifiers);
     }
 
     // reset acceleration
     gcode += m_writer.set_print_acceleration(fast_round_up<unsigned int>(m_config.default_acceleration.value));
 
-    if (m_wipe.enabled()) {
-        // Wipe will hide the seam.
-        m_wipe.set_path(std::move(smooth_path));
-    }
-    //w38
-    else if (new_loop_src.paths.back().role().is_external_perimeter() && m_layer != nullptr && m_config.perimeters.value > 1) {
-
-        // Only wipe inside if the wipe along the perimeter is disabled.
-        // Make a little move inwards before leaving loop.
-        if (std::optional<Point> pt = wipe_hide_seam(smooth_path, is_hole, scale_(EXTRUDER_CONFIG(nozzle_diameter))); pt) {
-            // Generate the seam hiding travel move.
-            gcode += m_writer.travel_to_xy(this->point_to_gcode(*pt), "move inwards before travel");
-            this->last_position = *pt;
-        }
+    if (is_loop) {
+        m_wipe.set_path(GCode::SmoothPath{smooth_path});
+    } else {
+        GCode::SmoothPath reversed_smooth_path{smooth_path};
+        GCode::reverse(reversed_smooth_path);
+        m_wipe.set_path(std::move(reversed_smooth_path));
     }
 
     return gcode;
@@ -3023,7 +3001,6 @@ std::string GCodeGenerator::extrude_perimeters(
             speed = m_config.small_perimeter_speed.get_abs_value(m_config.perimeter_speed);
             is_small_perimeter_length = true;
         }
-        
         gcode += this->extrude_smooth_path(perimeter.smooth_path, true, comment_perimeter, speed);
         this->m_travel_obstacle_tracker.mark_extruded(
             perimeter.extrusion_entity, print_instance.object_layer_to_print_id, print_instance.instance_id
@@ -3330,26 +3307,25 @@ std::string GCodeGenerator::_extrude(
             }
         }
     }
-    
-    
 
     ExtrusionProcessor::OverhangSpeeds dynamic_print_and_fan_speeds = {-1.f, -1.f};
     if (path_attr.overhang_attributes.has_value()) {
-        double external_perim_reference_speed = m_config.get_abs_value("external_perimeter_speed");
-        if (external_perim_reference_speed == 0)
-            external_perim_reference_speed = m_volumetric_speed / path_attr.mm3_per_mm;
-        external_perim_reference_speed = cap_speed(
-            external_perim_reference_speed, path_attr.mm3_per_mm, m_config, m_writer.extruder()->id()
-        );
+        double external_perimeter_reference_speed = m_config.get_abs_value("external_perimeter_speed");
+        if (external_perimeter_reference_speed == 0) {
+            external_perimeter_reference_speed = m_volumetric_speed / path_attr.mm3_per_mm;
+        }
 
-        dynamic_speed_and_fan_speed = ExtrusionProcessor::calculate_overhang_speed(path_attr, this->m_config, m_writer.extruder()->id(),
-                                                                                   external_perim_reference_speed, speed);
+        external_perimeter_reference_speed = cap_speed(external_perimeter_reference_speed, m_config, m_writer.extruder()->id(), path_attr);
+        dynamic_print_and_fan_speeds       = ExtrusionProcessor::calculate_overhang_speed(path_attr, this->m_config, m_writer.extruder()->id(),
+                                                                                    float(external_perimeter_reference_speed), float(speed),
+                                                                                    m_current_dynamic_fan_speed);
     }
-//Y27
+
+    //w41
     if (path_attr.role == ExtrusionRole::ExternalPerimeter && m_config.opt_bool("resonance_avoidance")) {
-        if (dynamic_speed_and_fan_speed.first > -1) {
-            if (speed != dynamic_speed_and_fan_speed.first) {
-                double min_speed = cap_speed(speed, path_attr.mm3_per_mm, m_config, m_writer.extruder()->id());
+        if (dynamic_print_and_fan_speeds.print_speed > -1) {
+            if (speed != dynamic_print_and_fan_speeds.print_speed) {
+                double min_speed = cap_speed(speed, m_config, m_writer.extruder()->id(),path_attr);
                 if (min_speed > m_config.opt_float("max_resonance_avoidance_speed")) {
                     m_resonance_avoidance = false;
                 }

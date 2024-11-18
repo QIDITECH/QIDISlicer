@@ -1,4 +1,3 @@
-#include "libslic3r/libslic3r.h"
 #include "libslic3r/Utils.hpp"
 #include "libslic3r/Print.hpp"
 #include <LocalesUtils.hpp>
@@ -3367,7 +3366,7 @@ void GCodeProcessor::process_M108(const GCodeReader::GCodeLine& line)
 {
     // These M-codes are used by Sailfish to change active tool.
     // They have to be processed otherwise toolchanges will be unrecognised
-    // by the analyzer - see https://github.com/qidi3d/QIDISlicer/issues/2566
+    // by the analyzer - see https://github.com/QIDITECH/QIDISlicer/issues/2566
 
     if (m_flavor != gcfSailfish)
         return;
@@ -3403,7 +3402,7 @@ void GCodeProcessor::process_M132(const GCodeReader::GCodeLine& line)
 {
     // This command is used by Makerbot to load the current home position from EEPROM
     // see: https://github.com/makerbot/s3g/blob/master/doc/GCodeProtocol.md
-    // Using this command to reset the axis origin to zero helps in fixing: https://github.com/qidi3d/QIDISlicer/issues/3082
+    // Using this command to reset the axis origin to zero helps in fixing: https://github.com/QIDITECH/QIDISlicer/issues/3082
 
     if (line.has('X'))
         m_origin[X] = 0.0f;
@@ -3422,7 +3421,7 @@ void GCodeProcessor::process_M135(const GCodeReader::GCodeLine& line)
 {
     // These M-codes are used by MakerWare to change active tool.
     // They have to be processed otherwise toolchanges will be unrecognised
-    // by the analyzer - see https://github.com/qidi3d/QIDISlicer/issues/2566
+    // by the analyzer - see https://github.com/QIDITECH/QIDISlicer/issues/2566
 
     if (m_flavor != gcfMakerWare)
         return;
@@ -3650,11 +3649,11 @@ void GCodeProcessor::process_T(const std::string_view command)
     if (command.length() > 1) {
         int eid = 0;
         if (! parse_number(command.substr(1), eid) || eid < 0 || eid > 255) {
-            // Specific to the MMU2 V2 (see https://www.help.qidi3d.com/en/article/qidi-specific-g-codes_112173):
+            // Specific to the MMU2 V2 (see https://www.wiki.qidi3d.com/en/article/qidi-specific-g-codes_112173):
             if ((m_flavor == gcfMarlinLegacy || m_flavor == gcfMarlinFirmware) && (command == "Tx" || command == "Tc" || command == "T?"))
                 return;
 
-            // T-1 is a valid gcode line for RepRap Firmwares (used to deselects all tools) see https://github.com/qidi3d/QIDISlicer/issues/5677
+            // T-1 is a valid gcode line for RepRap Firmwares (used to deselects all tools) see https://github.com/QIDITECH/QIDISlicer/issues/5677
             if ((m_flavor != gcfRepRapFirmware && m_flavor != gcfRepRapSprinter) || eid != -1)
                 BOOST_LOG_TRIVIAL(error) << "GCodeProcessor encountered an invalid toolchange (" << command << ").";
         }

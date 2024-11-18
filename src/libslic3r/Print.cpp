@@ -69,13 +69,13 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "binary_gcode",
         "bridge_acceleration",
         "bridge_fan_speed",
-        //B15
-        // "auxiliary_fan_speed",
         "enable_dynamic_fan_speeds",
         "overhang_fan_speed_0",
         "overhang_fan_speed_1",
         "overhang_fan_speed_2",
         "overhang_fan_speed_3",
+        "chamber_temperature",
+        "chamber_minimal_temperature",
         "colorprint_heights",
         "cooling",
         "default_acceleration",
@@ -195,8 +195,6 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         } else if (
                opt_key == "first_layer_height"
             || opt_key == "nozzle_diameter"
-            //Y23
-            || opt_key == "filament_shrink"
             || opt_key == "resolution"
             // Spiral Vase forces different kind of slicing than the normal model:
             // In Spiral Vase mode, holes are closed and only the largest area contour is kept at each layer.
@@ -227,6 +225,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
             || opt_key == "filament_multitool_ramming_volume"
             || opt_key == "filament_multitool_ramming_flow"
             || opt_key == "filament_max_volumetric_speed"
+            || opt_key == "filament_infill_max_speed"
+            || opt_key == "filament_infill_max_crossing_speed"
             || opt_key == "gcode_flavor"
             || opt_key == "high_current_on_filament_swap"
             || opt_key == "infill_first"
@@ -591,12 +591,19 @@ std::string Print::validate(std::vector<std::string>* warnings) const
         //w27
         if (auto layers = generate_object_layers(print_object.slicing_parameters(), layer_height_profile(print_object_idx), print_object.config().precise_z_height.value);
             ! layers.empty() && layers.back() > this->config().max_print_height + EPSILON) {
-            return
-                // Test whether the last slicing plane is below or above the print volume.
-                0.5 * (layers[layers.size() - 2] + layers.back()) > this->config().max_print_height + EPSILON ?
-                format(_u8L("The object %1% exceeds the maximum build volume height."), print_object.model_object()->name) :
-                format(_u8L("While the object %1% itself fits the build volume, its last layer exceeds the maximum build volume height."), print_object.model_object()->name) +
-                " " + _u8L("You might want to reduce the size of your model or change current print settings and retry.");
+
+            const double shrinkage_compensation_z = this->shrinkage_compensation().z();
+            if (shrinkage_compensation_z != 1. && layers.back() > (this->config().max_print_height / shrinkage_compensation_z + EPSILON)) {
+                // The object exceeds the maximum build volume height because of shrinkage compensation.
+                return format(_u8L("While the object %1% itself fits the build volume, it exceeds the maximum build volume height because of material shrinkage compensation."), print_object.model_object()->name);
+            } else if (0.5 * (layers[layers.size() - 2] + layers.back()) > this->config().max_print_height + EPSILON) {
+                // The last slicing plane is below the print volume.
+                return format(_u8L("The object %1% exceeds the maximum build volume height."), print_object.model_object()->name);
+            } else {
+                // The last slicing plane is above the print volume.
+                return format(_u8L("While the object %1% itself fits the build volume, its last layer exceeds the maximum build volume height."), print_object.model_object()->name) +
+                    " " + _u8L("You might want to reduce the size of your model or change current print settings and retry.");
+            }
         }
     }
 
@@ -1509,7 +1516,7 @@ void Print::_make_wipe_tower()
     // Check whether there are any layers in m_tool_ordering, which are marked with has_wipe_tower,
     // they print neither object, nor support. These layers are above the raft and below the object, and they
     // shall be added to the support layers to be printed.
-    // see https://github.com/qidi3d/QIDISlicer/issues/607
+    // see https://github.com/QIDITECH/QIDISlicer/issues/607
     {
         size_t idx_begin = size_t(-1);
         size_t idx_end   = m_wipe_tower_data.tool_ordering.layer_tools().size();

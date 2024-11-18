@@ -1853,7 +1853,6 @@ static inline SupportGeneratorLayer* detect_bottom_contacts(
 
     // Allocate a new bottom contact layer.
     SupportGeneratorLayer &layer_new = layer_storage.allocate_unguarded(SupporLayerType::BottomContact);
-    
     //w34
     Layer *upper_layer = layer.upper_layer;
     if (!object.config().support_material_synchronize_layers) {
@@ -1875,11 +1874,11 @@ static inline SupportGeneratorLayer* detect_bottom_contacts(
     //w34
     //layer_new.height = slicing_params.soluble_interface ?
         // Align the interface layer with the object's layer height.
-     //   layer.upper_layer->height :
+        //layer.upper_layer->height :
         // Place a bridge flow interface layer or the normal flow interface layer over the top surface.
-     //   support_params.support_material_bottom_interface_flow.height();
+        //support_params.support_material_bottom_interface_flow.height();
     //layer_new.print_z = slicing_params.soluble_interface ? layer.upper_layer->print_z :
-     //   layer.print_z + layer_new.height + slicing_params.gap_object_support;
+        //layer.print_z + layer_new.height + slicing_params.gap_object_support;
     layer_new.bottom_z = layer.print_z;
     layer_new.idx_object_layer_below = layer_id;
     layer_new.bridging = !slicing_params.soluble_interface && object.config().thick_bridges;

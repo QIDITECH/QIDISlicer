@@ -100,7 +100,7 @@ extern CopyFileResult copy_file(const std::string &from, const std::string &to, 
 extern CopyFileResult check_copy(const std::string& origin, const std::string& copy);
 
 // Ignore system and hidden files, which may be created by the DropBox synchronisation process.
-// https://github.com/qidi3d/QIDISlicer/issues/1298
+// https://github.com/QIDITECH/QIDISlicer/issues/1298
 extern bool is_plain_file(const boost::filesystem::directory_entry &path);
 extern bool is_ini_file(const boost::filesystem::directory_entry &path);
 extern bool is_idx_file(const boost::filesystem::directory_entry &path);

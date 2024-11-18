@@ -334,7 +334,6 @@ std::string Preset::remove_invalid_keys(DynamicPrintConfig &config, const Dynami
     std::string incorrect_keys;
     for (const std::string &key : config.keys())
         if (! default_config.has(key)) {
-            BOOST_LOG_TRIVIAL(error) << key;
             if (incorrect_keys.empty())
                 incorrect_keys = key;
             else {
@@ -479,7 +478,7 @@ static std::vector<std::string> s_Preset_print_options {
     "elefant_foot_compensation", "xy_size_compensation", "resolution", "gcode_resolution", "arc_fitting",
     "wipe_tower", "wipe_tower_x", "wipe_tower_y",
     //w12
-    "elefant_foot_compensation", "xy_size_compensation", "xy_contour_compensation", "xy_hole_compensation", "resolution", "gcode_resolution", "wipe_tower", "wipe_tower_x", "wipe_tower_y",
+    "xy_contour_compensation", "xy_hole_compensation",
     "wipe_tower_width", "wipe_tower_cone_angle", "wipe_tower_rotation_angle", "wipe_tower_brim_width", "wipe_tower_bridging", "single_extruder_multi_material_priming", "mmu_segmented_region_max_width",
     "mmu_segmented_region_interlocking_depth", "wipe_tower_extruder", "wipe_tower_no_sparse_layers", "wipe_tower_extra_flow", "wipe_tower_extra_spacing", "compatible_printers", "compatible_printers_condition", "inherits",
     "perimeter_generator", "wall_transition_length", "wall_transition_filter_deviation", "wall_transition_angle",
@@ -507,8 +506,6 @@ static std::vector<std::string> s_Preset_print_options {
     "top_solid_infill_flow_ratio", "bottom_solid_infill_flow_ratio",
     //w33
     "ironing_pattern",
-    //w38
-    "overhang_reverse", "overhang_reverse_internal_only", "overhang_reverse_threshold",
     //w39
     "precise_outer_wall",
     //Y27
@@ -523,7 +520,7 @@ static std::vector<std::string> s_Preset_filament_options {
     "filament_multitool_ramming", "filament_multitool_ramming_volume", "filament_multitool_ramming_flow", 
     "temperature", "idle_temperature", "first_layer_temperature", "bed_temperature", "first_layer_bed_temperature", "fan_always_on", "cooling", "min_fan_speed",
     "max_fan_speed", "bridge_fan_speed", "disable_fan_first_layers", "full_fan_speed_layer", "fan_below_layer_time", "slowdown_below_layer_time", "min_print_speed",
-    "start_filament_gcode", "end_filament_gcode", "enable_dynamic_fan_speeds",
+    "start_filament_gcode", "end_filament_gcode", "enable_dynamic_fan_speeds", "chamber_temperature", "chamber_minimal_temperature",
     "overhang_fan_speed_0", "overhang_fan_speed_1", "overhang_fan_speed_2", "overhang_fan_speed_3",
     // Retract overrides
     "filament_retract_length", "filament_retract_lift", "filament_retract_lift_above", "filament_retract_lift_below", "filament_retract_speed", "filament_deretract_speed", "filament_retract_restart_extra", "filament_retract_before_travel",
@@ -531,12 +528,12 @@ static std::vector<std::string> s_Preset_filament_options {
     "filament_travel_slope", "filament_travel_max_lift", "filament_travel_lift_before_obstacle",
     // Profile compatibility
     "filament_vendor", "compatible_prints", "compatible_prints_condition", "compatible_printers", "compatible_printers_condition", "inherits",
+    // Shrinkage compensation
+    "filament_shrinkage_compensation_xy", "filament_shrinkage_compensation_z",
     //B15
     "enable_auxiliary_fan",
     //Y26
     "enable_auxiliary_fan_unseal",
-    //B24
-    "volume_temperature",
     //B25
     "enable_volume_fan",
     //B26
@@ -547,8 +544,6 @@ static std::vector<std::string> s_Preset_filament_options {
     "smooth_time",
     //B39
     "disable_rapid_cooling_fan_first_layers",
-    //Y23
-    "filament_shrink",
     //Y26
     "seal_print",
     //Y28
@@ -568,7 +563,7 @@ static std::vector<std::string> s_Preset_machine_limits_options {
 static std::vector<std::string> s_Preset_printer_options {
     "printer_technology", "autoemit_temperature_commands",
     "bed_shape", "bed_custom_texture", "bed_custom_model", "binary_gcode", "z_offset", "gcode_flavor", "use_relative_e_distances",
-    "use_firmware_retraction", "use_volumetric_e", "variable_layer_height",
+    "use_firmware_retraction", "use_volumetric_e", "variable_layer_height", "prefer_clockwise_movements",
     //FIXME the print host keys are left here just for conversion from the Printer preset to Physical Printer preset.
     "host_type", "print_host", "printhost_apikey", "printhost_cafile",
     "single_extruder_multi_material", "start_gcode", "end_gcode", "before_layer_gcode", "layer_gcode", "toolchange_gcode",
@@ -578,12 +573,13 @@ static std::vector<std::string> s_Preset_printer_options {
     "max_print_height", "default_print_profile", "inherits",
     "remaining_times", "silent_mode",
     "machine_limits_usage", "thumbnails", "thumbnails_format",
+    "nozzle_high_flow",
 //Y20 //B52
     "bed_exclude_area",
 //Y25
     "wipe_device",
 //Y16
-    "chamber_temperature", "auxiliary_fan", "chamber_fan"
+    "chamber_temperature_control", "auxiliary_fan", "chamber_fan"
 };
 
 static std::vector<std::string> s_Preset_sla_print_options {
@@ -810,7 +806,7 @@ void PresetCollection::load_presets(
     PresetsConfigSubstitutions& substitutions, ForwardCompatibilitySubstitutionRule substitution_rule)
 {
     // Don't use boost::filesystem::canonical() on Windows, it is broken in regard to reparse points,
-    // see https://github.com/qidi3d/QIDISlicer/issues/732
+    // see https://github.com/QIDITECH/QIDISlicer/issues/732
     boost::filesystem::path dir = boost::filesystem::absolute(boost::filesystem::path(dir_path) / subdir).make_preferred();
     m_dir_path = dir.string();
     std::string errors_cummulative;
@@ -1331,8 +1327,8 @@ size_t PresetCollection::get_preset_idx_by_name(const std::string name) const
 size_t PresetCollection::first_visible_idx() const
 {
     size_t first_visible = -1;
-    size_t idx           = m_default_suppressed ? m_num_default_presets : 0;
-    for (; idx < m_presets.size(); ++idx)
+    size_t idx = m_default_suppressed ? m_num_default_presets : 0;
+    for (; idx < m_presets.size(); ++ idx)
         if (m_presets[idx].is_visible) {
             if (first_visible == -1)
                 first_visible = idx;
@@ -1978,7 +1974,7 @@ void PhysicalPrinterCollection::load_printers(
     PresetsConfigSubstitutions& substitutions, ForwardCompatibilitySubstitutionRule substitution_rule)
 {
     // Don't use boost::filesystem::canonical() on Windows, it is broken in regard to reparse points,
-    // see https://github.com/qidi3d/QIDISlicer/issues/732
+    // see https://github.com/QIDITECH/QIDISlicer/issues/732
     boost::filesystem::path dir = boost::filesystem::absolute(boost::filesystem::path(dir_path) / subdir).make_preferred();
     m_dir_path = dir.string();
     std::string errors_cummulative;

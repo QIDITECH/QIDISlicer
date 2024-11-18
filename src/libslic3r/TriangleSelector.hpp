@@ -3,6 +3,7 @@
 
 // #define QIDISLICER_TRIANGLE_SELECTOR_DEBUG
 
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>

@@ -161,6 +161,7 @@ enum DraftShield {
 enum class LabelObjectsStyle {
     Disabled, Octoprint, Firmware
 };
+
 enum class PerimeterGeneratorType
 {
     // Classic perimeter generator using Clipper offsets with constant extrusion width.
@@ -169,6 +170,7 @@ enum class PerimeterGeneratorType
     // "A framework for adaptive width control of dense contour-parallel toolpaths in fused deposition modeling" ported from Cura.
     Arachne
 };
+
 enum class TopOnePerimeterType
 {
     None,
@@ -177,7 +179,9 @@ enum class TopOnePerimeterType
     Count
 };
 //B3
-enum class GCodeThumbnailsFormat { QIDI,PNG, JPG, QOI };
+enum class GCodeThumbnailsFormat {
+    QIDI,PNG, JPG, QOI
+};
 
 enum TowerSpeeds : int {
     tsLayer1,
@@ -598,8 +602,6 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat,               raft_first_layer_expansion))
     ((ConfigOptionInt,                 raft_layers))
     ((ConfigOptionEnum<SeamPosition>,  seam_position))
-    //Y21
-    ((ConfigOptionPercent,             seam_gap))
     ((ConfigOptionBool,                staggered_inner_seams))
 //  ((ConfigOptionFloat,               seam_preferred_direction))
 //  ((ConfigOptionFloat,               seam_preferred_direction_jitter))
@@ -661,14 +663,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionBool,                wipe_into_objects))
     //w11
     ((ConfigOptionBool,                detect_narrow_internal_solid_infill))
-    //w16
-    ((ConfigOptionEnum<TopOneWallType>, top_one_wall_type))
-    //w17
-    ((ConfigOptionPercent,            top_area_threshold))
     //w21
     ((ConfigOptionFloat,               filter_top_gap_infill))
-    //w23
-    ((ConfigOptionBool, only_one_wall_first_layer))
     //w27
     ((ConfigOptionBool, precise_z_height))
 )
@@ -744,12 +740,12 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat, top_solid_infill_flow_ratio))
     ((ConfigOptionFloat, bottom_solid_infill_flow_ratio))
 
-    //w38
-    ((ConfigOptionBool,                 overhang_reverse))
-    ((ConfigOptionBool, overhang_reverse_internal_only))
-    ((ConfigOptionFloatOrPercent,       overhang_reverse_threshold))
     //w39
-    ((ConfigOptionBool, precise_outer_wall)))
+    ((ConfigOptionBool, precise_outer_wall))
+    // Single perimeter.
+    ((ConfigOptionEnum<TopOnePerimeterType>, top_one_perimeter_type))
+    ((ConfigOptionBool,                 only_one_perimeter_first_layer))
+)
 
 PRINT_CONFIG_CLASS_DEFINE(
     MachineEnvelopeConfig,
@@ -908,9 +904,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionPoints,             bed_exclude_area))
     ((ConfigOptionInts,               bed_temperature))
     //Y16
-    ((ConfigOptionBool,               chamber_temperature))
-    //B24
-    ((ConfigOptionInts,               volume_temperature))
+    ((ConfigOptionBool,               chamber_temperature_control))
     //Y26
     ((ConfigOptionBool,               seal_print))
     ((ConfigOptionFloat,              bridge_acceleration))
@@ -920,6 +914,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               overhang_fan_speed_1))
     ((ConfigOptionInts,               overhang_fan_speed_2))
     ((ConfigOptionInts,               overhang_fan_speed_3))
+    ((ConfigOptionInts,               chamber_temperature))
+    ((ConfigOptionInts,               chamber_minimal_temperature))
     ((ConfigOptionBool,               complete_objects))
     ((ConfigOptionFloats,             colorprint_heights))
     ((ConfigOptionBools,              cooling))
@@ -947,8 +943,6 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               fan_below_layer_time))
     ((ConfigOptionStrings,            filament_colour))
     ((ConfigOptionStrings,            filament_notes))
-    //Y23
-    ((ConfigOptionPercents,           filament_shrink))
     ((ConfigOptionFloat,              first_layer_acceleration))
     ((ConfigOptionInts,               first_layer_bed_temperature))
     ((ConfigOptionFloatOrPercent,     first_layer_extrusion_width))
@@ -1018,6 +1012,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloats,             wiping_volumes_matrix))
     ((ConfigOptionBool,               wiping_volumes_use_custom_matrix))
     ((ConfigOptionFloat,              z_offset))
+    //Y21
+    ((ConfigOptionPercent,             seam_gap))
 )
 
 PRINT_CONFIG_CLASS_DERIVED_DEFINE0(
@@ -1267,13 +1263,10 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloatNullable,               material_ow_support_head_width))
     ((ConfigOptionFloatNullable,               material_ow_branchingsupport_head_width))
     ((ConfigOptionIntNullable,                 material_ow_support_points_density_relative))
+    ((ConfigOptionFloatNullable,               material_ow_elefant_foot_compensation))
     ((ConfigOptionFloatNullable,               material_ow_absolute_correction))
     ((ConfigOptionFloat,                       area_fill))
 
-    ((ConfigOptionFloatNullable,               material_ow_elefant_foot_compensation))
-    ((ConfigOptionFloatNullable,               material_ow_relative_correction_x))
-    ((ConfigOptionFloatNullable,               material_ow_relative_correction_y))
-    ((ConfigOptionFloatNullable,               material_ow_relative_correction_z))
     //tilt params
     ((ConfigOptionFloats,                      delay_before_exposure))
     ((ConfigOptionFloats,                      delay_after_exposure))
@@ -1440,6 +1433,7 @@ public:
     CustomGcodeSpecificConfigDef();
 };
 extern const CustomGcodeSpecificConfigDef    custom_gcode_specific_config_def;
+
 // This class defines the command line options representing actions.
 extern const CLIActionsConfigDef    cli_actions_config_def;
 

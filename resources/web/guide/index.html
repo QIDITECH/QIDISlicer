@@ -369,10 +369,20 @@
 			<div class="IntroduceText">https://qidi3d.com/collections/filaments</div>
 		</div>
 		<script>
-			const urlParams = new URLSearchParams(window.location.search);
-			const lang = urlParams.get('lang') || 'en'; 
 			var iframe = document.getElementById('filamentTableIframe');
-			iframe.src = 'filament_table.html?lang=' + lang;
+			let strLang=GetQueryString("lang");
+			if(strLang!=null)
+			{
+				localStorage.setItem(LANG_COOKIE_NAME,strLang);
+			}
+			else
+			{
+				strLang=localStorage.getItem(LANG_COOKIE_NAME);
+			}
+	
+			if( !LangText.hasOwnProperty(strLang) )
+				strLang="en";
+			iframe.src = 'filament_table.html?lang=' + strLang;
 		</script>
 
 		<div class="IssueBoard" board="IssueReport">

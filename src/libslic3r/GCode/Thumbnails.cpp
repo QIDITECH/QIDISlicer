@@ -98,7 +98,6 @@ std::unique_ptr<CompressedImageBuffer> compress_thumbnail_jpg(const ThumbnailDat
 std::string compress_thumbnail_qidi(const ThumbnailData &data)
 {
     auto out = std::make_unique<CompressedPNG>();
-    // BOOST_LOG_TRIVIAL(error) << data.width;
     int width  = int(data.width);
     int height = int(data.height);
 
@@ -107,10 +106,7 @@ std::string compress_thumbnail_qidi(const ThumbnailData &data)
         height = 500;
     }
     U16 color16[500 * 500];
-    // U16 *color16 = new U16[data.width * data.height];
-    // for (int i = 0; i < 200*200; i++) color16[i] = 522240;
     unsigned char outputdata[500 * 500 * 10];
-    // unsigned char *outputdata = new unsigned char[data.width * data.height * 10];
 
     std::vector<uint8_t> rgba_pixels(data.pixels.size() * 4);
     size_t               row_size = width * 4;
@@ -120,7 +116,7 @@ std::string compress_thumbnail_qidi(const ThumbnailData &data)
     pixels   = (const unsigned char *) rgba_pixels.data();
     int rrrr = 0, gggg = 0, bbbb = 0, aaaa = 0, rgb = 0;
 
-    int time = width * height - 1; // 200*200-1;
+    int time = width * height - 1;
 
     for (unsigned int r = 0; r < height; ++r) {
         unsigned int rr = r * width;
@@ -143,14 +139,10 @@ std::string compress_thumbnail_qidi(const ThumbnailData &data)
     int         res = ColPic_EncodeStr(color16, width, height, outputdata, height * width * 10, 1024);
     std::string temp;
 
-    // for (unsigned char i : outputdata) { temp += i; }
     for (unsigned int i = 0; i < sizeof(outputdata); ++i) {
         temp += outputdata[i];
-        // unsigned char strr = outputdata[i];
-        // temp += strr;
     }
-    // out->data = tdefl_write_image_to_png_file_in_memory_ex((const void*)data.pixels.data(), data.width, data.height, 4, &out->size,
-    // MZ_DEFAULT_LEVEL, 1);
+
     return temp;
 }
 std::unique_ptr<CompressedImageBuffer> compress_thumbnail_qoi(const ThumbnailData &data)
@@ -444,9 +436,11 @@ static int ColPicEncode(U16 *fromcolor16, int picw, int pich, U8 *outputdata, in
         U16 *l0 = (U16 *) &outputdata[sizeof(ColPicHead3)];
         l0[i]   = Listu16[i].colo16;
     }
-    enqty                = Byte8bitEncode(fromcolor16, (U16 *) &outputdata[sizeof(ColPicHead3)], Head0->ListDataSize >> 1, dotsqty,
-                           &outputdata[sizeof(ColPicHead3) + Head0->ListDataSize],
-                           outputmaxtsize - sizeof(ColPicHead3) - Head0->ListDataSize);
+    enqty                = Byte8bitEncode(fromcolor16, (U16 *) &outputdata[sizeof(ColPicHead3)],
+                                          Head0->ListDataSize >> 1,
+                                          dotsqty,
+                                          &outputdata[sizeof(ColPicHead3) + Head0->ListDataSize],
+                                          outputmaxtsize - sizeof(ColPicHead3) - Head0->ListDataSize);
     Head0->ColorDataSize = enqty;
     Head0->PicW          = picw;
     Head0->PicH          = pich;
@@ -507,6 +501,5 @@ int ColPic_EncodeStr(U16 *fromcolor16, int picw, int pich, U8 *outputdata, int o
     outputdata[qty] = 0;
     return qty;
 }
-
 
 } // namespace Slic3r::GCodeThumbnails

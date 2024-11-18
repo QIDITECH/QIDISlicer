@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <boost/log/trivial.hpp>
 #include <numeric>
 #include <algorithm>
 #include <cmath>
@@ -35,8 +35,6 @@
 //w32
 #include "FillCrossHatch.hpp"
 
-#include <boost/log/trivial.hpp>
-
 // #define INFILL_DEBUG_OUTPUT
 
 namespace Slic3r {
@@ -70,6 +68,7 @@ Fill* Fill::new_from_type(const InfillPattern type)
     case ipConcentricInternal:  return new FillConcentricInternal();
     //w32
     case ipCrossHatch:          return new FillCrossHatch();
+    case ipZigZag:              return new FillZigZag();
     default: throw Slic3r::InvalidArgument("unknown type");
     }
 }

@@ -90,8 +90,6 @@ void AppConfig::set_defaults()
         if (get("associate_stl").empty())
             set("associate_stl", "0");
 
-        if (get("tabs_as_menu").empty())
-            set("tabs_as_menu", "0");
         if (get("suppress_round_corners").empty())
             set("suppress_round_corners", "1");
 #endif // _WIN32
@@ -99,11 +97,6 @@ void AppConfig::set_defaults()
         // remove old 'use_legacy_opengl' parameter from this config, if present
         if (!get("use_legacy_opengl").empty())
             erase("", "use_legacy_opengl");
-
-#ifdef __APPLE__
-        if (get("use_retina_opengl").empty())
-            set("use_retina_opengl", "1");
-#endif
 
         if (get("single_instance").empty())
             set("single_instance", 
@@ -128,9 +121,10 @@ void AppConfig::set_defaults()
 
         if (get("auto_toolbar_size").empty())
             set("auto_toolbar_size", "100");
- 
+
         if (get("use_binary_gcode_when_supported").empty())
-            set("use_binary_gcode_when_supported", "0");
+            set("use_binary_gcode_when_supported", "1");
+ 
        if (get("notify_release").empty())
            set("notify_release", "all"); // or "none" or "release"
 
@@ -151,6 +145,7 @@ void AppConfig::set_defaults()
         if (get("default_action_on_new_project").empty())
             set("default_action_on_new_project", "none");       // , "keep(transfer)", "discard" or "save" 
 
+        //y15
         if (get("color_mapinulation_panel").empty())
             set("color_mapinulation_panel", "1");
 
@@ -171,6 +166,11 @@ void AppConfig::set_defaults()
             set("associate_bgcode", "0");
 #endif // _WIN32
     }
+
+#ifdef __APPLE__
+    if (get("use_retina_opengl").empty())
+        set("use_retina_opengl", "1");
+#endif // __APPLE__
 
     if (get("seq_top_layer_only").empty())
         set("seq_top_layer_only", "1");
@@ -201,6 +201,22 @@ void AppConfig::set_defaults()
 
     if (get("wifi_config_dialog_declined").empty())
         set("wifi_config_dialog_declined", "0");
+
+    if (get("connect_polling").empty())
+        set("connect_polling", "1");
+
+    if (get("auth_login_dialog_confirmed").empty())
+        set("auth_login_dialog_confirmed", "0");
+
+    if (get("show_estimated_times_in_dbl_slider").empty())
+        set("show_estimated_times_in_dbl_slider", "1");
+
+    if (get("show_ruler_in_dbl_slider").empty())
+        set("show_ruler_in_dbl_slider", "0");
+
+    if (get("show_ruler_bg_in_dbl_slider").empty())
+        set("show_ruler_bg_in_dbl_slider", "1");
+
 #ifdef _WIN32
     if (get("use_legacy_3DConnexion").empty())
         set("use_legacy_3DConnexion", "0");
@@ -210,7 +226,6 @@ void AppConfig::set_defaults()
 
     if (get("sys_menu_enabled").empty())
         set("sys_menu_enabled", "1");
-
 #endif // _WIN32
         // B45
     if (get("machine_list_minification").empty())
@@ -219,6 +234,10 @@ void AppConfig::set_defaults()
     //B64
     if (get("user_token").empty())
         set("user_token", "");
+
+    //B64
+    if (get("user_name").empty())
+        set("user_name", "");
 
     //y5
     if(get("user_head_url").empty())
@@ -237,6 +256,11 @@ void AppConfig::set_defaults()
 
     if (get("machine_list_net").empty())
         set("machine_list_net", "0");
+
+    //y14
+    if (get("old_settings_layout_mode").empty())
+        set("old_settings_layout_mode", "1");
+
     // Remove legacy window positions/sizes
     erase("", "main_frame_maximized");
     erase("", "main_frame_pos");
@@ -385,12 +409,10 @@ std::string AppConfig::load(const std::string &path)
                 if (! boost::starts_with(kvp.first, MODEL_PREFIX)) { continue; }
                 const auto model_name = kvp.first.substr(MODEL_PREFIX.size());
                 std::vector<std::string> variants;
-                //B9
                 if (! unescape_strings_cstyle(kvp.second.data(), variants)) { continue; }
                 for (const auto &variant : variants) {
                     vendor[model_name].insert(variant);
                 }
-                //B19
             }
     	} else {
     		// This must be a section name. Read the entries of a section.
@@ -556,21 +578,6 @@ bool AppConfig::get_variant(const std::string &vendor, const std::string &model,
     const auto it_m = it_v->second.find(model);
     return it_m == it_v->second.end() ? false : it_m->second.find(variant) != it_m->second.end();
 }
-//B19
-bool AppConfig::get_email(const std::string &vendor, const std::string &model, const std::string &email) const
-{
-    const auto it_v = m_vendors.find(vendor);
-    if (it_v == m_vendors.end()) { return false; }
-    const auto it_m = it_v->second.find(model);
-    return it_m == it_v->second.end() ? false : it_m->second.find(email) != it_m->second.end();
-}
-bool AppConfig::get_skype(const std::string &vendor, const std::string &model, const std::string &skype) const
-{
-    const auto it_v = m_vendors.find(vendor);
-    if (it_v == m_vendors.end()) { return false; }
-    const auto it_m = it_v->second.find(model);
-    return it_m == it_v->second.end() ? false : it_m->second.find(skype) != it_m->second.end();
-}
 
 bool AppConfig::set_variant(const std::string &vendor, const std::string &model, const std::string &variant, bool enable)
 {
@@ -586,52 +593,6 @@ bool AppConfig::set_variant(const std::string &vendor, const std::string &model,
         if (it_m == it_v->second.end())
             return false;
         auto it_var = it_m->second.find(variant);
-        if (it_var == it_m->second.end())
-            return false;
-        it_m->second.erase(it_var);
-    }
-    // If we got here, there was an update
-    m_dirty = true;
-    return true;
-}
-//B19
-bool AppConfig::set_email(const std::string &vendor, const std::string &model, const std::string &email, bool enable)
-{
-    if (enable) {
-        if (get_email(vendor, model, email))
-            return false;
-        m_vendors[vendor][model].insert(email);
-    } else {
-        auto it_v = m_vendors.find(vendor);
-        if (it_v == m_vendors.end())
-            return false;
-        auto it_m = it_v->second.find(model);
-        if (it_m == it_v->second.end())
-            return false;
-        auto it_var = it_m->second.find(email);
-        if (it_var == it_m->second.end())
-            return false;
-        it_m->second.erase(it_var);
-    }
-    // If we got here, there was an update
-    m_dirty = true;
-    return true;
-}
-//B19
-bool AppConfig::set_skype(const std::string &vendor, const std::string &model, const std::string &skype, bool enable)
-{
-    if (enable) {
-        if (get_skype(vendor, model, skype))
-            return false;
-        m_vendors[vendor][model].insert(skype);
-    } else {
-        auto it_v = m_vendors.find(vendor);
-        if (it_v == m_vendors.end())
-            return false;
-        auto it_m = it_v->second.find(model);
-        if (it_m == it_v->second.end())
-            return false;
-        auto it_var = it_m->second.find(skype);
         if (it_var == it_m->second.end())
             return false;
         it_m->second.erase(it_var);

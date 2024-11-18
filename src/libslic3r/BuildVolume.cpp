@@ -321,7 +321,6 @@ BuildVolume::ObjectState BuildVolume::object_state(const indexed_triangle_set& i
     }
 }
 
-// B52 //B66
 BuildVolume::ObjectState BuildVolume::volume_state_bbox(const BoundingBoxf3& volume_bbox, bool ignore_bottom) const
 {
     assert(m_type == Type::Rectangle);
@@ -330,11 +329,9 @@ BuildVolume::ObjectState BuildVolume::volume_state_bbox(const BoundingBoxf3& vol
         build_volume.max.z() = std::numeric_limits<double>::max();
     if (ignore_bottom)
         build_volume.min.z() = -std::numeric_limits<double>::max();
-
-    return build_volume.max.z() <= -SceneEpsilon ? ObjectState::Below :
-           build_volume.contains(volume_bbox)    ? ObjectState::Inside :
-           build_volume.intersects(volume_bbox)  ? ObjectState::Colliding :
-                                                   ObjectState::Outside;
+    return build_volume.max.z() <= - SceneEpsilon ? ObjectState::Below :
+           build_volume.contains(volume_bbox) ? ObjectState::Inside : 
+           build_volume.intersects(volume_bbox) ? ObjectState::Colliding : ObjectState::Outside;
 }
 
 // B66

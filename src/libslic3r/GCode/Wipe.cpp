@@ -90,7 +90,7 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
         //w15
         const double wipe_dist_max    = gcodegen.writer().config.wipe_distance.get_at(extruder.id());
         double       wipe_dist    = 0;
-        auto wipe_linear = [&gcode, &gcodegen, &retract_length, xy_to_e, wipe_dist_max, &wipe_dist,extruder](const Vec2d &prev_quantized, Vec2d &p) {
+        auto         wipe_linear = [&gcode, &gcodegen, &retract_length, xy_to_e, wipe_dist_max, &wipe_dist,extruder](const Vec2d &prev_quantized, Vec2d &p) {
             Vec2d  p_quantized = GCodeFormatter::quantize(p);
             if (p_quantized == prev_quantized) {
                 p = p_quantized;
@@ -99,7 +99,7 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             double segment_length = (p_quantized - prev_quantized).norm();
             // Quantize E axis as it is to be extruded as a whole segment.
             // w15
-            double dE   = retract_length * segment_length / wipe_dist_max;
+            double dE = retract_length * segment_length / wipe_dist_max;
             bool   done = false;
             if (dE > retract_length - EPSILON) {
                 if (dE > retract_length + EPSILON)
@@ -139,13 +139,7 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
             float  angle  = Geometry::ArcWelder::arc_angle(prev_quantized.cast<double>(), p_quantized.cast<double>(), double(radius));
             assert(angle > 0);
             double segment_length = angle * std::abs(radius);
-            wipe_dist += segment_length;
-            if (wipe_dist > wipe_dist_max) {
-                angle = angle * (wipe_dist_max - wipe_dist + segment_length) / segment_length;
-                segment_length = wipe_dist_max - wipe_dist + segment_length;
-            }
             double dE = GCodeFormatter::quantize_e(xy_to_e * segment_length);
-            dE        = retract_length * segment_length / wipe_dist_max;
             bool   done = false;
             if (dE > retract_length - EPSILON) {
                 if (dE > retract_length + EPSILON) {
@@ -154,12 +148,12 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
                     angle = Geometry::ArcWelder::arc_angle(prev_quantized.cast<double>(), p.cast<double>(), double(radius));
                     segment_length = angle * std::abs(radius);
                     //w15
-                    dE = retract_length* segment_length / wipe_dist_max ; 
+                    dE = retract_length* segment_length / wipe_dist_max;
                     p = GCodeFormatter::quantize(
                             Vec2d(center + Eigen::Rotation2D((ccw ? angle : -angle) * (retract_length / dE)) * (prev_quantized - center)));
                 } else
                     p = p_quantized;
-                //dE   = retract_length;
+                dE   = retract_length;
                 done = true;
             } else
                 p = p_quantized;
@@ -207,8 +201,7 @@ std::string Wipe::wipe(GCodeGenerator &gcodegen, bool toolchange)
         }
         if (wiped) {
             // add tag for processor
-            Vec2d test = GCodeFormatter::quantize(p);
-            // assert(p == GCodeFormatter::quantize(p));
+            assert(p == GCodeFormatter::quantize(p));
             gcode += ";" + GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Wipe_End) + "\n";
             gcodegen.last_position = gcodegen.gcode_to_point(p);
         }

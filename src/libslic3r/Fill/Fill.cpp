@@ -36,12 +36,12 @@
 #include "libslic3r/libslic3r.h"
 #include "libslic3r/ShortestPath.hpp"
 
-////w11
-////w29
+//w11
+//w29
 #include "FillConcentricInternal.hpp"
 #include "FillConcentric.hpp"
 #define NARROW_INFILL_AREA_THRESHOLD 3
-#define NARROW_INFILL_AREA_THRESHOLD_MIN 0.5
+
 namespace Slic3r {
 namespace FillAdaptive {
 struct Octree;
@@ -150,7 +150,6 @@ static bool is_narrow_infill_area(const ExPolygon &expolygon)
 {
     //w29
     ExPolygons offsets = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD));
-	//ExPolygons offsets_min = offset_ex(expolygon, -scale_(NARROW_INFILL_AREA_THRESHOLD_MIN));
     if (offsets.empty() )
         return true;
 
@@ -565,7 +564,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
             fill_concentric->print_config        = &this->object()->print()->config();
             fill_concentric->print_object_config = &this->object()->config();
         } else if (surface_fill.params.pattern == ipLightning)
-            dynamic_cast<FillLightning::Filler *>(f.get())->generator = lightning_generator;
+            dynamic_cast<FillLightning::Filler*>(f.get())->generator = lightning_generator;
 
 
         // calculate flow spacing for infill pattern generation
@@ -595,21 +594,21 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
         params.anchor_length              = surface_fill.params.anchor_length;
         params.anchor_length_max          = surface_fill.params.anchor_length_max;
         params.resolution                 = resolution;
-		//w21
-        params.use_arachne       = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentric;
+        //w21
+        params.use_arachne                = (perimeter_generator == PerimeterGeneratorType::Arachne && surface_fill.params.pattern == ipConcentric) || surface_fill.params.pattern == ipEnsuring || surface_fill.params.pattern == ipConcentric;
         params.layer_height               = layerm.layer()->height;
         params.prefer_clockwise_movements = this->object()->print()->config().prefer_clockwise_movements;
-		//w21
-		params.flow              = surface_fill.params.flow;
+        //w21
+        params.flow              = surface_fill.params.flow;
         params.extrusion_role    = surface_fill.params.extrusion_role;
         params.using_internal_flow = !surface_fill.surface.is_solid() && !surface_fill.params.bridge;
 
         for (ExPolygon &expoly : surface_fill.expolygons) {
-            // Spacing is modified by the filler to indicate adjustments. Reset it for each expolygon.
-            f->spacing = surface_fill.params.spacing;
-            // w21
-            f->no_overlap_expolygons = intersection_ex(surface_fill.no_overlap_expolygons, ExPolygons() = {expoly}, ApplySafetyOffset::Yes);
-            surface_fill.surface.expolygon = std::move(expoly);
+			// Spacing is modified by the filler to indicate adjustments. Reset it for each expolygon.
+			f->spacing = surface_fill.params.spacing;
+			// w21
+			f->no_overlap_expolygons = intersection_ex(surface_fill.no_overlap_expolygons, ExPolygons() = {expoly}, ApplySafetyOffset::Yes);
+			surface_fill.surface.expolygon = std::move(expoly);
             Polylines      polylines;
             ThickPolylines thick_polylines;
             //w29
@@ -617,18 +616,18 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 
             if (!polylines.empty() || !thick_polylines.empty()) {
                 // calculate actual flow from spacing (which might have been adjusted by the infill
-                // pattern generator)
-                double flow_mm3_per_mm = surface_fill.params.flow.mm3_per_mm();
-                double flow_width      = surface_fill.params.flow.width();
-                if (using_internal_flow) {
-                    // if we used the internal flow we're not doing a solid infill
-                    // so we can safely ignore the slight variation that might have
-                    // been applied to f->spacing
-                } else {
-                    Flow new_flow   = surface_fill.params.flow.with_spacing(float(f->spacing));
-                    flow_mm3_per_mm = new_flow.mm3_per_mm();
-                    flow_width      = new_flow.width();
-                }
+		        // pattern generator)
+		        double flow_mm3_per_mm = surface_fill.params.flow.mm3_per_mm();
+		        double flow_width      = surface_fill.params.flow.width();
+		        if (using_internal_flow) {
+		            // if we used the internal flow we're not doing a solid infill
+		            // so we can safely ignore the slight variation that might have
+		            // been applied to f->spacing
+		        } else {
+		            Flow new_flow   = surface_fill.params.flow.with_spacing(float(f->spacing));
+		        	flow_mm3_per_mm = new_flow.mm3_per_mm();
+		        	flow_width      = new_flow.width();
+		        }
                 // Save into layer.
                 ExtrusionEntityCollection *eec        = new ExtrusionEntityCollection();
                 auto                       fill_begin = uint32_t(layerm.fills().size());
@@ -638,10 +637,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                     for (const ThickPolyline &thick_polyline : thick_polylines) {
                         Flow new_flow = surface_fill.params.flow.with_spacing(float(f->spacing));
 
-                        ExtrusionMultiPath multi_path = PerimeterGenerator::thick_polyline_to_multi_path(thick_polyline,
-                                                                                                         surface_fill.params.extrusion_role,
-                                                                                                         new_flow, scaled<float>(0.05),
-                                                                                                         float(SCALED_EPSILON));
+                        ExtrusionMultiPath multi_path = PerimeterGenerator::thick_polyline_to_multi_path(thick_polyline, surface_fill.params.extrusion_role, new_flow, scaled<float>(0.05), float(SCALED_EPSILON));
                         // Append paths to collection.
                         if (!multi_path.empty()) {
                             if (multi_path.paths.front().first_point() == multi_path.paths.back().last_point())
@@ -655,6 +651,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                         layerm.m_fills.entities.push_back(eec);
                     else
                         delete eec;
+
                     thick_polylines.clear();
                 } else {
                     //w29
@@ -708,7 +705,7 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
                     layerm.m_fills.entities.push_back(eec);
                 }
                 insert_fills_into_islands(*this, uint32_t(surface_fill.region_id), fill_begin, uint32_t(layerm.fills().size()));
-            }
+		    }
 		}
     }
 
@@ -814,7 +811,7 @@ ExtrusionPaths Layer::thick_polyline_to_extrusion_paths(const ThickPolyline &thi
                 if (length > SCALED_EPSILON) {
                     double w        = sum / length;
                     Flow   new_flow = flow.with_width(unscale<float>(w) + flow.height() * float(1. - 0.25 * PI));
-					
+
                     //path.mm3_per_mm = new_flow.mm3_per_mm();
                     path.set_mm3_per_mm(new_flow.mm3_per_mm());
                     //path.width      = new_flow.width();
@@ -896,8 +893,6 @@ ExtrusionPaths Layer::thick_polyline_to_extrusion_paths(const ThickPolyline &thi
     return paths;
 }
 
-
-
 Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive::Octree* support_fill_octree,  FillLightning::Generator* lightning_generator) const
 {
     std::vector<SurfaceFill>  surface_fills = group_fills(*this);
@@ -934,9 +929,9 @@ Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Oc
         case ipHilbertCurve:
         case ipArchimedeanChords:
         case ipOctagramSpiral:
-        case ipZigZag: break;
-		// //w14
-        // case ipConcentricInternal: break;
+        case ipZigZag: 
+		//w14
+         case ipConcentricInternal: break;
         }
 
         // Create the filler object.
@@ -1045,8 +1040,8 @@ void Layer::make_ironing()
 
 		bool operator==(const IroningParams &rhs) const {
 			return this->extruder == rhs.extruder && this->just_infill == rhs.just_infill &&
-				this->line_spacing == rhs.line_spacing && this->height == rhs.height && this->speed == rhs.speed &&
-				this->angle == rhs.angle
+				    this->line_spacing == rhs.line_spacing && this->height == rhs.height && this->speed == rhs.speed &&
+				    this->angle == rhs.angle
                    //w33
                    && this->pattern == rhs.pattern;
 		}
@@ -1112,10 +1107,6 @@ void Layer::make_ironing()
 	// Layer::id() returns layer ID including raft layers, subtract them to make the infill direction independent
 	// from raft.
 	//FIXME ironing does not take fill angle into account. Shall it? Does it matter?
-	//w33
-	//fill.layer_id 			 = this->id() - this->object()->get_layer(0)->id();
-    //fill.z 					 = this->print_z;
-    //fill.overlap 			 = 0;
     fill_params.density 	 = 1.;
     fill_params.monotonic    = true;
     //w33
@@ -1201,14 +1192,10 @@ void Layer::make_ironing()
 
         // Create the filler object.
         //w33
-        //fill.spacing = ironing_params.line_spacing;
-        //fill.angle = float(ironing_params.angle + 0.25 * M_PI);
-        //fill.link_max_length = (coord_t)scale_(3. * fill.spacing);
-		//double extrusion_height = ironing_params.height * fill.spacing / nozzle_dmr;
         f->spacing               = ironing_params.line_spacing;
         f->angle                 = float(ironing_params.angle + 0.25 * M_PI);
-        f->link_max_length       = (coord_t) scale_(3. * f->spacing);
-        double  extrusion_height = ironing_params.height * f->spacing / nozzle_dmr;
+        f->link_max_length       = (coord_t)scale_(3. * f->spacing);
+        double extrusion_height = ironing_params.height * f->spacing / nozzle_dmr;
 		float  extrusion_width  = Flow::rounded_rectangle_extrusion_width_from_spacing(float(nozzle_dmr), float(extrusion_height));
 		double flow_mm3_per_mm = nozzle_dmr * extrusion_height;
         Surface surface_fill(stTop, ExPolygon());
@@ -1218,7 +1205,6 @@ void Layer::make_ironing()
 			try {
                 assert(!fill_params.use_arachne);
 				//w33
-				//polylines = fill.fill_surface(&surface_fill, fill_params);
                 polylines = f->fill_surface(&surface_fill, fill_params);
 			} catch (InfillFailedException &) {
 			}

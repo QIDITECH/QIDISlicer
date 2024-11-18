@@ -85,8 +85,6 @@ public:
 
     using ExtrusionLineSet = ankerl::unordered_dense::set<std::pair<const ExtrusionLine *, const ExtrusionLine *>, boost::hash<std::pair<const ExtrusionLine *, const ExtrusionLine *>>>;
 
-    static ExtrusionLineSet getRegionOrder(const std::vector<ExtrusionLine *> &input, bool outer_to_inner);
-
 protected:
     /*!
      * Stitch the polylines together and form closed polygons.

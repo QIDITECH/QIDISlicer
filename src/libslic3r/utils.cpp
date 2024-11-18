@@ -35,7 +35,7 @@
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
+#include <boost/log/expressions.hpp> // IWYU pragma: keep
 
 #include <boost/locale.hpp>
 
@@ -766,7 +766,7 @@ CopyFileResult check_copy(const std::string &origin, const std::string &copy)
 }
 
 // Ignore system and hidden files, which may be created by the DropBox synchronisation process.
-// https://github.com/qidi3d/QIDISlicer/issues/1298
+// https://github.com/QIDITECH/QIDISlicer/issues/1298
 bool is_plain_file(const boost::filesystem::directory_entry &dir_entry)
 {
     if (! boost::filesystem::is_regular_file(dir_entry.status()))

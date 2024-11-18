@@ -1764,14 +1764,8 @@ void PresetBundle::update_multi_material_filament_presets()
     size_t  num_extruders   = nozzle_diameter->values.size();
     // Verify validity of the current filament presets.
     //B40
-    for (size_t i = 0; i < std::min(this->extruders_filaments.size(), num_extruders); ++i) {
-        this->extruders_filaments[i].select_filament(this->filaments
-                                                         .find_preset(this->filaments.get_selected_idx() == size_t(-1) ?
-                                                                          this->filaments.first_visible().name :
-                                                                          this->extruders_filaments[i].get_selected_preset_name(),
-                                                                      true)
-                                                         ->name);
-    }
+    for (size_t i = 0; i < std::min(this->extruders_filaments.size(), num_extruders); ++i)
+        this->extruders_filaments[i].select_filament(this->filaments.find_preset(this->filaments.get_selected_idx() == size_t(-1) ? this->filaments.first_visible().name : this->extruders_filaments[i].get_selected_preset_name(), true)->name);
 
     if (this->extruders_filaments.size() > num_extruders)
         this->extruders_filaments.resize(num_extruders);

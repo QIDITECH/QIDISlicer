@@ -185,44 +185,24 @@ std::string GCodeWriter::set_pressure_advance(double pa) const
     return gcode.str();
 }
 
-//B24
-std::string GCodeWriter::set_volume_temperature(unsigned int temperature, bool wait)
+std::string GCodeWriter::set_chamber_temperature(unsigned int temperature, bool wait, bool accurate) const
 {
-    if (temperature == m_last_volume_temperature && (! wait || m_last_volume_temperature_reached))
-        return std::string();
-
-    m_last_volume_temperature = temperature;
-    m_last_volume_temperature_reached = wait;
-
-    std::string code, comment;
-    code = "M141";
-    comment = "set Volume temperature";
-    // if (wait && FLAVOR_IS_NOT(gcfTeacup)) {
-    //     if (FLAVOR_IS(gcfMakerWare) || FLAVOR_IS(gcfSailfish)) {
-    //         code = "M109";
-    //     } else {
-    //         code = "M190";
-    //     }
-    //     comment = "set bed temperature and wait for it to be reached";
-    // } else {
-    //     code = "M140";
-    //     comment = "set bed temperature";
-    // }
+    std::string_view code, comment;
+    if (wait) {
+        code = "M191"sv;
+        comment = "set chamber temperature and wait for it to be reached"sv;
+    } else {
+        code = "M141"sv;
+        comment = "set chamber temperature"sv;
+    }
     
     std::ostringstream gcode;
-    gcode << code << " ";
-    if (FLAVOR_IS(gcfMach3) || FLAVOR_IS(gcfMachinekit)) {
-        gcode << "P";
-    } else {
-        gcode << "S";
-    }
-    gcode << temperature << " ; " << comment << "\n";
-    
-    // if (FLAVOR_IS(gcfTeacup) && wait)
-    //     gcode << "M116 ; wait for bed temperature to be reached\n";
+    gcode << code << (accurate ? " R" : " S") << temperature << " ; " << comment << "\n";
     
     return gcode.str();
 }
+
+
 
 std::string GCodeWriter::set_acceleration_internal(Acceleration type, unsigned int acceleration)
 {
@@ -589,7 +569,6 @@ std::string GCodeWriter::set_fan(unsigned int speed) const
     return GCodeWriter::set_fan(this->config.gcode_flavor, this->config.gcode_comments, speed);
 }
 
-
 //B38
 void GCodeWriter::add_object_start_labels(std::string &gcode)
 {
@@ -612,7 +591,6 @@ void GCodeWriter::add_object_change_labels(std::string &gcode)
     add_object_end_labels(gcode);
     add_object_start_labels(gcode);
 }
-
 
 void GCodeFormatter::emit_axis(const char axis, const double v, size_t digits) {
     assert(digits <= 9);

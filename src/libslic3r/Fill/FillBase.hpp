@@ -87,7 +87,6 @@ struct FillParams
     Flow     flow;
     ExtrusionRole extrusion_role{ExtrusionRole::None};
     bool          using_internal_flow{false};
-    //bool          can_reverse{true};
 };
 static_assert(IsTriviallyCopyable<FillParams>::value, "FillParams class is not POD (and it should be - see constructor).");
 

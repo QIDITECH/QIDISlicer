@@ -893,7 +893,7 @@ void ViewerImpl::reset()
 
 // On some graphic cards texture buffers using GL_RGB32F format do not work, see:
 // https://dev.qidi3d.com/browse/SPE-2411
-// https://github.com/qidi3d/QIDISlicer/issues/12908
+// https://github.com/QIDITECH/QIDISlicer/issues/12908
 // To let all drivers be happy, we use GL_RGBA32F format, so we need to add an extra (currently unused) float
 // to position and heights_widths_angles vectors
 using Vec4 = std::array<float, 4>;

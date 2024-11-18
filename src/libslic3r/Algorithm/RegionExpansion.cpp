@@ -281,7 +281,7 @@ std::vector<WaveSeed> wave_seeds(
 
         if (front == back && (front.z() < idx_boundary_end)) {
             // This should be a very rare exception.
-            // See https://github.com/qidi3d/QIDISlicer/issues/12469.
+            // See https://github.com/QIDITECH/QIDISlicer/issues/12469.
             // Segement is open, yet its first point seems to be part of boundary polygon.
             // Take the first point with src polygon index.
             for (const ClipperLib_Z::IntPoint &point : path) {

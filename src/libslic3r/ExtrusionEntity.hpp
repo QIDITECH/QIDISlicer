@@ -215,7 +215,7 @@ public:
     void        collect_points(Points &dst) const override { append(dst, this->polyline.points); }
     double      total_volume() const override { return m_attributes.mm3_per_mm * unscale<double>(length()); }
     //w21
-    void     set_width(float set_val) { m_attributes.width = set_val; }
+    void        set_width(float set_val) { m_attributes.width = set_val; }
     void        set_height(float set_val) { m_attributes.height = set_val; }
     void        set_mm3_per_mm(float set_val) { m_attributes.mm3_per_mm = set_val; }
 
@@ -360,9 +360,6 @@ public:
             append(dst, p.polyline.points);
     }
     double total_volume() const override { double volume =0.; for (const auto& path : paths) volume += path.total_volume(); return volume; }
-    //w38
-    bool make_clockwise();
-    bool make_counter_clockwise();
 
 #ifndef NDEBUG
 	bool validate() const {

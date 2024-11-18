@@ -1,5 +1,3 @@
-#include "clipper/clipper_z.hpp"
-
 #include <cmath>
 #include <cassert>
 #include <algorithm>

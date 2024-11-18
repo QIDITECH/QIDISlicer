@@ -31,7 +31,6 @@ class ConfigBase;
     ENABLE_ENUM_BITMASK_OPERATORS(ThumbnailError);
 }
 
-
 //B3
 typedef struct
 {
@@ -77,7 +76,6 @@ std::pair<GCodeThumbnailDefinitionsList, ThumbnailErrors> make_and_check_thumbna
 
 std::string get_error_string(const ThumbnailErrors& errors);
 
-
 //B3
 std::string compress_qidi_thumbnail(const ThumbnailData &data, GCodeThumbnailsFormat format);
 int         ColPic_EncodeStr(U16 *fromcolor16, int picw, int pich, U8 *outputdata, int outputmaxtsize, int colorsmax);
@@ -89,56 +87,41 @@ inline void export_thumbnails_to_file(ThumbnailsGeneratorCallback &thumbnail_cb,
         //B3
         int count = 0;
         for (const auto& [format, size] : thumbnails_list) {
-        static constexpr const size_t max_row_length = 78;
-        //B54
-        ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{{size}, true, false, false, false});
-        for (const ThumbnailData& data : thumbnails)
-            if (data.is_valid()) {
-                switch (format) {
-                case GCodeThumbnailsFormat::QIDI: {
-                    //auto compressed = compress_qidi_thumbnail(data, format);
-
-                    //if (count == 0) {
-                    //    output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
-                    //    count++;
-                    //    break;
-                    //} else {
-                    //    output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
-                    //    count++;
-                    //    break;
-                    //}
-                    break;
-                }
-                default: {
-                    auto compressed = compress_thumbnail(data, format);
-                    if (compressed->data && compressed->size) {
-                        std::string encoded;
-                        encoded.resize(boost::beast::detail::base64::encoded_size(compressed->size));
-                        encoded.resize(boost::beast::detail::base64::encode((void *) encoded.data(), (const void *) compressed->data,
-                                                                            compressed->size));
-
-                        output((boost::format("\n;\n; %s begin %dx%d %d\n") % compressed->tag() % data.width % data.height % encoded.size())
-                                   .str()
-                                   .c_str());
-
-                        while (encoded.size() > max_row_length) {
-                            output((boost::format("; %s\n") % encoded.substr(0, max_row_length)).str().c_str());
-                            encoded = encoded.substr(max_row_length);
+            static constexpr const size_t max_row_length = 78;
+            //B54
+            ThumbnailsList thumbnails = thumbnail_cb(ThumbnailsParams{ {size}, true, false, false, false});
+            for (const ThumbnailData& data : thumbnails) {
+                if (data.is_valid()) {
+                    switch (format) {
+                        case GCodeThumbnailsFormat::QIDI: {
+                            break;
                         }
+                        default: {
+                            auto compressed = compress_thumbnail(data, format);
+                            if (compressed->data && compressed->size) {
+                                std::string encoded;
+                                encoded.resize(boost::beast::detail::base64::encoded_size(compressed->size));
+                                encoded.resize(boost::beast::detail::base64::encode((void*)encoded.data(), (const void*)compressed->data, compressed->size));
 
-                        if (encoded.size() > 0)
-                            output((boost::format("; %s\n") % encoded).str().c_str());
+                                output((boost::format("\n;\n; %s begin %dx%d %d\n") % compressed->tag() % data.width % data.height % encoded.size()).str().c_str());
 
-                        output((boost::format("; %s end\n;\n") % compressed->tag()).str().c_str());
+                                while (encoded.size() > max_row_length) {
+                                    output((boost::format("; %s\n") % encoded.substr(0, max_row_length)).str().c_str());
+                                    encoded = encoded.substr(max_row_length);
+                                }
 
+                                if (encoded.size() > 0)
+                                    output((boost::format("; %s\n") % encoded).str().c_str());
+
+                                output((boost::format("; %s end\n;\n") % compressed->tag()).str().c_str());
+                            }
+                        }
                     }
+                    throw_if_canceled();
                 }
-
-                }
-                throw_if_canceled();
             }
+        }
     }
-}
 }
 //B3
 template<typename WriteToOutput, typename ThrowIfCanceledCallback>
@@ -154,49 +137,27 @@ inline void export_qidi_thumbnails_to_file(ThumbnailsGeneratorCallback &        
         for (const auto &[format, size] : thumbnails_list) {
             static constexpr const size_t max_row_length = 78;
             ThumbnailsList                thumbnails     = thumbnail_cb(ThumbnailsParams{{size}, true, false, false, true});
-            for (const ThumbnailData &data : thumbnails)
+            for (const ThumbnailData &data : thumbnails) {
                 if (data.is_valid()) {
                     switch (format) {
-                    case GCodeThumbnailsFormat::QIDI: {
-                        auto compressed = compress_qidi_thumbnail(data, format);
+                        case GCodeThumbnailsFormat::QIDI: {
+                            auto compressed = compress_qidi_thumbnail(data, format);
 
-                        if (count == 0) {
-                            output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
-                            count++;
-                            break;
-                        } else {
-                            output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
-                            count++;
-                            break;
+                            if (count == 0) {
+                                output((boost::format("\n\n;gimage:%s\n\n") % compressed).str().c_str());
+                                count++;
+                                break;
+                            } else {
+                                output((boost::format("\n\n;simage:%s\n\n") % compressed).str().c_str());
+                                count++;
+                                break;
+                            }
                         }
-                    }
-                    default: {
-                        //auto compressed = compress_thumbnail(data, format);
-                        //if (compressed->data && compressed->size) {
-                        //    std::string encoded;
-                        //    encoded.resize(boost::beast::detail::base64::encoded_size(compressed->size));
-                        //    encoded.resize(boost::beast::detail::base64::encode((void *) encoded.data(), (const void *) compressed->data,
-                        //                                                        compressed->size));
-
-                        //    output((boost::format("\n;\n; %s begin %dx%d %d\n") % compressed->tag() % data.width % data.height %
-                        //            encoded.size())
-                        //               .str()
-                        //               .c_str());
-
-                        //    while (encoded.size() > max_row_length) {
-                        //        output((boost::format("; %s\n") % encoded.substr(0, max_row_length)).str().c_str());
-                        //        encoded = encoded.substr(max_row_length);
-                        //    }
-
-                        //    if (encoded.size() > 0)
-                        //        output((boost::format("; %s\n") % encoded).str().c_str());
-
-                        //    output((boost::format("; %s end\n;\n") % compressed->tag()).str().c_str());
-                        //}
-                    }
+                        default: { }
                     }
                     throw_if_canceled();
                 }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 #include "SpiralVase.hpp"
+
 #include <utility>
 #include <cstddef>
 

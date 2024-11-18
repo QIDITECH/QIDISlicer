@@ -1,4 +1,5 @@
 #include "TriangleSelectorWrapper.hpp"
+
 #include <igl/Hit.h>
 #include <memory>
 #include <utility>

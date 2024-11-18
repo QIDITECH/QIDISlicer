@@ -290,6 +290,9 @@ float new_feedrate_to_reach_time_stretch(
                 }
             }
         }
+
+        // Handle cases when all lines have feedrate below or equal to min_feedrate
+        // or when the accumulated sum of time is a very small number.
         assert(denom > 0);
         if (nomin <= 0 || denom <= EPSILON)
             return min_feedrate;
@@ -833,13 +836,22 @@ std::string CoolingBuffer::apply_layer_cooldown(
             enable_auxiliary_fan = EXTRUDER_CONFIG(enable_auxiliary_fan_unseal);
         //B25
         int enable_volume_fan = EXTRUDER_CONFIG(enable_volume_fan);
-        int fan_speed_new = EXTRUDER_CONFIG(fan_always_on) ? min_fan_speed : 0;
-        std::pair<int, int> custom_fan_speed_limits{fan_speed_new, 100 };
-        int disable_fan_first_layers = EXTRUDER_CONFIG(disable_fan_first_layers);
+
         //B39
         int disable_rapid_cooling_fan_first_layers = EXTRUDER_CONFIG(disable_rapid_cooling_fan_first_layers);
         // Is the fan speed ramp enabled?
-        int full_fan_speed_layer = EXTRUDER_CONFIG(full_fan_speed_layer);
+        const int full_fan_speed_layer     = EXTRUDER_CONFIG(full_fan_speed_layer);
+        int       disable_fan_first_layers = EXTRUDER_CONFIG(disable_fan_first_layers);
+        int       fan_speed_new            = EXTRUDER_CONFIG(fan_always_on) ? min_fan_speed : 0;
+
+        struct FanSpeedRange
+        {
+            int min_speed;
+            int max_speed;
+        };
+
+        FanSpeedRange requested_fan_speed_limits{fan_speed_new, 100};
+
         if (disable_fan_first_layers <= 0 && full_fan_speed_layer > 0) {
             // When ramping up fan speed from disable_fan_first_layers to full_fan_speed_layer, force disable_fan_first_layers above zero,
             // so there will be a zero fan speed at least at the 1st layer.
@@ -852,33 +864,42 @@ std::string CoolingBuffer::apply_layer_cooldown(
             if (EXTRUDER_CONFIG(cooling)) {
                 if (layer_time < slowdown_below_layer_time) {
                     // Layer time very short. Enable the fan to a full throttle.
-                    fan_speed_new = max_fan_speed;
-                    custom_fan_speed_limits.first = fan_speed_new;
+                    fan_speed_new                        = max_fan_speed;
+                    requested_fan_speed_limits.min_speed = max_fan_speed;
                 } else if (layer_time < fan_below_layer_time) {
                     // Layer time quite short. Enable the fan proportionally according to the current layer time.
                     assert(layer_time >= slowdown_below_layer_time);
-                    double t = (layer_time - slowdown_below_layer_time) / (fan_below_layer_time - slowdown_below_layer_time);
-                    fan_speed_new = int(floor(t * min_fan_speed + (1. - t) * max_fan_speed) + 0.5);
-                    custom_fan_speed_limits.first = fan_speed_new;
+                    const double t = (layer_time - slowdown_below_layer_time) / (fan_below_layer_time - slowdown_below_layer_time);
+
+                    fan_speed_new                        = int(floor(t * min_fan_speed + (1. - t) * max_fan_speed) + 0.5);
+                    requested_fan_speed_limits.min_speed = fan_speed_new;
                 }
             }
-            bridge_fan_speed   = EXTRUDER_CONFIG(bridge_fan_speed);
+
+            bridge_fan_speed = EXTRUDER_CONFIG(bridge_fan_speed);
             if (int(layer_id) >= disable_fan_first_layers && int(layer_id) + 1 < full_fan_speed_layer) {
                 // Ramp up the fan speed from disable_fan_first_layers to full_fan_speed_layer.
-                float factor = float(int(layer_id + 1) - disable_fan_first_layers) / float(full_fan_speed_layer - disable_fan_first_layers);
-                fan_speed_new    = std::clamp(int(float(fan_speed_new) * factor + 0.5f), 0, 100);
-                bridge_fan_speed = std::clamp(int(float(bridge_fan_speed) * factor + 0.5f), 0, 100);
-                custom_fan_speed_limits.second = fan_speed_new;
+                const float factor = float(int(layer_id + 1) - disable_fan_first_layers) / float(full_fan_speed_layer - disable_fan_first_layers);
+
+                fan_speed_new                        = std::clamp(int(float(fan_speed_new) * factor + 0.5f), 0, 100);
+                bridge_fan_speed                     = std::clamp(int(float(bridge_fan_speed) * factor + 0.5f), 0, 100);
+                requested_fan_speed_limits.max_speed = fan_speed_new;
             }
 
 #undef EXTRUDER_CONFIG
             bridge_fan_control = bridge_fan_speed > fan_speed_new;
         } else { // fan disabled
-            bridge_fan_control = false;
-            bridge_fan_speed   = 0;
-            fan_speed_new      = 0;
-            custom_fan_speed_limits.second = 0;
+            bridge_fan_control                   = false;
+            bridge_fan_speed                     = 0;
+            fan_speed_new                        = 0;
+            requested_fan_speed_limits.max_speed = 0;
         }
+
+        requested_fan_speed_limits.min_speed = std::min(requested_fan_speed_limits.min_speed, requested_fan_speed_limits.max_speed);
+        if (requested_fan_speed >= 0) {
+            fan_speed_new = std::clamp(requested_fan_speed, requested_fan_speed_limits.min_speed, requested_fan_speed_limits.max_speed);
+        }
+
         //B15 //B39
         if (int(layer_id) == disable_rapid_cooling_fan_first_layers) {
             int auxiliary_fan_speed_new = 255 * enable_auxiliary_fan / 100;
@@ -889,6 +910,7 @@ std::string CoolingBuffer::apply_layer_cooldown(
                 new_gcode += fan_gcode.str();
             }
         }
+
         if (fan_speed_new != m_fan_speed) {
             m_fan_speed = fan_speed_new;
             new_gcode  += GCodeWriter::set_fan(m_config.gcode_flavor, m_config.gcode_comments, m_fan_speed);
@@ -901,13 +923,12 @@ std::string CoolingBuffer::apply_layer_cooldown(
             fan_gcode << "M106 P3 S" << volume_fan_speed_new << "\n";
             new_gcode += fan_gcode.str();
         }
-        custom_fan_speed_limits.first = std::min(custom_fan_speed_limits.first, custom_fan_speed_limits.second);
-        return custom_fan_speed_limits;
     };
 
     const char         *pos               = gcode.c_str();
     int                 current_feedrate  = 0;
-    std::pair<int,int> fan_speed_limits = change_extruder_set_fan();
+
+    change_extruder_set_fan();
     for (const CoolingLine *line : lines) {
         const char *line_start  = gcode.c_str() + line->line_start;
         const char *line_end    = gcode.c_str() + line->line_end;
@@ -918,17 +939,13 @@ std::string CoolingBuffer::apply_layer_cooldown(
             auto res = std::from_chars(line_start + m_toolchange_prefix.size(), line_end, new_extruder);
             if (res.ec != std::errc::invalid_argument && new_extruder != m_current_extruder) {
                 m_current_extruder = new_extruder;
-                fan_speed_limits = change_extruder_set_fan();
+                change_extruder_set_fan();
             }
             new_gcode.append(line_start, line_end - line_start);
         } else if (line->type & CoolingLine::TYPE_SET_FAN_SPEED) {
-            int new_speed = std::clamp(line->fan_speed, fan_speed_limits.first, fan_speed_limits.second);
-            if (m_fan_speed != new_speed) {
-                new_gcode += GCodeWriter::set_fan(m_config.gcode_flavor, m_config.gcode_comments, new_speed);
-                m_fan_speed = new_speed;
-            }
+            change_extruder_set_fan(line->fan_speed);
         } else if (line->type & CoolingLine::TYPE_RESET_FAN_SPEED){
-            fan_speed_limits = change_extruder_set_fan();
+            change_extruder_set_fan();
         } else if (line->type & CoolingLine::TYPE_BRIDGE_FAN_START) {
             if (bridge_fan_control)
                 new_gcode += GCodeWriter::set_fan(m_config.gcode_flavor, m_config.gcode_comments, bridge_fan_speed);

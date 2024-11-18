@@ -355,7 +355,7 @@ bool objparse(const char *path, ObjData &data)
         while ((len = ::fread(buf + lenPrev, 1, half_buf-1, pFile)) != 0) {
             if (std::feof(pFile)) {
                 // Fix issue with missing last trinagle in obj file:
-                // https://github.com/qidi3d/QIDISlicer/issues/12157
+                // https://github.com/QIDITECH/QIDISlicer/issues/12157
                 // algorithm expect line endings after last face
                 // but file format support it
                 buf[len+lenPrev] = '\n';

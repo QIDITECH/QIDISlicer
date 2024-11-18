@@ -14,7 +14,6 @@
 
 #include "../ClipperUtils.hpp"
 #include "../ExPolygon.hpp"
-#include "../Surface.hpp"
 #include "../Geometry.hpp"
 #include "../Layer.hpp"
 #include "../Print.hpp"

@@ -1,14 +1,21 @@
 #ifndef slic3r_GCodeWriter_hpp_
 #define slic3r_GCodeWriter_hpp_
 
-#include "../libslic3r.h"
-#include "../Extruder.hpp"
-#include "../Point.hpp"
-#include "../PrintConfig.hpp"
-#include "CoolingBuffer.hpp"
+#include <string.h>
 #include <string>
 #include <string_view>
 #include <charconv>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <vector>
+#include <cstring>
+
+#include "libslic3r/libslic3r.h"
+#include "libslic3r/Extruder.hpp"
+#include "libslic3r/Point.hpp"
+#include "libslic3r/PrintConfig.hpp"
+#include "CoolingBuffer.hpp"
 
 namespace Slic3r {
 
@@ -21,12 +28,9 @@ public:
         multiple_extruders(false), m_extrusion_axis("E"), m_extruder(nullptr),
         m_single_extruder_multi_material(false),
         m_last_acceleration(0), m_max_acceleration(0),
-        m_last_bed_temperature(0), m_last_bed_temperature_reached(true), 
-        //B24
-        m_last_volume_temperature(0), m_last_volume_temperature_reached(true), 
-        m_lifted(0)
+        m_last_bed_temperature(0), m_last_bed_temperature_reached(true),
         //B36
-        , m_is_first_layer(true)
+        m_is_first_layer(true)
         {}
     Extruder*            extruder()             { return m_extruder; }
     const Extruder*      extruder()     const   { return m_extruder; }
@@ -48,10 +52,9 @@ public:
     std::string postamble() const;
     std::string set_temperature(unsigned int temperature, bool wait = false, int tool = -1) const;
     std::string set_bed_temperature(unsigned int temperature, bool wait = false);
+    std::string set_chamber_temperature(unsigned int temperature, bool wait, bool accurate) const;
     //B34
     std::string set_pressure_advance(double pa) const;
-    //B24
-    std::string set_volume_temperature(unsigned int temperature, bool wait = false);
     std::string set_print_acceleration(unsigned int acceleration)   { return set_acceleration_internal(Acceleration::Print, acceleration); }
     std::string set_travel_acceleration(unsigned int acceleration)  { return set_acceleration_internal(Acceleration::Travel, acceleration); }
     std::string reset_e(bool force = false);
@@ -66,9 +69,11 @@ public:
     std::string toolchange_prefix() const;
     std::string toolchange(unsigned int extruder_id);
     std::string set_speed(double F, const std::string_view comment = {}, const std::string_view cooling_marker = {}) const;
+
     std::string get_travel_to_xy_gcode(const Vec2d &point, const std::string_view comment) const;
     std::string travel_to_xy(const Vec2d &point, const std::string_view comment = {});
     std::string travel_to_xy_G2G3IJ(const Vec2d &point, const Vec2d &ij, const bool ccw, const std::string_view comment = {});
+
     /**
      * @brief Return gcode with all three axis defined. Optionally adds feedrate.
      *
@@ -122,7 +127,6 @@ public:
     void add_object_end_labels(std::string &gcode);
     void add_object_change_labels(std::string &gcode);
 
-
 private:
 	// Extruders are sorted by their ID, so that binary search is possible.
     std::vector<Extruder> m_extruders;
@@ -138,10 +142,6 @@ private:
 
     unsigned int    m_last_bed_temperature;
     bool            m_last_bed_temperature_reached;
-    //B24
-    unsigned int    m_last_volume_temperature;
-    bool            m_last_volume_temperature_reached;
-    double          m_lifted;
     Vec3d           m_pos = Vec3d::Zero();
 
     //B36
@@ -284,6 +284,7 @@ public:
     GCodeG2G3Formatter(const GCodeG2G3Formatter&) = delete;
     GCodeG2G3Formatter& operator=(const GCodeG2G3Formatter&) = delete;
 };
+
 } /* namespace Slic3r */
 
 #endif /* slic3r_GCodeWriter_hpp_ */
