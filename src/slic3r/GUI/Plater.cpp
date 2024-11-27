@@ -3713,8 +3713,12 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
     const bool send_gcode_shown = print_host_opt != nullptr && !print_host_opt->value.empty();
     const bool connect_gcode_shown = print_host_opt == nullptr && can_show_upload_to_connect();
     //y
+#if QDT_RELEASE_TO_PUBLIC
     auto m_devices = wxGetApp().get_devices();
     const bool link_has_machine = m_devices.size() > 0;
+#else
+    const bool link_has_machine = false;
+#endif
 
     // when a background processing is ON, export_btn and/or send_btn are showing
     if (get_config_bool("background_processing"))
@@ -6706,8 +6710,12 @@ void Plater::send_gcode()
 {
     // if physical_printer is selected, send gcode for this printer
     DynamicPrintConfig* physical_printer_config = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config();
+#if QDT_RELEASE_TO_PUBLIC
     auto       m_devices        = wxGetApp().get_devices();
     const bool link_has_machine = m_devices.size() > 0;
+#else
+    const bool link_has_machine = false;
+#endif
 
     if ((!physical_printer_config && !link_has_machine) || p->model.objects.empty())
         return;
