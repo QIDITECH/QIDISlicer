@@ -29439,3 +29439,219 @@ msgstr "zlib エラー %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "デバイス"
+
+msgid "Guide"
+msgstr "ガイド"
+
+msgid "Device Page"
+msgstr "デバイスページ"
+
+msgid "Guide Page"
+msgstr "ガイドページ"
+
+msgid "&Calibration"
+msgstr "キャリブレーション"
+
+msgid "Coarse"
+msgstr "粗"
+
+msgid "Fine"
+msgstr "細"
+
+msgid "Pressure Advance"
+msgstr "圧力アドバンス"
+
+msgid "Max Volumetric Speed"
+msgstr "最大体積速度"
+
+msgid "Seam gap"
+msgstr "シームギャップ"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "閉ループ押出しにおけるシームの可視性を減少させるために、ループは指定された量だけ中断され、短縮されます。\nこの量は現在の押出機の直径のパーセンテージとして指定されます。このパラメータのデフォルト値は15です。"
+
+msgid "Ironing Pattern"
+msgstr "アイロンパターン"
+
+msgid "Detect narrow internal solid infill"
+msgstr "狭い内部の固体インフィルを検出"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "このオプションは、狭い内部の固体インフィル領域を自動で検出します。これを有効にすると、その領域には同心円パターンが使用され、印刷速度が向上します。それ以外の場合は、デフォルトで直線パターンが使用されます。"
+
+msgid "Filter out tiny top gaps infill"
+msgstr "小さな上部ギャップのインフィルをフィルタリング"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "指定されたしきい値より小さな隙間をフィルタリングします。この設定は、上面の隙間インフィルに影響を与えます。"
+
+msgid "Resonance Avoidance"
+msgstr "共振回避"
+
+msgid "Resonance avoidance"
+msgstr "共振回避"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "プリンターの共振ゾーンを避けるために外壁の速度を下げることによって、モデルの表面にリングノイズが発生するのを防ぎます。\nリングノイズのテスト時には、このオプションをオフにしてください。"
+
+msgid "Resonance Avoidance Speed"
+msgstr "共振回避速度"
+
+msgid "First layer infill"
+msgstr "最初の層のインフィル"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "最初の層のインフィルの速度（遠くの押出しポイント間のジャンプ）。"
+
+msgid "First layer travel"
+msgstr "最初の層の移動"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "最初の層の移動速度（遠くの押出しポイント間のジャンプ）。"
+
+msgid "Number of slow layers"
+msgstr "遅い層の数"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "最初の数層は通常よりも遅く印刷されます。速度は指定された層数にわたって線形に増加します。"
+
+msgid "Top surface flow ratio"
+msgstr "上面のフロー比率"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "この要素は、上面の固体インフィルに使用する材料の量に影響を与えます。表面仕上げを滑らかにするために、少し減少させることができます。"
+
+msgid "Bottom surface flow ratio"
+msgstr "底面のフロー比率"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "この要素は、底面の固体インフィルに使用する材料の量に影響を与えます。"
+
+msgid "X-Y hole compensation"
+msgstr "X-Y 穴の補償"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "オブジェクトの穴は、XY平面で設定された値に基づいて拡大または縮小されます。正の値は穴を大きくし、負の値は穴を小さくします。この機能は、オブジェクトに組み立ての問題がある場合にサイズをわずかに調整するために使用されます。"
+
+msgid "X-Y contour compensation"
+msgstr "X-Y 輪郭補償"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "オブジェクトの輪郭は、XY平面で設定された値に基づいて拡大または縮小されます。正の値は輪郭を大きくし、負の値は輪郭を小さくします。この機能は、オブジェクトに組み立ての問題がある場合にサイズをわずかに調整するために使用されます。"
+
+msgid "Elephant foot compensation layers"
+msgstr "象の足補償層"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "象の足補償が有効になる層の数。最初の層は象の足補償値によって縮小され、その後、次の層はこの値で示された層まで線形に縮小されます。"
+
+msgid "Precise Z height"
+msgstr "正確なZ高さ"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "これを有効にすると、スライス後のオブジェクトの正確なZ高さを取得できます。最後の数層の高さを微調整することで、正確なオブジェクトの高さを得ることができます。これは実験的なパラメータであることに注意してください。"
+
+msgid "Precise wall"
+msgstr "精密壁"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "外壁の間隔を調整することでシェルの精度が向上します。これにより、層の一貫性も向上します。\n注意：この設定は、壁の順序が内-外に設定されている場合のみ有効になります。"
+
+msgid "Send"
+msgstr "送信"
+
+msgid "printers at the same time."
+msgstr "同時にプリンターを使用"
+
+msgid "Wait"
+msgstr "待機"
+
+msgid "minute each batch."
+msgstr "各バッチごとに1分"
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(同時に加熱できるデバイスの数に依存します。)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(加熱完了にかかる時間によって異なります。)"
+
+msgid "Switch to Device tab"
+msgstr "デバイスタブに切り替え"
+
+msgid "Switch to Device tab after upload."
+msgstr "アップロード後にデバイスタブに切り替え。"
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Localの物理プリンター"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Linkの物理プリンター"
+
+msgid "Local"
+msgstr "ローカル"
+
+msgid "Login/Register"
+msgstr "ログイン/登録"
+
+msgid "Flowrate Fine Calibration"
+msgstr "流量微調整"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "粗いキャリブレーションから最適な値を入力して、より正確な押出し倍率を決定してください。"
+
+msgid "Extrusion Multiplier:"
+msgstr "押出し倍率:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "有効な値を入力してください：\n 0.5 <= 押出し倍率 <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "圧力アドバンスキャリブレーション"
+
+msgid "PA Line"
+msgstr "PAライン"
+
+msgid "PA Pattern"
+msgstr "PAパターン"
+
+msgid "PA Tower"
+msgstr "PAタワー"
+
+msgid "Start PA:"
+msgstr "PA開始:"
+
+msgid "End PA:"
+msgstr "PA終了:"
+
+msgid "mm/s"
+msgstr "mm/s"
+
+msgid "PA step:"
+msgstr "PAステップ:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "注意: PAキャリブレーションはPETGには適用できません。モデルの実際の印刷に基づいてPA値を修正してください。"
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "有効な値を入力してください：\nPA開始: >= 0.0\nPA終了: > PA開始 + PAステップ\nPAステップ: >= 0.001)"
+
+msgid "Max Volumetric Speed"
+msgstr "最大体積速度"
+
+msgid "Start Volumetric Speed:"
+msgstr "開始体積速度:"
+
+msgid "mm³/s"
+msgstr "mm³/s"
+
+msgid "End Volumetric Speed:"
+msgstr "終了体積速度:"
+
+msgid "Volumetric Speed step:"
+msgstr "体積速度ステップ:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "有効な値を入力してください：\n開始体積速度: >= 0.0\n終了体積速度: > 開始体積速度 + 体積速度ステップ\n体積速度ステップ: >= 0.01)"

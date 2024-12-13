@@ -510,24 +510,18 @@ void PrinterWebView::AddButton(const wxString &    device_name,
     machine_button->SetBorderColor(wxColour(67, 67, 71));
     machine_button->SetCanFocus(false);
     machine_button->SetIsSimpleMode(m_isSimpleMode);
-    wxString formattedHost = ip;
-    if (!formattedHost.Lower().starts_with("http"))
-        formattedHost = wxString::Format("http://%s", formattedHost);
-    if (isQIDI) {
-        if (!formattedHost.Lower().ends_with("10088"))
-            formattedHost = wxString::Format("%s:10088", formattedHost);
-    }
 
-    machine_button->Bind(wxEVT_BUTTON, [this, formattedHost](wxCommandEvent &event) { 
-        wxString url = formattedHost;
-        load_url(url);
+    machine_button->Bind(wxEVT_BUTTON, [this, ip](wxCommandEvent &event) { 
+        //y16
+        FormatUrl(into_u8(ip));
     });
     devicesizer->Add(machine_button, wxSizerFlags().Border(wxALL, 1).Expand());
     devicesizer->Layout();
     m_buttons.push_back(machine_button);
 
     if(isSelected)
-        load_url(formattedHost);
+        //y16
+        FormatUrl(into_u8(ip));
 }
 
 //y3
@@ -601,35 +595,8 @@ void PrinterWebView::AddNetButton(const Device device)
     machine_button->SetIsSimpleMode(m_isSimpleMode);
 
     machine_button->Bind(wxEVT_BUTTON, [this, device](wxCommandEvent &event) {
-        //y5
-        std::string formattedHost;
-
-        if (device.isSpecialMachine)
-        {
-            if (wxGetApp().app_config->get("dark_color_mode") == "1")
-                formattedHost = device.link_url + "&theme=dark";
-            else
-                formattedHost = device.link_url + "&theme=light";
-
-            std::string formattedHost1 = "http://fluidd_" + formattedHost;
-            std::string formattedHost2 = "http://fluidd2_" + formattedHost;
-            if (formattedHost1 == m_web || formattedHost2 == m_web)
-                return;
-
-            if (m_isfluidd_1) {
-                formattedHost = "http://fluidd_" + formattedHost;
-                m_isfluidd_1  = false;
-            } else {
-                formattedHost = "http://fluidd2_" + formattedHost;
-                m_isfluidd_1  = true;
-            }
-        } 
-        else 
-        {
-            formattedHost = "http://" + device.link_url;
-        }
-
-        load_net_url(formattedHost, device.local_ip);
+        //y16
+        FormatNetUrl(device.link_url, device.local_ip, device.isSpecialMachine);
     });
 
 
@@ -939,15 +906,8 @@ void PrinterWebView::OnEditButtonClick(wxCommandEvent &event)
                     m_handlerl(event);
                 }
             m_ip = dlg.get_host();
-            wxString url;
-            if (!m_ip.Lower().starts_with("http"))
-                url = wxString::Format("http://%s", m_ip);
-
-            if (!url.Lower().ends_with("10088"))
-                url = wxString::Format("%s:10088", url);
-
-            load_url(url);
-
+            //y16
+            FormatUrl(into_u8(m_ip));
             SetPresetChanged(true);
             }
             break;
@@ -1152,5 +1112,63 @@ void PrinterWebView::RunScript(const wxString &javascript)
 
     WebView::RunScript(m_browser, javascript);
 }
+
+//y16
+ void PrinterWebView::FormatNetUrl(std::string link_url, std::string local_ip, bool isSpecialMachine)
+ {
+     std::string formattedHost;
+     if (isSpecialMachine)
+     {
+         if (wxGetApp().app_config->get("dark_color_mode") == "1")
+             formattedHost = link_url + "&theme=dark";
+         else
+             formattedHost = link_url + "&theme=light";
+
+         std::string formattedHost1 = "http://fluidd_" + formattedHost;
+         std::string formattedHost2 = "http://fluidd2_" + formattedHost;
+         if (formattedHost1 == m_web || formattedHost2 == m_web)
+             return;
+
+         if (m_isfluidd_1)
+         {
+             formattedHost = "http://fluidd_" + formattedHost;
+             m_isfluidd_1 = false;
+         }
+         else
+         {
+             formattedHost = "http://fluidd2_" + formattedHost;
+             m_isfluidd_1 = true;
+         }
+     }
+     else
+     {
+         formattedHost = "http://" + link_url;
+     }
+     load_net_url(formattedHost, local_ip);
+ }
+
+//y16
+ void PrinterWebView::FormatUrl(std::string link_url) 
+ {
+     wxString m_link_url = from_u8(link_url);
+     wxString url;
+     if (!m_link_url.Lower().starts_with("http"))
+         url = wxString::Format("http://%s", m_link_url);
+
+     if (!url.Lower().ends_with("10088"))
+         url = wxString::Format("%s:10088", url);
+
+     load_url(url);
+ }
+
+//y16
+ void PrinterWebView::SetToggleBar(bool is_net_mode)
+ {
+     toggleBar->SetValue(is_net_mode);
+     m_isNetMode = is_net_mode;
+     UpdateState();
+ }
+
+
 } // GUI
 } // Slic3r

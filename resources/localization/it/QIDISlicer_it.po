@@ -29811,3 +29811,219 @@ msgstr "errore zlib %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Dispositivo"
+
+msgid "Guide"
+msgstr "Guida"
+
+msgid "Device Page"
+msgstr "Pagina del dispositivo"
+
+msgid "Guide Page"
+msgstr "Pagina della guida"
+
+msgid "&Calibration"
+msgstr "Calibrazione"
+
+msgid "Coarse"
+msgstr "Rupe"
+
+msgid "Fine"
+msgstr "Fine"
+
+msgid "Pressure Advance"
+msgstr "Anticipazione della pressione"
+
+msgid "Max Volumetric Speed"
+msgstr "Velocità volumetrica massima"
+
+msgid "Seam gap"
+msgstr "Fessura di giunzione"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Per ridurre la visibilità della giunzione in un'estrusione a circuito chiuso, il ciclo viene interrotto e accorciato di una quantità specificata.\nQuesta quantità è espressa come percentuale del diametro attuale dell'estrusore. Il valore predefinito per questo parametro è 15."
+
+msgid "Ironing Pattern"
+msgstr "Motivo di stiratura"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Rileva riempimento solido interno stretto"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Questa opzione rileverà automaticamente le aree di riempimento solido interno stretto. Se abilitata, verrà utilizzato un motivo concentrico per l'area per accelerare la stampa. In caso contrario, verrà utilizzato il motivo rettilineo di default."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Filtra piccoli spazi di riempimento nella parte superiore"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Filtra gli spazi più piccoli rispetto alla soglia specificata. Questa impostazione influisce sul riempimento degli spazi nella superficie superiore."
+
+msgid "Resonance Avoidance"
+msgstr "Evitamento delle risonanze"
+
+msgid "Resonance avoidance"
+msgstr "Evitamento delle risonanze"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Riducendo la velocità del muro esterno per evitare la zona di risonanza della stampante, si evitano le vibrazioni sulla superficie del modello.\nDisattiva questa opzione quando testiamo la risonanza."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Velocità di evitamento delle risonanze"
+
+msgid "First layer infill"
+msgstr "Riempimento primo strato"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Velocità per il riempimento del primo strato (salti tra punti di estrusione distanti)."
+
+msgid "First layer travel"
+msgstr "Movimento primo strato"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Velocità per i movimenti di viaggio del primo strato (salti tra punti di estrusione distanti)."
+
+msgid "Number of slow layers"
+msgstr "Numero di strati lenti"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "I primi strati vengono stampati più lentamente del normale. La velocità viene aumentata gradualmente in modo lineare durante il numero specificato di strati."
+
+msgid "Top surface flow ratio"
+msgstr "Rapporto flusso superficie superiore"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Questo fattore influisce sulla quantità di materiale per il riempimento solido superiore. Puoi diminuirlo leggermente per ottenere una finitura liscia della superficie."
+
+msgid "Bottom surface flow ratio"
+msgstr "Rapporto flusso superficie inferiore"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Questo fattore influisce sulla quantità di materiale per il riempimento solido inferiore"
+
+msgid "X-Y hole compensation"
+msgstr "Compensazione dei fori X-Y"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "I fori dell'oggetto verranno ingranditi o rimpiccioliti nel piano XY in base al valore configurato. Un valore positivo rende i fori più grandi. Un valore negativo rende i fori più piccoli. Questa funzione viene utilizzata per regolare leggermente la dimensione quando l'oggetto presenta problemi di assemblaggio."
+
+msgid "X-Y contour compensation"
+msgstr "Compensazione del contorno X-Y"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Il contorno dell'oggetto verrà ingrandito o ridotto nel piano XY in base al valore configurato. Un valore positivo ingrandisce il contorno. Un valore negativo lo riduce. Questa funzione viene utilizzata per regolare leggermente la dimensione quando l'oggetto ha problemi di assemblaggio."
+
+msgid "Elephant foot compensation layers"
+msgstr "Strati di compensazione del piede d'elefante"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "Il numero di strati in cui sarà attiva la compensazione del piede d'elefante. Il primo strato verrà ridotto dalla compensazione del piede d'elefante, poi i successivi strati saranno ridotti progressivamente meno, fino allo strato indicato da questo valore."
+
+msgid "Precise Z height"
+msgstr "Altezza precisa Z"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "Abilita questa opzione per ottenere l'altezza precisa Z dell'oggetto dopo il slicing. Ottieni l'altezza precisa dell'oggetto affinando le altezze degli ultimi strati. Nota che questo è un parametro sperimentale."
+
+msgid "Precise wall"
+msgstr "Parete precisa"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "Migliora la precisione della shell regolando lo spazio tra le pareti esterne. Questo migliora anche la coerenza degli strati.\nNota: questa impostazione avrà effetto solo se la sequenza delle pareti è configurata su Interno-Esterno."
+
+msgid "Send"
+msgstr "Invia"
+
+msgid "printers at the same time."
+msgstr "stampanti allo stesso tempo."
+
+msgid "Wait"
+msgstr "Attendere"
+
+msgid "minute each batch."
+msgstr "minuto per ogni lotto."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Dipende da quanti dispositivi possono essere riscaldati contemporaneamente.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Dipende da quanto tempo ci vuole per completare il riscaldamento.)"
+
+msgid "Switch to Device tab"
+msgstr "Passa alla scheda Dispositivo"
+
+msgid "Switch to Device tab after upload."
+msgstr "Passa alla scheda Dispositivo dopo il caricamento."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "Stampante fisica di QIDI Local"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "Stampante fisica di QIDI Link"
+
+msgid "Local"
+msgstr "Locale"
+
+msgid "Login/Register"
+msgstr "Accedi/Registrati"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Calibrazione fine del flusso"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Inserisci il miglior valore dalla calibrazione grossolana per determinare un moltiplicatore di estrusione più preciso."
+
+msgid "Extrusion Multiplier:"
+msgstr "Moltiplicatore di estrusione:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Inserisci valori validi:\n 0.5 <= Moltiplicatore di estrusione <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Calibrazione dell'anticipo della pressione"
+
+msgid "PA Line"
+msgstr "Linea PA"
+
+msgid "PA Pattern"
+msgstr "Motivo PA"
+
+msgid "PA Tower"
+msgstr "Torre PA"
+
+msgid "Start PA:"
+msgstr "Inizia PA:"
+
+msgid "End PA:"
+msgstr "Fine PA:"
+
+msgid "mm/s"
+msgstr "mm/s"
+
+msgid "PA step:"
+msgstr "Passo PA:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Nota: La calibrazione PA non è applicabile al PETG, modifica il valore PA in base alla stampa effettiva del modello."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Inserisci valori validi:\nInizio PA: >= 0.0\nFine PA: > Inizio PA + Passo PA\nPasso PA: >= 0.001)"
+
+msgid "Max Volumetric Speed"
+msgstr "Velocità volumetrica massima"
+
+msgid "Start Volumetric Speed:"
+msgstr "Velocità volumetrica iniziale:"
+
+msgid "mm³/s"
+msgstr "mm³/s"
+
+msgid "End Volumetric Speed:"
+msgstr "Velocità volumetrica finale:"
+
+msgid "Volumetric Speed step:"
+msgstr "Passo della velocità volumetrica:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Inserisci valori validi:\nVelocità volumetrica iniziale: >= 0.0\nVelocità volumetrica finale: > Velocità volumetrica iniziale + Passo della velocità volumetrica\nPasso della velocità volumetrica: >= 0.01)"

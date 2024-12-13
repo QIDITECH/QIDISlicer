@@ -30,6 +30,8 @@
 #include "ExtraRenderers.hpp"
 #include "format.hpp"
 
+#include <wx/tooltip.h>
+
 namespace fs = boost::filesystem;
 
 namespace Slic3r {
@@ -122,6 +124,17 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     auto *label_input_sending_interval = new wxStaticText(this, wxID_ANY, _L("(It depends on how long it takes to complete the heating.)"));
     label_input_sending_interval->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 
+    //y16
+    m_switch_to_device = new wxCheckBox(this, wxID_ANY, _L("Switch to Device tab"), wxDefaultPosition);
+    m_switch_to_device->SetValue((wxGetApp().app_config->get("switch to device tab after upload") == "1") ? true : false);
+    wxToolTip* switch_tips = new wxToolTip(_L("Switch to Device tab after upload."));
+    m_switch_to_device->SetToolTip(switch_tips);
+    m_switch_to_device->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [this](wxCommandEvent &event){
+        if(event.GetInt() == 1)
+            wxGetApp().app_config->set("switch to device tab after upload", "1");
+        else
+            wxGetApp().app_config->set("switch to device tab after upload", "0");
+    });
 
     wxBoxSizer *max_printer_send =
         create_item_input(_L("Send"),
@@ -139,6 +152,10 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
 
     vbox2->Add(delay_time);
     vbox2->Add(label_input_sending_interval);
+
+    //y16
+    vbox2->Add(0, 0, 0, wxEXPAND | wxTOP, 15);
+    vbox2->Add(m_switch_to_device);
 
     hbox1->Add(vbox1);
     hbox1->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
@@ -397,6 +414,17 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
             MessageDialog msg_wingow(this, wxString::Format(_L("Upload filename doesn't end with \"%s\". Do you wish to continue?"), m_valid_suffix), wxString(SLIC3R_APP_NAME), wxYES | wxNO);
             return msg_wingow.ShowModal() == wxID_YES;
         }
+        
+        //y19
+        std::string unusable_symbols = "<>[]:/\\|?*\"";
+        for(auto c : path){
+            if(unusable_symbols.find(c) != std::string::npos){
+                ErrorDialog msg(this, format_wxstr("%1%\n%2% %3%", _L("The provided name is not valid;"),
+									_L("the following characters are not allowed:"), unusable_symbols), wxOK);
+                msg.ShowModal();
+                return false;
+            }
+        }
         return true;
     };
 
@@ -425,6 +453,7 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
             post_upload_action = PrintHostPostUploadAction::None;
             EndDialog(wxID_OK);
         }
+        txt_filename->SetFocus();
     });
     txt_filename->SetFocus();
     
@@ -483,6 +512,7 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
                 post_upload_action = PrintHostPostUploadAction::StartPrint;
                 EndDialog(wxID_OK);
             }
+            txt_filename->SetFocus();
         });
         //B53 //B64
         Bind(wxEVT_CHECKBOX, [btn_ok, btn_print, sizer_machine_list, sizer_machine_list2, this](wxCommandEvent &event) {

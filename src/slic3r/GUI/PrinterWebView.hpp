@@ -129,6 +129,14 @@ public:
     void load_disconnect_url(wxString& url);
     std::set<std::string> GetExitHost() { return m_exit_host; };
 
+    //y16
+    void FormatNetUrl(std::string link_url, std::string local_ip, bool isSpecialMachine);
+    void FormatUrl(std::string link_url);
+    void SetToggleBar(bool is_net_mode);
+
+    //y18
+    bool Local_has_device() { return m_buttons.size() > 0; };
+
 private:
     wxBoxSizer *leftallsizer;
 

@@ -29494,3 +29494,208 @@ msgstr "s'ha produït un error de zlib %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Dispositiu"
+
+msgid "Guide"
+msgstr "Guia"
+
+msgid "Device Page"
+msgstr "Pàgina del dispositiu"
+
+msgid "Guide Page"
+msgstr "Pàgina de la guia"
+
+msgid "&Calibration"
+msgstr "Calibratge"
+
+msgid "Coarse"
+msgstr "Gros"
+
+msgid "Fine"
+msgstr "Fi"
+
+msgid "Pressure Advance"
+msgstr "Avanç de pressió"
+
+msgid "Max Volumetric Speed"
+msgstr "Velocitat volumètrica màxima"
+
+msgid "Seam gap"
+msgstr "Espai de la costura"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Per reduir la visibilitat de la costura en una extrusió de bucle tancat, el bucle es talla i es retalla per una quantitat especificada.\nAquesta quantitat com a percentatge del diàmetre actual de l'extrusora. El valor per defecte d'aquest paràmetre és 15."
+
+msgid "Ironing Pattern"
+msgstr "Patró de planxat"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Detectar ompliment sòlid intern estret"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Aquesta opció detectarà automàticament les zones d'ompliment sòlid intern estret. Si està activada, es farà servir un patró concèntric per a l'àrea per accelerar la impressió. Si no, es farà servir el patró rectilini per defecte."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Filtrar petites esquerdes de la capa superior"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Filtrar les esquerdes més petites que el llindar especificat. Aquesta configuració afecta l'ompliment de les esquerdes a la superfície superior."
+
+msgid "Resonance Avoidance"
+msgstr "Evitar ressonància"
+
+msgid "Resonance avoidance"
+msgstr "Evitar la ressonància"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Reduint la velocitat de la paret exterior per evitar la zona de ressonància de la impressora, es prevenen els sons a la superfície del model.\nSi estàs provant els sons, desactiva aquesta opció."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Velocitat d'evitació de la ressonància"
+
+msgid "First layer infill"
+msgstr "Ompliment de la primera capa"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Velocitat per a l'ompliment de la primera capa (saltant entre punts d'extrusió distants)."
+
+msgid "First layer travel"
+msgstr "Desplaçament de la primera capa"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Velocitat per a desplaçaments de la primera capa (saltant entre punts d'extrusió distants)."
+
+msgid "Number of slow layers"
+msgstr "Nombre de capes lentes"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "Les primeres capes s'imprimeixen més lentament del normal. La velocitat s'augmenta gradualment de manera lineal durant el nombre de capes especificat."
+
+msgid "Top surface flow ratio"
+msgstr "Ràtio de flux de la superfície superior"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Aquest factor afecta la quantitat de material per a l'ompliment sòlid superior. Pots disminuir-lo lleugerament per aconseguir una superfície més suau."
+
+msgid "Bottom surface flow ratio"
+msgstr "Ràtio de flux de la superfície inferior"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Aquest factor afecta la quantitat de material per a l'ompliment sòlid inferior"
+
+msgid "X-Y hole compensation"
+msgstr "Compensació de forats X-Y"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Els forats de l'objecte es faran més grans o més petits al pla XY segons el valor configurat. Un valor positiu fa els forats més grans. Un valor negatiu fa els forats més petits. Aquesta funció s'utilitza per ajustar lleugerament la mida quan l'objecte té problemes d'assemblatge."
+
+msgid "X-Y contour compensation"
+msgstr "Compensació de contorns X-Y"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "El contorn de l'objecte es farà més gran o més petit al pla XY segons el valor configurat. Un valor positiu fa el contorn més gran. Un valor negatiu fa el contorn més petit. Aquesta funció s'utilitza per ajustar lleugerament la mida quan l'objecte té problemes d'assemblatge."
+
+msgid "Elephant foot compensation layers"
+msgstr "Capas de compensació de 'peus d'elefant'"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "El nombre de capes en què s'activarà la compensació dels 'peus d'elefant'. La primera capa es reduirà pel valor de compensació, i les següents capes es reduiran de manera lineal fins a la capa indicada per aquest valor."
+
+msgid "Precise Z height"
+msgstr "Alçada Z precisa"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "Habilita-ho per obtenir l'alçada precisa de l'objecte per l'eix Z després de tallar-lo. Es calcularà l'alçada precisa de l'objecte ajustant finament les alçades de les últimes capes. Tingues en compte que aquest és un paràmetre experimental."
+
+msgid "Precise wall"
+msgstr "Paret precisa"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "Millora la precisió de la carcassa ajustant l'espai entre les parets exteriors. Això també millora la consistència de les capes.\nNota: Aquesta configuració només tindrà efecte si la seqüència de parets està configurada com a Interior-Exterior."
+
+msgid "Send"
+msgstr "Enviar"
+
+msgid "printers at the same time."
+msgstr "impressores al mateix temps."
+
+msgid "minute each batch."
+msgstr "minut per cada lot."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Depèn de quants dispositius poden ser escalfats al mateix temps.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Depèn de quant de temps es triga a completar l'escalfament.)"
+
+msgid "Switch to Device tab"
+msgstr "Canvia a la pestanya Dispositiu"
+
+msgid "Switch to Device tab after upload."
+msgstr "Canvia a la pestanya Dispositiu després de la càrrega."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "Impressor físic de QIDI Local"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "Impressor físic de QIDI Link"
+
+msgid "Local"
+msgstr "Local"
+
+msgid "Login/Register"
+msgstr "Iniciar sessió/Registrar-se"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Calibratge fi de flux"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Si us plau, introduïu el millor valor de la calibració gruixuda per determinar un multiplicador d'extrusió més precís."
+
+msgid "Extrusion Multiplier:"
+msgstr "Multiplicador d'extrusió:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Si us plau, introduïu valors vàlids:\n 0.5 <= Multiplicador d'extrusió <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Calibratge de l'avanç de pressió"
+
+msgid "PA Line"
+msgstr "Línia PA"
+
+msgid "PA Pattern"
+msgstr "Patró PA"
+
+msgid "PA Tower"
+msgstr "Torres PA"
+
+msgid "Start PA:"
+msgstr "Iniciar PA:"
+
+msgid "End PA:"
+msgstr "Fi PA:"
+
+msgid "PA step:"
+msgstr "Pas PA:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Nota: El calibratge de PA no és aplicable al PETG, si us plau, modifiqueu el valor de PA d'acord amb la impressió real del model."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Si us plau, introduïu valors vàlids:\nIniciar PA: >= 0.0\nFi PA: > Iniciar PA + Pas PA\nPas PA: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "Velocitat volumètrica inicial:"
+
+msgid "End Volumetric Speed:"
+msgstr "Velocitat volumètrica final:"
+
+msgid "Volumetric Speed step:"
+msgstr "Pas de velocitat volumètrica:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Si us plau, introduïu valors vàlids:\nVelocitat volumètrica inicial: >= 0.0\nVelocitat volumètrica final: > Velocitat volumètrica inicial + Pas de velocitat volumètrica\nPas de velocitat volumètrica: >= 0.01)"
+

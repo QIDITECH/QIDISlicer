@@ -601,7 +601,8 @@ void MainFrame::update_title()
 
     title += wxString(build_id);
     if (wxGetApp().is_editor())
-        title += (" " + _L("based on Slic3r"));
+        //B8
+        title += (" ");
 
     SetTitle(title);
 }
@@ -720,12 +721,24 @@ void MainFrame::init_tabpanel()
                 tab->OnActivate();
                 m_last_selected_tab = m_tabpanel->GetSelection();
                 select_tab(tab);
-                //} else if (m_tabpanel->GetSelection() != 0) {
-                //    m_last_selected_tab = m_tabpanel->GetSelection();
+                } 
+        //y17
+                else if (m_tabpanel->GetSelection() != 0) {
+                   m_last_selected_tab = m_tabpanel->GetSelection();
             }
         }
-        else if (current_selected_tab == 4 || current_selected_tab == 5)
+        else if (m_layout == ESettingsLayout::Dlg) {
+            current_selected_tab += 1;
             select_tab(current_selected_tab);
+            m_last_selected_tab = current_selected_tab - 1;
+        }
+        else if (current_selected_tab == 4 || current_selected_tab == 5)
+        {
+            select_tab(current_selected_tab);
+            m_last_selected_tab = current_selected_tab;
+        }
+        //y17
+
         else
             select_tab(size_t(0)); // select Plater
     });
@@ -858,7 +871,8 @@ void MainFrame::create_preset_tabs()
     // new created tabs have to be hidden by default
     m_connect_webview->Hide();
     m_printer_webview->Hide();
-
+    //y17
+    select_tab(size_t(0));
 }
 
 void MainFrame::add_connect_webview_tab()
@@ -1617,6 +1631,7 @@ void MainFrame::init_menubar_as_editor()
             [this/*, tab_offset*/](wxCommandEvent&) { select_tab(3); }, "printer", nullptr,
             []() {return true; }, this);
         m_changeable_menu_items.push_back(item_printer_tab);
+        //y
         wxMenuItem* item_device_tab = append_menu_item(windowMenu, wxID_HIGHEST + 5, _L("Device Page") + "\tCtrl+5", _L("Show the Device page"),
             [this/*, tab_offset*/](wxCommandEvent&) { select_tab(4); }, "tab_monitor_active", nullptr,
             []() {return true; }, this);
@@ -1625,8 +1640,10 @@ void MainFrame::init_menubar_as_editor()
             [this/*, tab_offset*/](wxCommandEvent&) { select_tab(5); }, "userguide", nullptr,
             []() {return true; }, this);
         m_changeable_menu_items.push_back(item_guide_tab);
+
         if (m_plater) {
             windowMenu->AppendSeparator();
+            //y
             append_menu_item(windowMenu, wxID_HIGHEST + 7, _L("3&D") + "\tCtrl+7", _L("Show the 3D editing view"),
                 [this](wxCommandEvent&) { m_plater->select_view_3D("3D"); }, "editor_menu", nullptr,
                 [this](){return can_change_view(); }, this);

@@ -29466,3 +29466,219 @@ msgstr "chyba zlib %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Zařízení"
+
+msgid "Guide"
+msgstr "Průvodce"
+
+msgid "Device Page"
+msgstr "Stránka zařízení"
+
+msgid "Guide Page"
+msgstr "Stránka průvodce"
+
+msgid "&Calibration"
+msgstr "Kalibrace"
+
+msgid "Coarse"
+msgstr "Hrubé"
+
+msgid "Fine"
+msgstr "Jemné"
+
+msgid "Pressure Advance"
+msgstr "Předstih tlaku"
+
+msgid "Max Volumetric Speed"
+msgstr "Maximální objemová rychlost"
+
+msgid "Seam gap"
+msgstr "Mezera švu"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Aby se snížila viditelnost švu v uzavřeném extruzním smyčce, smyčka je přerušena a zkrácena o specifikovanou hodnotu.\nTato hodnota je vyjádřena jako procento aktuálního průměru extruderu. Výchozí hodnota pro tento parametr je 15."
+
+msgid "Ironing Pattern"
+msgstr "Vzor žehlení"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Detekce úzkého vnitřního pevného výplně"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Tato volba automaticky detekuje úzkou oblast vnitřního pevného výplně. Pokud je povolena, bude pro tuto oblast použit soustředný vzor pro zrychlení tisku. Jinak bude použito výchozí lineární vyplnění."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Filtrace malých mezer na horní straně"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Filtrujte mezery menší než specifikovaný práh. Toto nastavení ovlivňuje výplň mezer na horní ploše."
+
+msgid "Resonance Avoidance"
+msgstr "Vyhýbání se rezonanci"
+
+msgid "Resonance avoidance"
+msgstr "Vyhýbání se rezonanci"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Snížením rychlosti vnější stěny se vyhneme rezonanční zóně tiskárny a zabráníme vzniku zvonění na povrchu modelu.\nTuto možnost vypněte při testování zvonění."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Rychlost vyhýbání se rezonanci"
+
+msgid "First layer infill"
+msgstr "Výplň první vrstvy"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Rychlost pro výplň první vrstvy (skoky mezi vzdálenými body extruze)."
+
+msgid "First layer travel"
+msgstr "Cestování první vrstvy"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Rychlost pohybů první vrstvy (skoky mezi vzdálenými body extruze)."
+
+msgid "Number of slow layers"
+msgstr "Počet pomalých vrstev"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "První několik vrstev se tiskne pomaleji než obvykle. Rychlost se postupně zvyšuje lineárně během určeného počtu vrstev."
+
+msgid "Top surface flow ratio"
+msgstr "Poměr toku na horní ploše"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Tento faktor ovlivňuje množství materiálu pro horní pevnou výplň. Můžete ho mírně snížit, aby byl povrch hladký."
+
+msgid "Bottom surface flow ratio"
+msgstr "Poměr toku na spodní ploše"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Tento faktor ovlivňuje množství materiálu pro spodní pevnou výplň"
+
+msgid "X-Y hole compensation"
+msgstr "Kompenzace děr na ose X-Y"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Otvor v objektu budou zvětšeny nebo zmenšeny na rovině XY podle nastavené hodnoty. Pozitivní hodnota zvětší otvory. Negativní hodnota je zmenší. Tato funkce se používá k jemnému přizpůsobení velikosti, když má objekt problém se sestavením."
+
+msgid "X-Y contour compensation"
+msgstr "Kompenzace kontury na ose X-Y"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Kontura objektu bude zvětšena nebo zmenšena na rovině XY podle nastavené hodnoty. Pozitivní hodnota zvětší konturu. Negativní hodnota ji zmenší. Tato funkce se používá k jemnému přizpůsobení velikosti, když má objekt problém se sestavením."
+
+msgid "Elephant foot compensation layers"
+msgstr "Kompenzace efektu nohy slona"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "Počet vrstev, na kterých bude aktivní kompenzace efektu nohy slona. První vrstva bude zmenšena o hodnotu kompenzace efektu nohy slona, poté další vrstvy budou zmenšeny méně, až do vrstvy určené touto hodnotou."
+
+msgid "Precise Z height"
+msgstr "Přesná výška Z"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "Povolte to pro získání přesné výšky objektu po řezu. Přesnou výšku objektu získáte jemným laděním výšek posledních několika vrstev. Všimněte si, že toto je experimentální parametr."
+
+msgid "Precise wall"
+msgstr "Přesná stěna"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "Zlepšete přesnost pláště úpravou mezery mezi vnějšími stěnami. To také zlepšuje konzistenci vrstev.\nPoznámka: Toto nastavení bude mít účinek pouze v případě, že sekvence stěn je nastavena na Vnitřní-Vnější."
+
+msgid "Send"
+msgstr "Odeslat"
+
+msgid "printers at the same time."
+msgstr "tiskárny současně."
+
+msgid "Wait"
+msgstr "Počkejte"
+
+msgid "minute each batch."
+msgstr "minuta na každou dávku."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Záleží na tom, kolik zařízení může být současně zahříváno.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Záleží na tom, jak dlouho trvá dokončení zahřívání.)"
+
+msgid "Switch to Device tab"
+msgstr "Přejít na kartu Zařízení"
+
+msgid "Switch to Device tab after upload."
+msgstr "Přejít na kartu Zařízení po nahrání."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "Fyzická tiskárna QIDI Local"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "Fyzická tiskárna QIDI Link"
+
+msgid "Local"
+msgstr "Místní"
+
+msgid "Login/Register"
+msgstr "Přihlásit se/Registrovat se"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Precizní kalibrace průtoku"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Zadejte nejlepší hodnotu z hrubé kalibrace pro určení přesnějšího násobitele extruze."
+
+msgid "Extrusion Multiplier:"
+msgstr "Násobitel extruze:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Zadejte platné hodnoty:\n 0.5 <= Násobitel extruze <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Kalibrace předstihu tlaku"
+
+msgid "PA Line"
+msgstr "PA Linka"
+
+msgid "PA Pattern"
+msgstr "PA Vzor"
+
+msgid "PA Tower"
+msgstr "PA Věž"
+
+msgid "Start PA:"
+msgstr "Začátek PA:"
+
+msgid "End PA:"
+msgstr "Konec PA:"
+
+msgid "mm/s"
+msgstr "mm/s"
+
+msgid "PA step:"
+msgstr "Krok PA:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Poznámka: Kalibrace PA není použitelná pro PETG, prosím upravte hodnotu PA podle skutečného tisku modelu."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Zadejte platné hodnoty:\nZačátek PA: >= 0.0\nKonec PA: > Začátek PA + Krok PA\nKrok PA: >= 0.001)"
+
+msgid "Max Volumetric Speed"
+msgstr "Maximální objemová rychlost"
+
+msgid "Start Volumetric Speed:"
+msgstr "Začáteční objemová rychlost:"
+
+msgid "mm³/s"
+msgstr "mm³/s"
+
+msgid "End Volumetric Speed:"
+msgstr "Koncová objemová rychlost:"
+
+msgid "Volumetric Speed step:"
+msgstr "Krok objemové rychlosti:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Zadejte platné hodnoty:\nZačáteční objemová rychlost: >= 0.0\nKoncová objemová rychlost: > Začáteční objemová rychlost + Krok objemové rychlosti\nKrok objemové rychlosti: >= 0.01)"

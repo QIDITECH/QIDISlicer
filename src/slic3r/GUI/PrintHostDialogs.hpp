@@ -100,6 +100,9 @@ private:
     //y4
     std::vector<SendCheckBox*> unSelectedBoxes;
     std::vector<SendCheckBox*> SelectedBoxes;
+
+    //y16
+    wxCheckBox* m_switch_to_device{ nullptr };
 };
 
 

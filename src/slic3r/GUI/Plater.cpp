@@ -3712,13 +3712,17 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
     const auto print_host_opt = selected_printer_config ? selected_printer_config->option<ConfigOptionString>("print_host") : nullptr;
     const bool send_gcode_shown = print_host_opt != nullptr && !print_host_opt->value.empty();
     const bool connect_gcode_shown = print_host_opt == nullptr && can_show_upload_to_connect();
+
+    //y18
+    const bool local_has_devices = main_frame->m_printer_view->Local_has_device();
+
     //y
 #if QDT_RELEASE_TO_PUBLIC
     auto m_devices = wxGetApp().get_devices();
     const bool link_has_machine = m_devices.size() > 0;
 #else
     const bool link_has_machine = false;
-#endif
+# endif
 
     // when a background processing is ON, export_btn and/or send_btn are showing
     if (get_config_bool("background_processing"))
@@ -3726,7 +3730,8 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
 	    RemovableDriveManager::RemovableDrivesStatus removable_media_status = wxGetApp().removable_drive_manager()->status();
 		if (sidebar->show_reslice(false) |
 			sidebar->show_export(true) |
-			sidebar->show_send(send_gcode_shown | link_has_machine) |
+            //y18
+			sidebar->show_send(send_gcode_shown | link_has_machine | local_has_devices) |
             //y15
             // sidebar->show_connect(connect_gcode_shown) |
 			sidebar->show_export_removable(removable_media_status.has_removable_drives))
@@ -3739,7 +3744,8 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
 	    	removable_media_status = wxGetApp().removable_drive_manager()->status();
         if (sidebar->show_reslice(ready_to_slice) |
             sidebar->show_export(!ready_to_slice) |
-            sidebar->show_send((send_gcode_shown | link_has_machine) && !ready_to_slice) |
+            //y18
+            sidebar->show_send((send_gcode_shown | link_has_machine | local_has_devices) && !ready_to_slice) |
             //y15
             // sidebar->show_connect(connect_gcode_shown && !ready_to_slice) |
 			sidebar->show_export_removable(!ready_to_slice && removable_media_status.has_removable_drives))
@@ -4312,7 +4318,8 @@ void Plater::calib_pa_line(const double StartPA, double EndPA, double PAStep)
     gcode << "\n;WIDTH:" << pa_line_width;
     gcode << set_pa_acceleration(external_perimeter_acceleration);
     gcode << move_to(Vec2d(start_x + 80, start_y), pa_travel_speed, retract_length, retract_speed);
-    gcode << move_to(pa_layer_height);
+    //w44
+    gcode << move_to(pa_layer_height + printer_config->get_abs_value("z_offset"));
     gcode << move_to(Vec2d(start_x + 80, start_y + count * step_spacing), 3000, count * step_spacing * e_per_mm);
 
     for (int i = 0; i <= count; i++) {
@@ -4447,7 +4454,8 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     gcode << set_pa_acceleration(external_perimeter_acceleration);
 
     gcode << move_to(Vec2d(start_x + 2 * line_spacing, start_y - 2 * line_spacing), pa_travel_speed, retract_length, retract_speed);
-    gcode << move_to(pa_layer_height);
+    //w44
+    gcode << move_to(pa_layer_height + printer_config->get_abs_value("z_offset"));
 
     // Draw Box
     for (int i = 0; i < 3; i++) {
@@ -4464,7 +4472,8 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     for (int n = 1; n <= count + 1; n++) {
         gcode << set_pressure_advance(StartPA + (n - 1) * PAStep);
         for (int i = 0; i < 3; i++) {
-            gcode << move_to(Vec2d(start_x + 3 * line_spacing, start_y - n * step_spacing - i * line_spacing_xy), pa_travel_speed, retract_length, retract_speed, pa_layer_height, retract_lift);
+            //w44
+            gcode << move_to(Vec2d(start_x + 3 * line_spacing, start_y - n * step_spacing - i * line_spacing_xy), pa_travel_speed, retract_length, retract_speed, pa_layer_height + printer_config->get_abs_value("z_offset"), retract_lift);
             gcode << move_to(Vec2d(start_x + pa_wall_length / 2, start_y - n * step_spacing - i * line_spacing_xy - pa_wall_length / 2 + 3 * line_spacing),
                              speed_first_layer, (pa_wall_length - 6 * line_spacing) / 1.4142 * e_per_mm);
             gcode << move_to(Vec2d(start_x + pa_wall_length - 3 * line_spacing, start_y - n * step_spacing - i * line_spacing_xy),
@@ -4491,11 +4500,13 @@ void Plater::calib_pa_pattern(const double StartPA, double EndPA, double PAStep)
     gcode << "\nM106 P3 S" << volume_fan_speed;
 
     for (int m = 2; m <= 4; m++) {
-        gcode << move_to(pa_layer_height * m);
+        //w44
+        gcode << move_to(pa_layer_height * m + printer_config->get_abs_value("z_offset"));
         for (int n = 1; n <= count + 1; n++) {
             gcode << set_pressure_advance(StartPA + (n - 1) * PAStep);
             for (int i = 0; i < 3; i++) {
-                gcode << move_to(Vec2d(start_x , start_y - n * step_spacing - i * line_spacing_xy + 3 * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height * m, retract_lift);
+                //w44
+                gcode << move_to(Vec2d(start_x , start_y - n * step_spacing - i * line_spacing_xy + 3 * line_spacing), pa_travel_speed, retract_length, retract_speed, pa_layer_height * m + printer_config->get_abs_value("z_offset"), retract_lift);
                 gcode << move_to(Vec2d(start_x + pa_wall_length / 2, start_y - n * step_spacing - pa_wall_length / 2 + 3 * line_spacing - i * line_spacing_xy),
                                  speed_fast, pa_wall_length / 1.4142 * e_per_mm);
                 gcode << move_to(Vec2d(start_x + pa_wall_length, start_y - n * step_spacing - i * line_spacing_xy + 3 * line_spacing),
@@ -6710,6 +6721,10 @@ void Plater::send_gcode()
 {
     // if physical_printer is selected, send gcode for this printer
     DynamicPrintConfig* physical_printer_config = wxGetApp().preset_bundle->physical_printers.get_selected_printer_config();
+
+    //y18
+    const bool local_has_machine = wxGetApp().mainframe->m_printer_view->Local_has_device();
+
 #if QDT_RELEASE_TO_PUBLIC
     auto       m_devices        = wxGetApp().get_devices();
     const bool link_has_machine = m_devices.size() > 0;
@@ -6717,7 +6732,8 @@ void Plater::send_gcode()
     const bool link_has_machine = false;
 #endif
 
-    if ((!physical_printer_config && !link_has_machine) || p->model.objects.empty())
+    //y18
+    if ((!physical_printer_config && !link_has_machine && !local_has_machine) || p->model.objects.empty())
         return;
 
     // Obtain default output path
@@ -6767,6 +6783,9 @@ void Plater::send_gcode()
     PrintHostSendDialog dlg(default_output_file, PrintHostPostUploadAction::StartPrint, groups, storage_paths, storage_names, this,
                             (this->fff_print().print_statistics()), only_link);
     if (dlg.ShowModal() == wxID_OK) {
+        //y16
+        bool is_jump = false;
+
         if (printer_technology() == ptFFF) {
             const std::string ext = boost::algorithm::to_lower_copy(dlg.filename().extension().string());
             const bool        binary_output = wxGetApp().preset_bundle->printers.get_edited_preset().config.opt_bool("binary_gcode") &&
@@ -6832,6 +6851,16 @@ void Plater::send_gcode()
                 p->export_gcode(fs::path(), false, std::move(upload_job));
 
                 UploadCount++;
+
+                //y16
+                if(!is_jump){
+                    is_jump = true;
+                    std::string send_host = into_u8(preset_data.host);
+                    wxGetApp().mainframe->m_printer_view->FormatUrl(send_host);
+                    wxGetApp().mainframe->m_printer_view->SetToggleBar(false);
+                    wxGetApp().app_config->set("machine_list_net", "0");
+                    wxGetApp().mainframe->m_printer_view->ShowLocalPrinterButton();
+                }
             }
         }
 #if QDT_RELEASE_TO_PUBLIC
@@ -6840,32 +6869,45 @@ void Plater::send_gcode()
             if (checkbox_net_status[i]) {
                 auto         device = m_devices[i];
                 PrintHostJob upload_job(device.url,device.local_ip);
-            if (upload_job.empty())
-                    return;
-        upload_job.upload_data.upload_path = dlg.filename();
-        upload_job.upload_data.post_action = dlg.post_action();
-        upload_job.upload_data.group       = dlg.group();
-        upload_job.upload_data.storage     = dlg.storage();
-                upload_job.create_time             = std::chrono::system_clock::now();
+                if (upload_job.empty())
+                        return;
+                upload_job.upload_data.upload_path = dlg.filename();
+                upload_job.upload_data.post_action = dlg.post_action();
+                upload_job.upload_data.group       = dlg.group();
+                upload_job.upload_data.storage     = dlg.storage();
+                        upload_job.create_time             = std::chrono::system_clock::now();
 
                 if (UploadCount != 0 && UploadCount % std::stoi(wxGetApp().app_config->get("max_send")) == 0) {
                     m_sending_interval += std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;
                 }
                 upload_job.sendinginterval = m_sending_interval;
-        // Show "Is printer clean" dialog for QIDIConnect - Upload and print.
-            if (std::string(upload_job.printhost->get_name()) == "QIDIConnect" &&
-                    upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
-                    GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"),
-                                           _L("Upload and Print"), wxOK | wxCANCEL);
-            if (dlg.ShowModal() != wxID_OK)
-                return;
-        }
+            // Show "Is printer clean" dialog for QIDIConnect - Upload and print.
+                if (std::string(upload_job.printhost->get_name()) == "QIDIConnect" &&
+                        upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+                        GUI::MessageDialog dlg(nullptr, _L("Is the printer ready? Is the print sheet in place, empty and clean?"),
+                                            _L("Upload and Print"), wxOK | wxCANCEL);
+                if (dlg.ShowModal() != wxID_OK)
+                    return;
+                }
 
-        p->export_gcode(fs::path(), false, std::move(upload_job));
-        UploadCount++;
-    }
-}
+                p->export_gcode(fs::path(), false, std::move(upload_job));
+                UploadCount++;
+
+                //y16
+                if(!is_jump){
+                    is_jump = true;
+                    wxGetApp().mainframe->m_printer_view->FormatNetUrl(device.link_url, device.local_ip, device.isSpecialMachine);
+                    wxGetApp().mainframe->m_printer_view->SetToggleBar(true);
+                    wxGetApp().app_config->set("machine_list_net", "1");
+                    wxGetApp().mainframe->m_printer_view->ShowNetPrinterButton();
+                }
+            }
+        }
 #endif
+        //y16
+        bool is_switch_to_device = wxGetApp().app_config->get("switch to device tab after upload") == "1" ? true : false;
+        if (is_switch_to_device)
+            wxGetApp().mainframe->select_tab(size_t(4));
     }
 }
 

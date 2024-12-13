@@ -1164,7 +1164,7 @@ wxString OptionsGroup::get_url(const std::string& path_end)
     wxString language = wxGetApp().current_language_code_safe();
     wxString lang_marker = language.IsEmpty() ? "en" : language.BeforeFirst('_');
 
-    return wxString("https://wiki.qidi3d.com/") + lang_marker + wxString("/article/" + path_end);
+    return wxString("https://wiki.qidi3d.com/") + lang_marker + wxString("/software/qidi-slicer/" + path_end);
 }
 
 bool OptionsGroup::launch_browser(const std::string& path_end)

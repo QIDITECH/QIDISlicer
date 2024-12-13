@@ -28269,3 +28269,207 @@ msgstr "압축모듈(zlib) 오류 %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "장치"
+
+msgid "Guide"
+msgstr "가이드"
+
+msgid "Device Page"
+msgstr "장치 페이지"
+
+msgid "Guide Page"
+msgstr "가이드 페이지"
+
+msgid "&Calibration"
+msgstr "캘리브레이션"
+
+msgid "Coarse"
+msgstr "거칠게"
+
+msgid "Fine"
+msgstr "세밀하게"
+
+msgid "Pressure Advance"
+msgstr "압력 어드밴스"
+
+msgid "Max Volumetric Speed"
+msgstr "최대 부피 속도"
+
+msgid "Seam gap"
+msgstr "이음새 간격"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "폐쇄 루프 압출에서 이음새의 가시성을 줄이기 위해 루프가 지정된 양만큼 중단되고 짧아집니다.\n이 양은 현재 압출기의 직경에 대한 백분율로 설정됩니다. 이 매개변수의 기본값은 15입니다."
+
+msgid "Ironing Pattern"
+msgstr "다림질 패턴"
+
+msgid "Detect narrow internal solid infill"
+msgstr "좁은 내부 고형 채우기 감지"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "이 옵션은 좁은 내부 고형 채우기 영역을 자동으로 감지합니다. 활성화하면 해당 영역에 동심원 패턴이 사용되어 인쇄 속도가 빨라집니다. 그렇지 않으면 기본적으로 직선 패턴이 사용됩니다."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "작은 상단 간격 채우기 필터링"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "지정된 임계값보다 작은 간격을 필터링합니다. 이 설정은 상단 표면의 간격 채우기에 영향을 미칩니다."
+
+msgid "Resonance Avoidance"
+msgstr "공진 회피"
+
+msgid "Resonance avoidance"
+msgstr "공진 회피"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "프린터의 공진 영역을 피하기 위해 외벽 속도를 줄이면 모델 표면의 울림을 피할 수 있습니다.\n울림 테스트 시 이 옵션을 끄세요."
+
+msgid "Resonance Avoidance Speed"
+msgstr "공진 회피 속도"
+
+msgid "First layer infill"
+msgstr "첫 번째 층 채우기"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "첫 번째 층의 채우기 속도 (먼 거리의 압출 지점 사이의 점프)."
+
+msgid "First layer travel"
+msgstr "첫 번째 층의 이동"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "첫 번째 층의 이동 속도 (먼 거리의 압출 지점 사이의 점프)."
+
+msgid "Number of slow layers"
+msgstr "느린 층 수"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "처음 몇 개의 층은 정상보다 더 느리게 인쇄됩니다. 속도는 지정된 층 수에 따라 점진적으로 선형으로 증가합니다."
+
+msgid "Top surface flow ratio"
+msgstr "상단 표면 흐름 비율"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "이 요소는 상단 고형 채우기 재료의 양에 영향을 미칩니다. 표면 마감이 매끄럽게 되도록 약간 감소시킬 수 있습니다."
+
+msgid "Bottom surface flow ratio"
+msgstr "하단 표면 흐름 비율"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "이 요소는 하단 고형 채우기 재료의 양에 영향을 미칩니다."
+
+msgid "X-Y hole compensation"
+msgstr "X-Y 구멍 보상"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "물체의 구멍은 XY 평면에서 설정된 값에 따라 확장되거나 축소됩니다. 양의 값은 구멍을 크게 만들고, 음의 값은 구멍을 작게 만듭니다. 이 기능은 물체에 조립 문제가 있을 때 크기를 약간 조정하는 데 사용됩니다."
+
+msgid "X-Y contour compensation"
+msgstr "X-Y 윤곽 보상"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "물체의 윤곽은 XY 평면에서 설정된 값에 따라 확장되거나 축소됩니다. 양의 값은 윤곽을 크게 만들고, 음의 값은 윤곽을 작게 만듭니다. 이 기능은 물체에 조립 문제가 있을 때 크기를 약간 조정하는 데 사용됩니다."
+
+msgid "Elephant foot compensation layers"
+msgstr "코끼리 발 보상 층"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "코끼리 발 보상이 활성화될 층 수입니다. 첫 번째 층은 코끼리 발 보상 값에 의해 축소되며, 이후 층은 이 값에 따라 선형적으로 덜 축소됩니다."
+
+msgid "Precise Z height"
+msgstr "정확한 Z 높이"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "이 옵션을 활성화하면 스라이싱 후 객체의 정확한 Z 높이를 얻을 수 있습니다. 마지막 몇 개의 층 높이를 미세 조정하여 정확한 객체 높이를 얻습니다. 이는 실험적 매개변수임에 유의하세요."
+
+msgid "Precise wall"
+msgstr "정밀한 벽"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "외벽 간격을 조정하여 쉘의 정밀도를 향상시킵니다. 이로 인해 층 간 일관성도 향상됩니다.\n참고: 이 설정은 벽 순서가 내-외로 구성된 경우에만 적용됩니다."
+
+msgid "Send"
+msgstr "보내기"
+
+msgid "printers at the same time."
+msgstr "같은 시간에 프린터"
+
+msgid "minute each batch."
+msgstr "각 배치마다 1분"
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(동시에 가열할 수 있는 장치 수에 따라 다릅니다.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(가열 완료까지 걸리는 시간에 따라 다릅니다.)"
+
+msgid "Switch to Device tab"
+msgstr "장치 탭으로 전환"
+
+msgid "Switch to Device tab after upload."
+msgstr "업로드 후 장치 탭으로 전환."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Local의 물리적 프린터"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Link의 물리적 프린터"
+
+msgid "Local"
+msgstr "로컬"
+
+msgid "Login/Register"
+msgstr "로그인/등록"
+
+msgid "Flowrate Fine Calibration"
+msgstr "유량 미세 조정"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "거친 보정에서 가장 좋은 값을 입력하여 더 정확한 압출 배율을 결정하세요."
+
+msgid "Extrusion Multiplier:"
+msgstr "압출 배율:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "유효한 값을 입력하세요:\n 0.5 <= 압출 배율 <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "압력 선행 보정"
+
+msgid "PA Line"
+msgstr "PA 선"
+
+msgid "PA Pattern"
+msgstr "PA 패턴"
+
+msgid "PA Tower"
+msgstr "PA 타워"
+
+msgid "Start PA:"
+msgstr "PA 시작:"
+
+msgid "End PA:"
+msgstr "PA 종료:"
+
+msgid "PA step:"
+msgstr "PA 단계:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "주의: PA 보정은 PETG에 적용되지 않습니다. 모델의 실제 인쇄에 따라 PA 값을 수정하십시오."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "유효한 값을 입력하세요:\nPA 시작: >= 0.0\nPA 종료: > PA 시작 + PA 단계\nPA 단계: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "체적 속도 시작:"
+
+msgid "End Volumetric Speed:"
+msgstr "체적 속도 종료:"
+
+msgid "Volumetric Speed step:"
+msgstr "체적 속도 단계:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "유효한 값을 입력하세요:\n체적 속도 시작: >= 0.0\n체적 속도 종료: > 체적 속도 시작 + 체적 속도 단계\n체적 속도 단계: >= 0.01)"

@@ -29001,3 +29001,195 @@ msgstr "zlib hatası %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Cihaz"
+
+msgid "Guide"
+msgstr "Kılavuz"
+
+msgid "Device Page"
+msgstr "Cihaz Sayfası"
+
+msgid "Guide Page"
+msgstr "Kılavuz Sayfası"
+
+msgid "&Calibration"
+msgstr "Kalibrasyon"
+
+msgid "Coarse"
+msgstr "Kaba"
+
+msgid "Fine"
+msgstr "İnce"
+
+msgid "Pressure Advance"
+msgstr "Basınç İlerlemesi"
+
+msgid "Max Volumetric Speed"
+msgstr "Maksimum Hacimsel Hız"
+
+msgid "Seam gap"
+msgstr "Dikiş boşluğu"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Kapalı döngü ekstrüzyonda dikişin görünürlüğünü azaltmak için döngü kesilir ve belirli bir miktar kısaltılır.\nBu miktar, mevcut ekstrüder çapının bir yüzdesi olarak ifade edilir. Bu parametrenin varsayılan değeri 15'tir."
+
+msgid "Ironing Pattern"
+msgstr "Ütüleme Deseni"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Dar iç dolgu alanını algıla"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Bu seçenek, dar iç dolgu alanını otomatik olarak algılar. Etkinleştirilirse, bu alan için baskıyı hızlandırmak amacıyla konsantrik desen kullanılır. Aksi takdirde, varsayılan olarak dikdörtgen desen kullanılır."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Küçük üst boşluk dolgusunu filtrele"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Belirtilen eşikten daha küçük boşlukları filtreleyin. Bu ayar, üst yüzeyin boşluk dolgusunu etkiler."
+
+msgid "Resonance Avoidance"
+msgstr "Rezonans Önleme"
+
+msgid "Resonance avoidance"
+msgstr "Rezonans önleme"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Yazıcının rezonans bölgesinden kaçınmak için dış duvarın hızını azaltarak model yüzeyindeki dalgalanmalar önlenir.\nÇan testi yaparken bu seçeneği kapatınız."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Rezonans Önleme Hızı"
+
+msgid "First layer infill"
+msgstr "İlk katman dolgu"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "İlk katmanın dolgu hızı (uzak ekstrüzyon noktaları arasında sıçramalar)."
+
+msgid "First layer travel"
+msgstr "İlk katman hareketi"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "İlk katmanın hareket hızı (uzak ekstrüzyon noktaları arasında sıçramalar)."
+
+msgid "Number of slow layers"
+msgstr "Yavaş katman sayısı"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "İlk birkaç katman normalden daha yavaş basılır. Hız, belirtilen katman sayısı boyunca kademeli olarak doğrusal bir şekilde artırılır."
+
+msgid "Top surface flow ratio"
+msgstr "Üst yüzey akış oranı"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Bu faktör, üst dolgu için malzeme miktarını etkiler. Pürüzsüz bir yüzey elde etmek için hafifçe azaltabilirsiniz."
+
+msgid "Bottom surface flow ratio"
+msgstr "Alt yüzey akış oranı"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Bu faktör, alt dolgu için malzeme miktarını etkiler."
+
+msgid "X-Y hole compensation"
+msgstr "X-Y delik telafisi"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Objenin delikleri, ayarlanan değer kadar XY düzleminde büyütülür veya küçültülür. Pozitif değer delikleri büyütür. Negatif değer delikleri küçültür. Bu işlev, montaj sorunları olduğunda boyutu hafifçe ayarlamak için kullanılır."
+
+msgid "X-Y contour compensation"
+msgstr "X-Y kontur telafisi"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Objenin konturu, ayarlanan değer kadar XY düzleminde büyütülür veya küçültülür. Pozitif değer konturu büyütür. Negatif değer konturu küçültür. Bu işlev, montaj sorunları olduğunda boyutu hafifçe ayarlamak için kullanılır."
+
+msgid "Elephant foot compensation layers"
+msgstr "Fil ayağı telafisi katmanları"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "Fil ayağı telafisinin aktif olacağı katman sayısı. İlk katman, fil ayağı telafisi değeri kadar küçültülecek, sonraki katmanlar ise bu değere kadar doğrusal olarak daha az küçültülecektir."
+
+msgid "Send"
+msgstr "Gönder"
+
+msgid "printers at the same time."
+msgstr "aynı anda yazıcılar."
+
+msgid "minute each batch."
+msgstr "her parti için bir dakika."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Kaç cihazın aynı anda ısınabileceğine bağlıdır.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Isıtma işleminin tamamlanması ne kadar süreceğine bağlıdır.)"
+
+msgid "Switch to Device tab"
+msgstr "Cihaz sekmesine geç"
+
+msgid "Switch to Device tab after upload."
+msgstr "Yüklemeden sonra Cihaz sekmesine geç."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Local'ın Fiziksel Yazıcısı"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Link'in Fiziksel Yazıcısı"
+
+msgid "Local"
+msgstr "Yerel"
+
+msgid "Login/Register"
+msgstr "Giriş / Kayıt Ol"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Akış Hızı İnce Kalibrasyonu"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Daha doğru bir ekstruzyon çarpanı belirlemek için kaba kalibrasyondan en iyi değeri girin."
+
+msgid "Extrusion Multiplier:"
+msgstr "Ekstruzyon Çarpanı:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Geçerli değerler giriniz:\n 0.5 <= Ekstruzyon Çarpanı <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Basınç İleri Kalibrasyonu"
+
+msgid "PA Line"
+msgstr "PA Çizgisi"
+
+msgid "PA Pattern"
+msgstr "PA Deseni"
+
+msgid "PA Tower"
+msgstr "PA Kulesi"
+
+msgid "Start PA:"
+msgstr "PA Başlangıcı:"
+
+msgid "End PA:"
+msgstr "PA Sonu:"
+
+msgid "PA step:"
+msgstr "PA Adımı:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Not: PA kalibrasyonu PETG için geçerli değildir, lütfen PA değerini modelin gerçek baskısına göre değiştirin."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Geçerli değerler giriniz:\nPA Başlangıcı: >= 0.0\nPA Sonu: > PA Başlangıcı + PA Adımı\nPA Adımı: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "Başlangıç Hacimsel Hızı:"
+
+msgid "End Volumetric Speed:"
+msgstr "Bitiş Hacimsel Hızı:"
+
+msgid "Volumetric Speed step:"
+msgstr "Hacimsel Hız Adımı:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Geçerli değerler giriniz:\nBaşlangıç Hacimsel Hızı: >= 0.0\nBitiş Hacimsel Hızı: > Başlangıç Hacimsel Hızı + Hacimsel Hız Adımı\nHacimsel Hız Adımı: >= 0.01)"

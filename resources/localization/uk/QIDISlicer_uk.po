@@ -28446,3 +28446,183 @@ msgstr "помилка zlib %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Пристрій"
+
+msgid "Guide"
+msgstr "Посібник"
+
+msgid "Device Page"
+msgstr "Сторінка пристрою"
+
+msgid "Guide Page"
+msgstr "Сторінка посібника"
+
+msgid "&Calibration"
+msgstr "Калібрування"
+
+msgid "Coarse"
+msgstr "Грубий"
+
+msgid "Fine"
+msgstr "Точний"
+
+msgid "Pressure Advance"
+msgstr "Попереднє натискання"
+
+msgid "Max Volumetric Speed"
+msgstr "Максимальна об'ємна швидкість"
+
+msgid "Seam gap"
+msgstr "Зазор шва"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Щоб зменшити видимість шва в екструзії із замкнутим контуром, контур переривається і скорочується на задану величину.\nЦя величина вказується у відсотках від поточного діаметра екструдера. Значення за замовчуванням для цього параметра - 15."
+
+msgid "Ironing Pattern"
+msgstr "Візерунок прасування"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Виявлення вузького внутрішнього заповнення"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Цей параметр автоматично визначить область вузького внутрішнього заповнення. Якщо активовано, для цієї області буде використовуватися концентричний візерунок для прискорення друку. Інакше використовується прямолінійний візерунок за замовчуванням."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Фільтрувати невеликі зазори у верхньому заповненні"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Фільтрувати зазори, які менші за вказаний поріг. Цей параметр впливає на заповнення зазорів верхньої поверхні."
+
+msgid "Resonance Avoidance"
+msgstr "Уникнення резонансу"
+
+msgid "Resonance avoidance"
+msgstr "Уникнення резонансу"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Зменшуючи швидкість зовнішньої стінки, можна уникнути зони резонансу принтера та зменшити ефект хвиль на поверхні моделі.\nВимкніть цю опцію під час тестування резонансу."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Швидкість уникнення резонансу"
+
+msgid "First layer infill"
+msgstr "Заповнення першого шару"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Швидкість заповнення першого шару (переміщення між віддаленими точками екструзії)."
+
+msgid "First layer travel"
+msgstr "Переміщення першого шару"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Швидкість переміщення першого шару (переміщення між віддаленими точками екструзії)."
+
+msgid "Number of slow layers"
+msgstr "Кількість повільних шарів"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "Перші кілька шарів друкуються повільніше, ніж зазвичай. Швидкість поступово збільшується лінійно протягом вказаної кількості шарів."
+
+msgid "Top surface flow ratio"
+msgstr "Коефіцієнт потоку верхньої поверхні"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Цей параметр впливає на кількість матеріалу для заповнення верхньої поверхні. Ви можете трохи зменшити його, щоб отримати гладке покриття."
+
+msgid "Bottom surface flow ratio"
+msgstr "Коефіцієнт потоку нижньої поверхні"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Цей параметр впливає на кількість матеріалу для заповнення нижньої поверхні."
+
+msgid "X-Y hole compensation"
+msgstr "Компенсація отворів X-Y"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Отвори об'єкта будуть збільшені або зменшені в площині XY на задану величину. Позитивне значення збільшує отвори. Негативне значення зменшує їх. Ця функція використовується для незначного коригування розмірів при проблемах зі складанням об'єкта."
+
+msgid "Send"
+msgstr "Відправити"
+
+msgid "printers at the same time."
+msgstr "принтери одночасно."
+
+msgid "minute each batch."
+msgstr "хвилина на кожну партію."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Це залежить від того, скільки пристроїв можуть бути одночасно нагріті.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Це залежить від того, скільки часу потрібно для завершення нагрівання.)"
+
+msgid "Switch to Device tab"
+msgstr "Перейти на вкладку Пристрій"
+
+msgid "Switch to Device tab after upload."
+msgstr "Перейти на вкладку Пристрій після завантаження."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "Фізичний принтер QIDI Local"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "Фізичний принтер QIDI Link"
+
+msgid "Local"
+msgstr "Локальний"
+
+msgid "Login/Register"
+msgstr "Увійти/Зареєструватися"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Точна калібрування потоку"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Будь ласка, введіть найкраще значення з грубого калібрування для подальшого визначення більш точного множника екструзії."
+
+msgid "Extrusion Multiplier:"
+msgstr "Множник екструзії:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Будь ласка, введіть правильні значення:\n 0.5 <= Множник екструзії <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Калібрування попереднього тиску"
+
+msgid "PA Line"
+msgstr "Лінія PA"
+
+msgid "PA Pattern"
+msgstr "Шаблон PA"
+
+msgid "PA Tower"
+msgstr "Вежа PA"
+
+msgid "Start PA:"
+msgstr "Початок PA:"
+
+msgid "End PA:"
+msgstr "Кінець PA:"
+
+msgid "PA step:"
+msgstr "Крок PA:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Примітка: Калібрування PA не застосовується до PETG, будь ласка, змініть значення PA відповідно до фактичного друку моделі."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Будь ласка, введіть правильні значення:\nПочаток PA: >= 0.0\nКінець PA: > Початок PA + Крок PA\nКрок PA: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "Початкова об'ємна швидкість:"
+
+msgid "End Volumetric Speed:"
+msgstr "Кінцева об'ємна швидкість:"
+
+msgid "Volumetric Speed step:"
+msgstr "Крок об'ємної швидкості:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Будь ласка, введіть правильні значення:\nПочаткова об'ємна швидкість: >= 0.0\nКінцева об'ємна швидкість: > Початкова об'ємна швидкість + Крок об'ємної швидкості\nКрок об'ємної швидкості: >= 0.01)"

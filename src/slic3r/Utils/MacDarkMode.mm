@@ -46,6 +46,16 @@ void WKWebView_evaluateJavaScript(void * web, wxString const & script, void (*ca
     }];
 }
 
+// old webview
+//y18
+void WKWebView_setTransparentBackground(void * web)
+{
+    WKWebView * webView = (WKWebView*)web;
+    [webView layer].backgroundColor = [NSColor clearColor].CGColor;
+}
+
+// old webview
+
 }
 }
 

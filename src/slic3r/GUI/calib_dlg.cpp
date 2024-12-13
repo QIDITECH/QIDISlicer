@@ -16,7 +16,7 @@ FRF_Calibration_Dlg::FRF_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater
     SetSizer(v_sizer);
 
     // desc
-    std::string setting_desc_message = _u8L("Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier.");
+    wxString setting_desc_message = _L("Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier.");
     auto setting_desc = new wxStaticText(this, wxID_ANY, setting_desc_message, wxDefaultPosition, wxSize(340, -1), wxALIGN_LEFT);
     setting_desc->Wrap(setting_desc->GetClientSize().x);
     v_sizer->Add(setting_desc, 0, wxTOP | wxRIGHT | wxLEFT | wxALIGN_CENTER_VERTICAL, 15);
@@ -147,7 +147,7 @@ PA_Calibration_Dlg::PA_Calibration_Dlg(wxWindow* parent, wxWindowID id, Plater* 
 
     // Note
     auto note_sizer = new wxBoxSizer(wxHORIZONTAL);
-    std::string note_message = _u8L("Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model.");
+    wxString note_message = _L("Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model.");
     auto note_text = new wxStaticText(this, wxID_ANY, note_message, wxDefaultPosition, wxSize(240, -1), wxALIGN_LEFT);
     note_text->Wrap(note_text->GetClientSize().x);
     note_sizer->Add(note_text, 0, wxALL | wxALIGN_CENTER_VERTICAL, 2);

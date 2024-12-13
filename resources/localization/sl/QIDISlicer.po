@@ -28671,3 +28671,195 @@ msgstr "napaka zlib %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Naprava"
+
+msgid "Guide"
+msgstr "Vodič"
+
+msgid "Device Page"
+msgstr "Stran naprave"
+
+msgid "Guide Page"
+msgstr "Stran vodiča"
+
+msgid "&Calibration"
+msgstr "Umerjanje"
+
+msgid "Coarse"
+msgstr "Grobo"
+
+msgid "Fine"
+msgstr "Natančno"
+
+msgid "Pressure Advance"
+msgstr "Napredna kompenzacija pritiska"
+
+msgid "Max Volumetric Speed"
+msgstr "Največja volumetrična hitrost"
+
+msgid "Seam gap"
+msgstr "Reža šiva"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Za zmanjšanje vidnosti šiva pri zaprti ekstrudijski zanki se zanka prekine in skrajša za določeno vrednost.\nTa vrednost je izražena v odstotkih trenutnega premera ekstruderja. Privzeta vrednost za ta parameter je 15."
+
+msgid "Ironing Pattern"
+msgstr "Vzorec likanja"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Zaznaj ozko notranje polno polnjenje"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Ta možnost bo samodejno zaznala ozka notranja polna polnila. Če je omogočena, se bo za to območje uporabil koncentrični vzorec za pospešitev tiskanja. V nasprotnem primeru se privzeto uporabi pravokotni vzorec."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Filtriraj majhne vrhnje vrzeli v polnjenju"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Filtriraj vrzeli, manjše od določenega praga. Ta nastavitev vpliva na zapolnitev vrzeli na zgornji površini."
+
+msgid "Resonance Avoidance"
+msgstr "Izogibanje resonanci"
+
+msgid "Resonance avoidance"
+msgstr "Izogibanje resonanci"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Z zmanjšanjem hitrosti zunanje stene, da se izognemo resonančnemu območju tiskalnika, se izognemo zvonjenju na površini modela.\nTo možnost izklopite pri testiranju zvonjenja."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Hitrost za izogibanje resonanci"
+
+msgid "First layer infill"
+msgstr "Polnjenje prve plasti"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Hitrost polnjenja prve plasti (preskoki med oddaljenimi točkami ekstruzije)."
+
+msgid "First layer travel"
+msgstr "Premiki prve plasti"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Hitrost premikov prve plasti (preskoki med oddaljenimi točkami ekstruzije)."
+
+msgid "Number of slow layers"
+msgstr "Število počasnih plasti"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "Prvih nekaj plasti se tiska počasneje kot običajno. Hitrost se postopoma povečuje linearno skozi določeno število plasti."
+
+msgid "Top surface flow ratio"
+msgstr "Razmerje pretoka zgornje površine"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Ta faktor vpliva na količino materiala za zgornje polno polnjenje. Rahlo ga lahko zmanjšate za gladek zaključek površine."
+
+msgid "Bottom surface flow ratio"
+msgstr "Razmerje pretoka spodnje površine"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Ta faktor vpliva na količino materiala za spodnje polno polnjenje."
+
+msgid "X-Y hole compensation"
+msgstr "Kompenzacija lukenj v X-Y"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Luknje objekta bodo povečane ali zmanjšane v ravnini XY za nastavljeno vrednost. Pozitivna vrednost poveča luknje, negativna vrednost jih zmanjša. Ta funkcija se uporablja za rahlo prilagoditev velikosti ob težavah z montažo."
+
+msgid "X-Y contour compensation"
+msgstr "Kompenzacija konture v X-Y"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Kontura objekta bo povečana ali zmanjšana v ravnini XY za nastavljeno vrednost. Pozitivna vrednost poveča konturo, negativna vrednost jo zmanjša. Ta funkcija se uporablja za rahlo prilagoditev velikosti ob težavah z montažo."
+
+msgid "Elephant foot compensation layers"
+msgstr "Plasti za kompenzacijo efekta 'slonjega stopala'"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "Število plasti, na katerih bo aktivna kompenzacija efekta 'slonjega stopala'. Prva plast bo zmanjšana za vrednost kompenzacije, naslednje plasti pa bodo linearno manj zmanjšane do določene plasti."
+
+msgid "Send"
+msgstr "Pošlji"
+
+msgid "printers at the same time."
+msgstr "tiskalniki hkrati."
+
+msgid "minute each batch."
+msgstr "minuta na vsak paket."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Odvisno je od tega, koliko naprav lahko segrevamo hkrati.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Odvisno je od tega, koliko časa traja, da se ogrevanje zaključi.)"
+
+msgid "Switch to Device tab"
+msgstr "Preklopi na zavihek naprava"
+
+msgid "Switch to Device tab after upload."
+msgstr "Preklopi na zavihek naprava po nalaganju."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "Fizični tiskalnik QIDI Local"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "Fizični tiskalnik QIDI Link"
+
+msgid "Local"
+msgstr "Lokalno"
+
+msgid "Login/Register"
+msgstr "Prijava/Registracija"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Natančna kalibracija pretoka"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Vnesite najboljšo vrednost iz grobe kalibracije, da določite natančnejši množitelj ekstrudiranja."
+
+msgid "Extrusion Multiplier:"
+msgstr "Množitelj ekstrudiranja:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Vnesite veljavne vrednosti:\n 0.5 <= Množitelj ekstrudiranja <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Kalibracija predhodne napetosti"
+
+msgid "PA Line"
+msgstr "PA črta"
+
+msgid "PA Pattern"
+msgstr "PA vzorec"
+
+msgid "PA Tower"
+msgstr "PA stolp"
+
+msgid "Start PA:"
+msgstr "Začetek PA:"
+
+msgid "End PA:"
+msgstr "Konec PA:"
+
+msgid "PA step:"
+msgstr "PA korak:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Opomba: Kalibracija PA ni primerna za PETG, prosimo, prilagodite vrednost PA glede na dejanski tisk modela."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Vnesite veljavne vrednosti:\nZačetek PA: >= 0.0\nKonec PA: > Začetek PA + PA korak\nPA korak: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "Začetna volumetrična hitrost:"
+
+msgid "End Volumetric Speed:"
+msgstr "Koncna volumetrična hitrost:"
+
+msgid "Volumetric Speed step:"
+msgstr "Korak volumetrične hitrosti:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Vnesite veljavne vrednosti:\nZačetna volumetrična hitrost: >= 0.0\nKoncna volumetrična hitrost: > Začetna volumetrična hitrost + Korak volumetrične hitrosti\nKorak volumetrične hitrosti: >= 0.01)"

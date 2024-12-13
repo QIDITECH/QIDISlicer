@@ -197,6 +197,9 @@ struct PresetUpdater::priv
 	// checks existence and downloads resource to vendor or copy from cache to vendor
 	void get_or_copy_missing_resource(const GUI::ArchiveRepository* archive, const std::string& vendor, const std::string& filename, const std::string& repository_id_from_ini) const;
 	void update_index_db();
+
+	//w45
+	bool force_update_config();
 };
 
 PresetUpdater::priv::priv()
@@ -1268,7 +1271,20 @@ PresetUpdater::UpdateResult PresetUpdater::config_update(const Semver& old_slic3
 					break;
 				}
 			}
-			GUI::wxGetApp().plater()->get_notification_manager()->push_notification(new_printer? GUI::NotificationType::PresetUpdateAvailableNewPrinter : GUI::NotificationType::PresetUpdateAvailable);
+			//w45
+			if(new_printer == true)
+				GUI::wxGetApp().plater()->get_notification_manager()->push_notification(GUI::NotificationType::PresetUpdateAvailableNewPrinter);
+			else{
+				if(p->force_update_config()){
+					if (p->perform_updates(std::move(p->waiting_updates), repositories) &&
+					reload_configs_update_gui()) {
+						p->has_waiting_updates = false;
+					}
+				}
+				else {
+					GUI::wxGetApp().plater()->get_notification_manager()->push_notification( GUI::NotificationType::PresetUpdateAvailable);
+				}
+			}
 		}
 		else {
 			BOOST_LOG_TRIVIAL(info) << format("Update of %1% bundles available. Asking for confirmation ...", p->waiting_updates.updates.size());
@@ -1415,6 +1431,56 @@ bool PresetUpdater::install_bundles_rsrc_or_cache_vendor(std::vector<std::string
 	}
 
 	return p->perform_updates(std::move(updates), repositories, snapshot);
+}
+
+//w45
+bool PresetUpdater::priv::force_update_config()
+{
+    fs::path rsrc_ini = rsrc_path / "QIDITechnology.ini";
+
+    if (!fs::exists(rsrc_ini)) {
+        BOOST_LOG_TRIVIAL(error) << "INI file does not exist: " << rsrc_ini.string();
+        return false;
+    }
+
+    std::ifstream file(rsrc_ini.string());
+    if (!file.is_open()) {
+        BOOST_LOG_TRIVIAL(error) << "Failed to open INI file: " << rsrc_ini.string();
+        return false;
+    }
+
+    std::string line;
+    std::string force_update_value;
+
+    while (std::getline(file, line)) {
+        line.erase(0, line.find_first_not_of(" \t"));
+        line.erase(line.find_last_not_of(" \t") + 1);
+
+        if (line.find("force_update") == 0) {
+            auto pos = line.find('=');
+            if (pos != std::string::npos) {
+                force_update_value = line.substr(pos + 1);
+                force_update_value.erase(0, force_update_value.find_first_not_of(" \t"));
+                force_update_value.erase(force_update_value.find_last_not_of(" \t") + 1);
+            }
+            break;
+        }
+    }
+
+    file.close();
+
+    if (force_update_value.empty()) {
+        BOOST_LOG_TRIVIAL(warning) << "force_update not found in INI file.";
+        return false;
+    }
+
+    if (force_update_value == "1") {
+        BOOST_LOG_TRIVIAL(info) << "Force update is enabled in the INI file.";
+        return true;
+    } else {
+        BOOST_LOG_TRIVIAL(info) << "Force update is disabled or invalid in the INI file.";
+        return false;
+    }
 }
 
 void PresetUpdater::on_update_notification_confirm(const SharedArchiveRepositoryVector& repositories)

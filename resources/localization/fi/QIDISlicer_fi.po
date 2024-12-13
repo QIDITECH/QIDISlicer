@@ -27824,3 +27824,207 @@ msgstr "zlib-virhe %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "Laite"
+
+msgid "Guide"
+msgstr "Opas"
+
+msgid "Device Page"
+msgstr "Laitteen sivu"
+
+msgid "Guide Page"
+msgstr "Oppaan sivu"
+
+msgid "&Calibration"
+msgstr "Kalibrointi"
+
+msgid "Coarse"
+msgstr "Raskas"
+
+msgid "Fine"
+msgstr "Hieno"
+
+msgid "Pressure Advance"
+msgstr "Paineennousu"
+
+msgid "Max Volumetric Speed"
+msgstr "Maksimi volyymivirtausnopeus"
+
+msgid "Seam gap"
+msgstr "Sauman rako"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "Sauman näkyvyyden vähentämiseksi suljetussa silmukkassa, silmukka keskeytetään ja lyhennetään määritellyllä määrällä.\nTämä määrä on prosentteina nykyisestä suuttimen halkaisijasta. Oletusarvo tälle asetukselle on 15."
+
+msgid "Ironing Pattern"
+msgstr "Silitysmuoto"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Tunnista kapea sisäinen kiinteä täyttö"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Tämä vaihtoehto tunnistaa automaattisesti kapean sisäisen kiinteän täytön alueen. Jos tämä on käytössä, alueelle käytetään keskeistä kuviota tulostuksen nopeuttamiseksi. Muuten käytetään oletuksena suoraviivaista kuviota."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Suodata pienet yläpuolen aukot täytöstä"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Suodatin pois aukot, jotka ovat pienempiä kuin määritetty kynnysarvo. Tämä asetus vaikuttaa yläpinnan aukon täyttöön."
+
+msgid "Resonance Avoidance"
+msgstr "Resonanssin välttäminen"
+
+msgid "Resonance avoidance"
+msgstr "Resonanssin välttäminen"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "Vähentämällä ulkoseinän nopeutta välttääkseen tulostimen resonanssialuetta, estetään kellojen ääni mallin pinnalla.\nPoista tämä vaihtoehto käytöstä testatessasi soimista."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Resonanssin välttämisen nopeus"
+
+msgid "First layer infill"
+msgstr "Ensimmäisen kerroksen täyttö"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Ensimmäisen kerroksen täyttönopeus (hypyt kaukaisten suuttimien pisteiden välillä)."
+
+msgid "First layer travel"
+msgstr "Ensimmäisen kerroksen liikkuminen"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Ensimmäisen kerroksen liikkumisen nopeus (hypyt kaukaisten suuttimien pisteiden välillä)."
+
+msgid "Number of slow layers"
+msgstr "Hitaiden kerrosten määrä"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "Ensimmäiset kerrokset tulostetaan hitaammin kuin tavallisesti. Nopeus kasvaa asteittain lineaarisesti määritellyn kerrosmäärän yli."
+
+msgid "Top surface flow ratio"
+msgstr "Yläpinnan virtaus-suhde"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Tämä tekijä vaikuttaa materiaalin määrään yläpinnan kiinteässä täytössä. Voit vähentää sitä hieman saadaksesi tasaisen pinnan."
+
+msgid "Bottom surface flow ratio"
+msgstr "Alapinnan virtaus-suhde"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Tämä tekijä vaikuttaa materiaalin määrään alapinnan kiinteässä täytössä"
+
+msgid "X-Y hole compensation"
+msgstr "X-Y aukon kompensointi"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Objektin aukot kasvavat tai kutistuvat XY-tasossa määritellyn arvon mukaan. Positiivinen arvo suurentaa aukkoja. Negatiivinen arvo pienentää aukkoja. Tätä toimintoa käytetään koon hienosäätöön, kun objektissa on kokoamisongelmia."
+
+msgid "X-Y contour compensation"
+msgstr "X-Y ääriviivan kompensointi"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Objektin ääriviivat kasvavat tai kutistuvat XY-tasossa määritellyn arvon mukaan. Positiivinen arvo suurentaa ääriviivoja. Negatiivinen arvo pienentää ääriviivoja. Tätä toimintoa käytetään koon hienosäätöön, kun objektissa on kokoamisongelmia."
+
+msgid "Elephant foot compensation layers"
+msgstr "Elefantin jalan kompensointikerrokset"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "Kerrosten määrä, joilla elefantin jalan kompensointi on aktiivinen. Ensimmäinen kerros kutistetaan elefantin jalan kompensointiarvon mukaan, sitten seuraavat kerrokset kutistuvat lineaarisesti vähemmän, aina kerrokseen asti, joka on määritetty tälle arvolle."
+
+msgid "Precise Z height"
+msgstr "Tarkka Z-korkeus"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "Ota tämä käyttöön saadaksesi tarkan Z-korkeuden objektista leikkaamisen jälkeen. Se saa tarkan objektin korkeuden hienosäätämällä viimeisten kerrosten korkeuksia. Huomaa, että tämä on kokeellinen parametri."
+
+msgid "Precise wall"
+msgstr "Tarkka seinä"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "Paranna kuoren tarkkuutta säätämällä ulkoseinän väliä. Tämä parantaa myös kerrosten johdonmukaisuutta.\nHuomaa: Tämä asetus on käytössä vain, jos seinämäjärjestys on asetettu Sisään-Poispäin."
+
+msgid "Send"
+msgstr "Lähetä"
+
+msgid "printers at the same time."
+msgstr "tulostimet samanaikaisesti."
+
+msgid "minute each batch."
+msgstr "minuutti kutakin erää kohden."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Se riippuu siitä, kuinka monta laitetta voidaan lämmittää samanaikaisesti.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Se riippuu siitä, kuinka kauan lämmityksen suorittaminen vie aikaa.)"
+
+msgid "Switch to Device tab"
+msgstr "Siirry laite-välilehteen"
+
+msgid "Switch to Device tab after upload."
+msgstr "Siirry laite-välilehteen latauksen jälkeen."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Localin fyysinen tulostin"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Linkin fyysinen tulostin"
+
+msgid "Local"
+msgstr "Paikallinen"
+
+msgid "Login/Register"
+msgstr "Kirjaudu sisään/rekisteröidy"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Virtausnopeuden hienosäätökalibrointi"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Syötä paras arvo karkeasta kalibroinnista tarkemman ekstruusiokerroin määrittämiseksi."
+
+msgid "Extrusion Multiplier:"
+msgstr "Ekstruusiokerroin:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Syötä kelvolliset arvot:\n 0.5 <= Ekstruusiokerroin <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Paineen etukäteismaksun kalibrointi"
+
+msgid "PA Line"
+msgstr "PA-linja"
+
+msgid "PA Pattern"
+msgstr "PA-kuvio"
+
+msgid "PA Tower"
+msgstr "PA-torni"
+
+msgid "Start PA:"
+msgstr "Aloita PA:"
+
+msgid "End PA:"
+msgstr "Päättynyt PA:"
+
+msgid "PA step:"
+msgstr "PA-vaihe:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Huomautus: PA-kalibrointi ei ole sovellettavissa PETG:hen, muokkaa PA-arvoa mallin todellisen tulostuksen mukaan."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Syötä kelvolliset arvot:\nAloita PA: >= 0.0\nPäättynyt PA: > Aloita PA + PA-vaihe\nPA-vaihe: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "Alkuperäinen tilavuusnopeus:"
+
+msgid "End Volumetric Speed:"
+msgstr "Loppu tilavuusnopeus:"
+
+msgid "Volumetric Speed step:"
+msgstr "Tilavuusnopeusvaihe:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Syötä kelvolliset arvot:\nAlkuperäinen tilavuusnopeus: >= 0.0\nLoppu tilavuusnopeus: > Alkuperäinen tilavuusnopeus + Tilavuusnopeusvaihe\nTilavuusnopeusvaihe: >= 0.01)"

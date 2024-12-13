@@ -560,7 +560,7 @@ bool GLGizmoEmboss::init_create(ModelVolumeType volume_type)
     m_text_lines.reset(); // remove not current text lines
 
     // set default text
-    m_text = _u8L("Embossed text");
+    m_text = "Embossed text";
     return true;
 }
 

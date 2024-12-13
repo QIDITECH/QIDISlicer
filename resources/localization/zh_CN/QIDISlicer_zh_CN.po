@@ -80,7 +80,7 @@ msgstr "间隙填充"
 #: src/libslic3r/ExtrusionRole.cpp:51 src/libslic3r/ExtrusionRole.cpp:81
 #: src/slic3r/GUI/GCodeViewer.cpp:290
 msgid "Skirt/Brim"
-msgstr "裙子/围裙"
+msgstr "环绕/边缘"
 
 #: src/libslic3r/ExtrusionRole.cpp:52 src/libslic3r/ExtrusionRole.cpp:83
 #: src/libslic3r/PrintConfig.cpp:915 src/libslic3r/PrintConfig.cpp:2418
@@ -683,7 +683,7 @@ msgstr "\"G92E0\" 出现在 layer_gcode 中，这与绝对挤出机寻址不兼�
 
 #: src/libslic3r/Print.cpp:1015
 msgid "Generating skirt and brim"
-msgstr "生成环绕和裙边"
+msgstr "生成环绕和边缘"
 
 #: src/libslic3r/Print.cpp:1076
 msgid "Exporting G-code"
@@ -1412,13 +1412,13 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:772
 msgid "Brim width"
-msgstr "裙边宽度"
+msgstr "边缘宽度"
 
 #: src/libslic3r/PrintConfig.cpp:773 src/libslic3r/PrintConfig.cpp:784
 #: src/libslic3r/PrintConfig.cpp:797 src/slic3r/GUI/GUI_Factories.cpp:168
 #: src/slic3r/GUI/Tab.cpp:1505
 msgid "Skirt and brim"
-msgstr "环绕和裙边"
+msgstr "环绕和边缘"
 
 #: src/libslic3r/PrintConfig.cpp:774
 msgid ""
@@ -1431,7 +1431,7 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:783
 msgid "Brim type"
-msgstr "裙边类型"
+msgstr "边缘类型"
 
 #: src/libslic3r/PrintConfig.cpp:785
 msgid ""
@@ -1441,29 +1441,29 @@ msgstr "边缘将在第一层上的每个对象周围打印的位置。"
 
 #: src/libslic3r/PrintConfig.cpp:787
 msgid "No brim"
-msgstr "没有裙边"
+msgstr "没有边缘"
 
 #: src/libslic3r/PrintConfig.cpp:788
 msgid "Outer brim only"
-msgstr "仅外部裙边"
+msgstr "仅外部边缘"
 
 #: src/libslic3r/PrintConfig.cpp:789
 msgid "Inner brim only"
-msgstr "仅内部裙边"
+msgstr "仅内部边缘"
 
 #: src/libslic3r/PrintConfig.cpp:790
 msgid "Outer and inner brim"
-msgstr "内部和外部裙边"
+msgstr "内部和外部边缘"
 
 #: src/libslic3r/PrintConfig.cpp:796
 msgid "Brim separation gap"
-msgstr "裙边分离间隙"
+msgstr "边缘分离间隙"
 
 #: src/libslic3r/PrintConfig.cpp:798
 msgid ""
 "Offset of brim from the printed object. The offset is applied after the "
 "elephant foot compensation."
-msgstr "裙边与印刷品的偏移量。偏移在大象脚补偿后应用。"
+msgstr "边缘与印刷品的偏移量。偏移在大象脚补偿后应用。"
 
 #: src/libslic3r/PrintConfig.cpp:805
 msgid "Colorprint height"
@@ -3228,7 +3228,7 @@ msgid ""
 "specified amount of filament on the bottom layer. For multi-extruder "
 "machines, this minimum applies to each extruder."
 msgstr ""
-"生成不低于在底层消耗指定数量的耗材所需的裙圈数。对于多挤出机,此最小值适用于每"
+"生成不低于在底层消耗指定数量的耗材所需的环绕圈数。对于多挤出机,此最小值适用于每"
 "个挤出机。"
 
 #: src/libslic3r/PrintConfig.cpp:2210
@@ -3363,7 +3363,7 @@ msgstr "轮廓挤出机"
 #: src/libslic3r/PrintConfig.cpp:2321
 msgid ""
 "The extruder to use when printing perimeters and brim. First extruder is 1."
-msgstr "打印轮廓和外围裙边时使用的挤出机。第一个挤出机为 1。"
+msgstr "打印轮廓和外围边缘时使用的挤出机。第一个挤出机为 1。"
 
 #: src/libslic3r/PrintConfig.cpp:2330
 msgid ""
@@ -3778,12 +3778,12 @@ msgstr "接缝的首选方向 - 抖动"
 
 #: src/libslic3r/PrintConfig.cpp:2669
 msgid "Distance from brim/object"
-msgstr "与裙边/物体的距离"
+msgstr "与边缘/物体的距离"
 
 #: src/libslic3r/PrintConfig.cpp:2670
 msgid ""
 "Distance between skirt and brim (when draft shield is not used) or objects."
-msgstr "环绕和裙边之间的距离（不使用导流板时）或物体。"
+msgstr "环绕和斌元之间的距离（不使用导流板时）或物体。"
 
 #: src/libslic3r/PrintConfig.cpp:2676
 msgid "Skirt height"
@@ -3806,10 +3806,10 @@ msgid ""
 "This is useful to protect an ABS or ASA print from warping and detaching "
 "from print bed due to wind draft."
 msgstr ""
-"在拔模护罩处于活动状态时，裙子将在距离物体一定距离（可能与边缘相交）处打"
+"在拔模护罩处于活动状态时，环绕将在距离物体一定距离（可能与边缘相交）处打"
 "印。\n"
-"Enabled=裙子与最高的印刷品一样高。\n"
-"Limited=裙摆的高度与裙摆高度相同。\n"
+"Enabled=环绕与最高的印刷品一样高。\n"
+"Limited=环绕的高度与环绕高度相同。\n"
 "这有助于保护 ABS 或 ASA 印刷品不因风的牵伸而翘曲或从打印床上脱落。"
 
 #: src/libslic3r/PrintConfig.cpp:2690
@@ -3826,7 +3826,7 @@ msgstr "圈数（最小值）"
 
 #: src/libslic3r/PrintConfig.cpp:2698
 msgid "Skirt Loops"
-msgstr "裙边圈数"
+msgstr "环绕圈数"
 
 #: src/libslic3r/PrintConfig.cpp:2699
 msgid ""
@@ -3834,8 +3834,8 @@ msgid ""
 "set, the number of loops might be greater than the one configured here. Set "
 "this to zero to disable skirt completely."
 msgstr ""
-"裙边的循环数。如果设置了\"最小挤出长度\"选项，则循环数可能大于此处配置的循环"
-"数。设置为零以完全禁用裙边。"
+"环绕的循环数。如果设置了\"最小挤出长度\"选项，则循环数可能大于此处配置的循环"
+"数。设置为零以完全禁用环绕。"
 
 #: src/libslic3r/PrintConfig.cpp:2707
 msgid "Slow down if layer print time is below"
@@ -3942,8 +3942,8 @@ msgid ""
 "when printing more than one single object."
 msgstr ""
 "打印单壁对象时，此功能将逐渐升高Z，以移除任何可见接缝。此选项需要单个周长、无"
-"填充、无顶部实体层和无支撑材料。您仍然可以设置任意数量的底部实体层以及裙子/帽"
-"檐环。当打印多个对象时，它将不起作用。"
+"填充、无顶部实体层和无支撑材料。您仍然可以设置任意数量的底部实体层以及环绕/边缘"
+"环。当打印多个对象时，它将不起作用。"
 
 #: src/libslic3r/PrintConfig.cpp:2806
 msgid "Temperature variation"
@@ -4214,7 +4214,7 @@ msgid ""
 "The extruder to use when printing support material, raft and skirt (1+, 0 to "
 "use the current extruder to minimize tool changes)."
 msgstr ""
-"打印支撑材料、基座和裙边时使用的挤出机 (1+,0 用于使用当前挤出机以最大限度地减"
+"打印支撑材料、基座和环绕时使用的挤出机 (1+,0 用于使用当前挤出机以最大限度地减"
 "少工具切换)。"
 
 #: src/libslic3r/PrintConfig.cpp:3030
@@ -4766,7 +4766,7 @@ msgstr "相对于 x 轴擦料塔旋转角度。"
 
 #: src/libslic3r/PrintConfig.cpp:3508 src/libslic3r/PrintConfig.cpp:3509
 msgid "Wipe tower brim width"
-msgstr "擦拭塔裙边宽度"
+msgstr "擦拭塔边缘宽度"
 
 #: src/libslic3r/PrintConfig.cpp:3516
 msgid "Stabilization cone apex angle"
@@ -5566,7 +5566,7 @@ msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:4362
 msgid "Pad brim size"
-msgstr "垫裙边尺寸"
+msgstr "垫边缘尺寸"
 
 #: src/libslic3r/PrintConfig.cpp:4363
 msgid "How far should the pad extend around the contained geometry"
@@ -9073,13 +9073,13 @@ msgstr "任何地方"
 #: src/slic3r/GUI/FrequentlyChangedParameters.cpp:155
 #: src/slic3r/GUI/Tab.cpp:1514
 msgid "Brim"
-msgstr "裙边"
+msgstr "边缘"
 
 #: src/slic3r/GUI/FrequentlyChangedParameters.cpp:157
 msgid ""
 "This flag enables the brim that will be printed around each object on the "
 "first layer."
-msgstr "此标志启用将在第一层上的每个对象周围打印裙边。"
+msgstr "此标志启用将在第一层上的每个对象周围打印边缘。"
 
 #: src/slic3r/GUI/FrequentlyChangedParameters.cpp:165
 msgid "Purging volumes"
@@ -27051,7 +27051,7 @@ msgstr "视图"
 #. TRANSLATORS: System cursor name
 #: ../src/propgrid/advprops.cpp:1777
 msgid "Wait"
-msgstr ""
+msgstr "等待"
 
 #. TRANSLATORS: System cursor name
 #: ../src/propgrid/advprops.cpp:1779
@@ -28179,3 +28179,192 @@ msgstr "zlib 错误 %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "设备"
+
+msgid "Guide"
+msgstr "指南"
+
+msgid "Device Page"
+msgstr "设备页面"
+
+msgid "Guide Page"
+msgstr "指南页面"
+
+msgid "&Calibration"
+msgstr "校准"
+
+msgid "Coarse"
+msgstr "粗略"
+
+msgid "Fine"
+msgstr "精细"
+
+msgid "Pressure Advance"
+msgstr "压力提前量"
+
+msgid "Seam gap"
+msgstr "接缝间隙"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "为了减少封闭回路挤出中接缝的可见性，回路会被中断并缩短一定的量。\n该量以当前挤出机直径的百分比表示。此参数的默认值为15。"
+
+msgid "Ironing Pattern"
+msgstr "熨平模式"
+
+msgid "Detect narrow internal solid infill"
+msgstr "检测狭窄的内部实心填充"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "此选项会自动检测狭窄的内部实心填充区域。如果启用，将使用同心模式加快打印速度。否则，将默认使用直线模式。"
+
+msgid "Filter out tiny top gaps infill"
+msgstr "过滤微小的顶部空隙填充"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "过滤掉小于指定阈值的空隙。此设置会影响顶部表面的空隙填充。"
+
+msgid "Resonance Avoidance"
+msgstr "共振规避"
+
+msgid "Resonance avoidance"
+msgstr "共振规避"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "通过降低外壁的速度以避开打印机的共振区域，可以避免模型表面的振纹。\n进行振纹测试时请关闭此选项。"
+
+msgid "Resonance Avoidance Speed"
+msgstr "共振规避速度"
+
+msgid "First layer infill"
+msgstr "首层填充"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "首层填充速度（远距离挤出点之间的跳跃）。"
+
+msgid "First layer travel"
+msgstr "首层移动"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "首层移动速度（远距离挤出点之间的跳跃）。"
+
+msgid "Number of slow layers"
+msgstr "缓慢打印的层数"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "前几层的打印速度比正常慢。速度会在指定的层数内逐渐线性增加。"
+
+msgid "Top surface flow ratio"
+msgstr "顶部表面流量比例"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "此因子会影响顶部实心填充的材料量。您可以稍微减少它以获得平滑的表面效果。"
+
+msgid "Bottom surface flow ratio"
+msgstr "底部表面流量比例"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "此因子会影响底部实心填充的材料量。"
+
+msgid "X-Y hole compensation"
+msgstr "X-Y孔补偿"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "物体的孔会根据配置值在XY平面上增大或缩小。正值使孔变大，负值使孔变小。当物体存在装配问题时，此功能可用来稍微调整尺寸。"
+
+msgid "X-Y contour compensation"
+msgstr "X-Y轮廓补偿"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "物体的轮廓会根据配置值在XY平面上增大或缩小。正值使轮廓变大，负值使轮廓变小。当物体存在装配问题时，此功能可用来稍微调整尺寸。"
+
+msgid "Elephant foot compensation layers"
+msgstr "象脚补偿层数"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "象脚补偿将生效的层数。第一层将按象脚补偿值缩小，接下来的层会逐渐线性减少缩小，直到指定的层。"
+
+msgid "Send"
+msgstr "发送"
+
+msgid "printers at the same time."
+msgstr "同时使用打印机。"
+
+msgid "minute each batch."
+msgstr "每批次一分钟。"
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(这取决于能同时加热的设备数量。)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(这取决于完成加热所需的时间。)"
+
+msgid "Switch to Device tab"
+msgstr "切换到设备标签"
+
+msgid "Switch to Device tab after upload."
+msgstr "上传后切换到设备标签。"
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Local 的物理打印机"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Link 的物理打印机"
+
+msgid "Local"
+msgstr "本地"
+
+msgid "Login/Register"
+msgstr "登录/注册"
+
+msgid "Flowrate Fine Calibration"
+msgstr "流量精细校准"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "请输入粗略校准中最佳的数值，以进一步确定更精确的挤出倍增系数。"
+
+msgid "Extrusion Multiplier:"
+msgstr "挤出倍增系数："
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "请输入有效的数值：\n 0.5 <= 挤出倍增系数 <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "压力提前校准"
+
+msgid "PA Line"
+msgstr "PA 线"
+
+msgid "PA Pattern"
+msgstr "PA 图案"
+
+msgid "PA Tower"
+msgstr "PA 塔"
+
+msgid "Start PA:"
+msgstr "开始 PA："
+
+msgid "End PA:"
+msgstr "结束 PA："
+
+msgid "PA step:"
+msgstr "PA 步长："
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "注意：PA 校准不适用于 PETG，请根据模型实际打印调整 PA 值。"
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "请输入有效的数值：\n开始 PA: >= 0.0\n结束 PA: > 开始 PA + PA 步长\nPA 步长: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "起始体积速度："
+
+msgid "End Volumetric Speed:"
+msgstr "结束体积速度："
+
+msgid "Volumetric Speed step:"
+msgstr "体积速度步长："
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "请输入有效的数值：\n起始体积速度: >= 0.0\n结束体积速度: > 起始体积速度 + 体积速度步长\n体积速度步长: >= 0.01)"

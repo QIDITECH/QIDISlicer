@@ -29303,3 +29303,207 @@ msgstr "zlib hiba %d"
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr ""
+
+msgid "Device"
+msgstr "Eszköz"
+
+msgid "Guide"
+msgstr "Útmutató"
+
+msgid "Device Page"
+msgstr "Eszköz oldal"
+
+msgid "Guide Page"
+msgstr "Útmutató oldal"
+
+msgid "&Calibration"
+msgstr "Kalibrálás"
+
+msgid "Coarse"
+msgstr "Durva"
+
+msgid "Fine"
+msgstr "Finom"
+
+msgid "Pressure Advance"
+msgstr "Nyomáselőrejelzés"
+
+msgid "Seam gap"
+msgstr "Illesztési rés"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "A varrás láthatóságának csökkentése érdekében a zárt hurkú extrudálásban a hurkot megszakítják és a megadott mértékben lerövidítik.\nEz a mérték az aktuális extruder átmérőjének százalékában van megadva. A paraméter alapértelmezett értéke 15."
+
+msgid "Ironing Pattern"
+msgstr "Vasalási minta"
+
+msgid "Detect narrow internal solid infill"
+msgstr "Képesség a keskeny belső szilárd kitöltés érzékelésére"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "Ez az opció automatikusan érzékeli a keskeny belső szilárd kitöltési területeket. Ha engedélyezve van, koncentrikus mintát használ a terület gyorsabb nyomtatására. Ellenkező esetben alapértelmezés szerint rectilineáris mintát alkalmaz."
+
+msgid "Filter out tiny top gaps infill"
+msgstr "Kiszűrni a apró felső réseket a kitöltésből"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "Szűrje ki a kisebb réseket, mint a megadott küszöbérték. Ez a beállítás hatással van a felső felület réskitöltésére."
+
+msgid "Resonance Avoidance"
+msgstr "Rezonancia elkerülése"
+
+msgid "Resonance avoidance"
+msgstr "Rezonancia elkerülés"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "A külső fal sebességének csökkentésével a nyomtató rezonancia zónájának elkerülésére elkerülhetőek a modell felszínén keletkező zörgés.\nKérjük, kapcsolja ki ezt az opciót, amikor zörgést tesztel."
+
+msgid "Resonance Avoidance Speed"
+msgstr "Rezonancia elkerülési sebesség"
+
+msgid "First layer infill"
+msgstr "Első réteg kitöltése"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "Első réteg kitöltési sebesség (ugrások távoli extrudáló pontok között)."
+
+msgid "First layer travel"
+msgstr "Első réteg mozgás"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "Első réteg mozgási sebessége (ugrások távoli extrudáló pontok között)."
+
+msgid "Number of slow layers"
+msgstr "Lassú rétegek száma"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "Az első néhány réteg lassabban kerül kinyomtatásra, mint a normál sebességgel. A sebesség fokozatosan, lineárisan nő a megadott rétegszám felett."
+
+msgid "Top surface flow ratio"
+msgstr "Felső felület áramlási arány"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "Ez a tényező befolyásolja a felső szilárd kitöltéshez szükséges anyagmennyiséget. Ezt kissé csökkentheti a sima felület elérése érdekében."
+
+msgid "Bottom surface flow ratio"
+msgstr "Alsó felület áramlási arány"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "Ez a tényező befolyásolja az alsó szilárd kitöltéshez szükséges anyagmennyiséget"
+
+msgid "X-Y hole compensation"
+msgstr "X-Y lyukkompenzáció"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Az objektum lyukait az XY síkban a beállított érték szerint növelik vagy csökkentik. Pozitív érték nagyobb lyukakat, negatív érték kisebb lyukakat eredményez. Ezt a funkciót a méret finomhangolására használják, ha az objektumnak összeállítási problémái vannak."
+
+msgid "X-Y contour compensation"
+msgstr "X-Y kontúrok kompenzációja"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "Az objektum kontúrjait az XY síkban a beállított érték szerint növelik vagy csökkentik. Pozitív érték nagyobb kontúrokat, negatív érték kisebb kontúrokat eredményez. Ezt a funkciót a méret finomhangolására használják, ha az objektumnak összeállítási problémái vannak."
+
+msgid "Elephant foot compensation layers"
+msgstr "Elefánt láb kompenzációs rétegek"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "Az elefánt láb kompenzációs rétegek száma. Az első réteget az elefánt láb kompenzációs értéke alapján csökkentik, majd a következő rétegeket fokozatosan, lineárisan csökkentik, egészen a megadott rétegig."
+
+msgid "Precise Z height"
+msgstr "Pontos Z magasság"
+
+msgid "Enable this to get precise z height of object after slicing. It will get the precise object height by fine-tuning the layer heights of the last few layers. Note that this is an experimental parameter."
+msgstr "Engedélyezze ezt, hogy pontos Z magasságot kapjon az objektumról a szeletelés után. A pontos objektummagasságot a legutolsó néhány réteg magasságának finomhangolásával éri el. Vegye figyelembe, hogy ez egy kísérleti paraméter."
+
+msgid "Precise wall"
+msgstr "Pontos fal"
+
+msgid "Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr "A héj pontosságának javítása azáltal, hogy beállítja a külső falak közötti távolságot. Ez javítja a rétegek következetességét is.\nMegjegyzés: Ez a beállítás csak akkor lesz érvényes, ha a falak sorrendje belső-külső típusúra van konfigurálva."
+
+msgid "Send"
+msgstr "Küldés"
+
+msgid "printers at the same time."
+msgstr "nyomtatók egyszerre."
+
+msgid "minute each batch."
+msgstr "perc minden egyes tételhez."
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(Ez attól függ, hány eszköz képes egyszerre felmelegedni.)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(Ez attól függ, hogy mennyi időbe telik a fűtés befejezése.)"
+
+msgid "Switch to Device tab"
+msgstr "Váltás az Eszköz fülre"
+
+msgid "Switch to Device tab after upload."
+msgstr "Váltás az Eszköz fülre a feltöltés után."
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Local fizikai nyomtatója"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Link fizikai nyomtatója"
+
+msgid "Local"
+msgstr "Helyi"
+
+msgid "Login/Register"
+msgstr "Bejelentkezés/Regisztráció"
+
+msgid "Flowrate Fine Calibration"
+msgstr "Áramlási sebesség finom kalibrálása"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "Kérjük, adja meg a durva kalibrálás legjobb értékét a pontosabb extrúziós szorzó meghatározásához."
+
+msgid "Extrusion Multiplier:"
+msgstr "Extrúziós szorzó:"
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "Kérjük, adjon meg érvényes értékeket:\n 0.5 <= Extrúziós szorzó <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "Nyomás előrehaladás kalibrálása"
+
+msgid "PA Line"
+msgstr "PA vonal"
+
+msgid "PA Pattern"
+msgstr "PA minta"
+
+msgid "PA Tower"
+msgstr "PA torony"
+
+msgid "Start PA:"
+msgstr "PA indítása:"
+
+msgid "End PA:"
+msgstr "PA vége:"
+
+msgid "PA step:"
+msgstr "PA lépés:"
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "Megjegyzés: A PA kalibrálás nem alkalmazható PETG-re, kérjük, módosítsa a PA értékét a modell tényleges nyomtatása szerint."
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "Kérjük, adjon meg érvényes értékeket:\nPA indítása: >= 0.0\nPA vége: > PA indítása + PA lépés\nPA lépés: >= 0.001)"
+
+msgid "Max Volumetric Speed"
+msgstr "Maximális térfogati sebesség"
+
+msgid "Start Volumetric Speed:"
+msgstr "Térfogati sebesség indítása:"
+
+msgid "End Volumetric Speed:"
+msgstr "Térfogati sebesség vége:"
+
+msgid "Volumetric Speed step:"
+msgstr "Térfogati sebesség lépés:"
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "Kérjük, adjon meg érvényes értékeket:\nTérfogati sebesség indítása: >= 0.0\nTérfogati sebesség vége: > Térfogati sebesség indítása + Térfogati sebesség lépés\nTérfogati sebesség lépés: >= 0.01)"

@@ -27273,3 +27273,329 @@ msgstr ""
 #: ../src/richtext/richtextbulletspage.cpp:288
 msgid "~"
 msgstr ""
+
+msgid "Device"
+msgstr ""
+
+msgid "Guide"
+msgstr ""
+
+msgid "Device Page"
+msgstr ""
+
+msgid "Guide Page"
+msgstr ""
+
+msgid "&Calibration"
+msgstr ""
+
+msgid "Coarse"
+msgstr ""
+
+msgid "Fine"
+msgstr ""
+
+msgid "Pressure Advance"
+msgstr ""
+
+msgid "Max Volumetric Speed"
+msgstr ""
+
+msgid "Seam gap"
+msgstr ""
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\n" "This amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr ""
+
+msgid "Ironing Pattern"
+msgstr ""
+
+msgid "Detect narrow internal solid infill"
+msgstr ""
+
+msgid ""
+"This option will auto detect narrow internal solid infill area."
+" If enabled, concentric pattern will be used for the area to speed printing up."
+" Otherwise, rectilinear pattern is used defaultly."
+msgstr ""
+
+msgid "Filter out tiny top gaps infill"
+msgstr ""
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affact top surface's gap infill"
+msgstr ""
+
+msgid "Resonance Avoidance"
+msgstr ""
+
+msgid "Resonance avoidance"
+msgstr ""
+
+msgid ""
+"By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\n"
+"Please turn this option off when testing ringing."
+msgstr ""
+
+msgid "Resonance Avoidance Speed"
+msgstr ""
+
+msgid "First layer infill"
+msgstr ""
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr ""
+
+msgid "First layer travel"
+msgstr ""
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr ""
+
+msgid "Number of slow layers"
+msgstr ""
+
+msgid ""
+"The first few layers are printed slower than normal. "
+"The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr ""
+
+msgid "Top surface flow ratio"
+msgstr ""
+
+msgid ""
+"This factor affects the amount of material for top solid infill. "
+"You can decrease it slightly to have smooth surface finish"
+msgstr ""
+
+msgid "Bottom surface flow ratio"
+msgstr ""
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr ""
+
+msgid "X-Y hole compensation"
+msgstr ""
+
+msgid ""
+"Holes of object will be grown or shrunk in XY plane by the configured value. "
+"Positive value makes holes bigger. Negative value makes holes smaller. "
+"This function is used to adjust size slightly when the object has assembling issue"
+msgstr ""
+
+msgid "X-Y contour compensation"
+msgstr ""
+
+msgid ""
+"Contour of object will be grown or shrunk in XY plane by the configured value. "
+"Positive value makes contour bigger. Negative value makes contour smaller. "
+"This function is used to adjust size slightly when the object has assembling issue"
+msgstr ""
+
+msgid "Elephant foot compensation layers"
+msgstr ""
+
+msgid ""
+"The number of layers on which the elephant foot compensation will be active. "
+"The first layer will be shrunk by the elephant foot compensation value, then "
+"the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr ""
+
+msgid "Precise Z height"
+msgstr ""
+
+msgid ""
+"Enable this to get precise z height of object after slicing. "
+"It will get the precise object height by fine-tuning the layer heights of the last few layers. "
+"Note that this is an experimental parameter."
+msgstr ""
+
+msgid "Precise wall"
+msgstr ""
+
+msgid ""
+"Improve shell precision by adjusting outer wall spacing. This also improves layer consistency.\nNote: This setting "
+"will only take effect if the wall sequence is configured to Inner-Outer"
+msgstr ""
+
+msgid "Enable pressure advance"
+msgstr ""
+
+msgid "Enable pressure advance, auto calibration result will be overwriten once enabled."
+msgstr ""
+
+msgid "Pressure advance"
+msgstr ""
+
+msgid "Pressure advance(Klipper) AKA Linear advance factor(Marlin)"
+msgstr ""
+
+msgid "Smooth Time"
+msgstr ""
+
+msgid "PSmooth Time(Klipper) AKA Linear advance factor(Marlin)"
+msgstr ""
+
+msgid "Seal"
+msgstr ""
+
+msgid ""
+"Sealing box printing will be more stable and reliable, but the heat dissipation of the model will be poor. "
+"Determine whether to unpack and print according to the actual situation."
+msgstr ""
+
+msgid "This setting represents the PWM your rapid cooling fan needs to work when the printing is sealing."
+msgstr ""
+
+msgid "Rapido Cooling Fan Speed"
+msgstr ""
+
+msgid "Unseal"
+msgstr ""
+
+msgid "This setting represents the PWM your rapid cooling fan needs to work when the printing is unsealing."
+msgstr ""
+
+msgid "Chamber Fan Speed"
+msgstr ""
+
+msgid "This setting represents the PWM your volume fan needs to work."
+msgstr ""
+
+msgid "Disable rapid cooling fan for the first"
+msgstr ""
+
+msgid ""
+"You can set this to a positive value to disable rapid cooling fan at all "
+"during the first layers, so that it does not make adhesion worse."
+msgstr ""
+
+msgid "Don't slow down outer walls"
+msgstr ""
+
+msgid ""
+"If enabled, this setting will ensure external perimeters are not slowed down to meet the minimum layer time. "
+"This is particularly helpful in the below scenarios:\n\n "
+"1. To avoid changes in shine when printing glossy filaments \n"
+"2. To avoid changes in external wall speed which may create slight wall artefacts that appear like z banding \n"
+"3. To avoid printing at speeds which cause VFAs (fine artefacts) on the external walls\n\n"
+msgstr ""
+
+msgid "Wipe Distance"
+msgstr ""
+
+msgid "Discribe how long the nozzle will move along the last path when retracting."
+msgstr ""
+
+msgid "Accessory"
+msgstr ""
+
+msgid "Auxiliary Fan"
+msgstr ""
+
+msgid "Enable rapid cooling fan control."
+msgstr ""
+
+msgid "Chamber Fan"
+msgstr ""
+
+msgid "Enable chamber fan control."
+msgstr ""
+
+msgid "Wipe Device"
+msgstr ""
+
+msgid "Enable wipe device."
+msgstr ""
+
+msgid "Send"
+msgstr ""
+
+msgid "printers at the same time."
+msgstr ""
+
+msgid "minute each batch."
+msgstr ""
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr ""
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr ""
+
+msgid "Switch to Device tab"
+msgstr ""
+
+msgid "Switch to Device tab after upload."
+msgstr ""
+
+msgid "QIDI Local's Physical Printer"
+msgstr ""
+
+msgid "QIDI Link's Physical Printer"
+msgstr ""
+
+msgid "Local"
+msgstr ""
+
+msgid "Login/Register"
+msgstr ""
+
+msgid "Flowrate Fine Calibration"
+msgstr ""
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr ""
+
+msgid "Extrusion Multiplier:"
+msgstr ""
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr ""
+
+msgid "Pressure Advance Calibration"
+msgstr ""
+
+msgid "PA Line"
+msgstr ""
+
+msgid "PA Pattern"
+msgstr ""
+
+msgid "PA Tower"
+msgstr ""
+
+msgid "Start PA:"
+msgstr ""
+
+msgid "End PA:"
+msgstr ""
+
+msgid "mm/s"
+msgstr ""
+
+msgid "PA step:"
+msgstr ""
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr ""
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr ""
+
+msgid "Max Volumetric Speed"
+msgstr ""
+
+msgid "Start Volumetric Speed:"
+msgstr ""
+
+msgid "mm³/s"
+msgstr ""
+
+msgid "End Volumetric Speed:"
+msgstr ""
+
+msgid "Volumetric Speed step:"
+msgstr ""
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr ""

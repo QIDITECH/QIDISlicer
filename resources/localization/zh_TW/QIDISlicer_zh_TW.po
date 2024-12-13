@@ -28264,3 +28264,195 @@ msgstr "zlib 錯誤碼 %d"
 #: ../src/richtext/richtextliststylepage.cpp:496
 msgid "~"
 msgstr "~"
+
+msgid "Device"
+msgstr "設備"
+
+msgid "Guide"
+msgstr "指南"
+
+msgid "Device Page"
+msgstr "設備頁面"
+
+msgid "Guide Page"
+msgstr "指南頁面"
+
+msgid "&Calibration"
+msgstr "校準"
+
+msgid "Coarse"
+msgstr "粗略"
+
+msgid "Fine"
+msgstr "精細"
+
+msgid "Pressure Advance"
+msgstr "壓力提前量"
+
+msgid "Max Volumetric Speed"
+msgstr "最大體積速度"
+
+msgid "Seam gap"
+msgstr "接縫間隙"
+
+msgid "In order to reduce the visibility of the seam in a closed loop extrusion, the loop is interrupted and shortened by a specified amount.\nThis amount as a percentage of the current extruder diameter. The default value for this parameter is 15"
+msgstr "為了減少封閉回路擠出中接縫的可見性，回路會被中斷並縮短一定的量。\n該量以當前擠出機直徑的百分比表示。此參數的預設值為15。"
+
+msgid "Ironing Pattern"
+msgstr "熨平模式"
+
+msgid "Detect narrow internal solid infill"
+msgstr "檢測狹窄的內部實心填充"
+
+msgid "This option will auto detect narrow internal solid infill area. If enabled, concentric pattern will be used for the area to speed printing up. Otherwise, rectilinear pattern is used defaultly."
+msgstr "此選項會自動檢測狹窄的內部實心填充區域。如果啟用，將使用同心模式加快列印速度。否則，將預設使用直線模式。"
+
+msgid "Filter out tiny top gaps infill"
+msgstr "過濾微小的頂部空隙填充"
+
+msgid "Filter out gaps smaller than the threshold specified. This setting affects top surface's gap infill"
+msgstr "過濾掉小於指定閾值的空隙。此設置會影響頂部表面的空隙填充。"
+
+msgid "Resonance Avoidance"
+msgstr "共振規避"
+
+msgid "Resonance avoidance"
+msgstr "共振規避"
+
+msgid "By reducing the speed of the outer wall to avoid the resonance zone of the printer, ringing on the surface of the model are avoided.\nPlease turn this option off when testing ringing."
+msgstr "透過降低外壁的速度以避開列印機的共振區域，可以避免模型表面的振紋。\n進行振紋測試時請關閉此選項。"
+
+msgid "Resonance Avoidance Speed"
+msgstr "共振規避速度"
+
+msgid "First layer infill"
+msgstr "首層填充"
+
+msgid "Speed for infill of the first layer (jumps between distant extrusion points)."
+msgstr "首層填充速度（遠距離擠出點之間的跳躍）。"
+
+msgid "First layer travel"
+msgstr "首層移動"
+
+msgid "Speed for travel moves of the first layer (jumps between distant extrusion points)."
+msgstr "首層移動速度（遠距離擠出點之間的跳躍）。"
+
+msgid "Number of slow layers"
+msgstr "緩慢列印的層數"
+
+msgid "The first few layers are printed slower than normal. The speed is gradually increased in a linear fashion over the specified number of layers."
+msgstr "前幾層的列印速度比正常慢。速度會在指定的層數內逐漸線性增加。"
+
+msgid "Top surface flow ratio"
+msgstr "頂部表面流量比例"
+
+msgid "This factor affects the amount of material for top solid infill. You can decrease it slightly to have smooth surface finish"
+msgstr "此因子會影響頂部實心填充的材料量。您可以稍微減少它以獲得平滑的表面效果。"
+
+msgid "Bottom surface flow ratio"
+msgstr "底部表面流量比例"
+
+msgid "This factor affects the amount of material for bottom solid infill"
+msgstr "此因子會影響底部實心填充的材料量。"
+
+msgid "X-Y hole compensation"
+msgstr "X-Y孔補償"
+
+msgid "Holes of object will be grown or shrunk in XY plane by the configured value. Positive value makes holes bigger. Negative value makes holes smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "物體的孔會根據配置值在XY平面上增大或縮小。正值使孔變大，負值使孔變小。當物體存在組裝問題時，此功能可用來稍微調整尺寸。"
+
+msgid "X-Y contour compensation"
+msgstr "X-Y輪廓補償"
+
+msgid "Contour of object will be grown or shrunk in XY plane by the configured value. Positive value makes contour bigger. Negative value makes contour smaller. This function is used to adjust size slightly when the object has assembling issue"
+msgstr "物體的輪廓會根據配置值在XY平面上增大或縮小。正值使輪廓變大，負值使輪廓變小。當物體存在組裝問題時，此功能可用來稍微調整尺寸。"
+
+msgid "Elephant foot compensation layers"
+msgstr "象腳補償層數"
+
+msgid "The number of layers on which the elephant foot compensation will be active. The first layer will be shrunk by the elephant foot compensation value, then the next layers will be linearly shrunk less, up to the layer indicated by this value."
+msgstr "象腳補償將生效的層數。第一層將按大象腳補償值縮小，接下來的層會逐漸線性減少縮小，直到指定的層。"
+
+msgid "Send"
+msgstr "發送"
+
+msgid "printers at the same time."
+msgstr "同時使用印表機。"
+
+msgid "minute each batch."
+msgstr "每批次一分鐘。"
+
+msgid "(It depends on how many devices can undergo heating at the same time.)"
+msgstr "(這取決於能夠同時加熱的設備數量。)"
+
+msgid "(It depends on how long it takes to complete the heating.)"
+msgstr "(這取決於完成加熱所需的時間。)"
+
+msgid "Switch to Device tab"
+msgstr "切換到設備標籤"
+
+msgid "Switch to Device tab after upload."
+msgstr "上傳後切換到設備標籤。"
+
+msgid "QIDI Local's Physical Printer"
+msgstr "QIDI Local 的物理印表機"
+
+msgid "QIDI Link's Physical Printer"
+msgstr "QIDI Link 的物理印表機"
+
+msgid "Local"
+msgstr "本地"
+
+msgid "Login/Register"
+msgstr "登入/註冊"
+
+msgid "Flowrate Fine Calibration"
+msgstr "流量精細校準"
+
+msgid "Please input the best value from the coarse calibration to further determine a more accurate extrusion multiplier."
+msgstr "請輸入粗略校準中的最佳數值，以進一步確定更精確的擠出倍增係數。"
+
+msgid "Extrusion Multiplier:"
+msgstr "擠出倍增係數："
+
+msgid "Please input valid values:\n 0.5 <= Extrusion Multiplier <= 1.5\n"
+msgstr "請輸入有效的數值：\n 0.5 <= 擠出倍增係數 <= 1.5\n"
+
+msgid "Pressure Advance Calibration"
+msgstr "壓力提前校準"
+
+msgid "PA Line"
+msgstr "PA 線"
+
+msgid "PA Pattern"
+msgstr "PA 圖案"
+
+msgid "PA Tower"
+msgstr "PA 塔"
+
+msgid "Start PA:"
+msgstr "開始 PA："
+
+msgid "End PA:"
+msgstr "結束 PA："
+
+msgid "PA step:"
+msgstr "PA 步長："
+
+msgid "Note: PA calibration is not applicable to PETG, please modify the PA value according to the actual printing of the model."
+msgstr "注意：PA 校準不適用於 PETG，請根據模型實際列印調整 PA 值。"
+
+msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
+msgstr "請輸入有效的數值：\n開始 PA: >= 0.0\n結束 PA: > 開始 PA + PA 步長\nPA 步長: >= 0.001)"
+
+msgid "Start Volumetric Speed:"
+msgstr "起始體積速度："
+
+msgid "End Volumetric Speed:"
+msgstr "結束體積速度："
+
+msgid "Volumetric Speed step:"
+msgstr "體積速度步長："
+
+msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
+msgstr "請輸入有效的數值：\n起始體積速度: >= 0.0\n結束體積速度: > 起始體積速度 + 體積速度步長\n體積速度步長: >= 0.01)"

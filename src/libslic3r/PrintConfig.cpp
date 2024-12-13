@@ -2065,7 +2065,7 @@ void PrintConfigDef::init_fff_params()
     def                = this->add("ironing_pattern", coEnum);
     def->label         = L("Ironing Pattern");
     def->category      = L("Ironing");
-    def->tooltip       = L("Ironing Type");
+    def->tooltip       = L("Ironing Pattern");
     def->set_enum<InfillPattern>({
         { "rectilinear",    L("Rectilinear") },
         { "concentric",        L("Concentric") }

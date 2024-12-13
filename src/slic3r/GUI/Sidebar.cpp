@@ -486,6 +486,10 @@ Sidebar::Sidebar(Plater *parent)
 
     auto* complect_btns_sizer = new wxBoxSizer(wxHORIZONTAL);
     complect_btns_sizer->Add(m_btn_export_gcode, 1, wxEXPAND);
+
+    //B
+    m_btn_connect_gcode->Hide();
+
     //y15
     // complect_btns_sizer->Add(m_btn_connect_gcode, 1, wxEXPAND | wxLEFT, margin_5);
     complect_btns_sizer->Add(m_btn_send_gcode, 0, wxLEFT, margin_5);
