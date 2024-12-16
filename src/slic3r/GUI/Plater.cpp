@@ -3714,7 +3714,9 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
     const bool connect_gcode_shown = print_host_opt == nullptr && can_show_upload_to_connect();
 
     //y18
-    const bool local_has_devices = main_frame->m_printer_view->Local_has_device();
+    const bool local_has_devices = false;
+    if(main_frame->m_printer_view)
+        const bool local_has_devices = main_frame->m_printer_view->Local_has_device();
 
     //y
 #if QDT_RELEASE_TO_PUBLIC
