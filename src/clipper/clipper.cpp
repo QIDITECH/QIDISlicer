@@ -3199,8 +3199,8 @@ inline OutRec* ParseFirstLeft(OutRec* FirstLeft)
     FirstLeft = FirstLeft->FirstLeft;
   return FirstLeft;
 }
-
 //------------------------------------------------------------------------------
+
 // This is potentially very expensive! O(n^3)!
 void Clipper::FixupFirstLefts1(OutRec* OldOutRec, OutRec* NewOutRec)
 { 

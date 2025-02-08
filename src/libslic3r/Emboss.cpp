@@ -1,4 +1,5 @@
 #include <boost/nowide/convert.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <boost/log/trivial.hpp>
 #include <numeric>
 #include <cstdlib>
@@ -1086,7 +1087,7 @@ std::unique_ptr<FontFile> Emboss::create_font_file(
 
 std::unique_ptr<FontFile> Emboss::create_font_file(const char *file_path)
 {
-    FILE *file = std::fopen(file_path, "rb");
+    FILE *file = boost::nowide::fopen(file_path, "rb");
     if (file == nullptr) {
         assert(false);
         BOOST_LOG_TRIVIAL(error) << "Couldn't open " << file_path << " for reading.";
