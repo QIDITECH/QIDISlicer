@@ -1,4 +1,3 @@
-#
 # This CMake project downloads, configures and builds QIDISlicer dependencies on Unix and Windows.
 #
 # When using this script, it's recommended to perform an out-of-source build using CMake.
@@ -136,7 +135,6 @@ if (UNIX)
     endif ()
 endif ()
 
-
 list(APPEND SYSTEM_PROVIDED_PACKAGES ${${PROJECT_NAME}_PLATFORM_PACKAGES})
 list(REMOVE_DUPLICATES SYSTEM_PROVIDED_PACKAGES)
 
@@ -177,7 +175,7 @@ foreach (pkg ${FOUND_PACKAGES})
 
         if (${pkg} IN_LIST SYSTEM_PROVIDED_PACKAGES)
           check_system_package(${pkg} _checked_list)
-          elseif (TARGET dep_${pkg})
+        elseif (TARGET dep_${pkg})
           get_target_property(_is_excluded_from_all dep_${pkg} EXCLUDE_FROM_ALL)
           if (NOT _is_excluded_from_all)
             list(APPEND DEPS_TO_BUILD ${pkg})
