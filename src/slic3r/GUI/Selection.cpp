@@ -19,6 +19,7 @@
 #include "libslic3r/Model.hpp"
 #include "libslic3r/PresetBundle.hpp"
 #include "libslic3r/BuildVolume.hpp"
+#include "libslic3r/MultipleBeds.hpp"
 
 #include <GL/glew.h>
 
@@ -144,7 +145,7 @@ void Selection::add(unsigned int volume_idx, bool as_single_selection, bool chec
         return;
 
     // wipe tower is already selected
-    if (is_wipe_tower() && volume->is_wipe_tower)
+    if (is_wipe_tower() && volume->is_wipe_tower() && contains_volume(volume_idx))
         return;
 
     bool keep_instance_mode = (m_mode == Instance) && !as_single_selection;
@@ -152,8 +153,8 @@ void Selection::add(unsigned int volume_idx, bool as_single_selection, bool chec
 
     // resets the current list if needed
     bool needs_reset = as_single_selection && !already_contained;
-    needs_reset |= volume->is_wipe_tower;
-    needs_reset |= is_wipe_tower() && !volume->is_wipe_tower;
+    needs_reset |= volume->is_wipe_tower();
+    needs_reset |= is_wipe_tower() && !volume->is_wipe_tower();
     needs_reset |= as_single_selection && !is_any_modifier() && volume->is_modifier;
     needs_reset |= is_any_modifier() && !volume->is_modifier;
 
@@ -377,7 +378,7 @@ void Selection::add_all()
 
     unsigned int count = 0;
     for (unsigned int i = 0; i < (unsigned int)m_volumes->size(); ++i) {
-        if (!(*m_volumes)[i]->is_wipe_tower)
+        if (!(*m_volumes)[i]->is_wipe_tower())
             ++count;
     }
 
@@ -390,7 +391,7 @@ void Selection::add_all()
     clear();
 
     for (unsigned int i = 0; i < (unsigned int)m_volumes->size(); ++i) {
-        if (!(*m_volumes)[i]->is_wipe_tower)
+        if (!(*m_volumes)[i]->is_wipe_tower())
             do_add_volume(i);
     }
 
@@ -1442,7 +1443,7 @@ void Selection::translate(unsigned int object_idx, unsigned int instance_idx, co
         if (done.size() == m_volumes->size())
             break;
 
-        if ((*m_volumes)[i]->is_wipe_tower)
+        if ((*m_volumes)[i]->is_wipe_tower())
             continue;
 
         const int object_idx = (*m_volumes)[i]->object_idx();
@@ -1916,7 +1917,7 @@ void Selection::update_type()
             m_type = Empty;
         else if (m_list.size() == 1) {
             const GLVolume* first = (*m_volumes)[*m_list.begin()];
-            if (first->is_wipe_tower)
+            if (first->is_wipe_tower())
                 m_type = WipeTower;
             else if (first->is_modifier) {
                 m_type = SingleModifier;
@@ -2738,7 +2739,7 @@ void Selection::synchronize_unselected_instances(SyncRotationType sync_rotation_
         if (done.size() == m_volumes->size())
             break;
         const GLVolume* volume_i = (*m_volumes)[i];
-        if (volume_i->is_wipe_tower)
+        if (volume_i->is_wipe_tower())
             continue;
 
         const int object_idx = volume_i->object_idx();
@@ -2783,7 +2784,7 @@ void Selection::synchronize_unselected_volumes()
 {
     for (unsigned int i : m_list) {
         const GLVolume* volume = (*m_volumes)[i];
-        if (volume->is_wipe_tower)
+        if (volume->is_wipe_tower())
             continue;
 
         const int object_idx = volume->object_idx();
@@ -2811,7 +2812,7 @@ void Selection::ensure_on_bed()
 
     for (size_t i = 0; i < m_volumes->size(); ++i) {
         GLVolume* volume = (*m_volumes)[i];
-        if (!volume->is_wipe_tower && !volume->is_modifier && 
+        if (!volume->is_wipe_tower() && !volume->is_modifier && 
             std::find(m_cache.sinking_volumes.begin(), m_cache.sinking_volumes.end(), i) == m_cache.sinking_volumes.end()) {
             const double min_z = volume->transformed_convex_hull_bounding_box().min.z();
             std::pair<int, int> instance = std::make_pair(volume->object_idx(), volume->instance_idx());
@@ -2838,7 +2839,7 @@ void Selection::ensure_not_below_bed()
 
     for (size_t i = 0; i < m_volumes->size(); ++i) {
         GLVolume* volume = (*m_volumes)[i];
-        if (!volume->is_wipe_tower && !volume->is_modifier) {
+        if (!volume->is_wipe_tower() && !volume->is_modifier) {
             const double max_z = volume->transformed_convex_hull_bounding_box().max.z();
             const std::pair<int, int> instance = std::make_pair(volume->object_idx(), volume->instance_idx());
             InstancesToZMap::iterator it = instances_max_z.find(instance);

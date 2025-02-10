@@ -41,8 +41,8 @@ static const char *CONFIG_KEY_PATH  = "printhost_path";
 static const char *CONFIG_KEY_GROUP = "printhost_group";
 static const char* CONFIG_KEY_STORAGE = "printhost_storage";
 
-//B61
-PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUploadActions post_actions, const wxArrayString &groups, const wxArrayString& storage_paths, const wxArrayString& storage_names, Plater* plater, const PrintStatistics& ps, bool onlylink)
+//B61//y20
+PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUploadActions post_actions, const wxArrayString &groups, const wxArrayString& storage_paths, const wxArrayString& storage_names, Plater* plater, bool onlylink)
     : MsgDialog(static_cast<wxWindow*>(wxGetApp().mainframe), _L("Send G-Code to printer host"), _L(""), 0) // Set style = 0 to avoid default creation of the "OK" button. 
                                                                                                                                                                // All buttons will be added later in this constructor 
     , txt_filename(new wxTextCtrl(this, wxID_ANY))
@@ -63,8 +63,15 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     auto *label_dir_hint2 = new wxStaticText(this, wxID_ANY, _L("Upload to Printer Host with the following filename:"));
     label_dir_hint2->Wrap(CONTENT_WIDTH * wxGetApp().em_unit());
 
-    //B64
-    ThumbnailData thumbnail_data = m_plater->get_thumbnailldate_send();
+    //B64//y20
+    int bed_num = m_plater->get_beds_num();
+    ThumbnailData thumbnail_data;
+    if (bed_num > 1) {
+        int active_bed = m_plater->get_active_bed();
+        thumbnail_data = m_plater->get_thumbnailldate_from_bed(active_bed);
+    }
+    else
+        thumbnail_data = m_plater->get_thumbnailldate_send();
 
     wxImage image(thumbnail_data.width, thumbnail_data.height);
     image.InitAlpha();
@@ -77,8 +84,11 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
             image.SetAlpha((int) c, (int) r, px[3]);
         }
     }
+    //y21
+    image.Rescale(128, 160);
     wxBitmap        bitmap(image);
     wxStaticBitmap *static_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap);
+
     //static_bitmap->SetSize(wxSize(20, 20));
     //static_bitmap->SetMinSize(wxSize(100, 100));
 
@@ -96,19 +106,21 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
     vbox1->Add(static_bitmap, 0, wxALL | wxALIGN_CENTER);
     // Add add.svg image
     //wxBitmap        add_bitmap(*get_bmp_bundle("add.svg"), wxBITMAP_TYPE_SVG);
+    //y20
+    PrintStatistics print_statistic = wxGetApp().plater()->get_fff_prints()[m_plater->get_active_bed()].get()->print_statistics();
     wxStaticBitmap *add_bitmap = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("print_time", 20));
     row_sizer->Add(add_bitmap, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-    // Add ps.estimated_normal_print_time text
-    wxStaticText *estimated_print_time_text = new wxStaticText(this, wxID_ANY, wxString::Format("%s", ps.estimated_normal_print_time));
+    // Add print_statisticestimated_normal_print_time text
+    wxStaticText *estimated_print_time_text = new wxStaticText(this, wxID_ANY, wxString::Format("%s", print_statistic.estimated_normal_print_time));
     row_sizer->Add(estimated_print_time_text, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
     // Add delete.svg image
     wxStaticBitmap *delete_static_bitmap = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("cost_weight", 20));
     row_sizer->Add(delete_static_bitmap, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-    // Add ps.total_weight text
-    wxStaticText *total_weight_text = new wxStaticText(this, wxID_ANY, wxString::Format("%.4fg", ps.total_weight));
+    // Add print_statistictotal_weight text
+    wxStaticText *total_weight_text = new wxStaticText(this, wxID_ANY, wxString::Format("%.4fg", print_statistic.total_weight));
     row_sizer->Add(total_weight_text, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
     vbox1->Add(row_sizer, 0, wxALIGN_CENTER);
@@ -415,8 +427,8 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
             return msg_wingow.ShowModal() == wxID_YES;
         }
         
-        //y19
-        std::string unusable_symbols = "<>[]:/\\|?*\"";
+        //y21
+        wxString unusable_symbols = "<>[]:\\|?*\"";
         for(auto c : path){
             if(unusable_symbols.find(c) != std::string::npos){
                 ErrorDialog msg(this, format_wxstr("%1%\n%2% %3%", _L("The provided name is not valid;"),
@@ -874,7 +886,7 @@ void PrintHostQueueDialog::append_job(const PrintHostJob &job)
     // Both strings are UTF-8 encoded.
     upload_names.emplace_back(job.printhost->get_host(), job.upload_data.upload_path.string());
 
-    wxGetApp().notification_manager()->push_upload_job_notification(job_list->GetItemCount(), (float)size_i / 1024 / 1024, job.upload_data.upload_path.string(), job.printhost->get_host());
+    wxGetApp().notification_manager()->push_upload_job_notification(job_list->GetItemCount(), (float)size_i / 1024 / 1024, job.upload_data.upload_path.string(), job.printhost->get_notification_host());
 }
 
 void PrintHostQueueDialog::on_dpi_changed(const wxRect &suggested_rect)
@@ -954,9 +966,9 @@ void PrintHostQueueDialog::on_progress(Event &evt)
         wxVariant nm, hst;
         job_list->GetValue(nm, evt.job_id, COL_FILENAME);
         job_list->GetValue(hst, evt.job_id, COL_HOST);
-        const wchar_t * nm_str = nm.GetString();
-        const wchar_t * hst_str = hst.GetString();
-        wxGetApp().notification_manager()->set_upload_job_notification_percentage(evt.job_id + 1, into_u8(nm_str), into_u8(hst_str), evt.progress / 100.f);
+        const std::string& nm_str = into_u8(nm.GetString());
+        const std::string& hst_str = into_u8(hst.GetString());
+        wxGetApp().notification_manager()->set_upload_job_notification_percentage(evt.job_id + 1, nm_str, hst_str, evt.progress / 100.f);
     }
 }
 
@@ -1039,8 +1051,13 @@ void PrintHostQueueDialog::on_info(Event& evt)
         job_list->SetValue(hst, evt.job_id, COL_ERRORMSG);
         wxGetApp().notification_manager()->set_upload_job_notification_completed_with_warning(evt.job_id + 1);
         wxGetApp().notification_manager()->set_upload_job_notification_status(evt.job_id + 1, into_u8(evt.status));
-    } else if (evt.tag == L"set_complete_off") {
-        wxGetApp().notification_manager()->set_upload_job_notification_comp_on_100(evt.job_id + 1, false);
+    } else if (evt.tag == L"qidiconnect_printer_address") {
+        wxGetApp().notification_manager()->set_upload_job_notification_hypertext(evt.job_id + 1
+            , [evt](wxEvtHandler *) {
+                wxGetApp().mainframe->show_connect_tab(into_u8(evt.status));
+                return false ;
+            }
+            );
     }
 }
 

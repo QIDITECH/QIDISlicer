@@ -6,10 +6,10 @@
 
 #include "Job.hpp"
 
-#include "libslic3r/Arrange/Tasks/ArrangeTask.hpp"
-#include "libslic3r/Arrange/Tasks/FillBedTask.hpp"
-#include "libslic3r/Arrange/Items/ArrangeItem.hpp"
-#include "libslic3r/Arrange/SceneBuilder.hpp"
+#include <arrange-wrapper/Tasks/ArrangeTask.hpp>
+#include <arrange-wrapper/Tasks/FillBedTask.hpp>
+#include <arrange-wrapper/Items/ArrangeItem.hpp>
+#include <arrange-wrapper/SceneBuilder.hpp>
 
 namespace Slic3r {
 
@@ -24,7 +24,7 @@ namespace GUI {
 
 class Plater;
 
-enum class ArrangeSelectionMode { SelectionOnly, Full };
+enum class ArrangeSelectionMode { SelectionOnly, Full, CurrentBedFull, CurrentBedSelectionOnly };
 
 arr2::SceneBuilder build_scene(
     Plater &plater, ArrangeSelectionMode mode = ArrangeSelectionMode::Full);

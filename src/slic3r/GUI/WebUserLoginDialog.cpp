@@ -64,7 +64,8 @@ ZUserLogin::ZUserLogin() : wxDialog((wxWindow *) (wxGetApp().mainframe), wxID_AN
     // set the frame icon
 
     // Create the webview
-    m_browser = WebView::CreateWebView(this, TargetUrl, {"wx"});
+    m_browser = WebView::webview_new();
+    WebView::webview_create(m_browser, this, TargetUrl, {"wx"});
     if (m_browser == nullptr) {
         wxLogError("Could not init m_browser");
         return;

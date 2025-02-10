@@ -62,8 +62,8 @@ struct PhysicalPrinterPresetData
 class PrintHostSendDialog : public GUI::MsgDialog
 {
 public:
-    //B61
-    PrintHostSendDialog(const boost::filesystem::path &path, PrintHostPostUploadActions post_actions, const wxArrayString& groups, const wxArrayString& storage_paths, const wxArrayString& storage_names, Plater* plater, const PrintStatistics& ps, bool onlyLik);
+    //B61//y20
+    PrintHostSendDialog(const boost::filesystem::path &path, PrintHostPostUploadActions post_actions, const wxArrayString& groups, const wxArrayString& storage_paths, const wxArrayString& storage_names, Plater* plater, bool onlyLik);
     boost::filesystem::path filename() const;
     PrintHostPostUploadAction post_action() const;
     std::string group() const;

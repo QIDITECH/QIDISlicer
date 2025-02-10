@@ -52,6 +52,8 @@ enum class InfoItemType
     CustomSupports,
     CustomSeam,
     CutConnectors,
+    MmSegmentation,
+    FuzzySkin,
     MmuSegmentation,
     Sinking,
     VariableLayerHeight

@@ -11,6 +11,8 @@
 #include "libslic3r/Semver.hpp"
 #include "MsgDialog.hpp"
 
+#include "slic3r/Utils/PresetUpdater.hpp"
+
 //B44
 #include <wx/webview.h>
 
@@ -105,7 +107,7 @@ public:
 	};
 
 	// force_before_wizard - indicates that check of updated is forced before ConfigWizard opening
-	MsgUpdateConfig(const std::vector<Update> &updates, bool force_before_wizard = false);
+	MsgUpdateConfig(const std::vector<Update> &updates, PresetUpdater::UpdateParams update_params);
 	MsgUpdateConfig(MsgUpdateConfig &&) = delete;
 	MsgUpdateConfig(const MsgUpdateConfig &) = delete;
 	MsgUpdateConfig &operator=(MsgUpdateConfig &&) = delete;
