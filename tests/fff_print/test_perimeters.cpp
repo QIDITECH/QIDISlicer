@@ -48,6 +48,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
         //B56
         ExPolygons                fill_expolygons_no_overlap;
         Flow                      flow(1., 1., 1.);
+        PerimeterRegions          perimeter_regions;
         PerimeterGenerator::Parameters perimeter_generator_params(
             1., // layer height
             -1, // layer ID
@@ -55,6 +56,7 @@ SCENARIO("Perimeter nesting", "[Perimeters]")
             static_cast<const PrintRegionConfig&>(config),
             static_cast<const PrintObjectConfig&>(config),
             static_cast<const PrintConfig&>(config),
+            perimeter_regions,
             false); // spiral_vase
         Polygons lower_layer_polygons_cache;
         Polygons upper_layer_polygons_cache;
