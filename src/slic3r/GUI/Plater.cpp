@@ -1895,11 +1895,12 @@ void Plater::priv::object_list_changed()
             for (const ModelObject *object : wxGetApp().model().objects) {
                 for (const ModelInstance *instance : object->instances) {
                     const auto it{s_multiple_beds.get_inst_map().find(instance->id())};
+                    //y21
                     if (
-                        it != s_multiple_beds.get_inst_map().end()
+                        (it != s_multiple_beds.get_inst_map().end()
                         && it->second == bed_index
                         && instance->printable
-                        && instance->print_volume_state == ModelInstancePVS_Partly_Outside
+                        && instance->print_volume_state == ModelInstancePVS_Partly_Outside) || (object->in_exclude)
                     ) {
                         s_print_statuses[bed_index] = PrintStatus::outside;
                         break;

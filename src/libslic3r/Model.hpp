@@ -384,6 +384,9 @@ public:
     // Whether or not this object is printable
     bool                    printable { true };
 
+    //y21
+    bool                    in_exclude{ false };
+
     // This vector holds position of selected support points for SLA. The data are
     // saved in mesh coordinates to allow using them for several instances.
     // The format is (x, y, z, point_size, supports_island)

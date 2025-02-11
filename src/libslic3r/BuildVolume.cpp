@@ -389,24 +389,29 @@ BuildVolume::ObjectState BuildVolume::volume_state_bbox(const BoundingBoxf3 volu
 BuildVolume::ObjectState BuildVolume::check_outside(Polygon hull) const
 {
     //y21
-    const Vec3d bed_offset = s_multiple_beds.get_bed_translation(s_multiple_beds.get_active_bed());
-    if (m_exclude_bed_shape.size() > 0) {
-    for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
-        std::vector<Vec2d> tem_exclude_bed_shap;
-        for (int j = 1; j < 6; j++)
-            tem_exclude_bed_shap.push_back(Vec2d{ m_exclude_bed_shape[i + j].x()+ bed_offset.x(), m_exclude_bed_shape[i + j].y()+ bed_offset.y()});
-        BoundingBoxf tem_bboxf = get_extents(tem_exclude_bed_shap);
-        auto                    tem_exclude_bboxf = BoundingBoxf3{to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height)};
-            Slic3r::Polygon p                 = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
-            if (intersection({p}, {hull}).empty() == false) {
-                return ObjectState::Colliding;
-            break;
-        }
+    int beds_num = s_multiple_beds.get_number_of_beds();
+    for (int i = 0; i < beds_num; i++)
+    {
+        const Vec3d bed_offset = s_multiple_beds.get_bed_translation(i);
+        if (m_exclude_bed_shape.size() > 0) {
+            for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
+                std::vector<Vec2d> tem_exclude_bed_shap;
+                for (int j = 1; j < 6; j++)
+                    tem_exclude_bed_shap.push_back(Vec2d{ m_exclude_bed_shape[i + j].x() + bed_offset.x(), m_exclude_bed_shape[i + j].y() + bed_offset.y() });
+                BoundingBoxf tem_bboxf = get_extents(tem_exclude_bed_shap);
+                auto                    tem_exclude_bboxf = BoundingBoxf3{ to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height) };
+                Slic3r::Polygon p = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
+                if (intersection({ p }, { hull }).empty() == false) {
+                    return ObjectState::Colliding;
+                    break;
+                }
             }
-        return ObjectState::Inside;
-    } else {
-        return ObjectState::Inside;
+        }
+        else {
+            return ObjectState::Inside;
+        }
     }
+    return ObjectState::Inside;
 }
 
 //B52

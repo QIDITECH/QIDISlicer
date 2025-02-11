@@ -1544,21 +1544,22 @@ bool GLCanvas3D::check_volumes_outside_state(GLVolumeCollection& volumes, ModelI
                 state = BuildVolume::ObjectState::Below;
             else {
                 switch (build_volume.type()) {
-                    // B66
                 case BuildVolume::Type::Rectangle:
                     //FIXME this test does not evaluate collision of a build volume bounding box with non-convex objects.
                     state = build_volume.volume_state_bbox(volume_bbox(*volume), true, &bed_idx);
+                    // B66 //y21
                     if (state == BuildVolume::ObjectState::Inside) {
-                        for (size_t i = 0; i < m_model->objects.size(); ++i) {
-                            ModelObject *  object   = m_model->objects[i];
-                            ModelInstance *instance = object->instances[0];
-                            Polygon        hull     = instance->convex_hull_2d();
-
-                            state = build_volume.check_outside(hull);
-                            if (state != BuildVolume::ObjectState::Inside) {
-                                break;
-                            }
+                        int obj_idx = volume->object_idx();
+                        ModelObjectPtrs model_parts = wxGetApp().model().objects;
+                        ModelObject* model_obj = model_parts[obj_idx];
+                        ModelInstance* instance = model_obj->instances[0];
+                        Polygon        hull = instance->convex_hull_2d();
+                        state = build_volume.check_outside(hull);
+                        if (state != BuildVolume::ObjectState::Inside) {
+                            model_obj->in_exclude = true;
                         }
+                        else
+                            model_obj->in_exclude = false;
                     }
                     break;
                 case BuildVolume::Type::Circle:
