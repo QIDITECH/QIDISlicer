@@ -1980,7 +1980,7 @@ float project_overview_table(float scale) {
             }
         }
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImGuiPureWrap::COL_ORANGE_LIGHT);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGuiPureWrap::COL_BLUE_LIGHT);
 
         const StatisticsSum statistics_sum{get_statistics_sum()};
         ImGui::TableNextRow();
@@ -2087,7 +2087,7 @@ void extruder_usage_table(const PerExtruderStatistics &extruder_statistics, cons
             ImGui::Text("%.2f", statistics.filament_length);
         }
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImGuiPureWrap::COL_ORANGE_LIGHT);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGuiPureWrap::COL_BLUE_LIGHT);
 
         const ExtruderStatistics extruder_statistics_sum{sum_extruder_statistics(extruder_statistics)};
         ImGui::TableNextRow();

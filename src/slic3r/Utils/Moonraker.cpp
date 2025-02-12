@@ -21,8 +21,9 @@ namespace fs = boost::filesystem;
 namespace pt = boost::property_tree;
 namespace Slic3r {
 
-//y6
+//y21
 bool Moonraker::m_isStop = false;
+double Moonraker::progress_percentage = 0;
 
 namespace {
 #ifdef WIN32
@@ -68,7 +69,7 @@ std::string substitute_host(const std::string& orig_addr, std::string sub_addr)
 }
 //B55
 Moonraker::Moonraker(DynamicPrintConfig *config, bool add_port) :
-    m_host(add_port ? config->opt_string("print_host").find(":10088") == std::string::npos ? config->opt_string("print_host") + ":10088" :
+    m_host(add_port ? config->opt_string("print_host").find(":") == std::string::npos ? config->opt_string("print_host") + ":10088" :
                                                                                              config->opt_string("print_host") :
                         config->opt_string("print_host")),
     m_apikey(config->opt_string("printhost_apikey")),
@@ -171,56 +172,56 @@ std::string Moonraker::get_status(wxString &msg) const
     //B64 //y6
     http.timeout_connect(4)
     .on_error([&](std::string body, std::string error, unsigned status) {
-            // y1
-            if(status == 404)
-            {
-                body = ("Network connection fails.");
-                if(body.find("AWS") != std::string::npos)
-                    body += ("Unable to get required resources from AWS server, please check your network settings.");
-                else
-                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
-            }
-            BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
-                                            body;
-            print_state = "offline";
-            msg = format_error(body, error, status);
-        })
-        .on_complete([&](std::string body, unsigned) {
-            BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: Got print_stats: %2%") % name % body;
+        // y1
+        if (status == 404)
+        {
+            body = ("Network connection fails.");
+            if (body.find("AWS") != std::string::npos)
+                body += ("Unable to get required resources from AWS server, please check your network settings.");
+            else
+                body += ("Unable to get required resources from Aliyun server, please check your network settings.");
+        }
+        BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
+            body;
+        print_state = "offline";
+        msg = format_error(body, error, status);
+    })
+    .on_complete([&](std::string body, unsigned) {
+        BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: Got print_stats: %2%") % name % body;
 
-            try {
-                // All successful HTTP requests will return a json encoded object in the form of :
-                // {result: <response data>}
-                std::stringstream ss(body);
-                pt::ptree         ptree;
-                pt::read_json(ss, ptree);
-                if (ptree.front().first != "result") {
-                    msg = "Could not parse server response";
-                    print_state = "offline";
-                    return;
-                }
-                if (!ptree.front().second.get_optional<std::string>("status")) {
-                    msg = "Could not parse server response";
-                    print_state = "offline";
-                    return;
-                }
-                print_state = ptree.get<std::string>("result.status.print_stats.state");
-                BOOST_LOG_TRIVIAL(info) << boost::format("%1%: Got state: %2%") % name % print_state;
-                ;
-            } catch (const std::exception &) {
+        try {
+            // All successful HTTP requests will return a json encoded object in the form of :
+            // {result: <response data>}
+            std::stringstream ss(body);
+            pt::ptree         ptree;
+            pt::read_json(ss, ptree);
+            if (ptree.front().first != "result") {
+                msg = "Could not parse server response";
                 print_state = "offline";
-                msg         = "Could not parse server response";
+                return;
             }
-        })
+            if (!ptree.front().second.get_optional<std::string>("status")) {
+                msg = "Could not parse server response";
+                print_state = "offline";
+                return;
+            }
+            print_state = ptree.get<std::string>("result.status.print_stats.state");
+            BOOST_LOG_TRIVIAL(info) << boost::format("%1%: Got state: %2%") % name % print_state;
+            ;
+        } catch (const std::exception &) {
+            print_state = "offline";
+            msg         = "Could not parse server response";
+        }
+    })
 #ifdef _WIN32
-        .ssl_revoke_best_effort(m_ssl_revoke_best_effort)
-        .on_ip_resolve([&](std::string address) {
-            // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
-            // Remember resolved address to be reused at successive REST API call.
-            msg = GUI::from_u8(address);
-        })
+    .ssl_revoke_best_effort(m_ssl_revoke_best_effort)
+    .on_ip_resolve([&](std::string address) {
+        // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
+        // Remember resolved address to be reused at successive REST API call.
+        msg = GUI::from_u8(address);
+    })
 #endif // _WIN32
-        .perform_sync();
+    .perform_sync();
 
     return print_state;
 }
@@ -241,55 +242,55 @@ float Moonraker::get_progress(wxString &msg) const
     auto http = Http::get(std::move(url));
     set_auth(http);
     http.on_error([&](std::string body, std::string error, unsigned status) {
-            // y1
-            if(status == 404)
-            {
-                body = ("Network connection fails.");
-                if(body.find("AWS") != std::string::npos)
-                    body += ("Unable to get required resources from AWS server, please check your network settings.");
-                else
-                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
-            }
-            BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
-                                            body;
-            res = false;
-            msg = format_error(body, error, status);
-        })
-        .on_complete([&](std::string body, unsigned) {
-            BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: Got display_status: %2%") % name % body;
+        // y1
+        if (status == 404)
+        {
+            body = ("Network connection fails.");
+            if (body.find("AWS") != std::string::npos)
+                body += ("Unable to get required resources from AWS server, please check your network settings.");
+            else
+                body += ("Unable to get required resources from Aliyun server, please check your network settings.");
+        }
+        BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error getting version: %2%, HTTP %3%, body: `%4%`") % name % error % status %
+            body;
+        res = false;
+        msg = format_error(body, error, status);
+    })
+    .on_complete([&](std::string body, unsigned) {
+        BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: Got display_status: %2%") % name % body;
 
-            try {
-                // All successful HTTP requests will return a json encoded object in the form of :
-                // {result: <response data>}
-                std::stringstream ss(body);
-                pt::ptree         ptree;
-                pt::read_json(ss, ptree);
-                if (ptree.front().first != "result") {
-                    msg = "Could not parse server response";
-                    res = false;
-                    return;
-                }
-                if (!ptree.front().second.get_optional<std::string>("status")) {
-                    msg = "Could not parse server response";
-                    res = false;
-                    return;
-                }
-                process = std::stof(ptree.get<std::string>("result.status.display_status.progress"));
-                BOOST_LOG_TRIVIAL(info) << boost::format("%1%: Got state: %2%") % name % process;
-            } catch (const std::exception &) {
-                res = false;
+        try {
+            // All successful HTTP requests will return a json encoded object in the form of :
+            // {result: <response data>}
+            std::stringstream ss(body);
+            pt::ptree         ptree;
+            pt::read_json(ss, ptree);
+            if (ptree.front().first != "result") {
                 msg = "Could not parse server response";
+                res = false;
+                return;
             }
-        })
+            if (!ptree.front().second.get_optional<std::string>("status")) {
+                msg = "Could not parse server response";
+                res = false;
+                return;
+            }
+            process = std::stof(ptree.get<std::string>("result.status.display_status.progress"));
+            BOOST_LOG_TRIVIAL(info) << boost::format("%1%: Got state: %2%") % name % process;
+        } catch (const std::exception &) {
+            res = false;
+            msg = "Could not parse server response";
+        }
+    })
 #ifdef _WIN32
-        .ssl_revoke_best_effort(m_ssl_revoke_best_effort)
-        .on_ip_resolve([&](std::string address) {
-            // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
-            // Remember resolved address to be reused at successive REST API call.
-            msg = GUI::from_u8(address);
-        })
+    .ssl_revoke_best_effort(m_ssl_revoke_best_effort)
+    .on_ip_resolve([&](std::string address) {
+        // Workaround for Windows 10/11 mDNS resolve issue, where two mDNS resolves in succession fail.
+        // Remember resolved address to be reused at successive REST API call.
+        msg = GUI::from_u8(address);
+    })
 #endif // _WIN32
-        .perform_sync();
+    .perform_sync();
 
     return process;
 }
@@ -436,24 +437,26 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
         http.form_add("path", upload_parent_path.string());
     if (upload_data.post_action == PrintHostPostUploadAction::StartPrint)
         http.form_add("print", "true");
-   
+    progress_percentage = 0;
     http.form_add_file("file", upload_data.source_path.string(), upload_filename.string())
         .on_complete([&](std::string body, unsigned status) {
             BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: File uploaded: HTTP %2%: %3%") % name % status % body;
         })
         .on_error([&](std::string body, std::string error, unsigned status) {
-            // y1
-            if(status == 404)
-            {
-                body = ("Network connection fails.");
-                if(body.find("AWS") != std::string::npos)
-                    body += ("Unable to get required resources from AWS server, please check your network settings.");
-                else
-                    body += ("Unable to get required resources from Aliyun server, please check your network settings.");
+            // y21
+            if (progress_percentage < 0.99) {
+                if (status == 404)
+                {
+                    body = ("Network connection fails.");
+                    if (body.find("AWS") != std::string::npos)
+                        body += ("Unable to get required resources from AWS server, please check your network settings.");
+                    else
+                        body += ("Unable to get required resources from Aliyun server, please check your network settings.");
+                }
+                BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error uploading file: %2%, HTTP %3%, body: `%4%`") % name % error % status % body;
+                error_fn(format_error(body, error, status));
+                res = false;
             }
-            BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error uploading file: %2%, HTTP %3%, body: `%4%`") % name % error % status % body;
-            error_fn(format_error(body, error, status));
-            res = false;
         })
         .on_progress([&](Http::Progress progress, bool& cancel) {
             prorgess_fn(std::move(progress), cancel);

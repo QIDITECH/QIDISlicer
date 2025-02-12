@@ -969,6 +969,8 @@ void PrintHostQueueDialog::on_progress(Event &evt)
         const std::string& nm_str = into_u8(nm.GetString());
         const std::string& hst_str = into_u8(hst.GetString());
         wxGetApp().notification_manager()->set_upload_job_notification_percentage(evt.job_id + 1, nm_str, hst_str, evt.progress / 100.f);
+        //y21
+        Moonraker::progress_percentage = evt.progress / 100.f;
     }
 }
 

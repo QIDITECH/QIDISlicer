@@ -1152,11 +1152,13 @@ void PrinterWebView::RunScript(const wxString &javascript)
  {
      wxString m_link_url = from_u8(link_url);
      wxString url;
-     if (!m_link_url.Lower().starts_with("http"))
-         url = wxString::Format("http://%s", m_link_url);
+     if (link_url.find(":") == wxString::npos)
+         url = wxString::Format("%s:10088", link_url);
+     else
+         url = link_url;
 
-     if (!url.Lower().ends_with("10088"))
-         url = wxString::Format("%s:10088", url);
+     if (!m_link_url.Lower().starts_with("http"))
+         url = wxString::Format("http://%s", url);
 
      load_url(url);
  }

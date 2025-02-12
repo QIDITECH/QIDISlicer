@@ -107,7 +107,8 @@ struct Http::priv
 {
 	enum {
 		DEFAULT_TIMEOUT_CONNECT = 10,
-        DEFAULT_TIMEOUT_MAX = 0,
+		//y21
+        DEFAULT_TIMEOUT_MAX = 10,
 		DEFAULT_SIZE_LIMIT = 5 * 1024 * 1024,
 	};
 

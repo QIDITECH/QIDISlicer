@@ -1900,7 +1900,7 @@ void Plater::priv::object_list_changed()
                         (it != s_multiple_beds.get_inst_map().end()
                         && it->second == bed_index
                         && instance->printable
-                        && instance->print_volume_state == ModelInstancePVS_Partly_Outside) || (object->in_exclude)
+                        && instance->print_volume_state == ModelInstancePVS_Partly_Outside) || (it->second == bed_index && object->in_exclude)
                     ) {
                         s_print_statuses[bed_index] = PrintStatus::outside;
                         break;

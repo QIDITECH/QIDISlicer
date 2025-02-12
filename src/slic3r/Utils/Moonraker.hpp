@@ -48,6 +48,7 @@ public:
     static void                SetStop(bool isStop) { m_isStop = isStop; };
     static bool                GetStop() { return m_isStop; };
     static bool                m_isStop;
+    static double              progress_percentage;
 
 protected:
 /*
