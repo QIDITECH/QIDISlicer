@@ -1552,14 +1552,17 @@ bool GLCanvas3D::check_volumes_outside_state(GLVolumeCollection& volumes, ModelI
                         int obj_idx = volume->object_idx();
                         ModelObjectPtrs model_parts = wxGetApp().model().objects;
                         ModelObject* model_obj = model_parts[obj_idx];
-                        ModelInstance* instance = model_obj->instances[0];
-                        Polygon        hull = instance->convex_hull_2d();
-                        state = build_volume.check_outside(hull);
-                        if (state != BuildVolume::ObjectState::Inside) {
-                            model_obj->in_exclude = true;
+                        for (size_t i = 0; i < model_obj->instances.size(); ++i) {
+                            ModelInstance* instance = model_obj->instances[i];
+                            Polygon        hull = instance->convex_hull_2d();
+                            state = build_volume.check_outside(hull);
+                            if (state != BuildVolume::ObjectState::Inside) {
+                                model_obj->in_exclude = true;
+                                break;
+                            }
+                            else
+                                model_obj->in_exclude = false;
                         }
-                        else
-                            model_obj->in_exclude = false;
                     }
                     break;
                 case BuildVolume::Type::Circle:

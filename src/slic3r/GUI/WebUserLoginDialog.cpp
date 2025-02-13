@@ -55,10 +55,6 @@ ZUserLogin::ZUserLogin() : wxDialog((wxWindow *) (wxGetApp().mainframe), wxID_AN
     TargetUrl = m_qidinetwork.get_qidi_host();
 #endif
 
-
-    BOOST_LOG_TRIVIAL(error) << "login url = " << TargetUrl.ToStdString();
-
-
     m_qdt_user_agent = wxString::Format("QDT-Slicer/v%s", SLIC3R_VERSION);
 
     // set the frame icon

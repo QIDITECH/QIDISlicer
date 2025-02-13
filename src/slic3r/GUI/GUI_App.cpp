@@ -3457,8 +3457,11 @@ bool GUI_App::run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage
     }
     //y14
     std::string new_token = wxGetApp().app_config->get("user_token");
-    if(old_token != new_token)
+    if(new_token.empty())
+        wxGetApp().SetOnlineLogin(false);
+    else if(old_token != new_token)
         wxGetApp().SetOnlineLogin(true);
+
     return res;
 }
 
