@@ -476,18 +476,7 @@ msgstr "Tots els objectes són fora del volum d'impressió."
 msgid "The supplied settings will cause an empty print."
 msgstr "La configuració subministrada provocarà una impressió buida."
 
-#: src/libslic3r/Print.cpp:549
-msgid "Some objects are too close; your extruder will collide with them."
-msgstr "Alguns objectes estan massa a prop; L'extrusor xocarà amb ells."
-
-#: src/libslic3r/Print.cpp:551
-msgid ""
-"Some objects are too tall and cannot be printed without extruder collisions."
-msgstr ""
-"Alguns objectes són massa alts i no es poden imprimir sense col·lisions "
-"d'extrusora."
-
-#: src/libslic3r/Print.cpp:557
+#: src/libslic3r/Print.cpp:471
 msgid ""
 "Avoid crossing perimeters option and avoid crossing curled overhangs option "
 "cannot be both enabled together."
@@ -915,8 +904,8 @@ msgstr ""
 #: src/slic3r/GUI/GUI_ObjectLayers.cpp:149
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:351
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:478
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:604
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:605
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:606
 #: src/slic3r/GUI/ObjectDataViewModel.cpp:158
 #: src/slic3r/GUI/WipeTowerDialog.cpp:127
 msgid "mm"
@@ -1285,7 +1274,27 @@ msgid ""
 "When set to zero, the minimal chamber temperature is not set in the G-code."
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:623
+#: src/libslic3r/PrintConfig.cpp:622
+msgid "Bed temperature by extruder"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:623 src/libslic3r/PrintConfig.cpp:1122
+#: src/libslic3r/PrintConfig.cpp:1900 src/libslic3r/PrintConfig.cpp:2474
+#: src/libslic3r/PrintConfig.cpp:2967 src/libslic3r/PrintConfig.cpp:3248
+#: src/libslic3r/PrintConfig.cpp:3276 src/libslic3r/PrintConfig.cpp:3776
+#: src/slic3r/GUI/GUI_Factories.cpp:166 src/slic3r/GUI/Tab.cpp:1637
+#: src/slic3r/GUI/Tab.cpp:2668
+msgid "Extruders"
+msgstr "Extrusors"
+
+#: src/libslic3r/PrintConfig.cpp:624
+msgid ""
+"The extruder which determines bed temperatures. Set to 0 to determine "
+"temperatures based on the first printing extruder of the first and the "
+"second layers."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:633
 msgid ""
 "This custom code is inserted at every layer change, right before the Z move. "
 "Note that you can use placeholder variables for all Slic3r settings as well "
@@ -1501,7 +1510,29 @@ msgstr "Velocitat per imprimir ponts."
 msgid "mm/s"
 msgstr "mm/s"
 
-#: src/libslic3r/PrintConfig.cpp:731
+#. TRN: Label for speed used to print infill above bridges.
+#: src/libslic3r/PrintConfig.cpp:742
+msgid "Over bridges"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:744
+msgid ""
+"Speed for printing solid infill above bridges. Set to 0 to use solid infill "
+"speed. If set as percentage, the speed is calculated over solid infill "
+"speed. "
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:746 src/libslic3r/PrintConfig.cpp:769
+#: src/libslic3r/PrintConfig.cpp:778 src/libslic3r/PrintConfig.cpp:787
+#: src/libslic3r/PrintConfig.cpp:796 src/libslic3r/PrintConfig.cpp:1089
+#: src/libslic3r/PrintConfig.cpp:1638 src/libslic3r/PrintConfig.cpp:1651
+#: src/libslic3r/PrintConfig.cpp:1661 src/libslic3r/PrintConfig.cpp:2950
+#: src/libslic3r/PrintConfig.cpp:3003 src/libslic3r/PrintConfig.cpp:3340
+#: src/libslic3r/PrintConfig.cpp:3596
+msgid "mm/s or %"
+msgstr "mm/s o %"
+
+#: src/libslic3r/PrintConfig.cpp:752
 msgid "Enable dynamic overhang speeds"
 msgstr "Habilitar velocitats dinàmiques de voladís"
 
@@ -1526,16 +1557,7 @@ msgstr ""
 msgid "speed for 0% overlap (bridge)"
 msgstr "velocitat per a 0% de superposició (pont)"
 
-#: src/libslic3r/PrintConfig.cpp:748 src/libslic3r/PrintConfig.cpp:757
-#: src/libslic3r/PrintConfig.cpp:766 src/libslic3r/PrintConfig.cpp:775
-#: src/libslic3r/PrintConfig.cpp:1068 src/libslic3r/PrintConfig.cpp:1617
-#: src/libslic3r/PrintConfig.cpp:1628 src/libslic3r/PrintConfig.cpp:2867
-#: src/libslic3r/PrintConfig.cpp:2920 src/libslic3r/PrintConfig.cpp:3257
-#: src/libslic3r/PrintConfig.cpp:3513
-msgid "mm/s or %"
-msgstr "mm/s o %"
-
-#: src/libslic3r/PrintConfig.cpp:754 src/libslic3r/PrintConfig.cpp:801
+#: src/libslic3r/PrintConfig.cpp:775 src/libslic3r/PrintConfig.cpp:822
 msgid "speed for 25% overlap"
 msgstr "velocitat per a 25% de superposició"
 
@@ -2001,15 +2023,7 @@ msgstr ""
 msgid "Extruder"
 msgstr "Extrusor"
 
-#: src/libslic3r/PrintConfig.cpp:1101 src/libslic3r/PrintConfig.cpp:1867
-#: src/libslic3r/PrintConfig.cpp:2391 src/libslic3r/PrintConfig.cpp:2884
-#: src/libslic3r/PrintConfig.cpp:3165 src/libslic3r/PrintConfig.cpp:3193
-#: src/libslic3r/PrintConfig.cpp:3693 src/slic3r/GUI/GUI_Factories.cpp:165
-#: src/slic3r/GUI/Tab.cpp:1628 src/slic3r/GUI/Tab.cpp:2642
-msgid "Extruders"
-msgstr "Extrusors"
-
-#: src/libslic3r/PrintConfig.cpp:1102
+#: src/libslic3r/PrintConfig.cpp:1123
 msgid ""
 "The extruder to use (unless more specific extruder settings are specified). "
 "This value overrides perimeter and infill extruders, but not the support "
@@ -2038,16 +2052,13 @@ msgstr "Alçada"
 
 #: src/libslic3r/PrintConfig.cpp:1110
 msgid ""
+"Only used when 'Print Settings -> Complete individual objects' is active. "
 "Set this to the vertical distance between your nozzle tip and (usually) the "
-"X carriage rods. In other words, this is the height of the clearance "
-"cylinder around your extruder, and it represents the maximum depth the "
-"extruder can peek before colliding with other printed objects."
+"X carriage rods. Used to check for collisions with previously printed "
+"objects and to prevent them when arranging.\n"
+"The value is ignored for most QIDI printers, which come with more detailed "
+"extruder model."
 msgstr ""
-"Ajusteu aquest valor segons la distància vertical entre la punta del filtre "
-"i (generalment) les barres X del carro. En altres paraules, aquesta és "
-"l'alçada del cilindre de folgança al voltant del seu extrusor, i representa "
-"la profunditat màxima que l'extrusor pot treure abans de col·lidir amb "
-"altres objectes impresos."
 
 #: src/libslic3r/PrintConfig.cpp:1120 src/slic3r/GUI/GLCanvas3D.cpp:292
 msgid "Radius"
@@ -2055,14 +2066,13 @@ msgstr "Radi"
 
 #: src/libslic3r/PrintConfig.cpp:1121
 msgid ""
-"Set this to the clearance radius around your extruder. If the extruder is "
-"not centered, choose the largest value for safety. This setting is used to "
-"check for collisions and to display the graphical preview in the plater."
+"Only used when 'Print Settings -> Complete individual objects' is active. "
+"Set this to a radius of a nozzle-centered cylinder big enough to enclose the "
+"extruder assembly. Used to check for collisions with previously printed "
+"objects and to prevent them when arranging.\n"
+"The value is ignored for most QIDI printers, which come with more detailed "
+"extruder model."
 msgstr ""
-"Ajusteu aquest paràmetre segons el radi d'espai lliure al voltant del vostre "
-"extrusor. Si l'extrusor no està centrat, escolliu el valor més gran per a "
-"seguretat. Aquesta configuració es fa servir per verificar col·lisions i "
-"mostrar la vista prèvia gràfica a la safata."
 
 #: src/libslic3r/PrintConfig.cpp:1131
 msgid "Extruder Color"
@@ -2740,7 +2750,20 @@ msgstr ""
 "tipus. Si s'expressa com a percentatge (per exemple: 40%), escalarà les "
 "velocitats predeterminades."
 
-#: src/libslic3r/PrintConfig.cpp:1624
+#: src/libslic3r/PrintConfig.cpp:1645
+msgid "First layer solid infill speed"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:1646
+msgid ""
+"If expressed as absolute value in mm/s, this speed will be applied to the "
+"solid infill print moves of the first layer. If expressed as a percentage "
+"(for example: 40%) it will be a percantage of the solid infill speed (for "
+"example: 40% of the solid infill speed). Note that 0 means that the \"First "
+"layer speed\" value will be used."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:1657
 msgid "Speed of object first layer over raft interface"
 msgstr ""
 "Velocitat de la primera capa de l'objecte sobre la interfície de la bassa"
@@ -3216,7 +3239,64 @@ msgstr ""
 "Habilitar l'allisat de les capes superiors amb el capçal d'impressió calent "
 "per obtenir una superfície llisa"
 
-#: src/libslic3r/PrintConfig.cpp:1973 src/libslic3r/PrintConfig.cpp:1975
+#: src/libslic3r/PrintConfig.cpp:2006
+msgid "Use beam interlocking"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2007
+msgid ""
+"Generate interlocking beam structure at the locations where different "
+"filaments touch. This improves the adhesion between filaments, especially "
+"models printed in different materials."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2013
+msgid "Interlocking beam width"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2014
+msgid "The width of the interlocking structure beams."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2022
+msgid "Interlocking direction"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2023
+msgid "Orientation of interlocking beams."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2032
+msgid "Interlocking beam layers"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2033
+msgid ""
+"The height of the beams of the interlocking structure, measured in number of "
+"layers. Less layers is stronger, but more prone to defects."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2040
+msgid "Interlocking depth"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2041
+msgid ""
+"The distance from the boundary between filaments to generate interlocking "
+"structure, measured in cells. Too few cells will result in poor adhesion."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2048
+msgid "Interlocking boundary avoidance"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2049
+msgid ""
+"The distance from the outside of a model where interlocking structures will "
+"not be generated, measured in cells."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2056 src/libslic3r/PrintConfig.cpp:2058
 msgid "Ironing Type"
 msgstr "Tipus d'allisat"
 
@@ -6170,12 +6250,12 @@ msgstr "No es col·locaran punts de suport més a prop d'aquest llindar."
 msgid "Use pad"
 msgstr "Utilitza el pad"
 
-#: src/libslic3r/PrintConfig.cpp:4494 src/libslic3r/PrintConfig.cpp:4501
-#: src/libslic3r/PrintConfig.cpp:4515 src/libslic3r/PrintConfig.cpp:4526
-#: src/libslic3r/PrintConfig.cpp:4536 src/libslic3r/PrintConfig.cpp:4558
 #: src/libslic3r/PrintConfig.cpp:4569 src/libslic3r/PrintConfig.cpp:4576
-#: src/libslic3r/PrintConfig.cpp:4583 src/libslic3r/PrintConfig.cpp:4594
-#: src/libslic3r/PrintConfig.cpp:4603 src/libslic3r/PrintConfig.cpp:4612
+#: src/libslic3r/PrintConfig.cpp:4590 src/libslic3r/PrintConfig.cpp:4601
+#: src/libslic3r/PrintConfig.cpp:4611 src/libslic3r/PrintConfig.cpp:4633
+#: src/libslic3r/PrintConfig.cpp:4644 src/libslic3r/PrintConfig.cpp:4651
+#: src/libslic3r/PrintConfig.cpp:4658 src/libslic3r/PrintConfig.cpp:4669
+#: src/libslic3r/PrintConfig.cpp:4678 src/libslic3r/PrintConfig.cpp:4687
 #: src/slic3r/GUI/FrequentlyChangedParameters.cpp:276
 #: src/slic3r/GUI/GUI_Factories.cpp:173 src/slic3r/GUI/Tab.cpp:5861
 #: src/slic3r/GUI/Tab.cpp:5862 src/slic3r/GUI/Tab.cpp:5927
@@ -6535,42 +6615,39 @@ msgstr ""
 msgid "Export OBJ"
 msgstr "Exporta OBJ"
 
-#: src/libslic3r/PrintConfig.cpp:5594
-msgid "Export the model(s) as OBJ."
-msgstr "Exporta el/s model/s com a OBJ."
+#: src/libslic3r/PrintConfig.cpp:5682
+msgid ""
+"Load configuration from the specified file. It can be used more than once to "
+"load options from multiple files."
+msgstr ""
+"Carrega la configuració des del fitxer especificat. Es pot utilitzar més "
+"d'una vegada per carregar les opcions des de diversos fitxers."
 
-#: src/libslic3r/PrintConfig.cpp:5605
-msgid "Export SLA"
-msgstr "Exporta SLA"
+#: src/libslic3r/PrintConfig.cpp:5708
+msgid "Help"
+msgstr "Ajuda"
 
-#: src/libslic3r/PrintConfig.cpp:5606
-msgid "Slice the model and export SLA printing layers as PNG."
-msgstr "Laminar el model i exportar les capes d'impressió d'SLA com a PNG."
+#: src/libslic3r/PrintConfig.cpp:5709
+msgid "Show this help."
+msgstr "Mostra aquesta ajuda."
 
-#: src/libslic3r/PrintConfig.cpp:5611
-msgid "Export 3MF"
-msgstr "Exporta 3MF"
+#: src/libslic3r/PrintConfig.cpp:5714
+msgid "Help (FFF options)"
+msgstr "Ajuda (opcions FFF)"
 
-#: src/libslic3r/PrintConfig.cpp:5612
-msgid "Export the model(s) as 3MF."
-msgstr "Exporta el/s model/s com a 3MF."
+#: src/libslic3r/PrintConfig.cpp:5715
+msgid "Show the full list of print/G-code configuration options."
+msgstr ""
+"Mostra la llista completa d'opcions de configuració d'impressió/G-code."
 
-#: src/libslic3r/PrintConfig.cpp:5616
-msgid "Export STL"
-msgstr "Exporta STL"
+#: src/libslic3r/PrintConfig.cpp:5719
+msgid "Help (SLA options)"
+msgstr "Ajuda (opcions de l'SLA)"
 
-#: src/libslic3r/PrintConfig.cpp:5617
-msgid "Export the model(s) as STL."
-msgstr "Exporta el/s model/s com a STL."
-
-#: src/libslic3r/PrintConfig.cpp:5621 src/slic3r/GUI/KBShortcutsDialog.cpp:101
-#: src/slic3r/GUI/Plater.cpp:7356 src/slic3r/GUI/Sidebar.cpp:498
-msgid "Export G-code"
-msgstr "Exportar el codi G"
-
-#: src/libslic3r/PrintConfig.cpp:5622
-msgid "Slice the model and export toolpaths as G-code."
-msgstr "Laminar el model i exportar les trajectòries com a codi G."
+#: src/libslic3r/PrintConfig.cpp:5720
+msgid "Show the full list of SLA print configuration options."
+msgstr ""
+"Mostra la llista completa d'opcions de configuració d'impressió de l'SLA."
 
 #: src/libslic3r/PrintConfig.cpp:5627
 msgid "G-code viewer"
@@ -6580,40 +6657,41 @@ msgstr "Visualitzador de codi G"
 msgid "Visualize an already sliced and saved G-code"
 msgstr "Visualitzar un codi G ja laminat i desat"
 
-#: src/libslic3r/PrintConfig.cpp:5633
-msgid "Automatic OpenGL antialiasing samples number selection"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5751
+msgid "Save config file"
+msgstr "Desa el fitxer de configuració"
 
-#: src/libslic3r/PrintConfig.cpp:5634
-msgid ""
-"Automatically select the highest number of samples for OpenGL antialiasing."
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5752
+msgid "Save configuration to the specified file."
+msgstr "Desa la configuració al fitxer especificat."
 
-#: src/libslic3r/PrintConfig.cpp:5640
-msgid "OpenGL version"
-msgstr "Versió OpenGL"
+#: src/libslic3r/PrintConfig.cpp:5758
+msgid "Output Model Info"
+msgstr "Informació del model de sortida"
 
-#: src/libslic3r/PrintConfig.cpp:5641
-msgid "Select a specific version of OpenGL"
-msgstr "Seleccioneu una versió específica d'OpenGL"
+#: src/libslic3r/PrintConfig.cpp:5759
+msgid "Write information about the model to the console."
+msgstr "Escriure informació sobre el model a la consola."
 
-#: src/libslic3r/PrintConfig.cpp:5646
-msgid "OpenGL compatibility profile"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5764
+msgid "Export the model(s) as OBJ."
+msgstr "Exporta el/s model/s com a OBJ."
 
-#: src/libslic3r/PrintConfig.cpp:5647
-msgid "Enable OpenGL compatibility profile"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5768
+msgid "Export STL"
+msgstr "Exporta STL"
 
-#: src/libslic3r/PrintConfig.cpp:5652
-msgid "OpenGL debug output"
-msgstr "Sortida de depuració OpenGL"
+#: src/libslic3r/PrintConfig.cpp:5769
+msgid "Export the model(s) as STL."
+msgstr "Exporta el/s model/s com a STL."
 
-#: src/libslic3r/PrintConfig.cpp:5653
-msgid ""
-"Activate OpenGL debug output on graphic cards which support it (OpenGL 4.3 "
-"or higher)"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5775
+msgid "Export 3MF"
+msgstr "Exporta 3MF"
+
+#: src/libslic3r/PrintConfig.cpp:5776
+msgid "Export the model(s) as 3MF."
+msgstr "Exporta el/s model/s com a 3MF."
 
 #: src/libslic3r/PrintConfig.cpp:5659
 msgid "Slice"
@@ -6622,52 +6700,25 @@ msgstr "Laminar"
 #: src/libslic3r/PrintConfig.cpp:5660
 msgid ""
 "Slice the model as FFF or SLA based on the printer_technology configuration "
-"value."
+"value and export the result."
 msgstr ""
-"Laminar el model com FFF o SLA basat en el valor de configuració de "
-"printer_technology."
 
-#: src/libslic3r/PrintConfig.cpp:5665
-msgid "Help"
-msgstr "Ajuda"
+#: src/libslic3r/PrintConfig.cpp:5791
+msgid "Export SLA"
+msgstr "Exporta SLA"
 
-#: src/libslic3r/PrintConfig.cpp:5666
-msgid "Show this help."
-msgstr "Mostra aquesta ajuda."
+#: src/libslic3r/PrintConfig.cpp:5792
+msgid "Slice the model and export SLA printing layers as PNG."
+msgstr "Laminar el model i exportar les capes d'impressió d'SLA com a PNG."
 
-#: src/libslic3r/PrintConfig.cpp:5671
-msgid "Help (FFF options)"
-msgstr "Ajuda (opcions FFF)"
+#: src/libslic3r/PrintConfig.cpp:5797 src/slic3r/GUI/KBShortcutsDialog.cpp:101
+#: src/slic3r/GUI/Plater.cpp:7238 src/slic3r/GUI/Sidebar.cpp:499
+msgid "Export G-code"
+msgstr "Exportar el codi G"
 
-#: src/libslic3r/PrintConfig.cpp:5672
-msgid "Show the full list of print/G-code configuration options."
-msgstr ""
-"Mostra la llista completa d'opcions de configuració d'impressió/G-code."
-
-#: src/libslic3r/PrintConfig.cpp:5676
-msgid "Help (SLA options)"
-msgstr "Ajuda (opcions de l'SLA)"
-
-#: src/libslic3r/PrintConfig.cpp:5677
-msgid "Show the full list of SLA print configuration options."
-msgstr ""
-"Mostra la llista completa d'opcions de configuració d'impressió de l'SLA."
-
-#: src/libslic3r/PrintConfig.cpp:5681
-msgid "Output Model Info"
-msgstr "Informació del model de sortida"
-
-#: src/libslic3r/PrintConfig.cpp:5682
-msgid "Write information about the model to the console."
-msgstr "Escriure informació sobre el model a la consola."
-
-#: src/libslic3r/PrintConfig.cpp:5686
-msgid "Save config file"
-msgstr "Desa el fitxer de configuració"
-
-#: src/libslic3r/PrintConfig.cpp:5687
-msgid "Save configuration to the specified file."
-msgstr "Desa la configuració al fitxer especificat."
+#: src/libslic3r/PrintConfig.cpp:5798
+msgid "Slice the model and export toolpaths as G-code."
+msgstr "Laminar el model i exportar les trajectòries com a codi G."
 
 #: src/libslic3r/PrintConfig.cpp:5697
 msgid "Align XY"
@@ -6747,20 +6798,7 @@ msgstr ""
 "Organitzar els models subministrats en una base i combinar-los en un sol "
 "model per fer accions una vegada."
 
-#: src/libslic3r/PrintConfig.cpp:5752 src/slic3r/GUI/MainFrame.cpp:1923
-msgid "Repair"
-msgstr "Reparar"
-
-#: src/libslic3r/PrintConfig.cpp:5753
-msgid ""
-"Try to repair any non-manifold meshes (this option is implicitly added "
-"whenever we need to slice the model to perform the requested action)."
-msgstr ""
-"Intenta reparar qualsevol malla no múltiple (aquesta opció s'afegeix "
-"implícitament cada vegada que necessitem laminar el model per fer l'acció "
-"sol·licitada)."
-
-#: src/libslic3r/PrintConfig.cpp:5756
+#: src/libslic3r/PrintConfig.cpp:5847
 #: src/slic3r/GUI/Gizmos/GLGizmoRotate.cpp:574
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:689
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:729
@@ -6823,15 +6861,7 @@ msgstr "Escalar per Adaptar-se"
 msgid "Scale to fit the given volume."
 msgstr "Escala per ajustar-se al volum donat."
 
-#: src/libslic3r/PrintConfig.cpp:5785
-msgid "Delete files after loading"
-msgstr "Suprimir fitxers després de carregar"
-
-#: src/libslic3r/PrintConfig.cpp:5786
-msgid "Delete files after loading."
-msgstr "Suprimiu fitxers després de carregar-los."
-
-#: src/libslic3r/PrintConfig.cpp:5794
+#: src/libslic3r/PrintConfig.cpp:5881
 msgid "Ignore non-existent config files"
 msgstr "Ignora els fitxers de configuració inexistents"
 
@@ -6880,19 +6910,7 @@ msgstr ""
 "Permet llegir valors de configuració desconeguts substituint-los "
 "silenciosament pels predeterminats."
 
-#: src/libslic3r/PrintConfig.cpp:5810
-msgid "Load config file"
-msgstr "Carrega el fitxer de configuració"
-
-#: src/libslic3r/PrintConfig.cpp:5811
-msgid ""
-"Load configuration from the specified file. It can be used more than once to "
-"load options from multiple files."
-msgstr ""
-"Carrega la configuració des del fitxer especificat. Es pot utilitzar més "
-"d'una vegada per carregar les opcions des de diversos fitxers."
-
-#: src/libslic3r/PrintConfig.cpp:5814
+#: src/libslic3r/PrintConfig.cpp:5897
 msgid "Output File"
 msgstr "Fitxer de sortida"
 
@@ -6904,22 +6922,7 @@ msgstr ""
 "El fitxer on s'escriurà la sortida (si no s'especifica, es basarà en el "
 "fitxer d'entrada)."
 
-#: src/libslic3r/PrintConfig.cpp:5819
-msgid "Single instance mode"
-msgstr "Mode d'instància única"
-
-#: src/libslic3r/PrintConfig.cpp:5820
-msgid ""
-"If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
-msgstr ""
-"Si s'habilita, els arguments de la línia de comandes s'envien a una "
-"instància existent de la interfície gràfica d'usuari QIDISlicer o s'activa "
-"una finestra del QIDISlicer existent. Substitueix el valor de configuració "
-"\"single_instance\" de les preferències de l'aplicació."
-
-#: src/libslic3r/PrintConfig.cpp:5829
+#: src/libslic3r/PrintConfig.cpp:5902
 msgid "Data directory"
 msgstr "Directori de dades"
 
@@ -6957,7 +6960,65 @@ msgstr ""
 "depuració, 5:traça\n"
 "Per exemple. loglevel=2 registrarà missatges de fallada, error i perill."
 
-#: src/libslic3r/PrintConfig.cpp:5849
+#: src/libslic3r/PrintConfig.cpp:5918
+msgid "Automatic OpenGL antialiasing samples number selection"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5919
+msgid ""
+"Automatically select the highest number of samples for OpenGL antialiasing."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5925
+msgid "OpenGL version"
+msgstr "Versió OpenGL"
+
+#: src/libslic3r/PrintConfig.cpp:5926
+msgid "Select a specific version of OpenGL"
+msgstr "Seleccioneu una versió específica d'OpenGL"
+
+#: src/libslic3r/PrintConfig.cpp:5931
+msgid "OpenGL compatibility profile"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5932
+msgid "Enable OpenGL compatibility profile"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5937
+msgid "OpenGL debug output"
+msgstr "Sortida de depuració OpenGL"
+
+#: src/libslic3r/PrintConfig.cpp:5938
+msgid ""
+"Activate OpenGL debug output on graphic cards which support it (OpenGL 4.3 "
+"or higher)"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5944
+msgid "Single instance mode"
+msgstr "Mode d'instància única"
+
+#: src/libslic3r/PrintConfig.cpp:5945
+msgid ""
+"If enabled, the command line arguments are sent to an existing instance of "
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
+"the \"single_instance\" configuration value from application preferences."
+msgstr ""
+"Si s'habilita, els arguments de la línia de comandes s'envien a una "
+"instància existent de la interfície gràfica d'usuari QIDISlicer o s'activa "
+"una finestra del QIDISlicer existent. Substitueix el valor de configuració "
+"\"single_instance\" de les preferències de l'aplicació."
+
+#: src/libslic3r/PrintConfig.cpp:5950
+msgid "Delete files after loading"
+msgstr "Suprimir fitxers després de carregar"
+
+#: src/libslic3r/PrintConfig.cpp:5951
+msgid "Delete files after loading."
+msgstr "Suprimiu fitxers després de carregar-los."
+
+#: src/libslic3r/PrintConfig.cpp:5955
 msgid "Render with a software renderer"
 msgstr "Renderitzar amb un programari renderitzador"
 
@@ -7898,9 +7959,15 @@ msgstr "Acurat"
 msgid "Reset defaults"
 msgstr "Restablir els valors predeterminats"
 
-#: src/slic3r/GUI/ArrangeSettingsDialogImgui.cpp:134
-#: src/slic3r/GUI/GLCanvas3D.cpp:5558 src/slic3r/GUI/KBShortcutsDialog.cpp:146
-#: src/slic3r/GUI/Plater.cpp:7280
+#: src/slic3r/GUI/ArrangeSettingsDialogImgui.cpp:140
+msgid ""
+"Sequential printing is active. Arrange algorithm will use geometry of the "
+"printer to optimize objects placement and avoid collisions with the gantry."
+msgstr ""
+
+#: src/slic3r/GUI/ArrangeSettingsDialogImgui.cpp:147
+#: src/slic3r/GUI/GLCanvas3D.cpp:5331 src/slic3r/GUI/KBShortcutsDialog.cpp:146
+#: src/slic3r/GUI/Plater.cpp:7161
 msgid "Arrange"
 msgstr "Organitza"
 
@@ -8132,11 +8199,7 @@ msgstr "Escolliu un fitxer STL per importar la forma de la base:"
 msgid "Invalid file format."
 msgstr "Format de fitxer invàlid."
 
-#: src/slic3r/GUI/BedShapeDialog.cpp:544
-msgid "Error! Invalid model"
-msgstr "Error! Model invàlid"
-
-#: src/slic3r/GUI/BedShapeDialog.cpp:552
+#: src/slic3r/GUI/BedShapeDialog.cpp:551
 msgid "The selected file contains no geometry."
 msgstr "El fitxer seleccionat no conté geometria."
 
@@ -9375,7 +9438,12 @@ msgstr "Salta a l'alçada"
 msgid "Show estimated print time on hover"
 msgstr ""
 
-#: src/slic3r/GUI/DoubleSliderForLayers.cpp:777
+#: src/slic3r/GUI/DoubleSliderForLayers.cpp:776
+#: src/slic3r/GUI/Preferences.cpp:520
+msgid "Sequential slider applied only to top layer"
+msgstr "Control lliscant seqüencial aplicat només a la capa superior"
+
+#: src/slic3r/GUI/DoubleSliderForLayers.cpp:782
 msgid "Set extruder sequence for the entire print"
 msgstr "Fixa la seqüència de l'extrusor per a tota la impressió"
 
@@ -10187,8 +10255,8 @@ msgstr "Error"
 #: src/slic3r/GUI/Gizmos/GLGizmoMeasure.cpp:2011
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:351
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:478
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:604
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:605
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:606
 msgid "in"
 msgstr "a"
 
@@ -10547,12 +10615,12 @@ msgstr "Valor"
 msgid "Tolerance"
 msgstr "Tolerància"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:1189
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:1192
+#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:1190
 #: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:1193
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1286
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1289
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1290
+#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:1194
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1489
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1492
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1493
 msgid "Left click"
 msgstr "Clic esquerre"
 
@@ -11070,18 +11138,17 @@ msgstr ""
 "T'agradaria continuar de totes maneres?"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:2348
-#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:524
-#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:532
-#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:544
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1145 src/slic3r/GUI/GUI.cpp:144
-#: src/slic3r/GUI/GUI_Preview.cpp:510
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:904
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:923
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:953 src/slic3r/GUI/Plater.cpp:4630
-#: src/slic3r/GUI/Plater.cpp:4638 src/slic3r/GUI/Plater.cpp:4708
-#: src/slic3r/GUI/Plater.cpp:4716 src/slic3r/GUI/Plater.cpp:5830
-#: src/slic3r/GUI/WifiConfigDialog.cpp:256
+#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:525
+#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:533
+#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:553 src/slic3r/GUI/GUI.cpp:144
+#: src/slic3r/GUI/GUI_Preview.cpp:514
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:906
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:925
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:955 src/slic3r/GUI/Plater.cpp:4627
+#: src/slic3r/GUI/Plater.cpp:4635 src/slic3r/GUI/Plater.cpp:4705
+#: src/slic3r/GUI/Plater.cpp:4713 src/slic3r/GUI/WifiConfigDialog.cpp:256
 #: src/slic3r/GUI/WipeTowerDialog.cpp:70
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:59
 msgid "Warning"
 msgstr "Advertència"
 
@@ -12075,7 +12142,23 @@ msgstr "Entrant als punts de suport de l'SLA"
 msgid "Leaving SLA support points"
 msgstr "Sortint als punts de suport de l'SLA"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:41
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:83
+msgid "Visible support structure"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:90
+msgid "Click to show support points without support structure"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:97
+msgid "Click to show support structure with pad"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:101
+msgid "Visible support points without support structure"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:117
 msgid "Head diameter"
 msgstr "Diàmetre del capçal"
 
@@ -12102,12 +12185,8 @@ msgstr "Aplica els canvis"
 msgid "Discard changes"
 msgstr "Descarta els canvis"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:47
-msgid "Minimal points distance"
-msgstr "Distància mínima de punts"
-
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:49
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1300
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:124
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1503
 msgid "Auto-generate points"
 msgstr "Generació automàtica de punts"
 
@@ -12127,7 +12206,11 @@ msgstr "Esborra punt de suport"
 msgid "Change point head diameter"
 msgstr "Canviar diàmetre del cap de punta"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:715
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:740
+msgid "Change amount of generated support points."
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:756
 msgid "Support parameter change"
 msgstr "Canvi de paràmetres de suport"
 
@@ -12151,11 +12234,7 @@ msgstr "Mou el punt de suport"
 msgid "Support points edit"
 msgstr "Edició de punts de suport"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1143
-msgid "Autogeneration will erase all manually edited points."
-msgstr "La generació automàtica esborrarà tots els punts editats manualment."
-
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1150
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1352
 msgid "Autogenerate support points"
 msgstr "Autogenera els punts de suport"
 
@@ -12210,6 +12289,26 @@ msgstr "Restablir pla de retall"
 #: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1299
 msgid "Switch to editing mode"
 msgstr "Canvia al mode d'edició"
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1515
+msgid "Generated support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1516
+msgid "Selected support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1517
+msgid "Edited support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1518
+msgid "Island support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1519
+msgid "Hovered support point"
+msgstr ""
 
 #. TRN - Title in Undo/Redo stack after rotate with SVG around emboss axe
 #: src/slic3r/GUI/Gizmos/GLGizmoSVG.cpp:55
@@ -12823,7 +12922,13 @@ msgstr ""
 "%2$.2f mm. Si us plau, reposicioneu els objectes conflictius (%3% <-> %4%) "
 "més separats."
 
-#: src/slic3r/GUI/GLCanvas3D.cpp:7687
+#. TRN: Placeholders contain names of the colliding objects.
+#: src/slic3r/GUI/GLCanvas3D.cpp:7420
+#, boost-format
+msgid "Extruder will crash into %1% while printing %2%."
+msgstr ""
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7450
 msgid "Jump to"
 msgstr "Anar a"
 
@@ -13104,7 +13209,19 @@ msgstr "La nova versió prellançament %1% està disponible."
 msgid "See Releases page."
 msgstr "Consulteu pàgina de llançaments."
 
-#: src/slic3r/GUI/GUI_App.cpp:1584
+#. TRN Notification text, %1% is list of vendors.
+#: src/slic3r/GUI/GUI_App.cpp:1544
+#, boost-format
+msgid ""
+"Update check failed for the following vendors:\n"
+"\n"
+"%1%\n"
+"This may be due to an account logout or a lost connection. Please verify "
+"your account status and internet connection. Then select \"Check for "
+"Configuration Updates\" to repeat."
+msgstr ""
+
+#: src/slic3r/GUI/GUI_App.cpp:1591
 msgid "Preparing settings tabs"
 msgstr "Preparant pestanyes de configuració"
 
@@ -14558,6 +14675,25 @@ msgstr "Omplint base"
 msgid "Arranging"
 msgstr "Organitzant"
 
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:30
+msgid "Arranging for sequential print"
+msgstr ""
+
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:52
+msgid ""
+"The result of the single-bed arrange would scatter instances of a single "
+"object between several beds, possibly affecting order of printing of the non-"
+"selected beds. Consider using global arrange across all beds."
+msgstr ""
+
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:59
+msgid "One of the objects is too large to fit the bed."
+msgstr ""
+
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:72
+msgid "Arrange for sequential print"
+msgstr ""
+
 #: src/slic3r/GUI/Jobs/EmbossJob.cpp:357
 msgid "Add Emboss text object"
 msgstr "Afegir objecte de text en relleu"
@@ -15265,12 +15401,7 @@ msgstr ""
 msgid "The file already exists!"
 msgstr ""
 
-#: src/slic3r/GUI/BulkExportDialog.cpp:207
-#: src/slic3r/GUI/BulkExportDialog.cpp:257
-msgid "Export beds"
-msgstr ""
-
-#: src/slic3r/GUI/BulkExportDialog.cpp:256
+#: src/slic3r/GUI/BulkExportDialog.cpp:258
 msgid "Some of the selected files already exist. Do you want to replace them?"
 msgstr ""
 
@@ -15958,7 +16089,11 @@ msgstr "Desar fitxer OBJ (menys propens a errors de coordinació que STL) com:"
 msgid "Your file was repaired."
 msgstr "S'ha reparat el fitxer."
 
-#: src/slic3r/GUI/MainFrame.cpp:1937
+#: src/slic3r/GUI/MainFrame.cpp:1924
+msgid "Repair"
+msgstr "Reparar"
+
+#: src/slic3r/GUI/MainFrame.cpp:1938
 msgid "Save configuration as:"
 msgstr "Desa la configuració com a:"
 
@@ -16583,12 +16718,14 @@ msgstr ""
 msgid "Logged to QIDI Account as %1%."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:984 src/slic3r/GUI/Plater.cpp:997
+#: src/slic3r/GUI/Plater.cpp:997 src/slic3r/GUI/Plater.cpp:1017
 msgid "Failed to connect to QIDI Account."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:1052
-msgid "Failed to select printer from QIDI Connect."
+#. TRN: This is a hyperlink in a notification. It is preceded by a message from QIDIAccount (therefore not in this dictionary)
+#. saying something like "connection not established, I will keep trying".
+#: src/slic3r/GUI/Plater.cpp:1105
+msgid "Stop now."
 msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:1147
@@ -16613,21 +16750,35 @@ msgstr[1] ""
 msgid "PrintRequest can only be loaded if an SLA printer is selected."
 msgstr ""
 
-#. TRN The placeholder is either "3MF" or "AMF"
-#: src/slic3r/GUI/Plater.cpp:1351
-#, boost-format
-msgid ""
-"The selected %1% file contains a post-processing script.\n"
-"Please review the script carefully before exporting G-code."
-msgstr ""
-"El fitxer %1% seleccionat conté un script de postprocessament.\n"
-"Reviseu atentament l'script abans d'exportar el codi G."
-
-#: src/slic3r/GUI/Plater.cpp:1389
+#: src/slic3r/GUI/Plater.cpp:1358
 #, boost-format
 msgid "Failed loading file \"%1%\" due to an invalid configuration."
 msgstr ""
 "Error en carregar el fitxer \"%1%\" a causa d'una configuració no vàlida."
+
+#: src/slic3r/GUI/Plater.cpp:1383
+msgid "Configuration was not loaded"
+msgstr ""
+
+#. TRN: %1% is filename of the project, %2% is url link.
+#: src/slic3r/GUI/Plater.cpp:1386
+#, boost-format
+msgid ""
+"<b>Unable to load configuration from project\n"
+"\n"
+"File: </b>%1%\n"
+"\n"
+"This project was created in a newer version of QIDISlicer. Only the "
+"geometry was loaded.\n"
+"Update to the latest version for full compatibility.\n"
+"For more info: <a href=%2%>%2%</a>"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:1401
+msgid ""
+"The selected 3MF file contains a post-processing script.\n"
+"Please review the script carefully before exporting G-code."
+msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:1409
 #, c-format, boost-format
@@ -16837,11 +16988,19 @@ msgstr ""
 msgid "Enable supports for enforcers only."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:2158
-msgid "Bed temperatures for the used filaments differ significantly."
+#. TRN: Text of a notification, followed by (single) hyperlink to two of the config options. The sentence had to be split because of the hyperlink, sorry.
+#. The hyperlink part of the sentence reads "'Bed temperature by extruder' and 'Wipe tower extruder'", and it is also to be translated.
+#: src/slic3r/GUI/Plater.cpp:2176
+msgid ""
+"Bed temperatures for the used filaments differ significantly.\n"
+"For multi-material prints it is recommended to set the "
 msgstr ""
-"Les temperatures del llit per als filaments utilitzats difereixen "
-"significativament."
+
+#. TRN: The other part of the sentence starting "Bed temperatures for the used" (also in the dictionary). Sorry for splitting it, technical reasons -
+#. this part of the sentence is a hyperlink.
+#: src/slic3r/GUI/Plater.cpp:2180
+msgid "'Bed temperature by extruder' and 'Wipe tower extruder'"
+msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:2161
 msgid ""
@@ -17254,17 +17413,7 @@ msgid ""
 "Printer Settings."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:5825
-#, boost-format
-msgid ""
-"You are exporting binary G-code for a QIDI printer. Binary G-code enables "
-"significantly faster uploads. Ensure that your printer is running firmware "
-"version 5.1.0 or newer, as older versions do not support binary G-codes.\n"
-"\n"
-"To learn more about binary G-code, visit <a href=%1%>%1%</a>."
-msgstr ""
-
-#: src/slic3r/GUI/Plater.cpp:5890
+#: src/slic3r/GUI/Plater.cpp:5767
 msgid "The provided file name is not valid."
 msgstr "El nom del fitxer proporcionat no és vàlid."
 
@@ -17284,7 +17433,11 @@ msgstr "Desa el fitxer SL1 / SL1S com a:"
 msgid "Choose export directory:"
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:6161
+#: src/slic3r/GUI/Plater.cpp:5957
+msgid "Export beds"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6030
 msgid ""
 "Unable to perform boolean operation on model meshes. Only positive parts "
 "will be exported."
@@ -17326,8 +17479,12 @@ msgstr "No es pot desar el fitxer"
 msgid "Failed to select a printer."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:6653
+#: src/slic3r/GUI/Plater.cpp:6523
 msgid "Failed to read response from QIDI Connect server. Upload is cancelled."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6605 src/slic3r/GUI/Sidebar.cpp:533
+msgid "Send all to Connect"
 msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:6885
@@ -17339,7 +17496,13 @@ msgstr ""
 msgid "Upload and Print"
 msgstr "Enviar i imprimir"
 
-#: src/slic3r/GUI/Plater.cpp:7303
+#: src/slic3r/GUI/Plater.cpp:7143
+msgid ""
+"Sequential arrange for a single bed is only allowed when all instances of "
+"the affected objects are on the same bed."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:7184
 #, c-format, boost-format
 msgid ""
 "Arrangement ignored the following objects which can't fit into a single "
@@ -17684,11 +17847,7 @@ msgstr ""
 msgid "GUI"
 msgstr "IU"
 
-#: src/slic3r/GUI/Preferences.cpp:519
-msgid "Sequential slider applied only to top layer"
-msgstr "Control lliscant seqüencial aplicat només a la capa superior"
-
-#: src/slic3r/GUI/Preferences.cpp:520
+#: src/slic3r/GUI/Preferences.cpp:521
 msgid ""
 "If enabled, changes made using the sequential slider, in preview, apply only "
 "to gcode top layer. If disabled, changes made using the sequential slider, "
@@ -18709,11 +18868,7 @@ msgstr ""
 msgid "Export all G-codes"
 msgstr ""
 
-#: src/slic3r/GUI/Sidebar.cpp:532
-msgid "Send all to Connect"
-msgstr ""
-
-#: src/slic3r/GUI/Sidebar.cpp:782
+#: src/slic3r/GUI/Sidebar.cpp:784
 msgid "Hold Shift to Slice & Export G-code"
 msgstr "Mantingueu pressionada la tecla Shift per laminar i exportar el codi G"
 
@@ -19011,9 +19166,13 @@ msgstr "Opcions de sortida"
 msgid "Sequential printing"
 msgstr "Impressió seqüencial"
 
-#: src/slic3r/GUI/Tab.cpp:1694
-msgid "Extruder clearance"
-msgstr "Separació de l'extrusor"
+#: src/slic3r/GUI/Tab.cpp:1717
+msgid ""
+"Note: When using this option, the Arrange function automatically accounts "
+"for the printer geometry to prevent collisions. Extruder geometry is built-"
+"in for most QIDI printers, the others use generic model defined by values "
+"in Printer Settings."
+msgstr ""
 
 #: src/slic3r/GUI/Tab.cpp:1699 src/slic3r/GUI/Tab.cpp:5892
 msgid "Output file"
@@ -19211,7 +19370,11 @@ msgstr ""
 "mode Stealth.\n"
 "El mode sigil no s'aplicarà i es desactivarà."
 
-#: src/slic3r/GUI/Tab.cpp:2831
+#: src/slic3r/GUI/Tab.cpp:2843
+msgid "Sequential printing limits"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:2861
 msgid "Start G-Code options"
 msgstr "Inicia les opcions del codi G"
 
@@ -19680,7 +19843,19 @@ msgstr ""
 msgid "Profile settings"
 msgstr ""
 
-#: src/slic3r/GUI/Tab.cpp:5584
+#: src/slic3r/GUI/Tab.cpp:5569
+msgid "Set default values for fast print speed"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:5570
+msgid "Set default values for slow print speed"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:5571
+msgid "Set default values for high viscosity print speed"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:5666
 #, boost-format
 msgid "The current Z-axis height correction is: %1% mm"
 msgstr ""
@@ -20318,7 +20493,26 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: src/slic3r/GUI/UpdatesUIManager.cpp:184
+#. TRN tooltip in Configuration Wizard - Configuration Sources
+#: src/slic3r/GUI/UpdatesUIManager.cpp:169
+msgid ""
+"Some vendors were installed from this source, but you do not have the rights "
+"to receive updates from it.\n"
+"This source may no longer be active, or your account may no longer be "
+"subscribed.\n"
+"Please consider unsubscribing from this source."
+msgstr ""
+
+#. TRN tooltip in Configuration Wizard - Configuration Sources
+#: src/slic3r/GUI/UpdatesUIManager.cpp:174
+msgid ""
+"Some vendors were installed from this source, but you do not have rights to "
+"receive updates from it.\n"
+"Please log in to restore access to all your subscribed sources or consider "
+"unsubscribing from this source."
+msgstr ""
+
+#: src/slic3r/GUI/UpdatesUIManager.cpp:198
 msgid "Source file"
 msgstr ""
 
@@ -20911,8 +21105,30 @@ msgstr ""
 "Cos del missatge: \"%1%\"\n"
 "Error: \"%2%\""
 
-#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:73
-#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:134
+#. TRN Dialog text, %1% is list of vendors.
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:51
+#, boost-format
+msgid ""
+"Update check failed for the following vendors:\n"
+"\n"
+"%1%\n"
+"This may be because you are no longer subscribed to some configuration "
+"sources.\n"
+"Please manage your configuration sources in Configuration Wizard"
+msgstr ""
+
+#. TRN Dialog text, %1% is list of vendors.
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:56
+#, boost-format
+msgid ""
+"Update check failed for the following vendors:\n"
+"\n"
+"%1%\n"
+"Please log in to restore access to all your subscribed configuration sources."
+msgstr ""
+
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:120
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:195
 #, boost-format
 msgid "Failed to download %1%"
 msgstr ""
@@ -30076,3 +30292,15 @@ msgstr "Pas de velocitat volumètrica:"
 msgid "Please input valid values:\nStart Volumetric Speed: >= 0.0\nEnd Volumetric Speed: > Start Volumetric Speed + Volumetric Speed step\nVolumetric Speed step: >= 0.01)"
 msgstr "Si us plau, introduïu valors vàlids:\nVelocitat volumètrica inicial: >= 0.0\nVelocitat volumètrica final: > Velocitat volumètrica inicial + Pas de velocitat volumètrica\nPas de velocitat volumètrica: >= 0.01)"
 
+msgid "Clean the Webview Cache"
+msgstr "Neteja la memòria cau del Webview"
+
+msgid ""
+"Click the OK button, the software will open the WebView cache folder.\n"
+"You need to manually delete the WebView folder.\n"
+msgstr ""
+"Feu clic al botó OK, el programari obrirà la carpeta de la memòria cau del WebView.\n"
+"Cal que suprimiu manualment la carpeta WebView.\n"
+
+msgid "Learn more"
+msgstr "Aprèn més"

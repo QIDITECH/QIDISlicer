@@ -20,109 +20,109 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 
 #. TRN: Following strings are labels in the G-code Viewer legend.
-#: src/libslic3r/ExtrusionRole.cpp:41
+#: src/libslic3r/ExtrusionRole.cpp:42
 #: src/slic3r/GUI/ConfigSnapshotDialog.cpp:34
-#: src/slic3r/GUI/GCodeViewer.cpp:279 src/slic3r/GUI/GCodeViewer.cpp:288
-#: src/slic3r/GUI/GCodeViewer.cpp:303
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:912
+#: src/slic3r/GUI/GCodeViewer.cpp:316 src/slic3r/GUI/GCodeViewer.cpp:325
+#: src/slic3r/GUI/GCodeViewer.cpp:340
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:913
 msgid "Unknown"
 msgstr "Невядома"
 
-#: src/libslic3r/ExtrusionRole.cpp:42 src/libslic3r/ExtrusionRole.cpp:63
-#: src/slic3r/GUI/GCodeViewer.cpp:289
+#: src/libslic3r/ExtrusionRole.cpp:43 src/libslic3r/ExtrusionRole.cpp:64
+#: src/slic3r/GUI/GCodeViewer.cpp:326
 msgid "Perimeter"
 msgstr "Унутраны перыметр"
 
-#: src/libslic3r/ExtrusionRole.cpp:43 src/libslic3r/ExtrusionRole.cpp:65
-#: src/slic3r/GUI/GCodeViewer.cpp:290
+#: src/libslic3r/ExtrusionRole.cpp:44 src/libslic3r/ExtrusionRole.cpp:66
+#: src/slic3r/GUI/GCodeViewer.cpp:327
 msgid "External perimeter"
 msgstr "Вонкавы перыметр"
 
-#: src/libslic3r/ExtrusionRole.cpp:44 src/libslic3r/ExtrusionRole.cpp:67
-#: src/slic3r/GUI/GCodeViewer.cpp:291
+#: src/libslic3r/ExtrusionRole.cpp:45 src/libslic3r/ExtrusionRole.cpp:68
+#: src/slic3r/GUI/GCodeViewer.cpp:328
 msgid "Overhang perimeter"
 msgstr "Перыметры выступу"
 
-#: src/libslic3r/ExtrusionRole.cpp:45 src/libslic3r/ExtrusionRole.cpp:69
-#: src/slic3r/GUI/GCodeViewer.cpp:292
+#: src/libslic3r/ExtrusionRole.cpp:46 src/libslic3r/ExtrusionRole.cpp:70
+#: src/slic3r/GUI/GCodeViewer.cpp:329
 msgid "Internal infill"
 msgstr "Унутранае запаўненне"
 
-#: src/libslic3r/ExtrusionRole.cpp:46 src/libslic3r/ExtrusionRole.cpp:71
-#: src/libslic3r/PrintConfig.cpp:1773 src/libslic3r/PrintConfig.cpp:2903
-#: src/libslic3r/PrintConfig.cpp:2915 src/slic3r/GUI/GCodeViewer.cpp:293
+#: src/libslic3r/ExtrusionRole.cpp:47 src/libslic3r/ExtrusionRole.cpp:72
+#: src/libslic3r/PrintConfig.cpp:1806 src/libslic3r/PrintConfig.cpp:2986
+#: src/libslic3r/PrintConfig.cpp:2998 src/slic3r/GUI/GCodeViewer.cpp:330
 msgid "Solid infill"
 msgstr "Суцэльнае запаўненне"
 
-#: src/libslic3r/ExtrusionRole.cpp:47 src/libslic3r/ExtrusionRole.cpp:73
-#: src/libslic3r/PrintConfig.cpp:1782 src/libslic3r/PrintConfig.cpp:3493
-#: src/libslic3r/PrintConfig.cpp:3506 src/slic3r/GUI/GCodeViewer.cpp:294
+#: src/libslic3r/ExtrusionRole.cpp:48 src/libslic3r/ExtrusionRole.cpp:74
+#: src/libslic3r/PrintConfig.cpp:1815 src/libslic3r/PrintConfig.cpp:3576
+#: src/libslic3r/PrintConfig.cpp:3589 src/slic3r/GUI/GCodeViewer.cpp:331
 msgid "Top solid infill"
 msgstr "Верхні суцэльны пласт"
 
-#: src/libslic3r/ExtrusionRole.cpp:48 src/libslic3r/ExtrusionRole.cpp:75
-#: src/libslic3r/PrintConfig.cpp:1968 src/libslic3r/PrintConfig.cpp:1974
-#: src/libslic3r/PrintConfig.cpp:1986 src/libslic3r/PrintConfig.cpp:1996
-#: src/libslic3r/PrintConfig.cpp:2004 src/libslic3r/PrintConfig.cpp:2006
-#: src/slic3r/GUI/GCodeViewer.cpp:295 src/slic3r/GUI/GUI_Factories.cpp:161
-#: src/slic3r/GUI/Tab.cpp:1497
+#: src/libslic3r/ExtrusionRole.cpp:49 src/libslic3r/ExtrusionRole.cpp:76
+#: src/libslic3r/PrintConfig.cpp:2001 src/libslic3r/PrintConfig.cpp:2057
+#: src/libslic3r/PrintConfig.cpp:2069 src/libslic3r/PrintConfig.cpp:2079
+#: src/libslic3r/PrintConfig.cpp:2087 src/libslic3r/PrintConfig.cpp:2089
+#: src/slic3r/GUI/GCodeViewer.cpp:332 src/slic3r/GUI/GUI_Factories.cpp:162
+#: src/slic3r/GUI/Tab.cpp:1504
 msgid "Ironing"
 msgstr "Прасаванне"
 
-#: src/libslic3r/ExtrusionRole.cpp:49 src/libslic3r/ExtrusionRole.cpp:77
-#: src/slic3r/GUI/GCodeViewer.cpp:296
+#: src/libslic3r/ExtrusionRole.cpp:50 src/libslic3r/ExtrusionRole.cpp:78
+#: src/slic3r/GUI/GCodeViewer.cpp:333
 msgid "Bridge infill"
 msgstr "Запаўненне перакрыцця"
 
-#: src/libslic3r/ExtrusionRole.cpp:50 src/libslic3r/ExtrusionRole.cpp:79
-#: src/libslic3r/PrintConfig.cpp:1694 src/slic3r/GUI/GCodeViewer.cpp:297
+#: src/libslic3r/ExtrusionRole.cpp:51 src/libslic3r/ExtrusionRole.cpp:80
+#: src/libslic3r/PrintConfig.cpp:1727 src/slic3r/GUI/GCodeViewer.cpp:334
 msgid "Gap fill"
 msgstr "Запаўненне прагалаў"
 
-#: src/libslic3r/ExtrusionRole.cpp:51 src/libslic3r/ExtrusionRole.cpp:81
-#: src/slic3r/GUI/GCodeViewer.cpp:298
+#: src/libslic3r/ExtrusionRole.cpp:52 src/libslic3r/ExtrusionRole.cpp:82
+#: src/slic3r/GUI/GCodeViewer.cpp:335
 msgid "Skirt/Brim"
 msgstr "Спадніца/аблямоўка"
 
-#: src/libslic3r/ExtrusionRole.cpp:52 src/libslic3r/ExtrusionRole.cpp:83
-#: src/libslic3r/PrintConfig.cpp:971 src/libslic3r/PrintConfig.cpp:2489
-#: src/libslic3r/PrintConfig.cpp:2498 src/libslic3r/PrintConfig.cpp:2507
-#: src/libslic3r/PrintConfig.cpp:2517 src/libslic3r/PrintConfig.cpp:2526
-#: src/libslic3r/PrintConfig.cpp:3076 src/libslic3r/PrintConfig.cpp:3082
-#: src/libslic3r/PrintConfig.cpp:3090 src/libslic3r/PrintConfig.cpp:3103
-#: src/libslic3r/PrintConfig.cpp:3113 src/libslic3r/PrintConfig.cpp:3120
-#: src/libslic3r/PrintConfig.cpp:3136 src/libslic3r/PrintConfig.cpp:3152
+#: src/libslic3r/ExtrusionRole.cpp:53 src/libslic3r/ExtrusionRole.cpp:84
+#: src/libslic3r/PrintConfig.cpp:992 src/libslic3r/PrintConfig.cpp:2572
+#: src/libslic3r/PrintConfig.cpp:2581 src/libslic3r/PrintConfig.cpp:2590
+#: src/libslic3r/PrintConfig.cpp:2600 src/libslic3r/PrintConfig.cpp:2609
+#: src/libslic3r/PrintConfig.cpp:3159 src/libslic3r/PrintConfig.cpp:3165
 #: src/libslic3r/PrintConfig.cpp:3173 src/libslic3r/PrintConfig.cpp:3186
-#: src/libslic3r/PrintConfig.cpp:3202 src/libslic3r/PrintConfig.cpp:3217
-#: src/libslic3r/PrintConfig.cpp:3235 src/libslic3r/PrintConfig.cpp:3245
-#: src/libslic3r/PrintConfig.cpp:3254 src/libslic3r/PrintConfig.cpp:3265
-#: src/libslic3r/PrintConfig.cpp:3277 src/libslic3r/PrintConfig.cpp:3291
-#: src/libslic3r/PrintConfig.cpp:3299 src/libslic3r/PrintConfig.cpp:3300
-#: src/libslic3r/PrintConfig.cpp:3309 src/libslic3r/PrintConfig.cpp:3323
-#: src/libslic3r/PrintConfig.cpp:3333 src/libslic3r/PrintConfig.cpp:3347
-#: src/libslic3r/PrintConfig.cpp:3355 src/libslic3r/PrintConfig.cpp:3367
-#: src/libslic3r/PrintConfig.cpp:3379 src/libslic3r/PrintConfig.cpp:3390
-#: src/libslic3r/PrintConfig.cpp:3403 src/libslic3r/PrintConfig.cpp:3416
-#: src/libslic3r/PrintConfig.cpp:3432 src/libslic3r/PrintConfig.cpp:3442
-#: src/slic3r/GUI/GCodeViewer.cpp:299 src/slic3r/GUI/GUI_Factories.cpp:88
-#: src/slic3r/GUI/GUI_Factories.cpp:163 src/slic3r/GUI/Tab.cpp:1532
-#: src/slic3r/GUI/Tab.cpp:1534
+#: src/libslic3r/PrintConfig.cpp:3196 src/libslic3r/PrintConfig.cpp:3203
+#: src/libslic3r/PrintConfig.cpp:3219 src/libslic3r/PrintConfig.cpp:3235
+#: src/libslic3r/PrintConfig.cpp:3256 src/libslic3r/PrintConfig.cpp:3269
+#: src/libslic3r/PrintConfig.cpp:3285 src/libslic3r/PrintConfig.cpp:3300
+#: src/libslic3r/PrintConfig.cpp:3318 src/libslic3r/PrintConfig.cpp:3328
+#: src/libslic3r/PrintConfig.cpp:3337 src/libslic3r/PrintConfig.cpp:3348
+#: src/libslic3r/PrintConfig.cpp:3360 src/libslic3r/PrintConfig.cpp:3374
+#: src/libslic3r/PrintConfig.cpp:3382 src/libslic3r/PrintConfig.cpp:3383
+#: src/libslic3r/PrintConfig.cpp:3392 src/libslic3r/PrintConfig.cpp:3406
+#: src/libslic3r/PrintConfig.cpp:3416 src/libslic3r/PrintConfig.cpp:3430
+#: src/libslic3r/PrintConfig.cpp:3438 src/libslic3r/PrintConfig.cpp:3450
+#: src/libslic3r/PrintConfig.cpp:3462 src/libslic3r/PrintConfig.cpp:3473
+#: src/libslic3r/PrintConfig.cpp:3486 src/libslic3r/PrintConfig.cpp:3499
+#: src/libslic3r/PrintConfig.cpp:3515 src/libslic3r/PrintConfig.cpp:3525
+#: src/slic3r/GUI/GCodeViewer.cpp:336 src/slic3r/GUI/GUI_Factories.cpp:89
+#: src/slic3r/GUI/GUI_Factories.cpp:164 src/slic3r/GUI/Tab.cpp:1539
+#: src/slic3r/GUI/Tab.cpp:1541
 msgid "Support material"
 msgstr "Апора матэрыяла"
 
-#: src/libslic3r/ExtrusionRole.cpp:53 src/libslic3r/ExtrusionRole.cpp:85
-#: src/libslic3r/PrintConfig.cpp:3253 src/slic3r/GUI/GCodeViewer.cpp:300
+#: src/libslic3r/ExtrusionRole.cpp:54 src/libslic3r/ExtrusionRole.cpp:86
+#: src/libslic3r/PrintConfig.cpp:3336 src/slic3r/GUI/GCodeViewer.cpp:337
 msgid "Support material interface"
 msgstr "Злучны пласт апоры"
 
-#: src/libslic3r/ExtrusionRole.cpp:54 src/libslic3r/ExtrusionRole.cpp:87
-#: src/libslic3r/PrintConfig.cpp:1791 src/slic3r/GUI/GCodeViewer.cpp:301
-#: src/slic3r/GUI/Tab.cpp:1640
+#: src/libslic3r/ExtrusionRole.cpp:55 src/libslic3r/ExtrusionRole.cpp:88
+#: src/libslic3r/PrintConfig.cpp:1824 src/slic3r/GUI/GCodeViewer.cpp:338
+#: src/slic3r/GUI/Tab.cpp:1650
 msgid "Wipe tower"
 msgstr "Вежа выцірання"
 
-#: src/libslic3r/ExtrusionRole.cpp:55 src/libslic3r/ExtrusionRole.cpp:89
-#: src/slic3r/GUI/BedShapeDialog.cpp:91 src/slic3r/GUI/GCodeViewer.cpp:302
+#: src/libslic3r/ExtrusionRole.cpp:56 src/libslic3r/ExtrusionRole.cpp:90
+#: src/slic3r/GUI/BedShapeDialog.cpp:92 src/slic3r/GUI/GCodeViewer.cpp:339
 msgid "Custom"
 msgstr "Карыстальніцкі"
 
@@ -443,50 +443,37 @@ msgstr "памылка праверкі"
 msgid "write calledback failed"
 msgstr "памылка запісу зваротнага выкліку"
 
-#: src/libslic3r/Preset.cpp:1638 src/slic3r/GUI/ConfigSnapshotDialog.cpp:68
+#: src/libslic3r/Preset.cpp:1644 src/slic3r/GUI/ConfigSnapshotDialog.cpp:68
 msgid "print"
 msgstr "друк"
 
-#: src/libslic3r/Preset.cpp:1639 src/slic3r/GUI/ConfigWizard.cpp:1004
+#: src/libslic3r/Preset.cpp:1645 src/slic3r/GUI/ConfigWizard.cpp:1004
 msgid "filament"
 msgstr "філамент"
 
-#: src/libslic3r/Preset.cpp:1640 src/slic3r/GUI/ConfigSnapshotDialog.cpp:72
+#: src/libslic3r/Preset.cpp:1646 src/slic3r/GUI/ConfigSnapshotDialog.cpp:72
 msgid "SLA print"
 msgstr "Профіль друку SLA"
 
-#: src/libslic3r/Preset.cpp:1641 src/slic3r/GUI/ConfigSnapshotDialog.cpp:73
+#: src/libslic3r/Preset.cpp:1647 src/slic3r/GUI/ConfigSnapshotDialog.cpp:73
 #: src/slic3r/GUI/ConfigWizard.cpp:1004 src/slic3r/GUI/GUI.cpp:217
-#: src/slic3r/GUI/Sidebar.cpp:405
+#: src/slic3r/GUI/Sidebar.cpp:406
 msgid "SLA material"
 msgstr "Профіль матэрыялу SLA"
 
-#: src/libslic3r/Preset.cpp:1642 src/slic3r/GUI/ConfigSnapshotDialog.cpp:75
+#: src/libslic3r/Preset.cpp:1648 src/slic3r/GUI/ConfigSnapshotDialog.cpp:75
 msgid "printer"
 msgstr "друкарка"
 
-#: src/libslic3r/Print.cpp:542
+#: src/libslic3r/Print.cpp:465
 msgid "All objects are outside of the print volume."
 msgstr "Усе аб'екты знаходзяцца па-за межамі вобласці друку."
 
-#: src/libslic3r/Print.cpp:545
+#: src/libslic3r/Print.cpp:468
 msgid "The supplied settings will cause an empty print."
 msgstr "Зададзеныя налады прывядуць да пустога друку."
 
-#: src/libslic3r/Print.cpp:549
-msgid "Some objects are too close; your extruder will collide with them."
-msgstr ""
-"Некаторыя аб'екты знаходзяцца занадта блізка адзін да аднаго; ваш экструдар "
-"пры друку сутыкнецца з імі."
-
-#: src/libslic3r/Print.cpp:551
-msgid ""
-"Some objects are too tall and cannot be printed without extruder collisions."
-msgstr ""
-"Некаторыя аб'екты занадта высокія, і не могуць быць надрукаваныя без "
-"сутыкнення з экстрударам."
-
-#: src/libslic3r/Print.cpp:557
+#: src/libslic3r/Print.cpp:471
 msgid ""
 "Avoid crossing perimeters option and avoid crossing curled overhangs option "
 "cannot be both enabled together."
@@ -494,7 +481,7 @@ msgstr ""
 "Налада \"Пазбягаць перасячэнняў перыметраў\" і \"Пазбягаць перасячэнняў "
 "скручаных выступаў\" не могуць быць уключаныя адначасова."
 
-#: src/libslic3r/Print.cpp:566
+#: src/libslic3r/Print.cpp:480
 msgid ""
 "Only a single object may be printed at a time in Spiral Vase mode. Either "
 "remove all but the last object, or enable sequential mode by "
@@ -505,7 +492,7 @@ msgstr ""
 "Альбо выдаліце ўсе аб'екты на стале акрамя апошняй, альбо ўключыце "
 "паслядоўны друк з дапамогай 'complete_objects'."
 
-#: src/libslic3r/Print.cpp:570
+#: src/libslic3r/Print.cpp:484
 msgid ""
 "The Spiral Vase option can only be used when printing single material "
 "objects."
@@ -513,7 +500,7 @@ msgstr ""
 "Рэжым \"Спіральная ваза\" можа ўжывацца толькі пры друку аб'ектаў адзінкавым "
 "матэрыялам."
 
-#: src/libslic3r/Print.cpp:574
+#: src/libslic3r/Print.cpp:488
 msgid ""
 "Machine limits cannot be emitted to G-Code when Klipper firmware flavor is "
 "used. Change the value of machine_limits_usage."
@@ -522,19 +509,19 @@ msgstr ""
 "прашыўка Klipper.\n"
 "Змяніце значэнне 'machine_limits_usage'."
 
-#: src/libslic3r/Print.cpp:602
+#: src/libslic3r/Print.cpp:516
 #, boost-format
 msgid ""
 "While the object %1% itself fits the build volume, it exceeds the maximum "
 "build volume height because of material shrinkage compensation."
 msgstr ""
 
-#: src/libslic3r/Print.cpp:605
+#: src/libslic3r/Print.cpp:519
 #, boost-format
 msgid "The object %1% exceeds the maximum build volume height."
 msgstr "Аб'ект %1% перавышае найбольшую вышыню аб'ёму зборкі."
 
-#: src/libslic3r/Print.cpp:608
+#: src/libslic3r/Print.cpp:522
 #, boost-format
 msgid ""
 "While the object %1% itself fits the build volume, its last layer exceeds "
@@ -543,7 +530,7 @@ msgstr ""
 "Хоць сам аб'ект %1% адпавядае аб'ёму зборкі, яго апошні пласт перавышае "
 "найбольшую вышыню аб'ёму зборкі."
 
-#: src/libslic3r/Print.cpp:609
+#: src/libslic3r/Print.cpp:523
 msgid ""
 "You might want to reduce the size of your model or change current print "
 "settings and retry."
@@ -551,17 +538,17 @@ msgstr ""
 "Магчыма, вы захочаце паменшыць памер вашай мадэлі ці змяніць бягучыя налады "
 "друку, і паўтарыць спробу."
 
-#: src/libslic3r/Print.cpp:626
+#: src/libslic3r/Print.cpp:540
 msgid "Variable layer height is not supported with Organic supports."
 msgstr "Пераменная вышыня пласта не падтрымліваецца арганічнымі апорамі."
 
-#: src/libslic3r/Print.cpp:643
+#: src/libslic3r/Print.cpp:557
 msgid ""
 "The wipe tower is only supported if all extruders use filaments of the same "
 "diameter."
 msgstr ""
 
-#: src/libslic3r/Print.cpp:650
+#: src/libslic3r/Print.cpp:564
 msgid ""
 "The Wipe Tower is currently only supported for the Marlin, Klipper, RepRap/"
 "Sprinter, RepRapFirmware and Repetier G-code flavors."
@@ -569,7 +556,7 @@ msgstr ""
 "У бягучы час вежа выцірання падтрымліваецца толькі для G-code версій Marlin, "
 "Klipper, RepRap/Sprinter, RepRapFirmware і Repetier."
 
-#: src/libslic3r/Print.cpp:652
+#: src/libslic3r/Print.cpp:566
 msgid ""
 "The Wipe Tower is currently only supported with the relative extruder "
 "addressing (use_relative_e_distances=1)."
@@ -578,7 +565,7 @@ msgstr ""
 "экструдара ('use_relative_e_distances'=1 (\"Ужыць адносныя каардынаты для "
 "экструдара E\"=1))."
 
-#: src/libslic3r/Print.cpp:654
+#: src/libslic3r/Print.cpp:568
 msgid ""
 "Ooze prevention is only supported with the wipe tower when "
 "'single_extruder_multi_material' is off."
@@ -588,14 +575,14 @@ msgstr ""
 "'single_extruder_multi_material' (\"Адзін экструдар з некалькімі матэрыяламі"
 "\")."
 
-#: src/libslic3r/Print.cpp:656
+#: src/libslic3r/Print.cpp:570
 msgid ""
 "The Wipe Tower currently does not support volumetric E (use_volumetric_e=0)."
 msgstr ""
 "У бягучы час вежа выцірання не падтрымлівае аб'ёмны выдатак экструдара E "
 "('use_volumetric_e'=0 (\"Ужыць аб'ёмны выдатак для экструдара E\"=0))"
 
-#: src/libslic3r/Print.cpp:658
+#: src/libslic3r/Print.cpp:572
 msgid ""
 "The Wipe Tower is currently not supported for multimaterial sequential "
 "prints."
@@ -603,7 +590,7 @@ msgstr ""
 "У бягучы час вежа выцірання не падтрымлівае паслядоўны друк для друкарак з "
 "некалькімі матэрыяламі."
 
-#: src/libslic3r/Print.cpp:668
+#: src/libslic3r/Print.cpp:582
 msgid ""
 "The Wipe Tower is only supported for multiple objects if they have equal "
 "layer heights"
@@ -611,7 +598,7 @@ msgstr ""
 "Вежа выцірання прымяняецца для некалькіх аб'ектаў толькі ў тым выпадку, калі "
 "яны маюць аднолькавую вышыню пласта"
 
-#: src/libslic3r/Print.cpp:670
+#: src/libslic3r/Print.cpp:584
 msgid ""
 "The Wipe Tower is only supported for multiple objects if they are printed "
 "over an equal number of raft layers"
@@ -619,7 +606,7 @@ msgstr ""
 "Вежа выцірання прымяняецца для некалькіх аб'ектаў толькі ў тым выпадку, калі "
 "яны маюць аднолькавую колькасць пластоў падтрымкі"
 
-#: src/libslic3r/Print.cpp:673
+#: src/libslic3r/Print.cpp:587
 msgid ""
 "The Wipe Tower is only supported for multiple objects if they are printed "
 "with the same support_material_contact_distance"
@@ -629,7 +616,7 @@ msgstr ""
 "'support_material_contact_distance' (\"Адлегласць ад апоры да мадэлі па "
 "вертыкалі\")"
 
-#: src/libslic3r/Print.cpp:675
+#: src/libslic3r/Print.cpp:589
 msgid ""
 "The Wipe Tower is only supported for multiple objects if they are sliced "
 "equally."
@@ -637,7 +624,7 @@ msgstr ""
 "Вежа выцірання падтрымліваецца толькі для некалькіх аб'ектаў, калі яны "
 "нарэзаныя аднолькава."
 
-#: src/libslic3r/Print.cpp:700
+#: src/libslic3r/Print.cpp:614
 msgid ""
 "The Wipe tower is only supported if all objects have the same variable layer "
 "height"
@@ -645,24 +632,24 @@ msgstr ""
 "Вежа выцірання прымяняецца толькі ў тым выпадку, калі ўсе аб'екты маюць "
 "аднолькавую пераменную вышыню пласта"
 
-#: src/libslic3r/Print.cpp:724
+#: src/libslic3r/Print.cpp:638
 msgid ""
 "One or more object were assigned an extruder that the printer does not have."
 msgstr ""
 "Для аднаго ці некалькіх аб'ектаў быў прызначаны экструдар, які ў друкарцы "
 "адсутнічае."
 
-#: src/libslic3r/Print.cpp:737
+#: src/libslic3r/Print.cpp:651
 #, boost-format
 msgid "%1%=%2% mm is too low to be printable at a layer height %3% mm"
 msgstr "Значэнне %1%=%2% мм занадта малое для друку пры вышыні пласта %3% мм"
 
-#: src/libslic3r/Print.cpp:740
+#: src/libslic3r/Print.cpp:654
 #, boost-format
 msgid "Excessive %1%=%2% mm to be printable with a nozzle diameter %3% mm"
 msgstr "Перавышэнне %1%=%2% мм для друку з дыяметрам фарсункі %3% мм"
 
-#: src/libslic3r/Print.cpp:757
+#: src/libslic3r/Print.cpp:671
 msgid ""
 "For the Wipe Tower to work with the soluble supports, the support layers "
 "need to be synchronized with the object layers."
@@ -670,7 +657,7 @@ msgstr ""
 "Для таго, каб вежа выцірання працавала з растваральнай апорай, пласты апоры "
 "павінны быць сінхранізаваныя з пластамі аб'екту."
 
-#: src/libslic3r/Print.cpp:761 src/slic3r/GUI/ConfigManipulation.cpp:200
+#: src/libslic3r/Print.cpp:675 src/slic3r/GUI/ConfigManipulation.cpp:200
 msgid ""
 "The Wipe Tower currently supports the non-soluble supports only if they are "
 "printed with the current extruder without triggering a tool change. (both "
@@ -682,7 +669,7 @@ msgstr ""
 "інструмента. (Значэнні 'both support_material_extruder' і "
 "'support_material_interface_extruder' павінны быць 0)"
 
-#: src/libslic3r/Print.cpp:770
+#: src/libslic3r/Print.cpp:684
 msgid ""
 "Organic support tree tip diameter must not be smaller than support material "
 "extrusion width."
@@ -690,7 +677,7 @@ msgstr ""
 "Дыяметр верхавіны дрэва арганічнай апоры не павінна быць менш шырыні "
 "выдушвання матэрыялу апоры."
 
-#: src/libslic3r/Print.cpp:772
+#: src/libslic3r/Print.cpp:686
 msgid ""
 "Organic support branch diameter must not be smaller than 2x support material "
 "extrusion width."
@@ -698,7 +685,7 @@ msgstr ""
 "Дыяметр адгалінавання арганічнай апоры не павінна быць менш шырыні "
 "выдушвання матэрыялу апоры ў два разы."
 
-#: src/libslic3r/Print.cpp:774
+#: src/libslic3r/Print.cpp:688
 msgid ""
 "Organic support branch diameter must not be smaller than support tree tip "
 "diameter."
@@ -706,15 +693,15 @@ msgstr ""
 "Дыяметр адгалінавання арганічнай апоры не павінна быць менш дыяметра "
 "верхавіны дрэва апоры."
 
-#: src/libslic3r/Print.cpp:808
+#: src/libslic3r/Print.cpp:722
 msgid "First layer height can't be greater than nozzle diameter"
 msgstr "Вышыня першага пласта не можа быць больш дыяметра фарсункі"
 
-#: src/libslic3r/Print.cpp:813
+#: src/libslic3r/Print.cpp:727
 msgid "Layer height can't be greater than nozzle diameter"
 msgstr "Вышыня пласта не можа быць больш дыяметра фарсункі"
 
-#: src/libslic3r/Print.cpp:834
+#: src/libslic3r/Print.cpp:748
 msgid ""
 "Relative extruder addressing requires resetting the extruder position at "
 "each layer to prevent loss of floating point accuracy. Add \"G92 E0\" to "
@@ -724,7 +711,7 @@ msgstr ""
 "экструдара патрабуе скіду становішча экструдара на кожным пласту.\n"
 "У 'layer_gcode' дадайце \"G92 E0\"."
 
-#: src/libslic3r/Print.cpp:836
+#: src/libslic3r/Print.cpp:750
 msgid ""
 "\"G92 E0\" was found in before_layer_gcode, which is incompatible with "
 "absolute extruder addressing."
@@ -732,7 +719,7 @@ msgstr ""
 "У 'before_layer_gcode' быў знойдзены \"G92 E0\", які несумяшчальны з "
 "абсалютным адрасаваннем экструдара."
 
-#: src/libslic3r/Print.cpp:838
+#: src/libslic3r/Print.cpp:752
 msgid ""
 "\"G92 E0\" was found in layer_gcode, which is incompatible with absolute "
 "extruder addressing."
@@ -740,75 +727,75 @@ msgstr ""
 "У 'layer_gcode' быў знойдзены \"G92 E0\" , які несумяшчальны з абсалютным "
 "адрасаваннем экструдара."
 
-#: src/libslic3r/Print.cpp:1018
+#: src/libslic3r/Print.cpp:932
 msgid "Generating skirt and brim"
 msgstr "Стварэнне спадніцы і аблямоўкі"
 
-#: src/libslic3r/Print.cpp:1079
+#: src/libslic3r/Print.cpp:995
 msgid "Exporting G-code"
 msgstr "Экспартаванне у G-code"
 
-#: src/libslic3r/Print.cpp:1083
+#: src/libslic3r/Print.cpp:999
 msgid "Generating G-code"
 msgstr "Стварэнне G-code"
 
-#: src/libslic3r/Print.cpp:1309
+#: src/libslic3r/Print.cpp:1228
 msgid "Alert if supports needed"
 msgstr "Апавяшчаць, калі патрабуецца апора"
 
 #. TRN Alert when support is needed. Describes that the model has long bridging extrusions which may print badly
-#: src/libslic3r/Print.cpp:1315
+#: src/libslic3r/Print.cpp:1234
 msgid "Long bridging extrusions"
 msgstr "Выдушванне доўгіх перакрыццяў"
 
 #. TRN Alert when support is needed. Describes bridge anchors/turns in the air, which will definitely print badly
-#: src/libslic3r/Print.cpp:1317
+#: src/libslic3r/Print.cpp:1236
 msgid "Floating bridge anchors"
 msgstr "Прывязкі плывучага перакрыцця"
 
 #. TRN Alert when support is needed. Describes that the print has large overhang area which will print badly or not print at all.
-#: src/libslic3r/Print.cpp:1321
+#: src/libslic3r/Print.cpp:1240
 msgid "Collapsing overhang"
 msgstr "Выступ, які абвальваецца"
 
 #. TRN Alert when support is needed. Describes extrusions that are not supported enough and come out curled or loose.
-#: src/libslic3r/Print.cpp:1324
+#: src/libslic3r/Print.cpp:1243
 msgid "Loose extrusions"
 msgstr "Друзлае выдушванне"
 
 #. TRN Alert when support is needed. Describes that the print has low bed adhesion and may became loose.
-#: src/libslic3r/Print.cpp:1328
+#: src/libslic3r/Print.cpp:1247
 msgid "Low bed adhesion"
 msgstr "Нізкае прыліпанне да стала"
 
 #. TRN Alert when support is needed. Describes that the object has part that is not connected to the bed and will not print at all without supports.
-#: src/libslic3r/Print.cpp:1330
+#: src/libslic3r/Print.cpp:1249
 msgid "Floating object part"
 msgstr "Частка аб'екту плавае"
 
 #. TRN Alert when support is needed. Describes that the object has thin part that may brake during printing
-#: src/libslic3r/Print.cpp:1332
+#: src/libslic3r/Print.cpp:1251
 msgid "Thin fragile part"
 msgstr "Тонкая далікатная частка"
 
 #. TRN this translation rule is used to translate lists of uknown size on single line. The first argument is element of the list,
 #. the second argument may be element or rest of the list. For most languages, this does not need translation, but some use different
 #. separator than comma and some use blank space in front of the separator.
-#: src/libslic3r/Print.cpp:1341
+#: src/libslic3r/Print.cpp:1260
 #, boost-format
 msgid "%1%, %2%"
 msgstr "%1%, %2%"
 
-#: src/libslic3r/Print.cpp:1440
+#: src/libslic3r/Print.cpp:1359
 msgid "Consider enabling supports."
 msgstr "Рэкамендуецца ўключыць апоры."
 
-#: src/libslic3r/Print.cpp:1442
+#: src/libslic3r/Print.cpp:1361
 msgid "Also consider enabling brim."
 msgstr "Таксама рэкамендуецца ўключыць аблямоўку."
 
 #. TRN Alert message for detected print issues. first argument is a list of detected issues.
-#: src/libslic3r/Print.cpp:1446
+#: src/libslic3r/Print.cpp:1365
 #, boost-format
 msgid ""
 "Detected print stability issues:\n"
@@ -843,20 +830,23 @@ msgstr "Карыстальніцкая мадэль стала"
 msgid "Elephant foot compensation"
 msgstr "Кампенсацыя пашырэння першага пласта"
 
-#: src/libslic3r/PrintConfig.cpp:376 src/libslic3r/PrintConfig.cpp:691
-#: src/libslic3r/PrintConfig.cpp:1821 src/libslic3r/PrintConfig.cpp:1903
-#: src/libslic3r/PrintConfig.cpp:1950 src/libslic3r/PrintConfig.cpp:1961
-#: src/libslic3r/PrintConfig.cpp:3054 src/libslic3r/PrintConfig.cpp:3064
-#: src/libslic3r/PrintConfig.cpp:3714 src/libslic3r/PrintConfig.cpp:3748
-#: src/libslic3r/PrintConfig.cpp:3759 src/libslic3r/PrintConfig.cpp:3774
-#: src/libslic3r/PrintConfig.cpp:3787 src/libslic3r/PrintConfig.cpp:3796
-#: src/libslic3r/PrintConfig.cpp:3808 src/libslic3r/PrintConfig.cpp:4240
-#: src/libslic3r/PrintConfig.cpp:4249
+#: src/libslic3r/PrintConfig.cpp:376 src/libslic3r/PrintConfig.cpp:701
+#: src/libslic3r/PrintConfig.cpp:1854 src/libslic3r/PrintConfig.cpp:1936
+#: src/libslic3r/PrintConfig.cpp:1983 src/libslic3r/PrintConfig.cpp:1994
+#: src/libslic3r/PrintConfig.cpp:2008 src/libslic3r/PrintConfig.cpp:2017
+#: src/libslic3r/PrintConfig.cpp:2027 src/libslic3r/PrintConfig.cpp:2035
+#: src/libslic3r/PrintConfig.cpp:2043 src/libslic3r/PrintConfig.cpp:2051
+#: src/libslic3r/PrintConfig.cpp:3137 src/libslic3r/PrintConfig.cpp:3147
+#: src/libslic3r/PrintConfig.cpp:3797 src/libslic3r/PrintConfig.cpp:3831
+#: src/libslic3r/PrintConfig.cpp:3842 src/libslic3r/PrintConfig.cpp:3857
+#: src/libslic3r/PrintConfig.cpp:3870 src/libslic3r/PrintConfig.cpp:3879
+#: src/libslic3r/PrintConfig.cpp:3891 src/libslic3r/PrintConfig.cpp:4323
+#: src/libslic3r/PrintConfig.cpp:4332
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:1461
-#: src/slic3r/GUI/GUI_Factories.cpp:170 src/slic3r/GUI/Tab.cpp:1460
-#: src/slic3r/GUI/Tab.cpp:1510 src/slic3r/GUI/Tab.cpp:1651
-#: src/slic3r/GUI/Tab.cpp:1656 src/slic3r/GUI/Tab.cpp:2237
-#: src/slic3r/GUI/Tab.cpp:2810 src/slic3r/GUI/Tab.cpp:5886
+#: src/slic3r/GUI/GUI_Factories.cpp:171 src/slic3r/GUI/Tab.cpp:1466
+#: src/slic3r/GUI/Tab.cpp:1517 src/slic3r/GUI/Tab.cpp:1661
+#: src/slic3r/GUI/Tab.cpp:1673 src/slic3r/GUI/Tab.cpp:2263
+#: src/slic3r/GUI/Tab.cpp:2836 src/slic3r/GUI/Tab.cpp:5982
 msgid "Advanced"
 msgstr "Пашыраныя"
 
@@ -870,62 +860,62 @@ msgstr ""
 "\"."
 
 #: src/libslic3r/PrintConfig.cpp:379 src/libslic3r/PrintConfig.cpp:404
-#: src/libslic3r/PrintConfig.cpp:411 src/libslic3r/PrintConfig.cpp:656
-#: src/libslic3r/PrintConfig.cpp:832 src/libslic3r/PrintConfig.cpp:855
-#: src/libslic3r/PrintConfig.cpp:922 src/libslic3r/PrintConfig.cpp:930
-#: src/libslic3r/PrintConfig.cpp:980 src/libslic3r/PrintConfig.cpp:1114
-#: src/libslic3r/PrintConfig.cpp:1125 src/libslic3r/PrintConfig.cpp:1143
-#: src/libslic3r/PrintConfig.cpp:1293 src/libslic3r/PrintConfig.cpp:1395
-#: src/libslic3r/PrintConfig.cpp:1607 src/libslic3r/PrintConfig.cpp:1671
-#: src/libslic3r/PrintConfig.cpp:1681 src/libslic3r/PrintConfig.cpp:1998
-#: src/libslic3r/PrintConfig.cpp:2196 src/libslic3r/PrintConfig.cpp:2257
-#: src/libslic3r/PrintConfig.cpp:2275 src/libslic3r/PrintConfig.cpp:2293
-#: src/libslic3r/PrintConfig.cpp:2351 src/libslic3r/PrintConfig.cpp:2361
-#: src/libslic3r/PrintConfig.cpp:2491 src/libslic3r/PrintConfig.cpp:2500
-#: src/libslic3r/PrintConfig.cpp:2519 src/libslic3r/PrintConfig.cpp:2540
-#: src/libslic3r/PrintConfig.cpp:2552 src/libslic3r/PrintConfig.cpp:2560
-#: src/libslic3r/PrintConfig.cpp:2617 src/libslic3r/PrintConfig.cpp:2639
-#: src/libslic3r/PrintConfig.cpp:2650 src/libslic3r/PrintConfig.cpp:2660
-#: src/libslic3r/PrintConfig.cpp:2668 src/libslic3r/PrintConfig.cpp:2676
-#: src/libslic3r/PrintConfig.cpp:2770 src/libslic3r/PrintConfig.cpp:2779
-#: src/libslic3r/PrintConfig.cpp:2816 src/libslic3r/PrintConfig.cpp:3057
-#: src/libslic3r/PrintConfig.cpp:3124 src/libslic3r/PrintConfig.cpp:3139
-#: src/libslic3r/PrintConfig.cpp:3238 src/libslic3r/PrintConfig.cpp:3247
-#: src/libslic3r/PrintConfig.cpp:3293 src/libslic3r/PrintConfig.cpp:3382
-#: src/libslic3r/PrintConfig.cpp:3394 src/libslic3r/PrintConfig.cpp:3420
-#: src/libslic3r/PrintConfig.cpp:3535 src/libslic3r/PrintConfig.cpp:3627
-#: src/libslic3r/PrintConfig.cpp:3634 src/libslic3r/PrintConfig.cpp:3687
-#: src/libslic3r/PrintConfig.cpp:3718 src/libslic3r/PrintConfig.cpp:3728
-#: src/libslic3r/PrintConfig.cpp:3925 src/libslic3r/PrintConfig.cpp:3934
-#: src/libslic3r/PrintConfig.cpp:3943 src/libslic3r/PrintConfig.cpp:3953
-#: src/libslic3r/PrintConfig.cpp:3986 src/libslic3r/PrintConfig.cpp:4029
-#: src/libslic3r/PrintConfig.cpp:4039 src/libslic3r/PrintConfig.cpp:4051
-#: src/libslic3r/PrintConfig.cpp:4071 src/libslic3r/PrintConfig.cpp:4086
-#: src/libslic3r/PrintConfig.cpp:4096 src/libslic3r/PrintConfig.cpp:4234
-#: src/libslic3r/PrintConfig.cpp:4242 src/libslic3r/PrintConfig.cpp:4287
-#: src/libslic3r/PrintConfig.cpp:4488 src/libslic3r/PrintConfig.cpp:4503
-#: src/libslic3r/PrintConfig.cpp:4517 src/libslic3r/PrintConfig.cpp:4528
-#: src/libslic3r/PrintConfig.cpp:4541 src/libslic3r/PrintConfig.cpp:4586
-#: src/libslic3r/PrintConfig.cpp:4596 src/libslic3r/PrintConfig.cpp:4605
-#: src/libslic3r/PrintConfig.cpp:4615 src/libslic3r/PrintConfig.cpp:4631
-#: src/libslic3r/PrintConfig.cpp:4655 src/libslic3r/PrintConfig.cpp:4682
-#: src/libslic3r/PrintConfig.cpp:4742 src/slic3r/GUI/BedShapeDialog.cpp:74
+#: src/libslic3r/PrintConfig.cpp:411 src/libslic3r/PrintConfig.cpp:666
+#: src/libslic3r/PrintConfig.cpp:853 src/libslic3r/PrintConfig.cpp:876
+#: src/libslic3r/PrintConfig.cpp:943 src/libslic3r/PrintConfig.cpp:951
+#: src/libslic3r/PrintConfig.cpp:1001 src/libslic3r/PrintConfig.cpp:1135
+#: src/libslic3r/PrintConfig.cpp:1146 src/libslic3r/PrintConfig.cpp:1164
+#: src/libslic3r/PrintConfig.cpp:1314 src/libslic3r/PrintConfig.cpp:1416
+#: src/libslic3r/PrintConfig.cpp:1628 src/libslic3r/PrintConfig.cpp:1704
+#: src/libslic3r/PrintConfig.cpp:1714 src/libslic3r/PrintConfig.cpp:2015
+#: src/libslic3r/PrintConfig.cpp:2081 src/libslic3r/PrintConfig.cpp:2279
+#: src/libslic3r/PrintConfig.cpp:2340 src/libslic3r/PrintConfig.cpp:2358
+#: src/libslic3r/PrintConfig.cpp:2376 src/libslic3r/PrintConfig.cpp:2434
+#: src/libslic3r/PrintConfig.cpp:2444 src/libslic3r/PrintConfig.cpp:2574
+#: src/libslic3r/PrintConfig.cpp:2583 src/libslic3r/PrintConfig.cpp:2602
+#: src/libslic3r/PrintConfig.cpp:2623 src/libslic3r/PrintConfig.cpp:2635
+#: src/libslic3r/PrintConfig.cpp:2643 src/libslic3r/PrintConfig.cpp:2700
+#: src/libslic3r/PrintConfig.cpp:2722 src/libslic3r/PrintConfig.cpp:2733
+#: src/libslic3r/PrintConfig.cpp:2743 src/libslic3r/PrintConfig.cpp:2751
+#: src/libslic3r/PrintConfig.cpp:2759 src/libslic3r/PrintConfig.cpp:2853
+#: src/libslic3r/PrintConfig.cpp:2862 src/libslic3r/PrintConfig.cpp:2899
+#: src/libslic3r/PrintConfig.cpp:3140 src/libslic3r/PrintConfig.cpp:3207
+#: src/libslic3r/PrintConfig.cpp:3222 src/libslic3r/PrintConfig.cpp:3321
+#: src/libslic3r/PrintConfig.cpp:3330 src/libslic3r/PrintConfig.cpp:3376
+#: src/libslic3r/PrintConfig.cpp:3465 src/libslic3r/PrintConfig.cpp:3477
+#: src/libslic3r/PrintConfig.cpp:3503 src/libslic3r/PrintConfig.cpp:3618
+#: src/libslic3r/PrintConfig.cpp:3710 src/libslic3r/PrintConfig.cpp:3717
+#: src/libslic3r/PrintConfig.cpp:3770 src/libslic3r/PrintConfig.cpp:3801
+#: src/libslic3r/PrintConfig.cpp:3811 src/libslic3r/PrintConfig.cpp:4008
+#: src/libslic3r/PrintConfig.cpp:4017 src/libslic3r/PrintConfig.cpp:4026
+#: src/libslic3r/PrintConfig.cpp:4036 src/libslic3r/PrintConfig.cpp:4069
+#: src/libslic3r/PrintConfig.cpp:4112 src/libslic3r/PrintConfig.cpp:4122
+#: src/libslic3r/PrintConfig.cpp:4134 src/libslic3r/PrintConfig.cpp:4154
+#: src/libslic3r/PrintConfig.cpp:4169 src/libslic3r/PrintConfig.cpp:4179
+#: src/libslic3r/PrintConfig.cpp:4317 src/libslic3r/PrintConfig.cpp:4325
+#: src/libslic3r/PrintConfig.cpp:4370 src/libslic3r/PrintConfig.cpp:4578
+#: src/libslic3r/PrintConfig.cpp:4592 src/libslic3r/PrintConfig.cpp:4603
+#: src/libslic3r/PrintConfig.cpp:4616 src/libslic3r/PrintConfig.cpp:4661
+#: src/libslic3r/PrintConfig.cpp:4671 src/libslic3r/PrintConfig.cpp:4680
+#: src/libslic3r/PrintConfig.cpp:4690 src/libslic3r/PrintConfig.cpp:4706
+#: src/libslic3r/PrintConfig.cpp:4730 src/libslic3r/PrintConfig.cpp:4757
+#: src/libslic3r/PrintConfig.cpp:4817 src/slic3r/GUI/BedShapeDialog.cpp:75
 #: src/slic3r/GUI/ConfigWizard.cpp:362 src/slic3r/GUI/ConfigWizard.cpp:2108
 #: src/slic3r/GUI/ConfigWizard.cpp:2144 src/slic3r/GUI/ConfigWizard.cpp:2158
 #: src/slic3r/GUI/ExtruderSequenceDialog.cpp:105
-#: src/slic3r/GUI/GCodeViewer.cpp:369 src/slic3r/GUI/GCodeViewer.cpp:379
-#: src/slic3r/GUI/GCodeViewer.cpp:2183 src/slic3r/GUI/GCodeViewer.cpp:2189
-#: src/slic3r/GUI/GCodeViewer.cpp:2197 src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:258
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:567
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:587
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2373
+#: src/slic3r/GUI/GCodeViewer.cpp:406 src/slic3r/GUI/GCodeViewer.cpp:416
+#: src/slic3r/GUI/GCodeViewer.cpp:2226 src/slic3r/GUI/GCodeViewer.cpp:2232
+#: src/slic3r/GUI/GCodeViewer.cpp:2240 src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:259
+#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:568
+#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:588
+#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2374
 #: src/slic3r/GUI/Gizmos/GLGizmoMeasure.cpp:1237
 #: src/slic3r/GUI/Gizmos/GLGizmoMeasure.cpp:2011
 #: src/slic3r/GUI/GUI_ObjectLayers.cpp:149
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:351
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:478
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:604
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:605
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:606
 #: src/slic3r/GUI/ObjectDataViewModel.cpp:158
 #: src/slic3r/GUI/WipeTowerDialog.cpp:127
 msgid "mm"
@@ -958,25 +948,25 @@ msgstr ""
 "QOI для прашыўкі з малым аб'ёмам памяці"
 
 #: src/libslic3r/PrintConfig.cpp:400 src/slic3r/GUI/ConfigManipulation.cpp:113
-#: src/slic3r/GUI/GUI_ObjectLayers.cpp:33 src/slic3r/GUI/Tab.cpp:1416
+#: src/slic3r/GUI/GUI_ObjectLayers.cpp:33 src/slic3r/GUI/Tab.cpp:1422
 msgid "Layer height"
 msgstr "Вышыня пласта"
 
 #: src/libslic3r/PrintConfig.cpp:401 src/libslic3r/PrintConfig.cpp:576
-#: src/libslic3r/PrintConfig.cpp:644 src/libslic3r/PrintConfig.cpp:652
-#: src/libslic3r/PrintConfig.cpp:703 src/libslic3r/PrintConfig.cpp:715
-#: src/libslic3r/PrintConfig.cpp:1009 src/libslic3r/PrintConfig.cpp:1076
-#: src/libslic3r/PrintConfig.cpp:1084 src/libslic3r/PrintConfig.cpp:1093
-#: src/libslic3r/PrintConfig.cpp:1604 src/libslic3r/PrintConfig.cpp:1688
-#: src/libslic3r/PrintConfig.cpp:1941 src/libslic3r/PrintConfig.cpp:2341
-#: src/libslic3r/PrintConfig.cpp:2424 src/libslic3r/PrintConfig.cpp:2710
-#: src/libslic3r/PrintConfig.cpp:2730 src/libslic3r/PrintConfig.cpp:2744
-#: src/libslic3r/PrintConfig.cpp:2751 src/libslic3r/PrintConfig.cpp:2761
-#: src/libslic3r/PrintConfig.cpp:2768 src/libslic3r/PrintConfig.cpp:2777
-#: src/libslic3r/PrintConfig.cpp:2786 src/libslic3r/PrintConfig.cpp:3466
-#: src/libslic3r/PrintConfig.cpp:3474 src/libslic3r/PrintConfig.cpp:3522
-#: src/libslic3r/PrintConfig.cpp:3530 src/libslic3r/PrintConfig.cpp:3734
-#: src/slic3r/GUI/GUI_Factories.cpp:86 src/slic3r/GUI/GUI_Factories.cpp:159
+#: src/libslic3r/PrintConfig.cpp:654 src/libslic3r/PrintConfig.cpp:662
+#: src/libslic3r/PrintConfig.cpp:713 src/libslic3r/PrintConfig.cpp:725
+#: src/libslic3r/PrintConfig.cpp:1030 src/libslic3r/PrintConfig.cpp:1097
+#: src/libslic3r/PrintConfig.cpp:1105 src/libslic3r/PrintConfig.cpp:1114
+#: src/libslic3r/PrintConfig.cpp:1625 src/libslic3r/PrintConfig.cpp:1721
+#: src/libslic3r/PrintConfig.cpp:1974 src/libslic3r/PrintConfig.cpp:2424
+#: src/libslic3r/PrintConfig.cpp:2507 src/libslic3r/PrintConfig.cpp:2793
+#: src/libslic3r/PrintConfig.cpp:2813 src/libslic3r/PrintConfig.cpp:2827
+#: src/libslic3r/PrintConfig.cpp:2834 src/libslic3r/PrintConfig.cpp:2844
+#: src/libslic3r/PrintConfig.cpp:2851 src/libslic3r/PrintConfig.cpp:2860
+#: src/libslic3r/PrintConfig.cpp:2869 src/libslic3r/PrintConfig.cpp:3549
+#: src/libslic3r/PrintConfig.cpp:3557 src/libslic3r/PrintConfig.cpp:3605
+#: src/libslic3r/PrintConfig.cpp:3613 src/libslic3r/PrintConfig.cpp:3817
+#: src/slic3r/GUI/GUI_Factories.cpp:87 src/slic3r/GUI/GUI_Factories.cpp:160
 msgid "Layers and Perimeters"
 msgstr "Пласты і перыметры"
 
@@ -1040,7 +1030,7 @@ msgid "Name of the printer"
 msgstr "Назва друкаркі"
 
 #: src/libslic3r/PrintConfig.cpp:444
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:519
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:520
 msgid "HTTPS CA File"
 msgstr "Файл сертыфіката HTTPS CA"
 
@@ -1131,11 +1121,11 @@ msgstr ""
 msgid "Automatic extrusion widths calculation"
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:532 src/libslic3r/PrintConfig.cpp:1052
-#: src/libslic3r/PrintConfig.cpp:1165 src/libslic3r/PrintConfig.cpp:1590
-#: src/libslic3r/PrintConfig.cpp:1875 src/libslic3r/PrintConfig.cpp:2400
-#: src/libslic3r/PrintConfig.cpp:2904 src/libslic3r/PrintConfig.cpp:3174
-#: src/libslic3r/PrintConfig.cpp:3494 src/slic3r/GUI/GUI_Factories.cpp:166
+#: src/libslic3r/PrintConfig.cpp:532 src/libslic3r/PrintConfig.cpp:1073
+#: src/libslic3r/PrintConfig.cpp:1186 src/libslic3r/PrintConfig.cpp:1611
+#: src/libslic3r/PrintConfig.cpp:1908 src/libslic3r/PrintConfig.cpp:2483
+#: src/libslic3r/PrintConfig.cpp:2987 src/libslic3r/PrintConfig.cpp:3257
+#: src/libslic3r/PrintConfig.cpp:3577 src/slic3r/GUI/GUI_Factories.cpp:167
 msgid "Extrusion Width"
 msgstr "Шырыня выдушвання"
 
@@ -1151,16 +1141,16 @@ msgid "Automatic infill combination"
 msgstr ""
 
 #: src/libslic3r/PrintConfig.cpp:540 src/libslic3r/PrintConfig.cpp:548
-#: src/libslic3r/PrintConfig.cpp:671 src/libslic3r/PrintConfig.cpp:1023
-#: src/libslic3r/PrintConfig.cpp:1043 src/libslic3r/PrintConfig.cpp:1498
-#: src/libslic3r/PrintConfig.cpp:1511 src/libslic3r/PrintConfig.cpp:1536
-#: src/libslic3r/PrintConfig.cpp:1764 src/libslic3r/PrintConfig.cpp:1810
-#: src/libslic3r/PrintConfig.cpp:1874 src/libslic3r/PrintConfig.cpp:1913
-#: src/libslic3r/PrintConfig.cpp:2875 src/libslic3r/PrintConfig.cpp:2892
-#: src/libslic3r/PrintConfig.cpp:3702 src/slic3r/GUI/ConfigManipulation.cpp:257
+#: src/libslic3r/PrintConfig.cpp:681 src/libslic3r/PrintConfig.cpp:1044
+#: src/libslic3r/PrintConfig.cpp:1064 src/libslic3r/PrintConfig.cpp:1519
+#: src/libslic3r/PrintConfig.cpp:1532 src/libslic3r/PrintConfig.cpp:1557
+#: src/libslic3r/PrintConfig.cpp:1797 src/libslic3r/PrintConfig.cpp:1843
+#: src/libslic3r/PrintConfig.cpp:1907 src/libslic3r/PrintConfig.cpp:1946
+#: src/libslic3r/PrintConfig.cpp:2958 src/libslic3r/PrintConfig.cpp:2975
+#: src/libslic3r/PrintConfig.cpp:3785 src/slic3r/GUI/ConfigManipulation.cpp:257
 #: src/slic3r/GUI/FrequentlyChangedParameters.cpp:148
-#: src/slic3r/GUI/GUI_Factories.cpp:87 src/slic3r/GUI/GUI_Factories.cpp:160
-#: src/slic3r/GUI/Tab.cpp:1487 src/slic3r/GUI/Tab.cpp:1489
+#: src/slic3r/GUI/GUI_Factories.cpp:88 src/slic3r/GUI/GUI_Factories.cpp:161
+#: src/slic3r/GUI/Tab.cpp:1494 src/slic3r/GUI/Tab.cpp:1496
 msgid "Infill"
 msgstr "Запаўненне"
 
@@ -1239,7 +1229,7 @@ msgstr ""
 msgid "mm or % (zero to disable)"
 msgstr "мм альбо % (0 калі адключана)"
 
-#: src/libslic3r/PrintConfig.cpp:587 src/libslic3r/PrintConfig.cpp:3455
+#: src/libslic3r/PrintConfig.cpp:587 src/libslic3r/PrintConfig.cpp:3538
 msgid "Other layers"
 msgstr "Наступныя пласты"
 
@@ -1252,10 +1242,10 @@ msgstr ""
 "Калі 0, адключае каманды кіравання тэмпературай стала на выхадзе."
 
 #: src/libslic3r/PrintConfig.cpp:590 src/libslic3r/PrintConfig.cpp:602
-#: src/libslic3r/PrintConfig.cpp:615 src/libslic3r/PrintConfig.cpp:1583
-#: src/libslic3r/PrintConfig.cpp:1638 src/libslic3r/PrintConfig.cpp:3458
-#: src/libslic3r/PrintConfig.cpp:4295 src/slic3r/GUI/ConfigWizard.cpp:2233
-#: src/slic3r/GUI/ConfigWizard.cpp:2247 src/slic3r/GUI/GCodeViewer.cpp:424
+#: src/libslic3r/PrintConfig.cpp:615 src/libslic3r/PrintConfig.cpp:1604
+#: src/libslic3r/PrintConfig.cpp:1671 src/libslic3r/PrintConfig.cpp:3541
+#: src/libslic3r/PrintConfig.cpp:4378 src/slic3r/GUI/ConfigWizard.cpp:2233
+#: src/slic3r/GUI/ConfigWizard.cpp:2247 src/slic3r/GUI/GCodeViewer.cpp:461
 msgid "°C"
 msgstr "°C"
 
@@ -1295,7 +1285,27 @@ msgid ""
 "When set to zero, the minimal chamber temperature is not set in the G-code."
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:623
+#: src/libslic3r/PrintConfig.cpp:622
+msgid "Bed temperature by extruder"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:623 src/libslic3r/PrintConfig.cpp:1122
+#: src/libslic3r/PrintConfig.cpp:1900 src/libslic3r/PrintConfig.cpp:2474
+#: src/libslic3r/PrintConfig.cpp:2967 src/libslic3r/PrintConfig.cpp:3248
+#: src/libslic3r/PrintConfig.cpp:3276 src/libslic3r/PrintConfig.cpp:3776
+#: src/slic3r/GUI/GUI_Factories.cpp:166 src/slic3r/GUI/Tab.cpp:1637
+#: src/slic3r/GUI/Tab.cpp:2668
+msgid "Extruders"
+msgstr "Экструдары"
+
+#: src/libslic3r/PrintConfig.cpp:624
+msgid ""
+"The extruder which determines bed temperatures. Set to 0 to determine "
+"temperatures based on the first printing extruder of the first and the "
+"second layers."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:633
 msgid ""
 "This custom code is inserted at every layer change, right before the Z move. "
 "Note that you can use placeholder variables for all Slic3r settings as well "
@@ -1327,20 +1337,20 @@ msgstr ""
 "дзе заўгодна."
 
 #. TRN Print Settings: "Bottom solid layers"
-#: src/libslic3r/PrintConfig.cpp:643 src/libslic3r/PrintConfig.cpp:651
+#: src/libslic3r/PrintConfig.cpp:653 src/libslic3r/PrintConfig.cpp:661
 msgctxt "Layers"
 msgid "Bottom"
 msgstr "Знізу"
 
-#: src/libslic3r/PrintConfig.cpp:645
+#: src/libslic3r/PrintConfig.cpp:655
 msgid "Number of solid layers to generate on bottom surfaces."
 msgstr "Колькасць суцэльных пластоў пры друку ніжняй паверхні аб'екту."
 
-#: src/libslic3r/PrintConfig.cpp:646
+#: src/libslic3r/PrintConfig.cpp:656
 msgid "Bottom solid layers"
 msgstr "Ніжніх суцэльных пластоў"
 
-#: src/libslic3r/PrintConfig.cpp:653
+#: src/libslic3r/PrintConfig.cpp:663
 msgid ""
 "The number of bottom solid layers is increased above bottom_solid_layers if "
 "necessary to satisfy minimum thickness of bottom shell."
@@ -1349,15 +1359,15 @@ msgstr ""
 "значэння 'bottom_solid_layers' (\"Ніжніх суцэльных пластоў\"), каб "
 "забяспечыць найменшую таўшчыню ніжняй абалонкі."
 
-#: src/libslic3r/PrintConfig.cpp:655
+#: src/libslic3r/PrintConfig.cpp:665
 msgid "Minimum bottom shell thickness"
 msgstr "Найменшая таўшчыня ніжняй абалонкі"
 
-#: src/libslic3r/PrintConfig.cpp:661
+#: src/libslic3r/PrintConfig.cpp:671
 msgid "Bridge"
 msgstr "Перакрыццё"
 
-#: src/libslic3r/PrintConfig.cpp:662
+#: src/libslic3r/PrintConfig.cpp:672
 msgid ""
 "This is the acceleration your printer will use for bridges. Set zero to "
 "disable acceleration control for bridges."
@@ -1365,22 +1375,22 @@ msgstr ""
 "Паскарэнне, якое друкарка ўжывае для друку перакрыццяў.\n"
 "Калі 0, кіраванне паскарэннем для перакрыццяў адключана."
 
-#: src/libslic3r/PrintConfig.cpp:664 src/libslic3r/PrintConfig.cpp:940
-#: src/libslic3r/PrintConfig.cpp:1564 src/libslic3r/PrintConfig.cpp:1573
-#: src/libslic3r/PrintConfig.cpp:1767 src/libslic3r/PrintConfig.cpp:1776
-#: src/libslic3r/PrintConfig.cpp:1785 src/libslic3r/PrintConfig.cpp:1794
-#: src/libslic3r/PrintConfig.cpp:1803 src/libslic3r/PrintConfig.cpp:2105
-#: src/libslic3r/PrintConfig.cpp:2154 src/libslic3r/PrintConfig.cpp:2166
-#: src/libslic3r/PrintConfig.cpp:2176 src/libslic3r/PrintConfig.cpp:2377
-#: src/libslic3r/PrintConfig.cpp:2385
+#: src/libslic3r/PrintConfig.cpp:674 src/libslic3r/PrintConfig.cpp:961
+#: src/libslic3r/PrintConfig.cpp:1585 src/libslic3r/PrintConfig.cpp:1594
+#: src/libslic3r/PrintConfig.cpp:1800 src/libslic3r/PrintConfig.cpp:1809
+#: src/libslic3r/PrintConfig.cpp:1818 src/libslic3r/PrintConfig.cpp:1827
+#: src/libslic3r/PrintConfig.cpp:1836 src/libslic3r/PrintConfig.cpp:2188
+#: src/libslic3r/PrintConfig.cpp:2237 src/libslic3r/PrintConfig.cpp:2249
+#: src/libslic3r/PrintConfig.cpp:2259 src/libslic3r/PrintConfig.cpp:2460
+#: src/libslic3r/PrintConfig.cpp:2468
 msgid "mm/s²"
 msgstr "мм/с²"
 
-#: src/libslic3r/PrintConfig.cpp:670
+#: src/libslic3r/PrintConfig.cpp:680
 msgid "Bridging angle"
 msgstr "Вугал перакрыцця"
 
-#: src/libslic3r/PrintConfig.cpp:672
+#: src/libslic3r/PrintConfig.cpp:682
 msgid ""
 "Bridging angle override. If left to zero, the bridging angle will be "
 "calculated automatically. Otherwise the provided angle will be used for all "
@@ -1391,45 +1401,45 @@ msgstr ""
 "У адваротным выпадку зададзены вугал ужывацца для ўсіх перакрыццяў.\n"
 "Задаць 180° для нулявога вугла."
 
-#: src/libslic3r/PrintConfig.cpp:675 src/libslic3r/PrintConfig.cpp:1502
-#: src/libslic3r/PrintConfig.cpp:2599 src/libslic3r/PrintConfig.cpp:2795
-#: src/libslic3r/PrintConfig.cpp:2805 src/libslic3r/PrintConfig.cpp:3105
-#: src/libslic3r/PrintConfig.cpp:3339 src/libslic3r/PrintConfig.cpp:3359
-#: src/libslic3r/PrintConfig.cpp:3371 src/libslic3r/PrintConfig.cpp:3408
-#: src/libslic3r/PrintConfig.cpp:3643 src/libslic3r/PrintConfig.cpp:3779
-#: src/libslic3r/PrintConfig.cpp:4061 src/libslic3r/PrintConfig.cpp:4561
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:286
-#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2571
+#: src/libslic3r/PrintConfig.cpp:685 src/libslic3r/PrintConfig.cpp:1523
+#: src/libslic3r/PrintConfig.cpp:2024 src/libslic3r/PrintConfig.cpp:2682
+#: src/libslic3r/PrintConfig.cpp:2878 src/libslic3r/PrintConfig.cpp:2888
+#: src/libslic3r/PrintConfig.cpp:3188 src/libslic3r/PrintConfig.cpp:3422
+#: src/libslic3r/PrintConfig.cpp:3442 src/libslic3r/PrintConfig.cpp:3454
+#: src/libslic3r/PrintConfig.cpp:3491 src/libslic3r/PrintConfig.cpp:3726
+#: src/libslic3r/PrintConfig.cpp:3862 src/libslic3r/PrintConfig.cpp:4144
+#: src/libslic3r/PrintConfig.cpp:4636 src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:287
+#: src/slic3r/GUI/Gizmos/GLGizmoCut.cpp:2572
 msgid "°"
 msgstr "°"
 
-#: src/libslic3r/PrintConfig.cpp:681
+#: src/libslic3r/PrintConfig.cpp:691
 msgid "Bridges fan speed"
 msgstr "Хуткасць вентылятара пры друку перакрыццяў"
 
-#: src/libslic3r/PrintConfig.cpp:682
+#: src/libslic3r/PrintConfig.cpp:692
 msgid "This fan speed is enforced during all bridges and overhangs."
 msgstr "Хуткасць кручэння вентылятара пры друку перакрыццяў і выступаў."
 
-#: src/libslic3r/PrintConfig.cpp:683 src/libslic3r/PrintConfig.cpp:794
-#: src/libslic3r/PrintConfig.cpp:803 src/libslic3r/PrintConfig.cpp:812
-#: src/libslic3r/PrintConfig.cpp:821 src/libslic3r/PrintConfig.cpp:1339
-#: src/libslic3r/PrintConfig.cpp:1479 src/libslic3r/PrintConfig.cpp:1490
-#: src/libslic3r/PrintConfig.cpp:1513 src/libslic3r/PrintConfig.cpp:1988
-#: src/libslic3r/PrintConfig.cpp:2184 src/libslic3r/PrintConfig.cpp:2247
-#: src/libslic3r/PrintConfig.cpp:2509 src/libslic3r/PrintConfig.cpp:2568
-#: src/libslic3r/PrintConfig.cpp:2753 src/libslic3r/PrintConfig.cpp:3448
-#: src/libslic3r/PrintConfig.cpp:3652 src/libslic3r/PrintConfig.cpp:3662
-#: src/libslic3r/PrintConfig.cpp:3964 src/libslic3r/PrintConfig.cpp:4192
-#: src/libslic3r/PrintConfig.cpp:4480 src/slic3r/GUI/GCodeViewer.cpp:414
+#: src/libslic3r/PrintConfig.cpp:693 src/libslic3r/PrintConfig.cpp:815
+#: src/libslic3r/PrintConfig.cpp:824 src/libslic3r/PrintConfig.cpp:833
+#: src/libslic3r/PrintConfig.cpp:842 src/libslic3r/PrintConfig.cpp:1360
+#: src/libslic3r/PrintConfig.cpp:1500 src/libslic3r/PrintConfig.cpp:1511
+#: src/libslic3r/PrintConfig.cpp:1534 src/libslic3r/PrintConfig.cpp:2071
+#: src/libslic3r/PrintConfig.cpp:2267 src/libslic3r/PrintConfig.cpp:2330
+#: src/libslic3r/PrintConfig.cpp:2592 src/libslic3r/PrintConfig.cpp:2651
+#: src/libslic3r/PrintConfig.cpp:2836 src/libslic3r/PrintConfig.cpp:3531
+#: src/libslic3r/PrintConfig.cpp:3735 src/libslic3r/PrintConfig.cpp:3745
+#: src/libslic3r/PrintConfig.cpp:4047 src/libslic3r/PrintConfig.cpp:4275
+#: src/libslic3r/PrintConfig.cpp:4563 src/slic3r/GUI/GCodeViewer.cpp:451
 msgid "%"
 msgstr "%"
 
-#: src/libslic3r/PrintConfig.cpp:690
+#: src/libslic3r/PrintConfig.cpp:700
 msgid "Bridge flow ratio"
 msgstr "Каэфіцыент выдатку пры друку перакрыццяў"
 
-#: src/libslic3r/PrintConfig.cpp:692
+#: src/libslic3r/PrintConfig.cpp:702
 msgid ""
 "This factor affects the amount of plastic for bridging. You can decrease it "
 "slightly to pull the extrudates and prevent sagging, although default "
@@ -1442,71 +1452,71 @@ msgstr ""
 "Першапачатковыя налады звычайна добрыя, і вам варта паспрабаваць з "
 "астуджэннем (ужывая вентылятар), перш чым наладжваць гэтае."
 
-#: src/libslic3r/PrintConfig.cpp:702
+#: src/libslic3r/PrintConfig.cpp:712
 msgid "Single perimeter on top surfaces"
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:704
+#: src/libslic3r/PrintConfig.cpp:714
 msgid ""
 "Use only one perimeter on flat top surface, to give more space to the top "
 "infill pattern. Could be applied on topmost surface or all top surfaces."
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:707 src/libslic3r/PrintConfig.cpp:1013
-#: src/libslic3r/PrintConfig.cpp:1742 src/libslic3r/PrintConfig.cpp:2834
+#: src/libslic3r/PrintConfig.cpp:717 src/libslic3r/PrintConfig.cpp:1034
+#: src/libslic3r/PrintConfig.cpp:1775 src/libslic3r/PrintConfig.cpp:2917
 msgid "Disabled"
 msgstr "Адключана"
 
-#: src/libslic3r/PrintConfig.cpp:708 src/libslic3r/PrintConfig.cpp:1977
+#: src/libslic3r/PrintConfig.cpp:718 src/libslic3r/PrintConfig.cpp:2060
 msgid "All top surfaces"
 msgstr "Усе верхнія паверхні"
 
-#: src/libslic3r/PrintConfig.cpp:709 src/libslic3r/PrintConfig.cpp:1978
+#: src/libslic3r/PrintConfig.cpp:719 src/libslic3r/PrintConfig.cpp:2061
 msgid "Topmost surface only"
 msgstr "Самая верхняя паверхня"
 
-#: src/libslic3r/PrintConfig.cpp:714
+#: src/libslic3r/PrintConfig.cpp:724
 msgid "Only one perimeter on first layer"
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:716
+#: src/libslic3r/PrintConfig.cpp:726
 msgid "Use only one perimeter on the first layer."
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:721
+#: src/libslic3r/PrintConfig.cpp:731
 msgid "Bridges"
 msgstr "Перакрыцці"
 
-#: src/libslic3r/PrintConfig.cpp:722 src/libslic3r/PrintConfig.cpp:732
-#: src/libslic3r/PrintConfig.cpp:746 src/libslic3r/PrintConfig.cpp:755
-#: src/libslic3r/PrintConfig.cpp:764 src/libslic3r/PrintConfig.cpp:773
-#: src/libslic3r/PrintConfig.cpp:1064 src/libslic3r/PrintConfig.cpp:1695
-#: src/libslic3r/PrintConfig.cpp:1914 src/libslic3r/PrintConfig.cpp:2005
-#: src/libslic3r/PrintConfig.cpp:2414 src/libslic3r/PrintConfig.cpp:2863
-#: src/libslic3r/PrintConfig.cpp:2916 src/libslic3r/PrintConfig.cpp:3507
-#: src/slic3r/GUI/GCodeViewer.cpp:394 src/slic3r/GUI/GUI_Factories.cpp:164
-#: src/slic3r/GUI/Tab.cpp:1577
+#: src/libslic3r/PrintConfig.cpp:732 src/libslic3r/PrintConfig.cpp:743
+#: src/libslic3r/PrintConfig.cpp:753 src/libslic3r/PrintConfig.cpp:767
+#: src/libslic3r/PrintConfig.cpp:776 src/libslic3r/PrintConfig.cpp:785
+#: src/libslic3r/PrintConfig.cpp:794 src/libslic3r/PrintConfig.cpp:1085
+#: src/libslic3r/PrintConfig.cpp:1728 src/libslic3r/PrintConfig.cpp:1947
+#: src/libslic3r/PrintConfig.cpp:2088 src/libslic3r/PrintConfig.cpp:2497
+#: src/libslic3r/PrintConfig.cpp:2946 src/libslic3r/PrintConfig.cpp:2999
+#: src/libslic3r/PrintConfig.cpp:3590 src/slic3r/GUI/GCodeViewer.cpp:431
+#: src/slic3r/GUI/GUI_Factories.cpp:165 src/slic3r/GUI/Tab.cpp:1584
 msgid "Speed"
 msgstr "Хуткасць"
 
-#: src/libslic3r/PrintConfig.cpp:723
+#: src/libslic3r/PrintConfig.cpp:733
 msgid "Speed for printing bridges."
 msgstr "Хуткасць друку перакрыццяў."
 
-#: src/libslic3r/PrintConfig.cpp:724 src/libslic3r/PrintConfig.cpp:1223
-#: src/libslic3r/PrintConfig.cpp:1233 src/libslic3r/PrintConfig.cpp:1241
-#: src/libslic3r/PrintConfig.cpp:1249 src/libslic3r/PrintConfig.cpp:1258
-#: src/libslic3r/PrintConfig.cpp:1266 src/libslic3r/PrintConfig.cpp:1284
-#: src/libslic3r/PrintConfig.cpp:1310 src/libslic3r/PrintConfig.cpp:1329
-#: src/libslic3r/PrintConfig.cpp:1698 src/libslic3r/PrintConfig.cpp:1916
-#: src/libslic3r/PrintConfig.cpp:2007 src/libslic3r/PrintConfig.cpp:2088
-#: src/libslic3r/PrintConfig.cpp:2122 src/libslic3r/PrintConfig.cpp:2134
-#: src/libslic3r/PrintConfig.cpp:2144 src/libslic3r/PrintConfig.cpp:2206
-#: src/libslic3r/PrintConfig.cpp:2265 src/libslic3r/PrintConfig.cpp:2416
-#: src/libslic3r/PrintConfig.cpp:2684 src/libslic3r/PrintConfig.cpp:2693
-#: src/libslic3r/PrintConfig.cpp:3302 src/libslic3r/PrintConfig.cpp:3542
-#: src/libslic3r/PrintConfig.cpp:3552 src/libslic3r/PrintConfig.cpp:4752
-#: src/slic3r/GUI/GCodeViewer.cpp:394
+#: src/libslic3r/PrintConfig.cpp:734 src/libslic3r/PrintConfig.cpp:1244
+#: src/libslic3r/PrintConfig.cpp:1254 src/libslic3r/PrintConfig.cpp:1262
+#: src/libslic3r/PrintConfig.cpp:1270 src/libslic3r/PrintConfig.cpp:1279
+#: src/libslic3r/PrintConfig.cpp:1287 src/libslic3r/PrintConfig.cpp:1305
+#: src/libslic3r/PrintConfig.cpp:1331 src/libslic3r/PrintConfig.cpp:1350
+#: src/libslic3r/PrintConfig.cpp:1731 src/libslic3r/PrintConfig.cpp:1949
+#: src/libslic3r/PrintConfig.cpp:2090 src/libslic3r/PrintConfig.cpp:2171
+#: src/libslic3r/PrintConfig.cpp:2205 src/libslic3r/PrintConfig.cpp:2217
+#: src/libslic3r/PrintConfig.cpp:2227 src/libslic3r/PrintConfig.cpp:2289
+#: src/libslic3r/PrintConfig.cpp:2348 src/libslic3r/PrintConfig.cpp:2499
+#: src/libslic3r/PrintConfig.cpp:2767 src/libslic3r/PrintConfig.cpp:2776
+#: src/libslic3r/PrintConfig.cpp:3385 src/libslic3r/PrintConfig.cpp:3625
+#: src/libslic3r/PrintConfig.cpp:3635 src/libslic3r/PrintConfig.cpp:4827
+#: src/slic3r/GUI/GCodeViewer.cpp:431
 msgid "mm/s"
 msgstr "мм/с"
 
@@ -1534,38 +1544,29 @@ msgstr ""
 msgid "speed for 0% overlap (bridge)"
 msgstr "хуткасць пры перакрыцці 0% (перакрыццё)"
 
-#: src/libslic3r/PrintConfig.cpp:748 src/libslic3r/PrintConfig.cpp:757
-#: src/libslic3r/PrintConfig.cpp:766 src/libslic3r/PrintConfig.cpp:775
-#: src/libslic3r/PrintConfig.cpp:1068 src/libslic3r/PrintConfig.cpp:1617
-#: src/libslic3r/PrintConfig.cpp:1628 src/libslic3r/PrintConfig.cpp:2867
-#: src/libslic3r/PrintConfig.cpp:2920 src/libslic3r/PrintConfig.cpp:3257
-#: src/libslic3r/PrintConfig.cpp:3513
-msgid "mm/s or %"
-msgstr "мм/с ці %"
-
-#: src/libslic3r/PrintConfig.cpp:754 src/libslic3r/PrintConfig.cpp:801
+#: src/libslic3r/PrintConfig.cpp:775 src/libslic3r/PrintConfig.cpp:822
 msgid "speed for 25% overlap"
 msgstr "хуткасць пры перакрыцці 25%"
 
-#: src/libslic3r/PrintConfig.cpp:763 src/libslic3r/PrintConfig.cpp:810
+#: src/libslic3r/PrintConfig.cpp:784 src/libslic3r/PrintConfig.cpp:831
 msgid "speed for 50% overlap"
 msgstr "хуткасць пры перакрыцці 50%"
 
-#: src/libslic3r/PrintConfig.cpp:772 src/libslic3r/PrintConfig.cpp:819
+#: src/libslic3r/PrintConfig.cpp:793 src/libslic3r/PrintConfig.cpp:840
 msgid "speed for 75% overlap"
 msgstr "хуткасць пры перакрыцці 75%"
 
-#: src/libslic3r/PrintConfig.cpp:781
+#: src/libslic3r/PrintConfig.cpp:802
 msgid "Enable dynamic fan speeds"
 msgstr "Уключыць дынамічную хуткасць кручэння вентылятара"
 
-#: src/libslic3r/PrintConfig.cpp:782
+#: src/libslic3r/PrintConfig.cpp:803
 msgid "This setting enables dynamic fan speed control on overhangs."
 msgstr ""
 "Дазваляе дынамічна рэгуляваць хуткасць кручэння вентылятара на выступах."
 
 #. TRN FilamentSettings : "Dynamic fan speeds"
-#: src/libslic3r/PrintConfig.cpp:787
+#: src/libslic3r/PrintConfig.cpp:808
 msgid ""
 "Overhang size is expressed as a percentage of overlap of the extrusion with "
 "the previous layer: 100% would be full overlap (no overhang), while 0% "
@@ -1578,17 +1579,17 @@ msgstr ""
 "Хуткасці кручэння вентылятараў для прамежкавых памераў выступаў разлічваюцца "
 "з дапамогай лінейнай інтэрпаляцыі."
 
-#: src/libslic3r/PrintConfig.cpp:828
+#: src/libslic3r/PrintConfig.cpp:849
 msgid "Brim width"
 msgstr "Шырыня аблямоўкі"
 
-#: src/libslic3r/PrintConfig.cpp:829 src/libslic3r/PrintConfig.cpp:840
-#: src/libslic3r/PrintConfig.cpp:853 src/slic3r/GUI/GUI_Factories.cpp:168
-#: src/slic3r/GUI/Tab.cpp:1518
+#: src/libslic3r/PrintConfig.cpp:850 src/libslic3r/PrintConfig.cpp:861
+#: src/libslic3r/PrintConfig.cpp:874 src/slic3r/GUI/GUI_Factories.cpp:169
+#: src/slic3r/GUI/Tab.cpp:1525
 msgid "Skirt and brim"
 msgstr "Спадніца і аблямоўка"
 
-#: src/libslic3r/PrintConfig.cpp:830
+#: src/libslic3r/PrintConfig.cpp:851
 msgid ""
 "The horizontal width of the brim that will be printed around each object on "
 "the first layer. When raft is used, no brim is generated (use "
@@ -1599,37 +1600,37 @@ msgstr ""
 "Пры ўжыванні плыта, аблямоўка не ствараецца (ужывайце "
 "'raft_first_layer_expansion')."
 
-#: src/libslic3r/PrintConfig.cpp:839
+#: src/libslic3r/PrintConfig.cpp:860
 msgid "Brim type"
 msgstr "Тып аблямоўкі"
 
-#: src/libslic3r/PrintConfig.cpp:841
+#: src/libslic3r/PrintConfig.cpp:862
 msgid ""
 "The places where the brim will be printed around each object on the first "
 "layer."
 msgstr "Месца друку аблямоўкі вакол кожнага аб'екту на першым пласту."
 
-#: src/libslic3r/PrintConfig.cpp:843
+#: src/libslic3r/PrintConfig.cpp:864
 msgid "No brim"
 msgstr "Без аблямоўкі"
 
-#: src/libslic3r/PrintConfig.cpp:844
+#: src/libslic3r/PrintConfig.cpp:865
 msgid "Outer brim only"
 msgstr "Аблямоўка толькі звонку"
 
-#: src/libslic3r/PrintConfig.cpp:845
+#: src/libslic3r/PrintConfig.cpp:866
 msgid "Inner brim only"
 msgstr "Аблямоўка толькі ўнутры"
 
-#: src/libslic3r/PrintConfig.cpp:846
+#: src/libslic3r/PrintConfig.cpp:867
 msgid "Outer and inner brim"
 msgstr "Аблямоўка звонку і ўнутры"
 
-#: src/libslic3r/PrintConfig.cpp:852
+#: src/libslic3r/PrintConfig.cpp:873
 msgid "Brim separation gap"
 msgstr "Прагал паміж аблямоўкамі"
 
-#: src/libslic3r/PrintConfig.cpp:854
+#: src/libslic3r/PrintConfig.cpp:875
 msgid ""
 "Offset of brim from the printed object. The offset is applied after the "
 "elephant foot compensation."
@@ -1637,23 +1638,23 @@ msgstr ""
 "Зрушэнне аблямоўкі ад друкаванага аб'екту.\n"
 "Зрушэнне ўжываецца пасля кампенсацыі пашырэння першага пласта."
 
-#: src/libslic3r/PrintConfig.cpp:861
+#: src/libslic3r/PrintConfig.cpp:882
 msgid "Colorprint height"
 msgstr "Вышыня змены колеру"
 
-#: src/libslic3r/PrintConfig.cpp:862
+#: src/libslic3r/PrintConfig.cpp:883
 msgid "Heights at which a filament change is to occur."
 msgstr "Вышыня, на якой павінна адбыцца замена філаменту."
 
-#: src/libslic3r/PrintConfig.cpp:866 src/slic3r/GUI/Tab.cpp:99
+#: src/libslic3r/PrintConfig.cpp:887 src/slic3r/GUI/Tab.cpp:100
 msgid "Compatible printers"
 msgstr "Сумяшчальныя друкаркі"
 
-#: src/libslic3r/PrintConfig.cpp:872
+#: src/libslic3r/PrintConfig.cpp:893
 msgid "Compatible printers condition"
 msgstr "Умовы сумяшчальнасці з друкаркай"
 
-#: src/libslic3r/PrintConfig.cpp:873
+#: src/libslic3r/PrintConfig.cpp:894
 msgid ""
 "A boolean expression using the configuration values of an active printer "
 "profile. If this expression evaluates to true, this profile is considered "
@@ -1662,15 +1663,15 @@ msgstr ""
 "Лагічны выраз, які ўжывае значэнне наладкі актыўнага профіля друкаркі.\n"
 "Калі true, профіль лічыцца сумяшчальны з актыўным профілем друкаркі."
 
-#: src/libslic3r/PrintConfig.cpp:881 src/slic3r/GUI/Tab.cpp:105
+#: src/libslic3r/PrintConfig.cpp:902 src/slic3r/GUI/Tab.cpp:106
 msgid "Compatible print profiles"
 msgstr "Сумяшчальныя профілі друку"
 
-#: src/libslic3r/PrintConfig.cpp:887
+#: src/libslic3r/PrintConfig.cpp:908
 msgid "Compatible print profiles condition"
 msgstr "Умовы сумяшчальнасці профіляў друку"
 
-#: src/libslic3r/PrintConfig.cpp:888
+#: src/libslic3r/PrintConfig.cpp:909
 msgid ""
 "A boolean expression using the configuration values of an active print "
 "profile. If this expression evaluates to true, this profile is considered "
@@ -1679,11 +1680,11 @@ msgstr ""
 "Лагічны выраз, які ўжывае значэнне наладкі актыўнага профіля друку.\n"
 "Калі true, профіль лічыцца сумяшчальны с актыўным профілем друку."
 
-#: src/libslic3r/PrintConfig.cpp:905
+#: src/libslic3r/PrintConfig.cpp:926
 msgid "Complete individual objects"
 msgstr "Друк аб'ектаў асобна"
 
-#: src/libslic3r/PrintConfig.cpp:906
+#: src/libslic3r/PrintConfig.cpp:927
 msgid ""
 "When printing multiple objects or copies, this feature will complete each "
 "object before moving onto next one (and starting it from its bottom layer). "
@@ -1701,7 +1702,7 @@ msgstr ""
 msgid "Enable auto cooling"
 msgstr "Уключыць аўтаматычнае астуджэнне"
 
-#: src/libslic3r/PrintConfig.cpp:915
+#: src/libslic3r/PrintConfig.cpp:936
 msgid ""
 "This flag enables the automatic cooling logic that adjusts print speed and "
 "fan speed according to layer printing time."
@@ -1709,33 +1710,33 @@ msgstr ""
 "Уключае алгарытм аўтаматычнага астуджэння, які рэгулюе хуткасць друку і "
 "хуткасць вентылятара ў адпаведнасці з часам друку пласта."
 
-#: src/libslic3r/PrintConfig.cpp:920
+#: src/libslic3r/PrintConfig.cpp:941
 msgid "Cooling tube position"
 msgstr "Становішча астуджальнай трубкі"
 
-#: src/libslic3r/PrintConfig.cpp:921
+#: src/libslic3r/PrintConfig.cpp:942
 msgid "Distance of the center-point of the cooling tube from the extruder tip."
 msgstr ""
 "Адлегласць паміж цэнтральнай кропкай астуджальнай трубкі і наканечнікам "
 "экструдара."
 
-#: src/libslic3r/PrintConfig.cpp:928
+#: src/libslic3r/PrintConfig.cpp:949
 msgid "Cooling tube length"
 msgstr "Даўжыня астуджальнай трубкі"
 
-#: src/libslic3r/PrintConfig.cpp:929
+#: src/libslic3r/PrintConfig.cpp:950
 msgid "Length of the cooling tube to limit space for cooling moves inside it."
 msgstr ""
 "Даўжыня астуджальнай трубкі для абмежавання руху ў прасторы для астуджэння."
 
-#: src/libslic3r/PrintConfig.cpp:936 src/libslic3r/PrintConfig.cpp:3282
-#: src/libslic3r/PrintConfig.cpp:4459 src/slic3r/GUI/GUI_Factories.cpp:957
-#: src/slic3r/GUI/Tab.cpp:5713 src/slic3r/GUI/Tab.cpp:5855
+#: src/libslic3r/PrintConfig.cpp:957 src/libslic3r/PrintConfig.cpp:3365
+#: src/libslic3r/PrintConfig.cpp:4542 src/slic3r/GUI/GUI_Factories.cpp:958
+#: src/slic3r/GUI/Tab.cpp:5810 src/slic3r/GUI/Tab.cpp:5952
 #: src/slic3r/Utils/Repetier.cpp:149 src/slic3r/Utils/Repetier.cpp:230
 msgid "Default"
 msgstr "Першапачатковы"
 
-#: src/libslic3r/PrintConfig.cpp:937
+#: src/libslic3r/PrintConfig.cpp:958
 msgid ""
 "This is the acceleration your printer will be reset to after the role-"
 "specific acceleration values are used (perimeter/infill). Set zero to "
@@ -1745,11 +1746,11 @@ msgstr ""
 "паскарэнняў, якія вызначаныя для канкрэтнай ролі (перыметра/запаўнення).\n"
 "Калі 0, прадухіляе скід паскарэння."
 
-#: src/libslic3r/PrintConfig.cpp:946
+#: src/libslic3r/PrintConfig.cpp:967
 msgid "Default filament profile"
 msgstr "Першапачатковы профіль філамента"
 
-#: src/libslic3r/PrintConfig.cpp:947
+#: src/libslic3r/PrintConfig.cpp:968
 msgid ""
 "Default filament profile associated with the current printer profile. On "
 "selection of the current printer profile, this filament profile will be "
@@ -1758,12 +1759,12 @@ msgstr ""
 "Першапачатковы профіль філамента, які звязаны з бягучым профілем друкаркі.\n"
 "Пры выбары бягучага профіля друкаркі гэты профіль філамента будзе актываваны."
 
-#: src/libslic3r/PrintConfig.cpp:953
+#: src/libslic3r/PrintConfig.cpp:974
 msgid "Default print profile"
 msgstr "Першапачатковы профіль друку"
 
-#: src/libslic3r/PrintConfig.cpp:954 src/libslic3r/PrintConfig.cpp:4427
-#: src/libslic3r/PrintConfig.cpp:4438
+#: src/libslic3r/PrintConfig.cpp:975 src/libslic3r/PrintConfig.cpp:4510
+#: src/libslic3r/PrintConfig.cpp:4521
 msgid ""
 "Default print profile associated with the current printer profile. On "
 "selection of the current printer profile, this print profile will be "
@@ -1772,11 +1773,11 @@ msgstr ""
 "Першапачатковы профіль друку, які звязаны з бягучым профілем друкаркі.\n"
 "Пры выбары бягучага профіля друкаркі гэты профіль друку будзе актываваны."
 
-#: src/libslic3r/PrintConfig.cpp:960
+#: src/libslic3r/PrintConfig.cpp:981
 msgid "Disable fan for the first"
 msgstr "Не ўключаць вентылятар на першых"
 
-#: src/libslic3r/PrintConfig.cpp:961
+#: src/libslic3r/PrintConfig.cpp:982
 msgid ""
 "You can set this to a positive value to disable fan at all during the first "
 "layers, so that it does not make adhesion worse."
@@ -1784,16 +1785,16 @@ msgstr ""
 "Станоўчае значэнне, каб адключыць вентылятар пры друку першых пластоў, каб "
 "гэтае не пагоршала прыліпанне да стала."
 
-#: src/libslic3r/PrintConfig.cpp:963 src/libslic3r/PrintConfig.cpp:1813
-#: src/libslic3r/PrintConfig.cpp:2529 src/libslic3r/PrintConfig.cpp:2823
-#: src/libslic3r/PrintConfig.cpp:2897 src/libslic3r/PrintConfig.cpp:3157
-#: src/libslic3r/PrintConfig.cpp:3204 src/libslic3r/PrintConfig.cpp:3220
-#: src/libslic3r/PrintConfig.cpp:3707
+#: src/libslic3r/PrintConfig.cpp:984 src/libslic3r/PrintConfig.cpp:1846
+#: src/libslic3r/PrintConfig.cpp:2612 src/libslic3r/PrintConfig.cpp:2906
+#: src/libslic3r/PrintConfig.cpp:2980 src/libslic3r/PrintConfig.cpp:3240
+#: src/libslic3r/PrintConfig.cpp:3287 src/libslic3r/PrintConfig.cpp:3303
+#: src/libslic3r/PrintConfig.cpp:3790
 #: src/slic3r/GUI/ExtruderSequenceDialog.cpp:65
 msgid "layers"
 msgstr "пласты"
 
-#: src/libslic3r/PrintConfig.cpp:970
+#: src/libslic3r/PrintConfig.cpp:991
 msgid "Don't support bridges"
 msgstr "Не друкаваць апору пад перакрыццямі"
 
@@ -1804,15 +1805,15 @@ msgid ""
 msgstr ""
 "Эксперыментальная налада прадухілення друку апоры пад участкамі перакрыцця."
 
-#: src/libslic3r/PrintConfig.cpp:978
+#: src/libslic3r/PrintConfig.cpp:999
 msgid "Distance between copies"
 msgstr "Адлегласць паміж копіямі"
 
-#: src/libslic3r/PrintConfig.cpp:979
+#: src/libslic3r/PrintConfig.cpp:1000
 msgid "Distance used for the auto-arrange feature of the plater."
 msgstr "Адлегласць паміж аб'ектамі, пры аўтаматычным размяшчэнні іх на стале."
 
-#: src/libslic3r/PrintConfig.cpp:987
+#: src/libslic3r/PrintConfig.cpp:1008
 msgid ""
 "This end procedure is inserted at the end of the output file. Note that you "
 "can use placeholder variables for all QIDISlicer settings."
@@ -1821,7 +1822,7 @@ msgstr ""
 "Звярніце ўвагу, што магчыма ўжываць зменныя-запаўняльнікі для ўсіх наладаў "
 "QIDISlicer."
 
-#: src/libslic3r/PrintConfig.cpp:997
+#: src/libslic3r/PrintConfig.cpp:1018
 msgid ""
 "This end procedure is inserted at the end of the output file, before the "
 "printer end gcode (and before any toolchange from this filament in case of "
@@ -1837,30 +1838,30 @@ msgstr ""
 "Калі ў вас некалькі экструдараў, G-code апрацоўваецца ў адпаведнасці з "
 "парадкавым нумарам экструдара."
 
-#: src/libslic3r/PrintConfig.cpp:1008
+#: src/libslic3r/PrintConfig.cpp:1029
 msgid "Ensure vertical shell thickness"
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:1010
+#: src/libslic3r/PrintConfig.cpp:1031
 msgid ""
 "Add solid infill near sloping surfaces to guarantee the vertical shell "
 "thickness (top+bottom solid layers)."
 msgstr ""
 
 #. TRN: This is a drop-down option for 'Ensure vertical shell thickness' parameter.
-#: src/libslic3r/PrintConfig.cpp:1015
+#: src/libslic3r/PrintConfig.cpp:1036
 msgid "Partial"
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:1016 src/libslic3r/PrintConfig.cpp:2836
+#: src/libslic3r/PrintConfig.cpp:1037 src/libslic3r/PrintConfig.cpp:2919
 msgid "Enabled"
 msgstr "Уключаны"
 
-#: src/libslic3r/PrintConfig.cpp:1022
+#: src/libslic3r/PrintConfig.cpp:1043
 msgid "Top fill pattern"
 msgstr "Шаблон запаўнення верхняй паверхні"
 
-#: src/libslic3r/PrintConfig.cpp:1024
+#: src/libslic3r/PrintConfig.cpp:1045
 msgid ""
 "Fill pattern for top infill. This only affects the top visible layer, and "
 "not its adjacent solid shells."
@@ -1869,45 +1870,45 @@ msgstr ""
 "Уплывае толькі на верхні бачны пласт, а не на прыляглыя да яго суцэльныя "
 "абалонкі."
 
-#: src/libslic3r/PrintConfig.cpp:1027 src/libslic3r/PrintConfig.cpp:1539
-#: src/libslic3r/PrintConfig.cpp:3268 src/libslic3r/PrintConfig.cpp:3283
+#: src/libslic3r/PrintConfig.cpp:1048 src/libslic3r/PrintConfig.cpp:1560
+#: src/libslic3r/PrintConfig.cpp:3351 src/libslic3r/PrintConfig.cpp:3366
 msgid "Rectilinear"
 msgstr "Прамалінейны"
 
-#: src/libslic3r/PrintConfig.cpp:1028
+#: src/libslic3r/PrintConfig.cpp:1049
 msgid "Monotonic"
 msgstr "Манатонны"
 
-#: src/libslic3r/PrintConfig.cpp:1029
+#: src/libslic3r/PrintConfig.cpp:1050
 msgid "Monotonic Lines"
 msgstr "Манатонныя лініі"
 
-#: src/libslic3r/PrintConfig.cpp:1030 src/libslic3r/PrintConfig.cpp:1540
+#: src/libslic3r/PrintConfig.cpp:1051 src/libslic3r/PrintConfig.cpp:1561
 msgid "Aligned Rectilinear"
 msgstr "Выраўнаваны прамалінейны"
 
-#: src/libslic3r/PrintConfig.cpp:1031 src/libslic3r/PrintConfig.cpp:1546
-#: src/libslic3r/PrintConfig.cpp:3284
+#: src/libslic3r/PrintConfig.cpp:1052 src/libslic3r/PrintConfig.cpp:1567
+#: src/libslic3r/PrintConfig.cpp:3367
 msgid "Concentric"
 msgstr "Канцэнтрычны"
 
-#: src/libslic3r/PrintConfig.cpp:1032 src/libslic3r/PrintConfig.cpp:1550
+#: src/libslic3r/PrintConfig.cpp:1053 src/libslic3r/PrintConfig.cpp:1571
 msgid "Hilbert Curve"
 msgstr "Крывыя Гільберта"
 
-#: src/libslic3r/PrintConfig.cpp:1033 src/libslic3r/PrintConfig.cpp:1551
+#: src/libslic3r/PrintConfig.cpp:1054 src/libslic3r/PrintConfig.cpp:1572
 msgid "Archimedean Chords"
 msgstr "Хорды Архімеда"
 
-#: src/libslic3r/PrintConfig.cpp:1034 src/libslic3r/PrintConfig.cpp:1552
+#: src/libslic3r/PrintConfig.cpp:1055 src/libslic3r/PrintConfig.cpp:1573
 msgid "Octagram Spiral"
 msgstr "Спіральная октаграма"
 
-#: src/libslic3r/PrintConfig.cpp:1042
+#: src/libslic3r/PrintConfig.cpp:1063
 msgid "Bottom fill pattern"
 msgstr "Шаблон запаўнення ніжняй паверхні"
 
-#: src/libslic3r/PrintConfig.cpp:1044
+#: src/libslic3r/PrintConfig.cpp:1065
 msgid ""
 "Fill pattern for bottom infill. This only affects the bottom external "
 "visible layer, and not its adjacent solid shells."
@@ -1921,7 +1922,7 @@ msgstr ""
 msgid "External perimeters"
 msgstr "Вонкавыя перыметры"
 
-#: src/libslic3r/PrintConfig.cpp:1053
+#: src/libslic3r/PrintConfig.cpp:1074
 msgid ""
 "Set this to a non-zero value to set a manual extrusion width for external "
 "perimeters. If left zero, default extrusion width will be used if set, "
@@ -1955,11 +1956,11 @@ msgstr ""
 "перыметраў.\n"
 "Калі 0, аўтаматычная наладка."
 
-#: src/libslic3r/PrintConfig.cpp:1075
+#: src/libslic3r/PrintConfig.cpp:1096
 msgid "External perimeters first"
 msgstr "Вонкавыя перыметры друкаваць першымі"
 
-#: src/libslic3r/PrintConfig.cpp:1077
+#: src/libslic3r/PrintConfig.cpp:1098
 msgid ""
 "Print contour perimeters from the outermost one to the innermost one instead "
 "of the default inverse order."
@@ -1967,11 +1968,11 @@ msgstr ""
 "Надрукаваць контурныя перыметры ад самага вонкавага да самага ўнутранага, "
 "замест зваротнага першапачатковага парадку."
 
-#: src/libslic3r/PrintConfig.cpp:1083
+#: src/libslic3r/PrintConfig.cpp:1104
 msgid "Extra perimeters if needed"
 msgstr "Дадатковыя перыметры пры неабходнасці"
 
-#: src/libslic3r/PrintConfig.cpp:1085
+#: src/libslic3r/PrintConfig.cpp:1106
 msgid ""
 "Add more perimeters when needed for avoiding gaps in sloping walls. Slic3r "
 "keeps adding perimeters, until more than 70% of the loop immediately above "
@@ -2004,15 +2005,7 @@ msgstr ""
 msgid "Extruder"
 msgstr "Экструдар"
 
-#: src/libslic3r/PrintConfig.cpp:1101 src/libslic3r/PrintConfig.cpp:1867
-#: src/libslic3r/PrintConfig.cpp:2391 src/libslic3r/PrintConfig.cpp:2884
-#: src/libslic3r/PrintConfig.cpp:3165 src/libslic3r/PrintConfig.cpp:3193
-#: src/libslic3r/PrintConfig.cpp:3693 src/slic3r/GUI/GUI_Factories.cpp:165
-#: src/slic3r/GUI/Tab.cpp:1628 src/slic3r/GUI/Tab.cpp:2642
-msgid "Extruders"
-msgstr "Экструдары"
-
-#: src/libslic3r/PrintConfig.cpp:1102
+#: src/libslic3r/PrintConfig.cpp:1123
 msgid ""
 "The extruder to use (unless more specific extruder settings are specified). "
 "This value overrides perimeter and infill extruders, but not the support "
@@ -2039,34 +2032,29 @@ msgstr "першапачаткова"
 msgid "Height"
 msgstr "Вышыня"
 
-#: src/libslic3r/PrintConfig.cpp:1110
+#: src/libslic3r/PrintConfig.cpp:1131
 msgid ""
+"Only used when 'Print Settings -> Complete individual objects' is active. "
 "Set this to the vertical distance between your nozzle tip and (usually) the "
-"X carriage rods. In other words, this is the height of the clearance "
-"cylinder around your extruder, and it represents the maximum depth the "
-"extruder can peek before colliding with other printed objects."
+"X carriage rods. Used to check for collisions with previously printed "
+"objects and to prevent them when arranging.\n"
+"The value is ignored for most QIDI printers, which come with more detailed "
+"extruder model."
 msgstr ""
-"Вертыкальная адлегласць паміж наканечнікаі фарсункі і (звычайна) стрыжнямі "
-"карэткі X.\n"
-"Іншым словам, гэта вышыня цыліндру зазору вакол экструдара, і яна вызначае, "
-"на якую найбольшую глыбіню можа зазірнуць экструдар, каб ён не сутыкнуўся з "
-"іншымі дукаванымі аб'ектамі."
 
-#: src/libslic3r/PrintConfig.cpp:1120 src/slic3r/GUI/GLCanvas3D.cpp:292
+#: src/libslic3r/PrintConfig.cpp:1141 src/slic3r/GUI/GLCanvas3D.cpp:360
 msgid "Radius"
 msgstr "Радыус"
 
-#: src/libslic3r/PrintConfig.cpp:1121
+#: src/libslic3r/PrintConfig.cpp:1142
 msgid ""
-"Set this to the clearance radius around your extruder. If the extruder is "
-"not centered, choose the largest value for safety. This setting is used to "
-"check for collisions and to display the graphical preview in the plater."
+"Only used when 'Print Settings -> Complete individual objects' is active. "
+"Set this to a radius of a nozzle-centered cylinder big enough to enclose the "
+"extruder assembly. Used to check for collisions with previously printed "
+"objects and to prevent them when arranging.\n"
+"The value is ignored for most QIDI printers, which come with more detailed "
+"extruder model."
 msgstr ""
-"Радыус бяспечнага зазору вакол экструдара.\n"
-"Калі экструдар знаходзіцца не па центры - абярыце найбольшае значэнне для "
-"забеспячэнне бяспекі.\n"
-"Ужываецца для прадухілення сутыкненняў экструдара з аб'ектамі і "
-"адлюстравання графічнага папярэдняга прагляду на стале."
 
 #: src/libslic3r/PrintConfig.cpp:1131
 msgid "Extruder Color"
@@ -2206,7 +2194,7 @@ msgstr ""
 msgid "mm³/s"
 msgstr "мм³/с"
 
-#: src/libslic3r/PrintConfig.cpp:1219
+#: src/libslic3r/PrintConfig.cpp:1240
 msgid "Max non-crossing infill speed"
 msgstr ""
 
@@ -2242,7 +2230,7 @@ msgstr "Пачатковая хуткасць загрузкі"
 msgid "Speed used at the very beginning of loading phase."
 msgstr "Хуткасць у пачатковай фазе загрузкі філамента."
 
-#: src/libslic3r/PrintConfig.cpp:1255
+#: src/libslic3r/PrintConfig.cpp:1276
 msgid "Unloading speed"
 msgstr "Хуткасць выгрузкі"
 
@@ -2278,15 +2266,15 @@ msgstr ""
 "матэрыялаў, якім можа спатрэбіцца болей часу для ўсаджвання да "
 "першапачатковых вымярэнняў."
 
-#: src/libslic3r/PrintConfig.cpp:1276 src/libslic3r/PrintConfig.cpp:1347
-#: src/libslic3r/PrintConfig.cpp:1362 src/libslic3r/PrintConfig.cpp:4164
-#: src/libslic3r/PrintConfig.cpp:4173 src/libslic3r/PrintConfig.cpp:4182
-#: src/libslic3r/PrintConfig.cpp:4339 src/libslic3r/PrintConfig.cpp:4347
-#: src/libslic3r/PrintConfig.cpp:4355 src/libslic3r/PrintConfig.cpp:4362
-#: src/libslic3r/PrintConfig.cpp:4370 src/libslic3r/PrintConfig.cpp:4378
-#: src/libslic3r/PrintConfig.cpp:4724 src/libslic3r/PrintConfig.cpp:4733
-#: src/libslic3r/PrintConfig.cpp:4835 src/libslic3r/PrintConfig.cpp:4852
-#: src/libslic3r/PrintConfig.cpp:4870 src/libslic3r/PrintConfig.cpp:4887
+#: src/libslic3r/PrintConfig.cpp:1297 src/libslic3r/PrintConfig.cpp:1368
+#: src/libslic3r/PrintConfig.cpp:1383 src/libslic3r/PrintConfig.cpp:4247
+#: src/libslic3r/PrintConfig.cpp:4256 src/libslic3r/PrintConfig.cpp:4265
+#: src/libslic3r/PrintConfig.cpp:4422 src/libslic3r/PrintConfig.cpp:4430
+#: src/libslic3r/PrintConfig.cpp:4438 src/libslic3r/PrintConfig.cpp:4445
+#: src/libslic3r/PrintConfig.cpp:4453 src/libslic3r/PrintConfig.cpp:4461
+#: src/libslic3r/PrintConfig.cpp:4799 src/libslic3r/PrintConfig.cpp:4808
+#: src/libslic3r/PrintConfig.cpp:4910 src/libslic3r/PrintConfig.cpp:4927
+#: src/libslic3r/PrintConfig.cpp:4945 src/libslic3r/PrintConfig.cpp:4962
 #: src/slic3r/GUI/RammingChart.cpp:94 src/slic3r/GUI/WipeTowerDialog.cpp:125
 msgid "s"
 msgstr "с"
@@ -2742,7 +2730,20 @@ msgstr ""
 "Калі ў адсотках (напрыклад 40%), прывядзе да маштабавання першапачатковых "
 "хуткасцяў."
 
-#: src/libslic3r/PrintConfig.cpp:1624
+#: src/libslic3r/PrintConfig.cpp:1645
+msgid "First layer solid infill speed"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:1646
+msgid ""
+"If expressed as absolute value in mm/s, this speed will be applied to the "
+"solid infill print moves of the first layer. If expressed as a percentage "
+"(for example: 40%) it will be a percantage of the solid infill speed (for "
+"example: 40% of the solid infill speed). Note that 0 means that the \"First "
+"layer speed\" value will be used."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:1657
 msgid "Speed of object first layer over raft interface"
 msgstr "Хуткасць друку першага пласта аб'екту па плыту"
 
@@ -3229,7 +3230,64 @@ msgstr ""
 "Уключэнне прасавання верхніх пластоў з дапамогай гарачай фарсункі для "
 "атрымання гладкай паверхні"
 
-#: src/libslic3r/PrintConfig.cpp:1973 src/libslic3r/PrintConfig.cpp:1975
+#: src/libslic3r/PrintConfig.cpp:2006
+msgid "Use beam interlocking"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2007
+msgid ""
+"Generate interlocking beam structure at the locations where different "
+"filaments touch. This improves the adhesion between filaments, especially "
+"models printed in different materials."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2013
+msgid "Interlocking beam width"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2014
+msgid "The width of the interlocking structure beams."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2022
+msgid "Interlocking direction"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2023
+msgid "Orientation of interlocking beams."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2032
+msgid "Interlocking beam layers"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2033
+msgid ""
+"The height of the beams of the interlocking structure, measured in number of "
+"layers. Less layers is stronger, but more prone to defects."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2040
+msgid "Interlocking depth"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2041
+msgid ""
+"The distance from the boundary between filaments to generate interlocking "
+"structure, measured in cells. Too few cells will result in poor adhesion."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2048
+msgid "Interlocking boundary avoidance"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2049
+msgid ""
+"The distance from the outside of a model where interlocking structures will "
+"not be generated, measured in cells."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:2056 src/libslic3r/PrintConfig.cpp:2058
 msgid "Ironing Type"
 msgstr "Тып прасавання"
 
@@ -6217,15 +6275,15 @@ msgstr ""
 msgid "Use pad"
 msgstr "Ужываць падкладку"
 
-#: src/libslic3r/PrintConfig.cpp:4494 src/libslic3r/PrintConfig.cpp:4501
-#: src/libslic3r/PrintConfig.cpp:4515 src/libslic3r/PrintConfig.cpp:4526
-#: src/libslic3r/PrintConfig.cpp:4536 src/libslic3r/PrintConfig.cpp:4558
 #: src/libslic3r/PrintConfig.cpp:4569 src/libslic3r/PrintConfig.cpp:4576
-#: src/libslic3r/PrintConfig.cpp:4583 src/libslic3r/PrintConfig.cpp:4594
-#: src/libslic3r/PrintConfig.cpp:4603 src/libslic3r/PrintConfig.cpp:4612
+#: src/libslic3r/PrintConfig.cpp:4590 src/libslic3r/PrintConfig.cpp:4601
+#: src/libslic3r/PrintConfig.cpp:4611 src/libslic3r/PrintConfig.cpp:4633
+#: src/libslic3r/PrintConfig.cpp:4644 src/libslic3r/PrintConfig.cpp:4651
+#: src/libslic3r/PrintConfig.cpp:4658 src/libslic3r/PrintConfig.cpp:4669
+#: src/libslic3r/PrintConfig.cpp:4678 src/libslic3r/PrintConfig.cpp:4687
 #: src/slic3r/GUI/FrequentlyChangedParameters.cpp:276
-#: src/slic3r/GUI/GUI_Factories.cpp:173 src/slic3r/GUI/Tab.cpp:5861
-#: src/slic3r/GUI/Tab.cpp:5862 src/slic3r/GUI/Tab.cpp:5927
+#: src/slic3r/GUI/GUI_Factories.cpp:174 src/slic3r/GUI/Tab.cpp:5957
+#: src/slic3r/GUI/Tab.cpp:5958 src/slic3r/GUI/Tab.cpp:6023
 msgid "Pad"
 msgstr "Падкладка"
 
@@ -6582,47 +6640,41 @@ msgstr ""
 msgid "The delay between tilt-up cycles."
 msgstr ""
 
-#: src/libslic3r/PrintConfig.cpp:5593
-msgid "Export OBJ"
-msgstr "Экспартаваць у OBJ"
+#: src/libslic3r/PrintConfig.cpp:5681
+msgid "Load config file"
+msgstr "Загрузіць файл наладкі"
 
-#: src/libslic3r/PrintConfig.cpp:5594
-msgid "Export the model(s) as OBJ."
-msgstr "Экспартаваць мадэль ў фармат OBJ."
-
-#: src/libslic3r/PrintConfig.cpp:5605
-msgid "Export SLA"
-msgstr "Экспартаваць у SLA"
-
-#: src/libslic3r/PrintConfig.cpp:5606
-msgid "Slice the model and export SLA printing layers as PNG."
-msgstr "Нарэзаць мадэль і экспартаваць пласты друку для SLA у фармаце PNG."
-
-#: src/libslic3r/PrintConfig.cpp:5611
-msgid "Export 3MF"
-msgstr "Экспартаваць у 3MF"
-
-#: src/libslic3r/PrintConfig.cpp:5612
-msgid "Export the model(s) as 3MF."
-msgstr "Экспартаваць мадэлі ў фармат 3MF."
-
-#: src/libslic3r/PrintConfig.cpp:5616
-msgid "Export STL"
-msgstr "Экспартаваць у STL"
-
-#: src/libslic3r/PrintConfig.cpp:5617
-msgid "Export the model(s) as STL."
-msgstr "Экспартаваць мадэлі ў фармат STL."
-
-#: src/libslic3r/PrintConfig.cpp:5621 src/slic3r/GUI/KBShortcutsDialog.cpp:101
-#: src/slic3r/GUI/Plater.cpp:7356 src/slic3r/GUI/Sidebar.cpp:498
-msgid "Export G-code"
-msgstr "Экспартаваць у G-code"
-
-#: src/libslic3r/PrintConfig.cpp:5622
-msgid "Slice the model and export toolpaths as G-code."
+#: src/libslic3r/PrintConfig.cpp:5682
+msgid ""
+"Load configuration from the specified file. It can be used more than once to "
+"load options from multiple files."
 msgstr ""
-"Нарэзаць мадэль і экспартаваць траекторыю руху інструмента ў файл G-code."
+"Загрузіць наладкі з паказанага файлу.\n"
+"Можна ўжываць некалькі разоў для загрузкі наладаў з некалькіх файлаў."
+
+#: src/libslic3r/PrintConfig.cpp:5708
+msgid "Help"
+msgstr "Дапамога"
+
+#: src/libslic3r/PrintConfig.cpp:5709
+msgid "Show this help."
+msgstr "Адлюстраваць дапамогу."
+
+#: src/libslic3r/PrintConfig.cpp:5714
+msgid "Help (FFF options)"
+msgstr "Дапамога (налады FFF)"
+
+#: src/libslic3r/PrintConfig.cpp:5715
+msgid "Show the full list of print/G-code configuration options."
+msgstr "Адлюстраваць поўны спіс наладаў друку/G-code."
+
+#: src/libslic3r/PrintConfig.cpp:5719
+msgid "Help (SLA options)"
+msgstr "Дапамога (налады SLA)"
+
+#: src/libslic3r/PrintConfig.cpp:5720
+msgid "Show the full list of SLA print configuration options."
+msgstr "Адлюстраваць поўны спіс наладаў друку SLA."
 
 #: src/libslic3r/PrintConfig.cpp:5627
 msgid "G-code viewer"
@@ -6632,40 +6684,45 @@ msgstr "Прагляд G-code"
 msgid "Visualize an already sliced and saved G-code"
 msgstr "Візуалізацыя ўжо нарэзанага і захаванага G-code"
 
-#: src/libslic3r/PrintConfig.cpp:5633
-msgid "Automatic OpenGL antialiasing samples number selection"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5751
+msgid "Save config file"
+msgstr "Захаваць наладкі ў файл"
 
-#: src/libslic3r/PrintConfig.cpp:5634
-msgid ""
-"Automatically select the highest number of samples for OpenGL antialiasing."
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5752
+msgid "Save configuration to the specified file."
+msgstr "Захаваць наладкі ў паказаны файл."
 
-#: src/libslic3r/PrintConfig.cpp:5640
-msgid "OpenGL version"
-msgstr "Версія OpenGL"
+#: src/libslic3r/PrintConfig.cpp:5758
+msgid "Output Model Info"
+msgstr "Інфармацыя аб выходнай мадэлі"
 
-#: src/libslic3r/PrintConfig.cpp:5641
-msgid "Select a specific version of OpenGL"
-msgstr "Абраць канкрэтную версію OpenGL"
+#: src/libslic3r/PrintConfig.cpp:5759
+msgid "Write information about the model to the console."
+msgstr "Запісать інфармацыю аб мадэлі ў кансоль."
 
-#: src/libslic3r/PrintConfig.cpp:5646
-msgid "OpenGL compatibility profile"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5763
+msgid "Export OBJ"
+msgstr "Экспартаваць у OBJ"
 
-#: src/libslic3r/PrintConfig.cpp:5647
-msgid "Enable OpenGL compatibility profile"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5764
+msgid "Export the model(s) as OBJ."
+msgstr "Экспартаваць мадэль ў фармат OBJ."
 
-#: src/libslic3r/PrintConfig.cpp:5652
-msgid "OpenGL debug output"
-msgstr "Адладзіць вывад OpenGL"
+#: src/libslic3r/PrintConfig.cpp:5768
+msgid "Export STL"
+msgstr "Экспартаваць у STL"
 
-#: src/libslic3r/PrintConfig.cpp:5653
-msgid ""
-"Activate OpenGL debug output on graphic cards which support it (OpenGL 4.3 "
-"or higher)"
-msgstr ""
+#: src/libslic3r/PrintConfig.cpp:5769
+msgid "Export the model(s) as STL."
+msgstr "Экспартаваць мадэлі ў фармат STL."
+
+#: src/libslic3r/PrintConfig.cpp:5775
+msgid "Export 3MF"
+msgstr "Экспартаваць у 3MF"
+
+#: src/libslic3r/PrintConfig.cpp:5776
+msgid "Export the model(s) as 3MF."
+msgstr "Экспартаваць мадэлі ў фармат 3MF."
 
 #: src/libslic3r/PrintConfig.cpp:5659
 msgid "Slice"
@@ -6674,52 +6731,28 @@ msgstr "Нарэзаць"
 #: src/libslic3r/PrintConfig.cpp:5660
 msgid ""
 "Slice the model as FFF or SLA based on the printer_technology configuration "
-"value."
+"value and export the result."
 msgstr ""
-"Наразае мадэль ў залежнасці ад тыпу друкаркі, такія як FFF ці SLA, на аснове "
-"значэння 'printer_technology'."
 
-#: src/libslic3r/PrintConfig.cpp:5665
-msgid "Help"
-msgstr "Дапамога"
+#: src/libslic3r/PrintConfig.cpp:5791
+msgid "Export SLA"
+msgstr "Экспартаваць у SLA"
 
-#: src/libslic3r/PrintConfig.cpp:5666
-msgid "Show this help."
-msgstr "Адлюстраваць дапамогу."
+#: src/libslic3r/PrintConfig.cpp:5792
+msgid "Slice the model and export SLA printing layers as PNG."
+msgstr "Нарэзаць мадэль і экспартаваць пласты друку для SLA у фармаце PNG."
 
-#: src/libslic3r/PrintConfig.cpp:5671
-msgid "Help (FFF options)"
-msgstr "Дапамога (налады FFF)"
+#: src/libslic3r/PrintConfig.cpp:5797 src/slic3r/GUI/KBShortcutsDialog.cpp:101
+#: src/slic3r/GUI/Plater.cpp:7238 src/slic3r/GUI/Sidebar.cpp:499
+msgid "Export G-code"
+msgstr "Экспартаваць у G-code"
 
-#: src/libslic3r/PrintConfig.cpp:5672
-msgid "Show the full list of print/G-code configuration options."
-msgstr "Адлюстраваць поўны спіс наладаў друку/G-code."
+#: src/libslic3r/PrintConfig.cpp:5798
+msgid "Slice the model and export toolpaths as G-code."
+msgstr ""
+"Нарэзаць мадэль і экспартаваць траекторыю руху інструмента ў файл G-code."
 
-#: src/libslic3r/PrintConfig.cpp:5676
-msgid "Help (SLA options)"
-msgstr "Дапамога (налады SLA)"
-
-#: src/libslic3r/PrintConfig.cpp:5677
-msgid "Show the full list of SLA print configuration options."
-msgstr "Адлюстраваць поўны спіс наладаў друку SLA."
-
-#: src/libslic3r/PrintConfig.cpp:5681
-msgid "Output Model Info"
-msgstr "Інфармацыя аб выходнай мадэлі"
-
-#: src/libslic3r/PrintConfig.cpp:5682
-msgid "Write information about the model to the console."
-msgstr "Запісать інфармацыю аб мадэлі ў кансоль."
-
-#: src/libslic3r/PrintConfig.cpp:5686
-msgid "Save config file"
-msgstr "Захаваць наладкі ў файл"
-
-#: src/libslic3r/PrintConfig.cpp:5687
-msgid "Save configuration to the specified file."
-msgstr "Захаваць наладкі ў паказаны файл."
-
-#: src/libslic3r/PrintConfig.cpp:5697
+#: src/libslic3r/PrintConfig.cpp:5809
 msgid "Align XY"
 msgstr "Выраўнаваць па восям XY"
 
@@ -6797,22 +6830,10 @@ msgstr ""
 "Раскласці мадэлі на стале і аб'яднаць іх у адну мадэль, каб выканаць дзеянні "
 "адзін раз."
 
-#: src/libslic3r/PrintConfig.cpp:5752 src/slic3r/GUI/MainFrame.cpp:1923
-msgid "Repair"
-msgstr "Аднавіць"
-
-#: src/libslic3r/PrintConfig.cpp:5753
-msgid ""
-"Try to repair any non-manifold meshes (this option is implicitly added "
-"whenever we need to slice the model to perform the requested action)."
-msgstr ""
-"Паспрабуйце аднавіць любыя нецэластныя сеткі (дадаецца ўселякі раз, калі "
-"патрэбна нарэзаць мадэль для выканання запытаннай дзеі)."
-
-#: src/libslic3r/PrintConfig.cpp:5756
+#: src/libslic3r/PrintConfig.cpp:5847
 #: src/slic3r/GUI/Gizmos/GLGizmoRotate.cpp:574
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:689
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:729
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:690
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:730
 msgid "Rotate"
 msgstr "Вярчэнне"
 
@@ -6872,15 +6893,7 @@ msgstr "Маштабаваць пад вобласць друку"
 msgid "Scale to fit the given volume."
 msgstr "Маштабаваць ў адпаведнасці з зададзеным аб'ёмам."
 
-#: src/libslic3r/PrintConfig.cpp:5785
-msgid "Delete files after loading"
-msgstr "Выдаліць файлы пасля загрузкі"
-
-#: src/libslic3r/PrintConfig.cpp:5786
-msgid "Delete files after loading."
-msgstr "Выдаліць файлы пасля загрузкі."
-
-#: src/libslic3r/PrintConfig.cpp:5794
+#: src/libslic3r/PrintConfig.cpp:5881
 msgid "Ignore non-existent config files"
 msgstr "Ігнараваць неіснуючыя наладачныя файлы"
 
@@ -6930,19 +6943,7 @@ msgstr ""
 "Уключыць чытанне невядомых значэнняў наладкі, аўтаматычна замяняя іх "
 "першапачатковымі значэннямі."
 
-#: src/libslic3r/PrintConfig.cpp:5810
-msgid "Load config file"
-msgstr "Загрузіць файл наладкі"
-
-#: src/libslic3r/PrintConfig.cpp:5811
-msgid ""
-"Load configuration from the specified file. It can be used more than once to "
-"load options from multiple files."
-msgstr ""
-"Загрузіць наладкі з паказанага файлу.\n"
-"Можна ўжываць некалькі разоў для загрузкі наладаў з некалькіх файлаў."
-
-#: src/libslic3r/PrintConfig.cpp:5814
+#: src/libslic3r/PrintConfig.cpp:5897
 msgid "Output File"
 msgstr "Выходны файл"
 
@@ -6954,21 +6955,7 @@ msgstr ""
 "Файл, куды будуць запісвацца выходныя дадзеныя (калі не азначана, ён будзе "
 "заснаваны на ўваходным файле)."
 
-#: src/libslic3r/PrintConfig.cpp:5819
-msgid "Single instance mode"
-msgstr "Адзінкавы асобнік прграмы"
-
-#: src/libslic3r/PrintConfig.cpp:5820
-msgid ""
-"If enabled, the command line arguments are sent to an existing instance of "
-"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
-"the \"single_instance\" configuration value from application preferences."
-msgstr ""
-"Калі ўключана, аргументы каманднага радка адпраўляюцца ў існуючы асобнік GUI "
-"QIDISlicer, альбо актывіруецца існуючае акно QIDISlicer.\n"
-"Перавызначае значэнне наладкі 'single_instance' з перавагаў праграмы."
-
-#: src/libslic3r/PrintConfig.cpp:5829
+#: src/libslic3r/PrintConfig.cpp:5902
 msgid "Data directory"
 msgstr "Каталог дадзеных карыстальніка"
 
@@ -7006,7 +6993,64 @@ msgstr ""
 "Напрыклад, loglevel=2 рэгіструе паведамленні ўзроўню фатальных памылак і "
 "папярэджанняў."
 
-#: src/libslic3r/PrintConfig.cpp:5849
+#: src/libslic3r/PrintConfig.cpp:5918
+msgid "Automatic OpenGL antialiasing samples number selection"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5919
+msgid ""
+"Automatically select the highest number of samples for OpenGL antialiasing."
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5925
+msgid "OpenGL version"
+msgstr "Версія OpenGL"
+
+#: src/libslic3r/PrintConfig.cpp:5926
+msgid "Select a specific version of OpenGL"
+msgstr "Абраць канкрэтную версію OpenGL"
+
+#: src/libslic3r/PrintConfig.cpp:5931
+msgid "OpenGL compatibility profile"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5932
+msgid "Enable OpenGL compatibility profile"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5937
+msgid "OpenGL debug output"
+msgstr "Адладзіць вывад OpenGL"
+
+#: src/libslic3r/PrintConfig.cpp:5938
+msgid ""
+"Activate OpenGL debug output on graphic cards which support it (OpenGL 4.3 "
+"or higher)"
+msgstr ""
+
+#: src/libslic3r/PrintConfig.cpp:5944
+msgid "Single instance mode"
+msgstr "Адзінкавы асобнік прграмы"
+
+#: src/libslic3r/PrintConfig.cpp:5945
+msgid ""
+"If enabled, the command line arguments are sent to an existing instance of "
+"GUI QIDISlicer, or an existing QIDISlicer window is activated. Overrides "
+"the \"single_instance\" configuration value from application preferences."
+msgstr ""
+"Калі ўключана, аргументы каманднага радка адпраўляюцца ў існуючы асобнік GUI "
+"QIDISlicer, альбо актывіруецца існуючае акно QIDISlicer.\n"
+"Перавызначае значэнне наладкі 'single_instance' з перавагаў праграмы."
+
+#: src/libslic3r/PrintConfig.cpp:5950
+msgid "Delete files after loading"
+msgstr "Выдаліць файлы пасля загрузкі"
+
+#: src/libslic3r/PrintConfig.cpp:5951
+msgid "Delete files after loading."
+msgstr "Выдаліць файлы пасля загрузкі."
+
+#: src/libslic3r/PrintConfig.cpp:5955
 msgid "Render with a software renderer"
 msgstr "Візуалізацыя з дапамогай праграмнага візуалізатара"
 
@@ -7948,9 +7992,15 @@ msgstr "Дакладны"
 msgid "Reset defaults"
 msgstr "Скінуць на першапачатковыя"
 
-#: src/slic3r/GUI/ArrangeSettingsDialogImgui.cpp:134
-#: src/slic3r/GUI/GLCanvas3D.cpp:5558 src/slic3r/GUI/KBShortcutsDialog.cpp:146
-#: src/slic3r/GUI/Plater.cpp:7280
+#: src/slic3r/GUI/ArrangeSettingsDialogImgui.cpp:140
+msgid ""
+"Sequential printing is active. Arrange algorithm will use geometry of the "
+"printer to optimize objects placement and avoid collisions with the gantry."
+msgstr ""
+
+#: src/slic3r/GUI/ArrangeSettingsDialogImgui.cpp:147
+#: src/slic3r/GUI/GLCanvas3D.cpp:5331 src/slic3r/GUI/KBShortcutsDialog.cpp:146
+#: src/slic3r/GUI/Plater.cpp:7161
 msgid "Arrange"
 msgstr "Упарадкаваць"
 
@@ -8187,11 +8237,7 @@ msgstr "Абраць файл STL, каб імпартаваць форму ст
 msgid "Invalid file format."
 msgstr "Недапушчальны фармат файлу."
 
-#: src/slic3r/GUI/BedShapeDialog.cpp:544
-msgid "Error! Invalid model"
-msgstr "Памылка! Недапушчальная мадэль"
-
-#: src/slic3r/GUI/BedShapeDialog.cpp:552
+#: src/slic3r/GUI/BedShapeDialog.cpp:551
 msgid "The selected file contains no geometry."
 msgstr "Абраны файл не ўтрымлівае геаметрыі."
 
@@ -9418,7 +9464,12 @@ msgstr "Перайсці да зададзенай вышыні"
 msgid "Show estimated print time on hover"
 msgstr ""
 
-#: src/slic3r/GUI/DoubleSliderForLayers.cpp:777
+#: src/slic3r/GUI/DoubleSliderForLayers.cpp:776
+#: src/slic3r/GUI/Preferences.cpp:520
+msgid "Sequential slider applied only to top layer"
+msgstr "Паўзунок становішча інструмента ўжываецца толькі да верхняга пласта"
+
+#: src/slic3r/GUI/DoubleSliderForLayers.cpp:782
 msgid "Set extruder sequence for the entire print"
 msgstr "Задаць паслядоўнасць экструдараў для ўсяго друку"
 
@@ -10230,8 +10281,8 @@ msgstr "Памылка"
 #: src/slic3r/GUI/Gizmos/GLGizmoMeasure.cpp:2011
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:351
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:478
-#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:604
 #: src/slic3r/GUI/GUI_ObjectManipulation.cpp:605
+#: src/slic3r/GUI/GUI_ObjectManipulation.cpp:606
 msgid "in"
 msgstr "цаля"
 
@@ -11117,18 +11168,17 @@ msgstr ""
 "Ці жадаеце вы ўсё роўна працягнуць?"
 
 #: src/slic3r/GUI/Gizmos/GLGizmoEmboss.cpp:2348
-#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:524
-#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:532
-#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:544
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1145 src/slic3r/GUI/GUI.cpp:144
-#: src/slic3r/GUI/GUI_Preview.cpp:510
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:904
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:923
-#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:953 src/slic3r/GUI/Plater.cpp:4630
-#: src/slic3r/GUI/Plater.cpp:4638 src/slic3r/GUI/Plater.cpp:4708
-#: src/slic3r/GUI/Plater.cpp:4716 src/slic3r/GUI/Plater.cpp:5830
-#: src/slic3r/GUI/WifiConfigDialog.cpp:256
+#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:525
+#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:533
+#: src/slic3r/GUI/Gizmos/GLGizmoFdmSupports.cpp:553 src/slic3r/GUI/GUI.cpp:144
+#: src/slic3r/GUI/GUI_Preview.cpp:514
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:906
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:925
+#: src/slic3r/GUI/PhysicalPrinterDialog.cpp:955 src/slic3r/GUI/Plater.cpp:4627
+#: src/slic3r/GUI/Plater.cpp:4635 src/slic3r/GUI/Plater.cpp:4705
+#: src/slic3r/GUI/Plater.cpp:4713 src/slic3r/GUI/WifiConfigDialog.cpp:256
 #: src/slic3r/GUI/WipeTowerDialog.cpp:70
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:59
 msgid "Warning"
 msgstr "Папярэджанне"
 
@@ -12118,7 +12168,23 @@ msgstr "Увайсці ў кропкі апоры SLA"
 msgid "Leaving SLA support points"
 msgstr "Выйсці з кропак апоры SLA"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:41
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:83
+msgid "Visible support structure"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:90
+msgid "Click to show support points without support structure"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:97
+msgid "Click to show support structure with pad"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:101
+msgid "Visible support points without support structure"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:117
 msgid "Head diameter"
 msgstr "Дыяметр галоўкі"
 
@@ -12145,12 +12211,8 @@ msgstr "Ужыць змены"
 msgid "Discard changes"
 msgstr "Адмовіцца ад зменаў"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:47
-msgid "Minimal points distance"
-msgstr "Найменшая адлегласць паміж кропкамі"
-
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:49
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1300
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:124
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1503
 msgid "Auto-generate points"
 msgstr "Стварыць кропкі аўтаматычна"
 
@@ -12194,12 +12256,7 @@ msgstr "Рухаць кропкі апоры"
 msgid "Support points edit"
 msgstr "Змена кропак апоры"
 
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1143
-msgid "Autogeneration will erase all manually edited points."
-msgstr ""
-"Аўтаматычнае стварэнне знішчыць усе кропкі, якія былі змененыя ўручную."
-
-#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1150
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1352
 msgid "Autogenerate support points"
 msgstr "Аўтаматычнае стварэнне кропак апоры"
 
@@ -12255,6 +12312,26 @@ msgstr "Скінуцьплоскасць адсячэння"
 #: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1299
 msgid "Switch to editing mode"
 msgstr "Пераключыцца ў рэжым змены"
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1515
+msgid "Generated support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1516
+msgid "Selected support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1517
+msgid "Edited support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1518
+msgid "Island support point"
+msgstr ""
+
+#: src/slic3r/GUI/Gizmos/GLGizmoSlaSupports.cpp:1519
+msgid "Hovered support point"
+msgstr ""
 
 #. TRN - Title in Undo/Redo stack after rotate with SVG around emboss axe
 #: src/slic3r/GUI/Gizmos/GLGizmoSVG.cpp:55
@@ -12869,7 +12946,13 @@ msgstr ""
 "Калі ласка, перамесціце аб'екты, якія канфліктуюць (%3% <-> %4%), далей "
 "адзін ад аднаго."
 
-#: src/slic3r/GUI/GLCanvas3D.cpp:7687
+#. TRN: Placeholders contain names of the colliding objects.
+#: src/slic3r/GUI/GLCanvas3D.cpp:7420
+#, boost-format
+msgid "Extruder will crash into %1% while printing %2%."
+msgstr ""
+
+#: src/slic3r/GUI/GLCanvas3D.cpp:7450
 msgid "Jump to"
 msgstr "Перайсці да"
 
@@ -13151,7 +13234,19 @@ msgstr "Даступна папярэдняя версія праграмы %1%.
 msgid "See Releases page."
 msgstr "Глядзіце старонку новых выпускаў."
 
-#: src/slic3r/GUI/GUI_App.cpp:1584
+#. TRN Notification text, %1% is list of vendors.
+#: src/slic3r/GUI/GUI_App.cpp:1544
+#, boost-format
+msgid ""
+"Update check failed for the following vendors:\n"
+"\n"
+"%1%\n"
+"This may be due to an account logout or a lost connection. Please verify "
+"your account status and internet connection. Then select \"Check for "
+"Configuration Updates\" to repeat."
+msgstr ""
+
+#: src/slic3r/GUI/GUI_App.cpp:1591
 msgid "Preparing settings tabs"
 msgstr "Падрыхтоўка наладаў"
 
@@ -14608,6 +14703,25 @@ msgstr "Запаўненне стала"
 msgid "Arranging"
 msgstr "Упарадкаванне"
 
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:30
+msgid "Arranging for sequential print"
+msgstr ""
+
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:52
+msgid ""
+"The result of the single-bed arrange would scatter instances of a single "
+"object between several beds, possibly affecting order of printing of the non-"
+"selected beds. Consider using global arrange across all beds."
+msgstr ""
+
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:59
+msgid "One of the objects is too large to fit the bed."
+msgstr ""
+
+#: src/slic3r/GUI/Jobs/SeqArrangeJob.cpp:72
+msgid "Arrange for sequential print"
+msgstr ""
+
 #: src/slic3r/GUI/Jobs/EmbossJob.cpp:357
 msgid "Add Emboss text object"
 msgstr "Дадаць тэкставы аб'ект з цісненнем"
@@ -15327,12 +15441,7 @@ msgstr ""
 msgid "The file already exists!"
 msgstr ""
 
-#: src/slic3r/GUI/BulkExportDialog.cpp:207
-#: src/slic3r/GUI/BulkExportDialog.cpp:257
-msgid "Export beds"
-msgstr ""
-
-#: src/slic3r/GUI/BulkExportDialog.cpp:256
+#: src/slic3r/GUI/BulkExportDialog.cpp:258
 msgid "Some of the selected files already exist. Do you want to replace them?"
 msgstr ""
 
@@ -16021,7 +16130,11 @@ msgstr "Захаваць у OBJ (менш схільны да памылак у 
 msgid "Your file was repaired."
 msgstr "Ваш файл был адноўлены."
 
-#: src/slic3r/GUI/MainFrame.cpp:1937
+#: src/slic3r/GUI/MainFrame.cpp:1924
+msgid "Repair"
+msgstr "Аднавіць"
+
+#: src/slic3r/GUI/MainFrame.cpp:1938
 msgid "Save configuration as:"
 msgstr "Захаваць наладкі ў файл як:"
 
@@ -16653,12 +16766,14 @@ msgstr ""
 msgid "Logged to QIDI Account as %1%."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:984 src/slic3r/GUI/Plater.cpp:997
+#: src/slic3r/GUI/Plater.cpp:997 src/slic3r/GUI/Plater.cpp:1017
 msgid "Failed to connect to QIDI Account."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:1052
-msgid "Failed to select printer from QIDI Connect."
+#. TRN: This is a hyperlink in a notification. It is preceded by a message from QIDIAccount (therefore not in this dictionary)
+#. saying something like "connection not established, I will keep trying".
+#: src/slic3r/GUI/Plater.cpp:1105
+msgid "Stop now."
 msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:1147
@@ -16686,20 +16801,34 @@ msgstr[2] ""
 msgid "PrintRequest can only be loaded if an SLA printer is selected."
 msgstr ""
 
-#. TRN The placeholder is either "3MF" or "AMF"
-#: src/slic3r/GUI/Plater.cpp:1351
-#, boost-format
-msgid ""
-"The selected %1% file contains a post-processing script.\n"
-"Please review the script carefully before exporting G-code."
-msgstr ""
-"Абраны файл %1% змяшчае сцэнар наступнай апрацоўкі.\n"
-"Калі ласка, трэба уважліва азнаёміцца з сцэнарам перад экспартам G-code."
-
-#: src/slic3r/GUI/Plater.cpp:1389
+#: src/slic3r/GUI/Plater.cpp:1358
 #, boost-format
 msgid "Failed loading file \"%1%\" due to an invalid configuration."
 msgstr "Не атрымалася загрузіць файл \"%1%\" з-за недапушчальнай наладкі."
+
+#: src/slic3r/GUI/Plater.cpp:1383
+msgid "Configuration was not loaded"
+msgstr ""
+
+#. TRN: %1% is filename of the project, %2% is url link.
+#: src/slic3r/GUI/Plater.cpp:1386
+#, boost-format
+msgid ""
+"<b>Unable to load configuration from project\n"
+"\n"
+"File: </b>%1%\n"
+"\n"
+"This project was created in a newer version of QIDISlicer. Only the "
+"geometry was loaded.\n"
+"Update to the latest version for full compatibility.\n"
+"For more info: <a href=%2%>%2%</a>"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:1401
+msgid ""
+"The selected 3MF file contains a post-processing script.\n"
+"Please review the script carefully before exporting G-code."
+msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:1409
 #, c-format, boost-format
@@ -16921,10 +17050,19 @@ msgstr ""
 msgid "Enable supports for enforcers only."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:2158
-msgid "Bed temperatures for the used filaments differ significantly."
+#. TRN: Text of a notification, followed by (single) hyperlink to two of the config options. The sentence had to be split because of the hyperlink, sorry.
+#. The hyperlink part of the sentence reads "'Bed temperature by extruder' and 'Wipe tower extruder'", and it is also to be translated.
+#: src/slic3r/GUI/Plater.cpp:2176
+msgid ""
+"Bed temperatures for the used filaments differ significantly.\n"
+"For multi-material prints it is recommended to set the "
 msgstr ""
-"Тэмпература стала для філаментаў, якія ўжываюцца, істотна адрозніваюцца."
+
+#. TRN: The other part of the sentence starting "Bed temperatures for the used" (also in the dictionary). Sorry for splitting it, technical reasons -
+#. this part of the sentence is a hyperlink.
+#: src/slic3r/GUI/Plater.cpp:2180
+msgid "'Bed temperature by extruder' and 'Wipe tower extruder'"
+msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:2161
 msgid ""
@@ -17344,25 +17482,7 @@ msgstr ""
 "Ужывайце іншае пашырэнне, альбо ўключыце <a href=%2%>экспартаванне G-code у "
 "двайковы фармат</a> у наладах друкаркі."
 
-#: src/slic3r/GUI/Plater.cpp:5825
-#, boost-format
-msgid ""
-"You are exporting binary G-code for a QIDI printer. Binary G-code enables "
-"significantly faster uploads. Ensure that your printer is running firmware "
-"version 5.1.0 or newer, as older versions do not support binary G-codes.\n"
-"\n"
-"To learn more about binary G-code, visit <a href=%1%>%1%</a>."
-msgstr ""
-"Вы экспартуеце файл G-code у двайковым фармаце для друкаркі QIDI.\n"
-"Файл G-code у двайковым фармаце дазваляе значна паскорыць загрузку.\n"
-"Пераканайцеся, што на вашай друкарке ўсталяваная прашыўка версіі 5.1.0 ці "
-"навей, паколькі больш старыя версіі не падтрымліваюць файлы G-code у "
-"двайковым фармаце.\n"
-"\n"
-"Каб даведацца больш пра G-Code у двайковым фармаце, наведайце <a href=%1%>"
-"%1%</a>."
-
-#: src/slic3r/GUI/Plater.cpp:5890
+#: src/slic3r/GUI/Plater.cpp:5767
 msgid "The provided file name is not valid."
 msgstr "Названае імя файлу недапушчальнае."
 
@@ -17382,7 +17502,11 @@ msgstr "Захаваць файл SL1 / SL1S як:"
 msgid "Choose export directory:"
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:6161
+#: src/slic3r/GUI/Plater.cpp:5957
+msgid "Export beds"
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6030
 msgid ""
 "Unable to perform boolean operation on model meshes. Only positive parts "
 "will be exported."
@@ -17425,8 +17549,12 @@ msgstr "Немагчыма захаваць файл"
 msgid "Failed to select a printer."
 msgstr ""
 
-#: src/slic3r/GUI/Plater.cpp:6653
+#: src/slic3r/GUI/Plater.cpp:6523
 msgid "Failed to read response from QIDI Connect server. Upload is cancelled."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:6605 src/slic3r/GUI/Sidebar.cpp:533
+msgid "Send all to Connect"
 msgstr ""
 
 #: src/slic3r/GUI/Plater.cpp:6885
@@ -17439,7 +17567,13 @@ msgstr ""
 msgid "Upload and Print"
 msgstr "Загрузіць і надрукаваць"
 
-#: src/slic3r/GUI/Plater.cpp:7303
+#: src/slic3r/GUI/Plater.cpp:7143
+msgid ""
+"Sequential arrange for a single bed is only allowed when all instances of "
+"the affected objects are on the same bed."
+msgstr ""
+
+#: src/slic3r/GUI/Plater.cpp:7184
 #, c-format, boost-format
 msgid ""
 "Arrangement ignored the following objects which can't fit into a single "
@@ -17783,11 +17917,7 @@ msgstr "Калі ўключана, мяняецца напрамак машта�
 msgid "GUI"
 msgstr "Графічны інтэрфейс карыстальніка"
 
-#: src/slic3r/GUI/Preferences.cpp:519
-msgid "Sequential slider applied only to top layer"
-msgstr "Паўзунок становішча інструмента ўжываецца толькі да верхняга пласта"
-
-#: src/slic3r/GUI/Preferences.cpp:520
+#: src/slic3r/GUI/Preferences.cpp:521
 msgid ""
 "If enabled, changes made using the sequential slider, in preview, apply only "
 "to gcode top layer. If disabled, changes made using the sequential slider, "
@@ -18808,11 +18938,7 @@ msgstr ""
 msgid "Export all G-codes"
 msgstr ""
 
-#: src/slic3r/GUI/Sidebar.cpp:532
-msgid "Send all to Connect"
-msgstr ""
-
-#: src/slic3r/GUI/Sidebar.cpp:782
+#: src/slic3r/GUI/Sidebar.cpp:784
 msgid "Hold Shift to Slice & Export G-code"
 msgstr "Утрымлівайце клавішу Shift, каб нарэзаць і экспартаваць у G-code"
 
@@ -19112,9 +19238,13 @@ msgstr "Выходныя налады"
 msgid "Sequential printing"
 msgstr "Паслядоўны друк"
 
-#: src/slic3r/GUI/Tab.cpp:1694
-msgid "Extruder clearance"
-msgstr "Зазор экструдара"
+#: src/slic3r/GUI/Tab.cpp:1717
+msgid ""
+"Note: When using this option, the Arrange function automatically accounts "
+"for the printer geometry to prevent collisions. Extruder geometry is built-"
+"in for most QIDI printers, the others use generic model defined by values "
+"in Printer Settings."
+msgstr ""
 
 #: src/slic3r/GUI/Tab.cpp:1699 src/slic3r/GUI/Tab.cpp:5892
 msgid "Output file"
@@ -19318,7 +19448,11 @@ msgstr ""
 "рэжыму.\n"
 "Ціхі рэжым ўжывацца не будзе і будзе адключаны."
 
-#: src/slic3r/GUI/Tab.cpp:2831
+#: src/slic3r/GUI/Tab.cpp:2843
+msgid "Sequential printing limits"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:2861
 msgid "Start G-Code options"
 msgstr "Налады пачатковага G-code"
 
@@ -19791,7 +19925,19 @@ msgstr ""
 msgid "Profile settings"
 msgstr ""
 
-#: src/slic3r/GUI/Tab.cpp:5584
+#: src/slic3r/GUI/Tab.cpp:5569
+msgid "Set default values for fast print speed"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:5570
+msgid "Set default values for slow print speed"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:5571
+msgid "Set default values for high viscosity print speed"
+msgstr ""
+
+#: src/slic3r/GUI/Tab.cpp:5666
 #, boost-format
 msgid "The current Z-axis height correction is: %1% mm"
 msgstr ""
@@ -20431,7 +20577,26 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: src/slic3r/GUI/UpdatesUIManager.cpp:184
+#. TRN tooltip in Configuration Wizard - Configuration Sources
+#: src/slic3r/GUI/UpdatesUIManager.cpp:169
+msgid ""
+"Some vendors were installed from this source, but you do not have the rights "
+"to receive updates from it.\n"
+"This source may no longer be active, or your account may no longer be "
+"subscribed.\n"
+"Please consider unsubscribing from this source."
+msgstr ""
+
+#. TRN tooltip in Configuration Wizard - Configuration Sources
+#: src/slic3r/GUI/UpdatesUIManager.cpp:174
+msgid ""
+"Some vendors were installed from this source, but you do not have rights to "
+"receive updates from it.\n"
+"Please log in to restore access to all your subscribed sources or consider "
+"unsubscribing from this source."
+msgstr ""
+
+#: src/slic3r/GUI/UpdatesUIManager.cpp:198
 msgid "Source file"
 msgstr ""
 
@@ -21032,8 +21197,30 @@ msgstr ""
 "Тэкст паведамлення: \"%1%\"\n"
 "Памылка: \"%2%\"."
 
-#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:73
-#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:134
+#. TRN Dialog text, %1% is list of vendors.
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:51
+#, boost-format
+msgid ""
+"Update check failed for the following vendors:\n"
+"\n"
+"%1%\n"
+"This may be because you are no longer subscribed to some configuration "
+"sources.\n"
+"Please manage your configuration sources in Configuration Wizard"
+msgstr ""
+
+#. TRN Dialog text, %1% is list of vendors.
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:56
+#, boost-format
+msgid ""
+"Update check failed for the following vendors:\n"
+"\n"
+"%1%\n"
+"Please log in to restore access to all your subscribed configuration sources."
+msgstr ""
+
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:120
+#: src/slic3r/Utils/PresetUpdaterWrapper.cpp:195
 #, boost-format
 msgid "Failed to download %1%"
 msgstr ""
@@ -30167,3 +30354,16 @@ msgstr "Заўвага: Каліброўка PA не падыходзіць дл
 
 msgid "Please input valid values:\nStart PA: >= 0.0\nEnd PA: > Start PA + PA step\nPA step: >= 0.001)"
 msgstr "Калі ласка, увядзіце правільныя значэнні:\nПачаць PA: >= 0.0\nКанец PA: > Пачаць PA + Крок PA\nКрок PA: >= 0.001)"
+
+msgid "Clean the Webview Cache"
+msgstr "Ачысціць кэш Webview"
+
+msgid ""
+"Click the OK button, the software will open the WebView cache folder.\n"
+"You need to manually delete the WebView folder.\n"
+msgstr ""
+"Націсніце кнопку OK, праграма адкрые папку кэшу WebView.\n"
+"Вам трэба ўручную выдаліць папку WebView.\n"
+
+msgid "Learn more"
+msgstr "Даведацца больш"
