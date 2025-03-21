@@ -1,23 +1,3 @@
-# This CMake project downloads, configures and builds QIDISlicer dependencies on Unix and Windows.
-#
-# When using this script, it's recommended to perform an out-of-source build using CMake.
-#
-# All the dependencies are installed in a `destdir` directory in the root of the build directory,
-# in a traditional Unix-style prefix structure. The destdir can be used directly by CMake
-# when building QIDISlicer - to do this, set the CMAKE_PREFIX_PATH to ${destdir}/usr/local.
-# Warning: On UNIX/Linux, you also need to set -DSLIC3R_STATIC=1 when building QIDISlicer.
-#
-# For better clarity of console output, it's recommended to _not_ use a parallelized build
-# for the top-level command, ie. use `make -j 1` or `ninja -j 1` to force single-threaded top-level
-# build. This doesn't degrade performance as individual dependencies are built in parallel fashion
-# if supported by the dependency.
-#
-# On Windows, architecture (64 vs 32 bits) is judged based on the compiler variant.
-# To build dependencies for either 64 or 32 bit OS, use the respective compiler command line.
-#
-# WARNING: On UNIX platforms wxWidgets hardcode the destdir path into its `wx-conffig` utility,
-# therefore, unfortunatelly, the installation cannot be copied/moved elsewhere without re-installing wxWidgets.
-#
 cmake_minimum_required(VERSION 3.12)
 project(QIDISlicer_deps)
 
