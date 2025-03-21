@@ -259,8 +259,8 @@ void AppConfig::set_defaults()
         set("old_settings_layout_mode", "1");
 
     //y16
-    if(get("switch to device tab after upload").empty())
-        set("switch to device tab after upload", "0");
+    if(get("switch_to_device_tab_after_upload").empty())
+        set("switch_to_device_tab_after_upload", "0");
 
     // Remove legacy window positions/sizes
     erase("", "main_frame_maximized");

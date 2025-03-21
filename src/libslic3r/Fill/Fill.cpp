@@ -192,15 +192,24 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
 		        } else if (params.density <= 0)
 		            continue;
 
-		        params.extrusion_role =
-		            is_bridge ?
-		                ExtrusionRole::BridgeInfill :
-		                (surface.is_solid() ?
-		                    (surface.is_top() ? ExtrusionRole::TopSolidInfill : ExtrusionRole::SolidInfill) :
-							ExtrusionRole::InternalInfill);
+				if (is_bridge) {
+					params.extrusion_role = ExtrusionRole::BridgeInfill;
+				} else {
+					if (surface.is_solid()) {
+						if (surface.is_top()) {
+							params.extrusion_role = ExtrusionRole::TopSolidInfill;
+						} else if (surface.surface_type == stSolidOverBridge) {
+							params.extrusion_role = ExtrusionRole::InfillOverBridge;
+						} else {
+							params.extrusion_role = ExtrusionRole::SolidInfill;
+						}
+					} else {
+						params.extrusion_role = ExtrusionRole::InternalInfill;
+					}
+				}
 		        params.bridge_angle = float(surface.bridge_angle);
 		        params.angle 		= float(Geometry::deg2rad(region_config.fill_angle.value));
-		        
+
 		        // Calculate the actual flow we'll be using for this infill.
 		        params.bridge = is_bridge || Fill::use_bridge_flow(params.pattern);
 				params.flow   = params.bridge ?
@@ -366,7 +375,7 @@ std::vector<SurfaceFill> group_fills(const Layer &layer)
         //w29
         size_t surface_fills_size = surface_fills.size();
         for (size_t i = 0; i < surface_fills_size; i++) {
-            if (surface_fills[i].surface.surface_type != stInternalSolid)
+            if (surface_fills[i].surface.surface_type != stInternalSolid || surface_fills[i].surface.surface_type != stSolidOverBridge)
                 continue;
             //w29
             size_t              expolygons_size = surface_fills[i].expolygons.size();

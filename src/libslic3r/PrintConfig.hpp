@@ -366,6 +366,7 @@ public:
 // This vector containes list of parameters for preview of tilt profiles
 const std::vector<std::string>& tilt_options();
 
+void update_tilts_by_mode(DynamicPrintConfig& config, int tilt_mode, bool is_sl1_model);
 void handle_legacy_sla(DynamicPrintConfig &config);
 
 class StaticPrintConfig : public StaticConfig
@@ -675,6 +676,13 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat, xy_hole_compensation))
     ((ConfigOptionFloat, xy_contour_compensation))
     ((ConfigOptionBool,                wipe_into_objects))
+
+    ((ConfigOptionBool,                interlocking_beam))
+    ((ConfigOptionFloat,               interlocking_beam_width))
+    ((ConfigOptionFloat,               interlocking_orientation))
+    ((ConfigOptionInt,                 interlocking_beam_layer_count))
+    ((ConfigOptionInt,                 interlocking_depth))
+    ((ConfigOptionInt,                 interlocking_boundary_avoidance))
     //w11
     ((ConfigOptionBool,                detect_narrow_internal_solid_infill))
     //w21
@@ -694,6 +702,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionFloat,                bridge_flow_ratio))
     ((ConfigOptionFloat,                bridge_speed))
     ((ConfigOptionEnum<EnsureVerticalShellThickness>, ensure_vertical_shell_thickness))
+    ((ConfigOptionFloatOrPercent,       over_bridge_speed))
     ((ConfigOptionEnum<InfillPattern>,  top_fill_pattern))
     ((ConfigOptionEnum<InfillPattern>,  bottom_fill_pattern))
     ((ConfigOptionFloatOrPercent,       external_perimeter_extrusion_width))
@@ -809,6 +818,7 @@ PRINT_CONFIG_CLASS_DEFINE(
 
     ((ConfigOptionEnum<ArcFittingType>, arc_fitting))
     ((ConfigOptionBool,                autoemit_temperature_commands))
+    ((ConfigOptionInt,                 bed_temperature_extruder))
     ((ConfigOptionString,              before_layer_gcode))
     ((ConfigOptionString,              between_objects_gcode))
     ((ConfigOptionBool,                binary_gcode))
@@ -889,8 +899,6 @@ PRINT_CONFIG_CLASS_DEFINE(
 
     //B36
     ((ConfigOptionFloat, first_layer_travel_speed))
-    //B37
-    ((ConfigOptionFloat, first_layer_infill_speed))
 
     ((ConfigOptionFloat,               travel_speed_z))
     ((ConfigOptionBool,                use_firmware_retraction))
@@ -976,6 +984,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloatOrPercent,     first_layer_extrusion_width))
     ((ConfigOptionFloatOrPercent,     first_layer_height))
     ((ConfigOptionFloatOrPercent,     first_layer_speed))
+    ((ConfigOptionFloatOrPercent,     first_layer_infill_speed))
+
     //w25
     ((ConfigOptionInt,                slow_down_layers))
     ((ConfigOptionInts,               first_layer_temperature))
@@ -1180,11 +1190,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     // and the model object's bounding box bottom. Units in mm.
     ((ConfigOptionFloat, branchingsupport_object_elevation))/*= 5.0*/
 
-
-
     /////// Following options influence automatic support points placement:
     ((ConfigOptionInt, support_points_density_relative))
-    ((ConfigOptionFloat, support_points_minimal_distance))
 
     // Now for the base pool (pad) /////////////////////////////////////////////
 
@@ -1293,7 +1300,7 @@ PRINT_CONFIG_CLASS_DEFINE(
     //tilt params
     ((ConfigOptionFloats,                      delay_before_exposure))
     ((ConfigOptionFloats,                      delay_after_exposure))
-    ((ConfigOptionInts,                        tower_hop_height))
+    ((ConfigOptionFloats,                      tower_hop_height))
     ((ConfigOptionEnums<TowerSpeeds>,          tower_speed))
     ((ConfigOptionBools,                       use_tilt))
     ((ConfigOptionEnums<TiltSpeeds>,           tilt_down_initial_speed))
@@ -1389,10 +1396,10 @@ public:
     CLIMiscConfigDef();
 };
 
-class CLIProfilesSharingConfigDef : public ConfigDef
+class CLIInputConfigDef : public ConfigDef
 {
 public:
-    CLIProfilesSharingConfigDef();
+    CLIInputConfigDef();
 };
 
 typedef std::string t_custom_gcode_key;
@@ -1457,7 +1464,7 @@ public:
 };
 extern const CustomGcodeSpecificConfigDef    custom_gcode_specific_config_def;
 
-// This class defines the command line options representing actions.
+// This class defines the command line options representing actions including options representing profiles sharing commands.
 extern const CLIActionsConfigDef    cli_actions_config_def;
 
 // This class defines the command line options representing transforms.
@@ -1466,42 +1473,8 @@ extern const CLITransformConfigDef  cli_transform_config_def;
 // This class defines all command line options that are not actions or transforms.
 extern const CLIMiscConfigDef       cli_misc_config_def;
 
-// This class defines the command line options representing profiles sharing commands.
-extern const CLIProfilesSharingConfigDef  cli_profiles_sharing_config_def;
-
-class DynamicPrintAndCLIConfig : public DynamicPrintConfig
-{
-public:
-    DynamicPrintAndCLIConfig() {}
-    DynamicPrintAndCLIConfig(const DynamicPrintAndCLIConfig &other) : DynamicPrintConfig(other) {}
-
-    // Overrides ConfigBase::def(). Static configuration definition. Any value stored into this ConfigBase shall have its definition here.
-    const ConfigDef*        def() const override { return &s_def; }
-
-    // Verify whether the opt_key has not been obsoleted or renamed.
-    // Both opt_key and value may be modified by handle_legacy().
-    // If the opt_key is no more valid in this version of Slic3r, opt_key is cleared by handle_legacy().
-    // handle_legacy() is called internally by set_deserialize().
-    void                    handle_legacy(t_config_option_key &opt_key, std::string &value) const override;
-
-private:
-    class PrintAndCLIConfigDef : public ConfigDef
-    {
-    public:
-        PrintAndCLIConfigDef() {
-            this->options.insert(print_config_def.options.begin(), print_config_def.options.end());
-            this->options.insert(cli_actions_config_def.options.begin(), cli_actions_config_def.options.end());
-            this->options.insert(cli_transform_config_def.options.begin(), cli_transform_config_def.options.end());
-            this->options.insert(cli_misc_config_def.options.begin(), cli_misc_config_def.options.end());
-            this->options.insert(cli_profiles_sharing_config_def.options.begin(), cli_profiles_sharing_config_def.options.end());
-            for (const auto &kvp : this->options)
-                this->by_serialization_key_ordinal[kvp.second.serialization_key_ordinal] = &kvp.second;
-        }
-        // Do not release the default values, they are handled by print_config_def & cli_actions_config_def / cli_transform_config_def / cli_misc_config_def.
-        ~PrintAndCLIConfigDef() { this->options.clear(); }
-    };
-    static PrintAndCLIConfigDef s_def;
-};
+// This class defines the command line options representing commands for loading configuration from CLI
+extern const CLIInputConfigDef  cli_input_config_def;
 
 bool is_XL_printer(const DynamicPrintConfig &cfg);
 bool is_XL_printer(const PrintConfig &cfg);

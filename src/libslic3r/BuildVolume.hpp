@@ -40,7 +40,7 @@ public:
     BuildVolume() {}
     // Initialize from PrintConfig::bed_shape and PrintConfig::max_print_height
     //B52
-    BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height, const std::vector<Vec2d> &exclude_bed_shape);
+    BuildVolume(const std::vector<Vec2d> &bed_shape, const double max_print_height, const std::vector<Vec2d> &exclude_bed_shape = {});
 
     // Source data, unscaled coordinates.
     const std::vector<Vec2d>&   bed_shape()         const { return m_bed_shape; }
