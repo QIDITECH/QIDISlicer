@@ -1,6 +1,7 @@
 #include "libslic3r/libslic3r.h"
 #include "libslic3r/PresetBundle.hpp"
 #include "libslic3r/Model.hpp"
+#include "libslic3r/ModelProcessing.hpp"
 
 #include "GUI_Factories.hpp"
 #include "GUI_ObjectList.hpp"
@@ -1160,7 +1161,7 @@ void MenuFactory::create_default_menu()
         []() {return (plater() != nullptr) && !plater()->model().objects.empty(); }, m_parent);
 
     append_menu_item(menu, wxID_ANY, _L("Arrange"), _L("Arrange all objects"),
-        [](wxCommandEvent&) { plater()->arrange(); }, "", nullptr,
+        [](wxCommandEvent&) { plater()->arrange(true); }, "", nullptr,
         []() {return plater()->can_arrange(); }, m_parent);
 
     m_default_menu.SetFirstSeparator();

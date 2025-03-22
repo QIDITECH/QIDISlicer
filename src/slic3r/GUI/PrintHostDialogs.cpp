@@ -138,14 +138,14 @@ PrintHostSendDialog::PrintHostSendDialog(const fs::path &path, PrintHostPostUplo
 
     //y16
     m_switch_to_device = new wxCheckBox(this, wxID_ANY, _L("Switch to Device tab"), wxDefaultPosition);
-    m_switch_to_device->SetValue((wxGetApp().app_config->get("switch to device tab after upload") == "1") ? true : false);
+    m_switch_to_device->SetValue((wxGetApp().app_config->get("switch_to_device_tab_after_upload") == "1") ? true : false);
     wxToolTip* switch_tips = new wxToolTip(_L("Switch to Device tab after upload."));
     m_switch_to_device->SetToolTip(switch_tips);
     m_switch_to_device->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [this](wxCommandEvent &event){
         if(event.GetInt() == 1)
-            wxGetApp().app_config->set("switch to device tab after upload", "1");
+            wxGetApp().app_config->set("switch_to_device_tab_after_upload", "1");
         else
-            wxGetApp().app_config->set("switch to device tab after upload", "0");
+            wxGetApp().app_config->set("switch_to_device_tab_after_upload", "0");
     });
 
     wxBoxSizer *max_printer_send =

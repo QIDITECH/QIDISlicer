@@ -266,6 +266,12 @@ public:
     PreferencesDialog*    preferences_dialog { nullptr };
     PrintHostQueueDialog* m_printhost_queue_dlg;
     GalleryDialog*        m_gallery_dialog{ nullptr };
+
+    //y22
+    wxString printer_view_url = "";
+    wxString printer_view_ip = "";
+    bool is_net_url = false;
+    int new_sel;
     
 #ifdef __APPLE__
     std::unique_ptr<wxTaskBarIcon> m_taskbar_icon;

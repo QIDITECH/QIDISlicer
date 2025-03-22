@@ -27,6 +27,7 @@
 
 //Y
 #include "libslic3r/AppConfig.hpp"
+#include "Widgets/StateColor.hpp"
 
 namespace Slic3r {
 namespace GUI {
@@ -403,6 +404,66 @@ wxString get_wraped_wxString(const wxString& in, size_t line_len /*=80*/)
     }
 
     return out;
+}
+
+//y22
+CleanCacheDialog::CleanCacheDialog(wxWindow* parent)
+    : wxDialog(parent, wxID_ANY, _L("Clean the Webview Cache"), wxDefaultPosition)
+{
+    std::string icon_path = (boost::format("%1%/icons/QIDISlicer.ico") % resources_dir()).str();
+    SetIcon(wxIcon(icon_path.c_str(), wxBITMAP_TYPE_ICO));
+
+    wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
+
+    auto m_line_top = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
+    m_line_top->SetBackgroundColour(wxColour(0xA6, 0xa9, 0xAA));
+    main_sizer->Add(m_line_top, 0, wxEXPAND, 0);
+    main_sizer->Add(0, 0, 0, wxTOP, FromDIP(5));
+    wxBoxSizer* content_sizer = new wxBoxSizer(wxHORIZONTAL);
+    wxStaticBitmap* info_bitmap = new wxStaticBitmap(this, wxID_ANY, *get_bmp_bundle("info", 60), wxDefaultPosition, wxSize(FromDIP(70), FromDIP(70)), 0);
+    content_sizer->Add(info_bitmap, 0, wxEXPAND | wxALL, FromDIP(5));
+
+    wxBoxSizer* vertical_sizer = new wxBoxSizer(wxVERTICAL);
+    wxStaticText* message_text = new wxStaticText(this, wxID_ANY,
+        _L("Click the OK button, the software will open the WebView cache folder.\n"
+            "You need to manually delete the WebView folder.\n"),
+        wxDefaultPosition);
+    vertical_sizer->Add(message_text, 0, wxEXPAND | wxTOP, FromDIP(5));
+
+    wxString hyperlink_text = "https://wiki.qidi3d.com/en/software/qidi-studio/troubleshooting/blank-page";
+    wxHyperlinkCtrl* hyperlink = new wxHyperlinkCtrl(this, wxID_ANY, _L("Learn more"), hyperlink_text, wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE);
+    vertical_sizer->Add(hyperlink, 0, wxRIGHT, FromDIP(5));
+    content_sizer->Add(vertical_sizer, 0, wxEXPAND | wxALL, FromDIP(5));
+    main_sizer->Add(content_sizer, 0, wxEXPAND | wxALL, FromDIP(10));
+
+    auto buttons = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
+    wxGetApp().SetWindowVariantForButton(buttons->GetAffirmativeButton());
+    wxGetApp().SetWindowVariantForButton(buttons->GetCancelButton());
+    this->Bind(wxEVT_BUTTON, &CleanCacheDialog::OnOK, this, wxID_OK);
+    this->Bind(wxEVT_BUTTON, &CleanCacheDialog::OnCancel, this, wxID_CANCEL);
+
+    for (int id : {wxID_OK, wxID_CANCEL})
+        wxGetApp().UpdateDarkUI(static_cast<wxButton*>(FindWindowById(id, this)));
+
+    main_sizer->Add(buttons, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxTOP, 10);
+
+    this->SetSizer(main_sizer);
+    Layout();
+    Fit();
+    CenterOnParent();
+
+}
+
+CleanCacheDialog::~CleanCacheDialog() {}
+
+void CleanCacheDialog::OnOK(wxCommandEvent& event)
+{
+    EndModal(wxID_OK);
+}
+
+void CleanCacheDialog::OnCancel(wxCommandEvent& event)
+{
+    EndModal(wxID_CANCEL);
 }
 
 }

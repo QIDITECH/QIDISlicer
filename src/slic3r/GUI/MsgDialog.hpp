@@ -360,6 +360,18 @@ private:
 	wxString msg;
 };
 
+//y22
+class CleanCacheDialog : public wxDialog
+{
+#define SELECT_MACHINE_DIALOG_BUTTON_SIZE wxSize(FromDIP(68), FromDIP(23))
+#define SELECT_MACHINE_DIALOG_SIMBOOK_SIZE wxSize(FromDIP(370), FromDIP(64))
+public:
+	CleanCacheDialog(wxWindow* parent);
+	~CleanCacheDialog();
+
+	void OnOK(wxCommandEvent& event);
+	void OnCancel(wxCommandEvent& event);
+};
 
 }
 }

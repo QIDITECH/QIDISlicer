@@ -68,6 +68,8 @@
 //B55
 #include "../Utils/PrintHost.hpp"
 
+#include <filesystem>
+
 //B64
 #if QDT_RELEASE_TO_PUBLIC
 #include "../QIDI/QIDINetwork.hpp"
@@ -274,6 +276,33 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_S
         // propagate event
         event.Skip();
     });
+
+    //y22
+    Bind(wxEVT_ICONIZE, [this](wxIconizeEvent& event) {
+        if (event.IsIconized()) {
+            if (m_printer_view->GetHasLoadUrl()) {
+                printer_view_ip = m_printer_view->GetWebIp();
+                printer_view_url = m_printer_view->GetWeburl();
+            }
+            wxString url;
+            if (m_printer_view->GetNetMode()) {
+                url = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
+            }
+            else {
+                url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+            }
+            m_printer_view->load_disconnect_url(url);
+        }
+        else {
+            if (!printer_view_ip.empty() && new_sel == 4) {
+                if (is_net_url)
+                    m_printer_view->load_net_url(printer_view_url, printer_view_ip);
+                else
+                    m_printer_view->load_url(printer_view_url);
+            }
+            m_printer_view->Layout();
+        }
+        });
 
     //FIXME it seems this method is not called on application start-up, at least not on Windows. Why?
     // The same applies to wxEVT_CREATE, it is not being called on startup on Windows.
@@ -707,6 +736,8 @@ void MainFrame::init_tabpanel()
         size_t current_selected_tab = m_tabpanel->GetSelection();
         Tab* tab = dynamic_cast<Tab*>(panel);
 
+        new_sel = e.GetSelection();
+
         //y15
         if (tab != nullptr)
         {
@@ -744,6 +775,32 @@ void MainFrame::init_tabpanel()
         //y17
         else
             select_tab(size_t(0)); // select Plater
+        //y22
+        if (current_selected_tab != 4) {
+            if (m_printer_view->GetHasLoadUrl()) {
+                printer_view_ip = m_printer_view->GetWebIp();
+                printer_view_url = m_printer_view->GetWeburl();
+                is_net_url = m_printer_view->IsNetUrl();
+            }
+            wxString url;
+            if (m_printer_view->GetNetMode()) {
+                url = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
+            }
+            else {
+                url = wxString::Format("file://%s/web/qidi/missing_connection.html", from_u8(resources_dir()));
+            }
+            m_printer_view->load_disconnect_url(url);
+        }
+        else {
+            if (!printer_view_ip.empty()) {
+                if (is_net_url)
+                    m_printer_view->load_net_url(printer_view_url, printer_view_ip);
+                else
+                    m_printer_view->load_url(printer_view_url);
+            }
+            m_printer_view->Layout();
+        }
+
     });
 
     m_plater = new Plater(this, this);
@@ -927,6 +984,7 @@ void MainFrame::remove_connect_webview_tab()
     if (!m_connect_webview_added) {
         return;
     }
+    m_connect_webview->prohibit_after_show_func_once();
     int n = m_tabpanel->FindPage(m_connect_webview);
     if (m_tabpanel->GetSelection() == n)
         m_tabpanel->SetSelection(0);
@@ -1453,6 +1511,59 @@ static wxMenu* generate_help_menu()
         [](wxCommandEvent&) { Slic3r::GUI::desktop_open_datadir_folder(); });
 //    append_menu_item(helpMenu, wxID_ANY, _L("Report an I&ssue"), wxString::Format(_L("Report an issue on %s"), SLIC3R_APP_NAME),
 //        [](wxCommandEvent&) { wxGetApp().open_browser_with_warning_dialog("https://github.com/qidi3d/slic3r/issues/new", nullptr, false); });
+
+    append_menu_item(helpMenu, wxID_ANY, _L("Clean the Webview Cache"), _L("Clean the Webview Cache"),
+        [](wxCommandEvent&) { 
+            CleanCacheDialog* dlg = new CleanCacheDialog(static_cast<wxWindow*>(wxGetApp().mainframe));
+            int res = dlg->ShowModal();
+            if (res == wxID_OK) {
+#ifdef _WIN32
+                wxString local_path = wxStandardPaths::Get().GetUserLocalDataDir();
+                wxString command = wxString::Format("explorer %s", local_path);
+                if (std::filesystem::exists(into_u8(local_path))) {
+                    BOOST_LOG_TRIVIAL(error) << boost::format("The path is Exitsts : %1%") % local_path;
+                    wxExecute(command);
+                    wxPostEvent(wxGetApp().mainframe, wxCloseEvent(wxEVT_CLOSE_WINDOW));
+                }
+                else {
+                    wxMessageBox("The path is not exists", "error", wxICON_ERROR | wxOK);
+                    BOOST_LOG_TRIVIAL(error) << boost::format("The path is not exitsts: %1%") % local_path;
+                }
+#elif defined(__APPLE__)
+                wxString local_path = wxFileName::GetHomeDir() + "/Library/Caches";
+                wxString command = wxString::Format("open \"%s\"", local_path);
+                wxString local_path_2 = wxFileName::GetHomeDir() + "/Library/WebKit";
+                wxString command_2 = wxString::Format("open \"%s\"", local_path_2);
+                if (std::filesystem::exists(into_u8(local_path)) && std::filesystem::exists(into_u8(local_path_2))) {
+                    BOOST_LOG_TRIVIAL(error) << boost::format("The path is Exitsts : %1%") % local_path;
+                    wxExecute(command);
+                    wxExecute(command_2);
+                    wxPostEvent(wxGetApp().mainframe, wxCloseEvent(wxEVT_CLOSE_WINDOW));
+            }
+                else {
+                    wxMessageBox("The path is not exists", "error", wxICON_ERROR | wxOK);
+                    BOOST_LOG_TRIVIAL(error) << boost::format("The path is not exitsts: %1%") % local_path;
+                }
+#elif defined __linux__
+                wxString local_path = wxFileName::GetHomeDir() + "/.local/share";
+                wxString command = wxString::Format("xdg-open \"%s\"", local_path);
+                wxString local_path_2 = wxFileName::GetHomeDir() + "/.cache";
+                wxString command_2 = wxString::Format("xdg-open \"%s\"", local_path_2);
+                if (std::filesystem::exists(into_u8(local_path)) && std::filesystem::exists(into_u8(local_path_2))) {
+                    BOOST_LOG_TRIVIAL(error) << boost::format("The path is Exitsts : %1%") % local_path;
+                    wxExecute(command);
+                    wxExecute(command_2);
+                    wxPostEvent(wxGetApp().mainframe, wxCloseEvent(wxEVT_CLOSE_WINDOW));
+                }
+                else {
+                    wxMessageBox("The path is not exists", "error", wxICON_ERROR | wxOK);
+                    BOOST_LOG_TRIVIAL(error) << boost::format("The path is not exitsts: %1%") % local_path;
+                }
+#endif
+            }
+            dlg->Destroy();
+        });
+
 #ifndef __APPLE__
     append_about_menu_item(helpMenu);
 #endif // __APPLE__

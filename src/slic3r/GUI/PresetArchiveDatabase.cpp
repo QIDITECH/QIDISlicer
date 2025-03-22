@@ -748,6 +748,7 @@ void PresetArchiveDatabase::read_server_manifest(const std::string& json_body)
         assert(it != m_has_installed_printer_repositories_uuid.end());
         if (it->second) {
             ArchiveRepository::RepositoryManifest manifest(repo_ptr->get_manifest());
+			manifest.not_in_manifest = true;
             secret_online_used_repos_cache.emplace_back(std::make_unique<OnlineArchiveRepository>(repo_ptr->get_uuid(), std::move(manifest)));
 		}
 	}
@@ -809,8 +810,7 @@ SharedArchiveRepositoryVector PresetArchiveDatabase::get_selected_archive_reposi
 {
     SharedArchiveRepositoryVector result;
     result.reserve(m_archive_repositories.size());
-    for (const auto &repo_ptr : m_archive_repositories) 
-    {
+    for (const auto &repo_ptr : m_archive_repositories) {
         auto it = m_selected_repositories_uuid.find(repo_ptr->get_uuid());
         assert(it != m_selected_repositories_uuid.end());
         if (it->second) {

@@ -75,14 +75,17 @@ private:
     // This must be a unique ptr, because Item does not have copy nor move constructors.
     std::vector<std::unique_ptr<Item>> m_items;
     wxFlexGridSizer*m_sizer{nullptr};
-
+    wxString m_title;
+    std::string m_unusable_symbols;    
 public:
 
-    BulkExportDialog(const std::vector<std::pair<int, std::optional<boost::filesystem::path>>> &paths);
+    BulkExportDialog(const std::vector<std::pair<int, std::optional<boost::filesystem::path>>> &paths, const wxString& title, const std::string& unusable_symbols);
     std::vector<std::pair<int, std::optional<boost::filesystem::path>>> get_paths() const;
     bool has_warnings() const;
 
 protected:
+    /// Called when the DPI settings of the system/display have changed
+    /// @param rect The new display rectangle after DPI change
     void on_dpi_changed(const wxRect &) override;
     void on_sys_color_changed() override {}
 
