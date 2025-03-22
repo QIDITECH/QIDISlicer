@@ -1,4 +1,5 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 #include <test_utils.hpp>
 
 #include <random>
@@ -12,6 +13,7 @@
 #include <libslic3r/libslic3r.h>
 
 using namespace Slic3r;
+using namespace Catch;
 
 TEST_CASE("arc basics", "[ArcWelder]") {
     using namespace Slic3r::Geometry;

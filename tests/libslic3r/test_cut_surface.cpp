@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <libslic3r/CutSurface.hpp>
 #include <libslic3r/TriangleMesh.hpp> // its_make_cube + its_merge
