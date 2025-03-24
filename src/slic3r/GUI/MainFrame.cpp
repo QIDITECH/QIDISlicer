@@ -280,10 +280,6 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_S
     //y22
     Bind(wxEVT_ICONIZE, [this](wxIconizeEvent& event) {
         if (event.IsIconized()) {
-            if (m_printer_view->GetHasLoadUrl()) {
-                printer_view_ip = m_printer_view->GetWebIp();
-                printer_view_url = m_printer_view->GetWeburl();
-            }
             wxString url;
             if (m_printer_view->GetNetMode()) {
                 url = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
@@ -302,7 +298,7 @@ DPIFrame(NULL, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_S
             }
             m_printer_view->Layout();
         }
-        });
+    });
 
     //FIXME it seems this method is not called on application start-up, at least not on Windows. Why?
     // The same applies to wxEVT_CREATE, it is not being called on startup on Windows.
@@ -775,13 +771,8 @@ void MainFrame::init_tabpanel()
         //y17
         else
             select_tab(size_t(0)); // select Plater
-        //y22
+        //y22 y24
         if (current_selected_tab != 4) {
-            if (m_printer_view->GetHasLoadUrl()) {
-                printer_view_ip = m_printer_view->GetWebIp();
-                printer_view_url = m_printer_view->GetWeburl();
-                is_net_url = m_printer_view->IsNetUrl();
-            }
             wxString url;
             if (m_printer_view->GetNetMode()) {
                 url = wxString::Format("file://%s/web/qidi/link_missing_connection.html", from_u8(resources_dir()));
@@ -793,12 +784,14 @@ void MainFrame::init_tabpanel()
         }
         else {
             if (!printer_view_ip.empty()) {
-                if (is_net_url)
-                    m_printer_view->load_net_url(printer_view_url, printer_view_ip);
-                else
-                    m_printer_view->load_url(printer_view_url);
+                if(!printer_view_ip.empty()){
+                    if (is_net_url)
+                        m_printer_view->load_net_url(printer_view_url, printer_view_ip);
+                    else
+                        m_printer_view->load_url(printer_view_url);
+                }
+                m_printer_view->Layout();
             }
-            m_printer_view->Layout();
         }
 
     });

@@ -473,9 +473,13 @@ void PrinterWebView::SetLoginStatus(bool status) {
         std::vector<Device> devices;
         wxGetApp().set_devices(devices);
 #endif
-        //y3
-        if (webisNetMode == isNetWeb)
-            webisNetMode = isDisconnect;
+        //y3 y24
+        webisNetMode = isDisconnect;
+        if (wxGetApp().mainframe) {
+            wxGetApp().mainframe->is_net_url = false;
+            wxGetApp().mainframe->printer_view_ip = "";
+            wxGetApp().mainframe->printer_view_url = "";
+        }
         m_user_head_name = "";
         SetPresetChanged(true);
         UpdateState();
@@ -999,8 +1003,6 @@ void PrinterWebView::load_disconnect_url(wxString& url)
     webisNetMode = isDisconnect;
     m_web = url;
     m_ip = "";
-    //y22
-    has_load_url = false;
     m_browser->LoadURL(url);
     UpdateState();
 }
@@ -1010,8 +1012,6 @@ void PrinterWebView::load_url(wxString &url)
     if (m_browser == nullptr || m_web == url)
         return;
     m_web = url;
-    //y22
-    has_load_url = true;
     m_browser->LoadURL(url);
     webisNetMode = isLocalWeb;
     // B55
@@ -1030,6 +1030,12 @@ void PrinterWebView::load_url(wxString &url)
         else
             button->SetIsSelected(false);
     }
+    //y24
+    if (wxGetApp().mainframe) {
+        wxGetApp().mainframe->is_net_url = false;
+        wxGetApp().mainframe->printer_view_ip = m_ip;
+        wxGetApp().mainframe->printer_view_url = m_web;
+    }
     UpdateState();
 }
 void PrinterWebView::load_net_url(wxString& url, wxString& ip)
@@ -1037,8 +1043,6 @@ void PrinterWebView::load_net_url(wxString& url, wxString& ip)
     if (m_browser == nullptr || m_web == url)
         return;
     m_web = url;
-    //y22
-    has_load_url = true;
     m_ip = ip;
     webisNetMode = isNetWeb;
     m_browser->LoadURL(url);
@@ -1052,6 +1056,12 @@ void PrinterWebView::load_net_url(wxString& url, wxString& ip)
             button->SetIsSelected(true);
         else
             button->SetIsSelected(false);
+    }
+    //y24
+    if (wxGetApp().mainframe) {
+        wxGetApp().mainframe->is_net_url = true;
+        wxGetApp().mainframe->printer_view_ip = m_ip;
+        wxGetApp().mainframe->printer_view_url = m_web;
     }
     UpdateState();
 }

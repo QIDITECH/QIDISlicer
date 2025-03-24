@@ -141,7 +141,6 @@ public:
     //y22
     wxString GetWeburl() { return m_web; };
     wxString GetWebIp() { return m_ip; };
-    bool GetHasLoadUrl() { return has_load_url; };
     bool IsNetUrl() { return webisNetMode == isNetWeb; };
 
 private:
@@ -190,8 +189,6 @@ private:
     std::string           m_user_head_name;
     bool                  m_isfluidd_1;
 
-    //y22
-    bool has_load_url;
 };
 
 //y3
