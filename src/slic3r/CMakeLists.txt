@@ -136,6 +136,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/Sidebar.hpp
     GUI/Plater.cpp
     GUI/Plater.hpp
+    GUI/LoadStepDialog.cpp
+    GUI/LoadStepDialog.hpp
     GUI/PresetComboBoxes.hpp
     GUI/PresetComboBoxes.cpp
     GUI/BitmapComboBox.hpp
@@ -200,6 +202,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/SendSystemInfoDialog.hpp
     GUI/SurfaceDrag.cpp
     GUI/SurfaceDrag.hpp
+    GUI/SyncBoxInfoDialog.cpp
+    GUI/SyncBoxInfoDialog.hpp
     GUI/TextLines.cpp
     GUI/TextLines.hpp
     GUI/BonjourDialog.cpp

@@ -1155,8 +1155,10 @@ void PlaterPresetComboBox::update()
                         tooltip = from_u8(preset.name);
                     }
                 }
-            } else {
+            }
+            else {
                 system_presets.push_back({ get_preset_name(preset), get_preset_name(preset).Lower(), bmp });
+
                 if (is_selected) {
                     selected_user_preset = get_preset_name(preset);
                     tooltip = from_u8(preset.name);
@@ -1333,19 +1335,22 @@ void TabPresetComboBox::OnSelect(wxCommandEvent &evt)
     auto selected_item = evt.GetSelection();
 
     auto marker = reinterpret_cast<Marker>(this->GetClientData(selected_item));
-    if (marker >= LABEL_ITEM_DISABLED && marker < LABEL_ITEM_MAX) {
-        this->SetSelection(m_last_selected);
-        if (marker == LABEL_ITEM_WIZARD_PRINTERS)
-            wxTheApp->CallAfter([this]() {
-            run_wizard(ConfigWizard::SP_PRINTERS);
 
-            // update combobox if its parent is a PhysicalPrinterDialog
-            PhysicalPrinterDialog* parent = dynamic_cast<PhysicalPrinterDialog*>(this->GetParent());
-            if (parent != nullptr)
-                update();
-        });
-    }
-    else if (on_selection_changed && (m_last_selected != selected_item || m_collection->current_is_dirty())) {
+    //y26
+    //if (marker >= LABEL_ITEM_DISABLED && marker < LABEL_ITEM_MAX) {
+    //    this->SetSelection(m_last_selected);
+    //    if (marker == LABEL_ITEM_WIZARD_PRINTERS)
+    //        wxTheApp->CallAfter([this]() {
+    //        run_wizard(ConfigWizard::SP_PRINTERS);
+
+    //        // update combobox if its parent is a PhysicalPrinterDialog
+    //        PhysicalPrinterDialog* parent = dynamic_cast<PhysicalPrinterDialog*>(this->GetParent());
+    //        if (parent != nullptr)
+    //            update();
+    //    });
+    //}
+    //else if (on_selection_changed && (m_last_selected != selected_item || m_collection->current_is_dirty())) {
+    if (on_selection_changed && (m_last_selected != selected_item || m_collection->current_is_dirty())) {
         m_last_selected = selected_item;
         on_selection_changed(selected_item);
     }
@@ -1431,7 +1436,23 @@ void TabPresetComboBox::update()
                         selected = get_preset_name(preset);
                 }
             } else {
-                system_presets.push_back({get_preset_name(preset), get_preset_name(preset).Lower(), bmp, is_enabled});
+                //y25
+                if (m_type == Preset::TYPE_FILAMENT && !m_preset_bundle->filament_box_list.empty()) {
+                    system_presets.push_back({ get_preset_name(preset), get_preset_name(preset).Lower(), bmp });
+                    std::string preset_filament_id = preset.config.opt_string("filament_id", 0u);
+                    for (auto& entry : m_preset_bundle->filament_box_list) {
+                        auto& tray = entry.second;
+
+                        std::string filament_id = tray.opt_string("filament_id", 0u);
+                        if (preset_filament_id == filament_id) {
+                            std::string box_preset_name = into_u8(get_preset_name(preset));
+                            tray.set_key_value("preset_name", new ConfigOptionStrings{ box_preset_name });
+                        }
+                    }
+                }
+                else
+                    system_presets.push_back({ get_preset_name(preset), get_preset_name(preset).Lower(), bmp });
+        
                 if (i == idx_selected)
                     selected = get_preset_name(preset);
             }

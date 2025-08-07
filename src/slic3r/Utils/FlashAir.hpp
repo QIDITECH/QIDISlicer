@@ -34,6 +34,9 @@ public:
 	bool can_test() const override { return true; }
     PrintHostPostUploadActions get_post_upload_actions() const override { return {}; }
 	std::string get_host() const override { return host; }
+
+	//y25
+	virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override {return false;};
     
 private:
 	std::string host;

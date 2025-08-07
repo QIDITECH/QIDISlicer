@@ -18,6 +18,10 @@
 #include "slic3r/GUI/Camera.hpp"
 #include "slic3r/Utils/PrintHost.hpp"
 
+#if QDT_RELEASE_TO_PUBLIC
+#include "../QIDI/QIDINetwork.hpp"
+#endif
+
 class wxString;
 
 namespace Slic3r {
@@ -54,6 +58,19 @@ class GLToolbar;
 class UserAccount;
 class PresetArchiveDatabase;
 enum class ArrangeSelectionMode;
+
+//y25
+struct Box_msg {
+    std::vector<int> slot_state;
+    std::vector<int> slot_id;
+    std::vector<std::string> filament_id;
+    std::vector<std::string> filament_colors;
+    std::vector<std::string> filament_type;
+    std::string box_list_preset_name;
+    std::string box_list_printer_ip;
+    int box_count = 0;
+    int auto_reload_detect = 0;
+};
 
 class Plater: public wxPanel
 {
@@ -474,6 +491,14 @@ public:
         UploadCount = 0;
         m_sending_interval = 0;
     };
+
+//y25
+    Box_msg box_msg;
+
+#if QDT_RELEASE_TO_PUBLIC
+    GUI::Box_info current_box_info;
+    GUI::Box_info get_cur_box_info() { return current_box_info; };
+#endif
 
 private:
     std::optional<fs_path> get_default_output_file();

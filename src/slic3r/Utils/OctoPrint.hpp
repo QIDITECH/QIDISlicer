@@ -38,6 +38,8 @@ public:
     std::string get_host() const override { return m_host; }
     const std::string& get_apikey() const { return m_apikey; }
     const std::string& get_cafile() const { return m_cafile; }
+    //y25
+	virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override {return false;}
 
 protected:
 #ifdef WIN32
@@ -86,6 +88,7 @@ protected:
 #ifdef WIN32
     bool upload_inner_with_resolved_ip(PrintHostUpload upload_data, ProgressFn prorgess_fn, ErrorFn error_fn, InfoFn info_fn, const boost::asio::ip::address& resolved_addr) const override;
 #endif
+    virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override { return false; }
 
     // Host authorization type.
     AuthorizationType m_authorization_type;
@@ -119,6 +122,7 @@ public:
     const char* get_name() const override { return "QIDIConnect"; }
     bool get_storage(wxArrayString& storage_path, wxArrayString& storage_name) const override { return false; }
     std::string get_unusable_symbols() const override { return "\\/:*?\"%<>¯°#ˇ|[]"; }
+    virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override { return false; }
 protected:
     void set_http_post_header_args(Http& http, PrintHostPostUploadAction post_action) const override;
 };
@@ -134,6 +138,7 @@ public:
     wxString get_test_ok_msg() const override;
     wxString get_test_failed_msg(wxString& msg) const override;
     PrintHostPostUploadActions get_post_upload_actions() const override { return {}; }
+    virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override { return false; }
 
 protected:
     bool validate_version_text(const boost::optional<std::string>& version_text) const override;

@@ -1464,17 +1464,17 @@ void TabPrint::build()
 
         optgroup = page->new_optgroup(L("Advanced"));
         optgroup->append_single_option_line("seam_position", category_path + "seam-position");
-        optgroup->append_single_option_line("seam_gap_distance", category_path + "seam-gap-distance");
-        optgroup->append_single_option_line("staggered_inner_seams", category_path + "staggered-inner-seams");
+        optgroup->append_single_option_line("seam_gap_distance", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("staggered_inner_seams", "print-settings/scarf-seam");
 
         const std::string scarf_seam_path{"seam-position_151069#"};
-        optgroup->append_single_option_line("scarf_seam_placement", scarf_seam_path + "scarf-joint-placement");
-        optgroup->append_single_option_line("scarf_seam_only_on_smooth", scarf_seam_path + "scarf-joint-only-on-smooth-perimeters");
-        optgroup->append_single_option_line("scarf_seam_start_height", scarf_seam_path + "scarf-start-height");
-        optgroup->append_single_option_line("scarf_seam_entire_loop", scarf_seam_path + "scarf-joint-around-entire-perimeter");
-        optgroup->append_single_option_line("scarf_seam_length", scarf_seam_path + "scarf-joint-length");
-        optgroup->append_single_option_line("scarf_seam_max_segment_length", scarf_seam_path + "max-scarf-joint-segment-length");
-        optgroup->append_single_option_line("scarf_seam_on_inner_perimeters", scarf_seam_path + "scarf-joint-on-inner-perimeters");
+        optgroup->append_single_option_line("scarf_seam_placement", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("scarf_seam_only_on_smooth", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("scarf_seam_start_height", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("scarf_seam_entire_loop", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("scarf_seam_length", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("scarf_seam_max_segment_length", "print-settings/scarf-seam");
+        optgroup->append_single_option_line("scarf_seam_on_inner_perimeters", "print-settings/scarf-seam");
 
         optgroup->append_single_option_line("external_perimeters_first", category_path + "external-perimeters-first");
         optgroup->append_single_option_line("gap_fill_enabled", category_path + "fill-gaps");
@@ -2250,6 +2250,8 @@ void TabFilament::build()
         Line line = { L("Nozzle"), "" };
         line.append_option(optgroup->get_option("first_layer_temperature"));
         line.append_option(optgroup->get_option("temperature"));
+        //Y30
+        line.append_option(optgroup->get_option("filament_flush_temp"));
         optgroup->append_line(line);
 
         line = { L("Bed"), "" };
@@ -2265,6 +2267,9 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("chamber_temperature"));
         line.append_option(optgroup->get_option("chamber_minimal_temperature"));
         optgroup->append_line(line);
+
+        //Y30
+        optgroup->append_single_option_line("box_temperature");
 
     page = add_options_page(L("Cooling"), "cooling");
         std::string category_path = "filament-settings/cooling#";
@@ -2541,6 +2546,9 @@ void TabFilament::toggle_options()
             new_conf.set_key_value("chamber_minimal_temperature", new ConfigOptionInts{0});
             load_config(new_conf);
         }
+//Y30
+        bool box_temp = printer_config->opt_bool("box_temperature_control");
+        toggle_option("box_temperature", box_temp);
 }
 
 void TabFilament::update()
@@ -2940,6 +2948,8 @@ void TabPrinter::build_fff()
         optgroup->append_single_option_line("chamber_fan");
         optgroup->append_single_option_line("chamber_temperature_control");
         optgroup->append_single_option_line("wipe_device");
+//Y30
+        optgroup->append_single_option_line("box_temperature_control");
 
     const int gcode_field_height = 15; // 150
     const int notes_field_height = 25; // 250
@@ -4206,6 +4216,11 @@ bool Tab::may_discard_current_dirty_preset(PresetCollection* presets /*= nullptr
         }
         else
             wxGetApp().get_tab(presets->type())->cache_config_diff(selected_options);
+    }
+    
+    //y25
+    if (!wxGetApp().preset_bundle->filament_box_list.empty()) {
+        wxGetApp().preset_bundle->filament_box_list.clear();
     }
 
     return true;

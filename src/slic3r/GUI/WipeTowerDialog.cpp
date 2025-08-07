@@ -283,7 +283,6 @@ WipingPanel::WipingPanel(wxWindow* parent, const std::vector<float>& matrix, con
             for (size_t j = 0; j < m_number_of_extruders; ++j) {
                 if (i != j) {
                     double def_val = m_printer_purging_volume * m_filament_purging_multipliers[j] / 100.;
-                    edit_boxes[j][i]->SetValue(wxString("") << int(def_val));
                 }
             }
         }

@@ -1473,7 +1473,8 @@ bool GLCanvas3D::check_volumes_outside_state(GLVolumeCollection& volumes, ModelI
     //B52
     for (unsigned int vol_idx : volumes_idxs) {
         GLVolume* volume = volumes.volumes[vol_idx];
-        if (!volume->is_modifier && (volume->shader_outside_printer_detection_enabled || (!volume->is_wipe_tower() && volume->composite_id.volume_id >= 0))) {
+        //y25
+        if (!volume->is_modifier && (volume->shader_outside_printer_detection_enabled && (!volume->is_wipe_tower() && volume->composite_id.volume_id >= 0))) {
             BuildVolume::ObjectState state;
             int bed_idx = -1;
             if (volume_below(*volume))

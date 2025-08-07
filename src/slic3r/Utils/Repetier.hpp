@@ -37,6 +37,9 @@ public:
     bool get_groups(wxArrayString &groups) const override;
     bool get_printers(wxArrayString &printers) const override;
 
+    //y25
+    virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override {return false;};
+
 private:
     std::string host;
     std::string apikey;

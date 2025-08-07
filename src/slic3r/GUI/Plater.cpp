@@ -11,6 +11,7 @@
 #include <string>
 #include <regex>
 #include <future>
+#include <utility>
 #include <boost/algorithm/string.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/optional.hpp>
@@ -119,6 +120,7 @@
 #include "ConfigWizardWebViewPage.hpp"
 #include "PresetArchiveDatabase.hpp"
 #include "BulkExportDialog.hpp"
+#include "LoadStepDialog.hpp"
 
 #include "libslic3r/ArrangeHelper.hpp"
 
@@ -315,6 +317,7 @@ struct Plater::priv
     static const std::regex pattern_qidi;
     static const std::regex pattern_zip;
     static const std::regex pattern_printRequest;
+    static const std::regex pattern_step;
 
     //y20
     std::vector<ThumbnailData> thumbnails;
@@ -609,11 +612,13 @@ private:
 	bool show_warning_dialog { false };	
 };
 
+// FIXME: Some of the regex patterns are wrong (missing [.] before file extension).
 const std::regex Plater::priv::pattern_bundle(".*[.](amf|amf[.]xml|3mf)", std::regex::icase);
 const std::regex Plater::priv::pattern_3mf(".*3mf", std::regex::icase);
 const std::regex Plater::priv::pattern_any_amf(".*[.](amf|amf[.]xml|zip[.]amf)", std::regex::icase);
 const std::regex Plater::priv::pattern_zip(".*zip", std::regex::icase);
 const std::regex Plater::priv::pattern_printRequest(".*printRequest", std::regex::icase);
+const std::regex Plater::priv::pattern_step(".*[.](step|stp)", std::regex::icase);
 
 Plater::priv::priv(Plater* q, MainFrame* main_frame)
     : q(q)
@@ -1287,6 +1292,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
     int answer_convert_from_meters          = wxOK_DEFAULT;
     int answer_convert_from_imperial_units  = wxOK_DEFAULT;
     int answer_consider_as_multi_part_objects = wxOK_DEFAULT;
+    bool apply_step_import_parameters_to_all   { false }; 
 
     bool in_temp = false; 
     const fs::path temp_path = wxStandardPaths::Get().GetTempDir().utf8_str().data();
@@ -1302,7 +1308,26 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
         const auto &path = input_files[i];
 #endif // _WIN32
         in_temp = (path.parent_path() == temp_path);
-        const auto filename = path.filename();
+        const boost::filesystem::path filename = path.filename();
+
+        const bool type_step = std::regex_match(path.string(), pattern_step);
+        if (type_step && !apply_step_import_parameters_to_all && 
+            wxGetApp().app_config->get_bool("show_step_import_parameters")) {
+
+            double linear_precision = string_to_double_decimal_point(wxGetApp().app_config->get("linear_precision"));
+            double angle_precision = string_to_double_decimal_point(wxGetApp().app_config->get("angle_precision"));
+
+            LoadStepDialog dlg(q, filename.string(), linear_precision, angle_precision, (input_files_size - i) > 1);
+            if (dlg.ShowModal() == wxID_OK) {
+                wxGetApp().app_config->set("linear_precision", float_to_string_decimal_point(dlg.get_linear_precision()));
+                wxGetApp().app_config->set("angle_precision", float_to_string_decimal_point(dlg.get_angle_precision()));
+                if (dlg.IsCheckBoxChecked())
+                    wxGetApp().app_config->set("show_step_import_parameters", "0");
+                apply_step_import_parameters_to_all = dlg.IsApplyToAllClicked();
+            } else
+                continue;
+        }
+
         if (progress_dlg) {
             progress_dlg->Update(static_cast<int>(100.0f * static_cast<float>(i) / static_cast<float>(input_files.size())), _L("Loading file") + ": " + from_path(filename));
             progress_dlg->Fit();
@@ -1350,7 +1375,14 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
                 model = FileReader::load_model_with_config(path.string(), &config_loaded, &config_substitutions, qidislicer_generator_version, FileReader::LoadAttribute::CheckVersion, &load_stats);
             }
             else if (load_model) {
-                model = FileReader::load_model(path.string(), FileReader::LoadAttributes{}, &load_stats);
+                if (type_step) {
+                    double linear_precision = string_to_double_decimal_point(wxGetApp().app_config->get("linear_precision"));
+                    double angle_precision = string_to_double_decimal_point(wxGetApp().app_config->get("angle_precision"));
+                    model = FileReader::load_model(path.string(), FileReader::LoadAttributes{}, &load_stats, 
+                                                   std::make_pair(linear_precision, angle_precision));
+                }
+                else
+                    model = FileReader::load_model(path.string(), FileReader::LoadAttributes{}, &load_stats);
             }
         } catch (const ConfigurationError &e) {
             std::string message = GUI::format(_L("Failed loading file \"%1%\" due to an invalid configuration."), filename.string()) + "\n\n" + e.what();
@@ -7363,9 +7395,62 @@ void Plater::send_gcode()
         only_link = true;
     }
     max_send_number = std::stoi(wxGetApp().app_config->get("max_send"));
+
+    std::string      selected_printer_host = "";
+    bool has_select_printer = wxGetApp().preset_bundle->physical_printers.has_selection();
+    if (has_select_printer) {
+        PhysicalPrinter& ph_printer = wxGetApp().preset_bundle->physical_printers.get_selected_printer();
+        selected_printer_host = ph_printer.config.opt_string("print_host");
+    }
+
+    std::string sync_ip = box_msg.box_list_printer_ip;
+
+    bool has_diff = false;
+
+    if(sync_ip.empty()){
+        ;
+    }
+    else if (selected_printer_host != sync_ip && !selected_printer_host.empty()){
+        WarningDialog(this, _L("Please note that the printer of the synchronous BOX does not match the currently selected printer.")).ShowModal();
+    }
+#if QDT_RELEASE_TO_PUBLIC
+    else{
+        QIDINetwork qidi;
+        wxString msg = "";
+        GUI::Box_info filament_info;
+        filament_info = qidi.get_box_info(msg, sync_ip);
+        GUI::Box_info cur_box_info;
+        cur_box_info = get_cur_box_info();
+
+        if (filament_info.filament_index != cur_box_info.filament_index
+            || filament_info.filament_vendor != cur_box_info.filament_vendor
+            || filament_info.filament_color_index != cur_box_info.filament_color_index
+            || filament_info.slot_state != cur_box_info.slot_state
+            || filament_info.slot_id != cur_box_info.slot_id
+            || filament_info.box_count != cur_box_info.box_count
+            || filament_info.auto_reload_detect != cur_box_info.auto_reload_detect) {
+            has_diff = true;
+        }
+#endif
+    }
+
+    if(has_diff){
+        WarningDialog(this, _L("The BOX information has been updated. Please resynchronize.")).ShowModal();
+    }
+
     //B61 //y20
     PrintHostSendDialog dlg(default_output_file, PrintHostPostUploadAction::StartPrint, groups, storage_paths, storage_names, this, only_link);
     if (dlg.ShowModal() == wxID_OK) {
+
+        //y25
+        std::vector<int> activate_slot;
+        for (auto& temp_fila : wxGetApp().preset_bundle->filament_box_list) {
+            auto& dnyconfig = temp_fila.second;
+            std::string sold_id_t = dnyconfig.opt_string("slot_id", 0u);
+            activate_slot.push_back(std::stoi(sold_id_t));
+        }
+
+
         //y16
         bool is_jump = false;
 
@@ -7426,6 +7511,20 @@ void Plater::send_gcode()
 
                 //m_time_p = upload_job.create_time + seconds_to_add;
 
+                //y25
+                if (!activate_slot.empty() && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+                    for (int i = 0; i < activate_slot.size(); i++) {
+                        wxString check_status_msg = "";
+                        wxString command = wxString::Format(
+                            "SAVE_VARIABLE VARIABLE=value_t%d VALUE=\\\"'slot%d'\\\"",
+                            i,
+                            activate_slot[i]
+                        );
+                        bool success = upload_job.printhost->send_command_to_printer(check_status_msg, command);
+                    }
+                }
+
+
                 p->export_gcode(fs::path(), false, std::move(upload_job));
 
                 UploadCount++;
@@ -7466,6 +7565,19 @@ void Plater::send_gcode()
                                             _L("Upload and Print"), wxOK | wxCANCEL);
                 if (dlg.ShowModal() != wxID_OK)
                     return;
+                }
+
+                //y25
+                if (!activate_slot.empty() && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
+                    for (int i = 0; i < activate_slot.size(); i++) {
+                        wxString check_status_msg = "";
+                        wxString command = wxString::Format(
+                            "SAVE_VARIABLE VARIABLE=value_t%d VALUE=\\\"'slot%d'\\\"",
+                            i,
+                            activate_slot[i]
+                        );
+                        bool success = upload_job.printhost->send_command_to_printer(check_status_msg, command);
+                    }
                 }
 
                 p->export_gcode(fs::path(), false, std::move(upload_job));
@@ -7563,8 +7675,18 @@ bool Plater::update_filament_colors_in_full_config()
     std::vector<std::string> filament_colors;
     filament_colors.reserve(extruders_filaments.size());
 
-    for (const auto& extr_filaments : extruders_filaments)
-        filament_colors.push_back(filaments.find_preset(extr_filaments.get_selected_preset_name(), true)->config.opt_string("filament_colour", (unsigned)0));
+    //y25
+    if(wxGetApp().preset_bundle->filament_box_list.empty()){
+        for (const auto& extr_filaments : extruders_filaments)
+            filament_colors.push_back(filaments.find_preset(extr_filaments.get_selected_preset_name(), true)->config.opt_string("filament_colour", (unsigned)0));
+    }
+    else{
+        for(auto& fila : wxGetApp().preset_bundle->filament_box_list){
+            auto& tray = fila.second;
+            std::string color = tray.opt_string("filament_colour", 0u);
+            filament_colors.push_back(color);
+        }
+    }
 
     p->config->option<ConfigOptionStrings>("filament_colour")->values = filament_colors;
     return true;

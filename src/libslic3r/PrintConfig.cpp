@@ -639,6 +639,21 @@ void PrintConfigDef::init_fff_params()
     def->max = 1000;
     def->mode = comExpert;
     def->set_default_value(new ConfigOptionInts{ 0 });
+//Y30
+    def = this->add("box_temperature", coInts);
+    def->label = L("BOX temperature");
+    def->tooltip = L("BOX temperature.");
+    def->sidetext = L("°C");
+    def->min = 0;
+    def->max = 65;
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionInts{ 0 });
+
+    def = this->add("box_temperature_control", coBool);
+    def->label = L("BOX Temperature");
+    def->tooltip = L("Enable box temperature control.");
+    def->mode = comExpert;
+    def->set_default_value(new ConfigOptionBool(false));
 
     def = this->add("bed_temperature_extruder", coInt);
     def->label = L("Bed temperature by extruder");
@@ -1812,6 +1827,16 @@ void PrintConfigDef::init_fff_params()
     def->max = max_temp;
     def->set_default_value(new ConfigOptionInts { 200 });
 
+    //Y30
+    def = this->add("filament_flush_temp", coInts);
+    def->label = L("Flush");
+    def->full_label = L("Filament flush nozzle temperature");
+    def->tooltip = L("Nozzle temperature for the Filament flush.");
+    def->sidetext = L("°C");
+    def->min = 0;
+    def->max = max_temp;
+    def->set_default_value(new ConfigOptionInts { 240 });
+
     def = this->add("full_fan_speed_layer", coInts);
     def->label = L("Full fan speed at layer");
     def->tooltip = L("Fan speed will be ramped up linearly from zero at layer \"disable_fan_first_layers\" "
@@ -2739,6 +2764,21 @@ void PrintConfigDef::init_fff_params()
     def->tooltip = L("Type of the printer.");
     def->set_default_value(new ConfigOptionString());
 //    def->cli = ConfigOptionDef::nocli;
+
+//y25
+    def = this->add("box_id", coString);
+    def->label = L("Box id");
+    def->tooltip = L("ID of the printer.");
+    def->set_default_value(new ConfigOptionString());
+
+    def = this->add("nozzle_volume", coFloat);
+    def->label = L("Nozzle volume");
+    def->tooltip = L("Volume of nozzle between the cutter and the end of nozzle");
+    def->set_default_value(new ConfigOptionFloat(0.0));
+//y25
+
+    def = this->add("filament_id", coStrings);
+    def->set_default_value(new ConfigOptionStrings { "" });
 
     def = this->add("printer_notes", coString);
     def->label = L("Printer notes");
@@ -3763,6 +3803,20 @@ void PrintConfigDef::init_fff_params()
     def->min = 0;
     def->max = max_temp;
     def->set_default_value(new ConfigOptionInts { 200 });
+
+    def = this->add("nozzle_temperature_range_low", coInts);
+    def->label = L("Min");
+    def->sidetext = "°C";
+    def->min = 0;
+    def->max = max_temp;
+    def->set_default_value(new ConfigOptionInts { 190 });
+
+    def = this->add("nozzle_temperature_range_high", coInts);
+    def->label = L("Max");
+    def->sidetext = "°C";
+    def->min = 0;
+    def->max = max_temp;
+    def->set_default_value(new ConfigOptionInts { 240 });
 
     def = this->add("thick_bridges", coBool);
     def->label = L("Thick bridges");

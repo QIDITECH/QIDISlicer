@@ -77,7 +77,9 @@ PrinterWebView::PrinterWebView(wxWindow *parent) : wxPanel(parent, wxID_ANY, wxD
 
     titlePanel->SetSizer(buttonSizer);
 
-    toggleBar = new SwitchButton(menuPanel);
+    //y25
+    toggleBar = new DeviceSwitchButton(menuPanel);
+
     toggleBar->SetSize(327);
     toggleBar->SetMaxSize({em_unit(this) * 40, -1});
     //y3

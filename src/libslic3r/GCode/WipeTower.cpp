@@ -969,7 +969,7 @@ void WipeTower::toolchange_Unload(
     float old_x = writer.x();
     float turning_point = (!m_left_to_right ? xl : xr );
     if (m_semm && (m_cooling_tube_retraction != 0 || m_cooling_tube_length != 0)) {
-        float total_retraction_distance = m_cooling_tube_retraction + m_cooling_tube_length/2.f - 15.f; // the 15mm is reserved for the first part after ramming
+        float total_retraction_distance = m_cooling_tube_retraction + m_cooling_tube_length/2.f - 15.f; // the 15mm is reserved for the first part after ramming  
         writer.suppress_preview()
               .retract(15.f, m_filpar[m_current_tool].unloading_speed_start * 60.f) // feedrate 5000mm/min = 83mm/s
               .retract(0.70f * total_retraction_distance, 1.0f * m_filpar[m_current_tool].unloading_speed * 60.f)
@@ -1039,6 +1039,7 @@ void WipeTower::toolchange_Unload(
                 // If cold_ramming, the temperature change should be done before the last cooling move.
                     writer.set_extruder_temp(new_temperature, false);
             }
+
 
             float speed = initial_speed + speed_inc * 2*i;
             writer.load_move_x_advanced(turning_point, m_cooling_tube_length, speed);

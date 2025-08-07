@@ -178,7 +178,7 @@ private:
     DeviceButton *                        refresh_button;
     DeviceButton *                        login_button;
     bool                                  m_isloginin;
-    SwitchButton *                        toggleBar;
+    DeviceSwitchButton *                  toggleBar;    //y25
     wxStaticBitmap *                      staticBitmap;
     //y3
     wxString  m_ip;

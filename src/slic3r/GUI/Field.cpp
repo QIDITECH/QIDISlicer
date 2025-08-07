@@ -688,7 +688,7 @@ wxWindow* CheckBox::GetNewWin(wxWindow* parent, const wxString& label /*= wxEmpt
     if (wxGetApp().suppress_round_corners())
         return new ::CheckBox(parent, label);
     
-    return new ::SwitchButton(parent, label);
+    return new ::DeviceSwitchButton(parent, label); //y25
 }
 
 void CheckBox::SetValue(wxWindow* win, bool value)
@@ -698,7 +698,7 @@ void CheckBox::SetValue(wxWindow* win, bool value)
             ch_b->SetValue(value);
     }
     else {
-        if (::SwitchButton* ch_b = dynamic_cast<::SwitchButton*>(win))
+        if (::DeviceSwitchButton* ch_b = dynamic_cast<::DeviceSwitchButton*>(win)) //y25
             ch_b->SetValue(value);
     }
 }
@@ -708,7 +708,7 @@ bool CheckBox::GetValue(wxWindow* win)
     if (wxGetApp().suppress_round_corners())
         return dynamic_cast<::CheckBox*>(win)->GetValue();
 
-    return dynamic_cast<::SwitchButton*>(win)->GetValue();
+    return dynamic_cast<::DeviceSwitchButton*>(win)->GetValue();    //y25
 }
 
 void CheckBox::Rescale(wxWindow* win)
@@ -716,13 +716,13 @@ void CheckBox::Rescale(wxWindow* win)
     if (wxGetApp().suppress_round_corners())
         dynamic_cast<::CheckBox*>(win)->Rescale();
     else
-        dynamic_cast<::SwitchButton*>(win)->Rescale();
+        dynamic_cast<::DeviceSwitchButton*>(win)->Rescale();    //y25
 }
 
 void CheckBox::SysColorChanged(wxWindow* win)
 {
     if (!wxGetApp().suppress_round_corners())
-        dynamic_cast<::SwitchButton*>(win)->SysColorChange();
+        dynamic_cast<::DeviceSwitchButton*>(win)->SysColorChange(); //y25
 }
 
 void CheckBox::SetValue(bool value)
@@ -730,7 +730,7 @@ void CheckBox::SetValue(bool value)
     if (wxGetApp().suppress_round_corners())
         dynamic_cast<::CheckBox*>(window)->SetValue(value);
     else
-        dynamic_cast<::SwitchButton*>(window)->SetValue(value);
+        dynamic_cast<::DeviceSwitchButton*>(window)->SetValue(value);   //y25
 }
 
 bool CheckBox::GetValue()
@@ -738,7 +738,7 @@ bool CheckBox::GetValue()
     if (wxGetApp().suppress_round_corners())
         return dynamic_cast<::CheckBox*>(window)->GetValue();
 
-    return dynamic_cast<::SwitchButton*>(window)->GetValue();
+    return dynamic_cast<::DeviceSwitchButton*>(window)->GetValue(); //y25
 }
 
 void CheckBox::BUILD() {
@@ -831,7 +831,7 @@ void CheckBox::msw_rescale()
 void CheckBox::sys_color_changed()
 {
     Field::sys_color_changed();
-    if (auto switch_btn = dynamic_cast<::SwitchButton*>(window))
+    if (auto switch_btn = dynamic_cast<::DeviceSwitchButton*>(window))  //y25
         switch_btn->SysColorChange();
 }
 

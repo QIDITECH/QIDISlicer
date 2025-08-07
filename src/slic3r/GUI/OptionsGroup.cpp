@@ -405,6 +405,14 @@ void OptionsGroup::activate_line(Line& line)
 		}
     }
 
+    //y25
+    if (!line.get_only_widgets().empty()){
+        for (auto only_widget : line.get_only_widgets()) {
+            sizer->Add(only_widget(this->ctrl_parent()), 0, wxEXPAND);
+        }
+        return;
+    }
+
     const std::vector<Option>& option_set = line.get_options();
 	bool is_legend_line = option_set.front().opt.gui_type == ConfigOptionDef::GUIType::legend;
 

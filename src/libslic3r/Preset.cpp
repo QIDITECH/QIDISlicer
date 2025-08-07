@@ -569,7 +569,12 @@ static std::vector<std::string> s_Preset_filament_options {
     //Y28
     "dont_slow_down_outer_wall",
     //w15
-    "filament_wipe_distance"
+    "filament_wipe_distance",
+    //y25
+    "filament_id",
+    //Y30
+    "filament_flush_temp",
+    "box_temperature"
 };
 
 static std::vector<std::string> s_Preset_machine_limits_options {
@@ -599,7 +604,12 @@ static std::vector<std::string> s_Preset_printer_options {
 //Y25
     "wipe_device",
 //Y16
-    "chamber_temperature_control", "auxiliary_fan", "chamber_fan"
+    "chamber_temperature_control", "auxiliary_fan", "chamber_fan",
+    //y25
+    "box_id",
+    "nozzle_volume",
+    //Y30
+    "box_temperature_control"
 };
 
 static std::vector<std::string> s_Preset_sla_print_options {

@@ -73,6 +73,12 @@ public:
 	void append_widget(const widget_t widget) {
 		m_extra_widgets.push_back(widget);
     }
+
+	//y25
+	void append_only_widget(const widget_t widget) {
+		only_widgets.push_back(widget);
+	}
+
 	Line(wxString label, wxString tooltip) :
 		label(_(label)), label_tooltip(_(tooltip)) {}
 	Line() : m_is_separator(true) {}
@@ -90,9 +96,14 @@ public:
     const std::vector<widget_t>&	get_extra_widgets() const {return m_extra_widgets;}
     const std::vector<Option>&		get_options() const { return m_options; }
 
+	//y25
+	const std::vector<widget_t>&	get_only_widgets() const {return only_widgets;}
+
 private:
 	std::vector<Option>		m_options;//! {std::vector<Option>()};
     std::vector<widget_t>	m_extra_widgets;//! {std::vector<widget_t>()};
+	//y25
+	std::vector<widget_t>	only_widgets;//{std::vector<widget_t>()};
 };
 
 using column_t = std::function<wxWindow*(wxWindow* parent, const Line&)>;

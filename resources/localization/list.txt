@@ -114,6 +114,8 @@ src/slic3r/GUI/SendSystemInfoDialog.cpp
 src/slic3r/GUI/Sidebar.cpp
 src/slic3r/GUI/SurfaceDrag.cpp
 src/slic3r/GUI/SysInfoDialog.cpp
+src/slic3r/GUI/SyncBoxInfoDialog.cpp
+src/slic3r/GUI/SyncBoxInfoDialog.cpp
 src/slic3r/GUI/Tab.cpp
 src/slic3r/GUI/Tab.hpp
 src/slic3r/GUI/TickCodesManager.cpp

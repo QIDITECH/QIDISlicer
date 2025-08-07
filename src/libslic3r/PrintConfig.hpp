@@ -918,6 +918,8 @@ PRINT_CONFIG_CLASS_DEFINE(
     ((ConfigOptionString,              template_custom_gcode))
     //w15
     ((ConfigOptionFloats,              wipe_distance))
+    //y25
+    ((ConfigOptionStrings,             filament_id))
 )
 
 static inline std::string get_extrusion_axis(const GCodeConfig &cfg)
@@ -952,6 +954,9 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               overhang_fan_speed_3))
     ((ConfigOptionInts,               chamber_temperature))
     ((ConfigOptionInts,               chamber_minimal_temperature))
+    //Y30
+    ((ConfigOptionInts,               box_temperature))
+    ((ConfigOptionBool,               box_temperature_control))
     ((ConfigOptionBool,               complete_objects))
     ((ConfigOptionFloats,             colorprint_heights))
     ((ConfigOptionBools,              cooling))
@@ -989,6 +994,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     //w25
     ((ConfigOptionInt,                slow_down_layers))
     ((ConfigOptionInts,               first_layer_temperature))
+    //Y30
+    ((ConfigOptionInts,               filament_flush_temp))
     ((ConfigOptionIntsNullable,       idle_temperature))
     //B26
     ((ConfigOptionBools,              enable_advance_pressure))
@@ -1047,6 +1054,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloats,             wiping_volumes_matrix))
     ((ConfigOptionBool,               wiping_volumes_use_custom_matrix))
     ((ConfigOptionFloat,              z_offset))
+    //y25
+    ((ConfigOptionString,             box_id))
 )
 
 PRINT_CONFIG_CLASS_DERIVED_DEFINE0(

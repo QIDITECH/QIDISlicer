@@ -43,6 +43,8 @@ public:
     // const std::string& get_apikey() const { return m_apikey; }
     // const std::string& get_cafile() const { return m_cafile; }
     std::string get_unusable_symbols() const override { return "\\/:*?\"%<>¯°#ˇ|[]"; }
+    //y25
+    virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const override { return false; }
 
 private:
     std::string m_uuid;

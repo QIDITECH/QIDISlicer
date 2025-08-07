@@ -24,6 +24,8 @@ class FreqChangedParams
 
 //Y26
     std::shared_ptr<ConfigOptionsGroup> m_og_filament;
+    //y25
+    std::shared_ptr<ConfigOptionsGroup> m_og_sync;
     std::shared_ptr<ConfigOptionsGroup> m_og_fff;
     std::shared_ptr<ConfigOptionsGroup> m_og_sla;
 

@@ -52,7 +52,8 @@ public:
     std::vector<float> read_matrix_values();
 	void format_sizer(wxSizer* sizer, wxPanel* page, wxGridSizer* grid_sizer, const wxString& table_title, int table_lshift=0);
         
-private:        
+private:
+
     std::vector<std::vector<wxTextCtrl*>> edit_boxes;
     std::vector<wxColour> m_colours;
     unsigned int m_number_of_extruders  = 0;

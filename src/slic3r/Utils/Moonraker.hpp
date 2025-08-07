@@ -44,9 +44,13 @@ public:
     std::string get_host() const override { return m_show_ip != "" ? m_show_ip : m_host; }
     const std::string& get_apikey() const { return m_apikey; }
     const std::string& get_cafile() const { return m_cafile; }
+    
+    //y25
+    bool send_command_to_printer(wxString& curl_msg, wxString commond) const override;
+
     //y6
-    static void                SetStop(bool isStop) { m_isStop = isStop; };
-    static bool                GetStop() { return m_isStop; };
+    static void                SetStop(bool isStop) { m_isStop = isStop; }
+    static bool                GetStop() { return m_isStop; }
     static bool                m_isStop;
     static double              progress_percentage;
 
@@ -68,7 +72,6 @@ protected:
     virtual void set_auth(Http &http) const;
     std::string make_url(const std::string &path) const;
 
-private:
 /*
 #ifdef WIN32
     bool test_with_resolved_ip(wxString& curl_msg) const;

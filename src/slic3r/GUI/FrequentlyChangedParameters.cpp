@@ -16,6 +16,11 @@
 
 #include "WipeTowerDialog.hpp"
 
+//y25
+#include "SyncBoxInfoDialog.hpp"
+
+#include "Tab.hpp"
+
 using Slic3r::Preset;
 using Slic3r::GUI::format_wxstr;
 
@@ -303,12 +308,54 @@ FreqChangedParams::FreqChangedParams(wxWindow* parent)
     m_og_filament->append_line(line);
     m_og_filament->activate();
 
+    //y25
+    m_og_sync = std::make_shared<ConfigOptionsGroup>(parent, "");
+    DynamicPrintConfig* printer_config = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
+
+    m_og_sync->set_config(printer_config);
+    m_og_sync->hide_labels();
+    auto add_sync_btn = [this](wxWindow* parent) {
+
+        //y26
+        auto sync_btn = new wxButton(parent, wxID_ANY, _L("Syn filament info from the box"), wxDefaultPosition, wxSize(200, 30), wxBU_EXACTFIT);
+        wxGetApp().UpdateDarkUI(sync_btn, true);
+
+        sync_btn->SetToolTip(_L("Click the sync button to synchronize the Box information to the filament column."));
+        auto sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(sync_btn, 0, wxALIGN_CENTER_VERTICAL);
+        sync_btn->Bind(wxEVT_BUTTON, [parent](wxCommandEvent& e){
+            //y25
+            std::string      ph_host = "";
+            bool has_select_printer = wxGetApp().preset_bundle->physical_printers.has_selection();
+            if (has_select_printer) {
+                PhysicalPrinter& ph_printer = wxGetApp().preset_bundle->physical_printers.get_selected_printer();
+                ph_host = ph_printer.config.opt_string("print_host");
+            }
+
+            GetBoxInfoDialog dlg(wxGetApp().plater());
+            if(ph_host.empty()){
+                dlg.ShowModal();
+            }
+            else{
+                dlg.synchronize_by_ip(ph_host);
+            }
+        });
+        return sizer;
+    };
+    line = Line { "", "" };
+    line.append_only_widget(add_sync_btn);
+    m_og_sync->append_line(line);
+    m_og_sync->activate();
+
     m_sizer = new wxBoxSizer(wxVERTICAL);
     m_sizer->Add(m_og_fff->sizer, 0, wxEXPAND);
 
     //Y26
     m_sizer->Add(m_og_filament->sizer, 0, wxEXPAND);
     m_sizer->Add(m_og_sla->sizer, 0, wxEXPAND);
+
+    //y25
+    m_sizer->Add(m_og_sync->sizer, 0, wxEXPAND);
 }
 
 void FreqChangedParams::msw_rescale()
@@ -339,7 +386,8 @@ void FreqChangedParams::Show(bool is_fff) const
 //Y26
     m_og_filament->Show(is_fff);
     m_og_sla->Show(!is_fff);
-
+    //y25
+    m_og_sync->Show(is_fff);
     // correct showing of the FreqChangedParams sizer when m_wiping_dialog_button is hidden
     if (is_fff && !is_wdb_shown)
         m_wiping_dialog_button->Hide();

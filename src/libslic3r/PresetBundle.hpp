@@ -199,6 +199,9 @@ public:
     //y3
     std::set<std::string> get_vendors();
 
+    //QDS box y25
+    std::map<int, DynamicPrintConfig> filament_box_list;
+
 private:
     std::pair<PresetsConfigSubstitutions, std::string> load_system_presets(ForwardCompatibilitySubstitutionRule compatibility_rule);
     // Merge one vendor's presets with the other vendor's presets, report duplicates.

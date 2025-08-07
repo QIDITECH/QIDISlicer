@@ -23,9 +23,12 @@
 namespace Slic3r {
 
 #if __APPLE__
-extern "C" bool load_step_internal(const char *path, OCCTResult* res);
+extern "C" bool load_step_internal(const char *path, OCCTResult* res, std::optional<std::pair<double, double>> deflections /*= std::nullopt*/);
 #endif
 
+// Inside deflections pair:
+// * first value is linear deflection
+// * second value is angle deflection
 LoadStepFn get_load_step_fn()
 {
     static LoadStepFn load_step_fn = nullptr;
@@ -76,7 +79,7 @@ LoadStepFn get_load_step_fn()
     return load_step_fn;
 }
 
-bool load_step(const char *path, Model *model /*BBS:, ImportStepProgressFn proFn*/)
+bool load_step(const char *path, Model *model /*BBS:, ImportStepProgressFn proFn*/, std::optional<std::pair<double, double>> deflections)
 {
     OCCTResult occt_object;
 
@@ -85,7 +88,7 @@ bool load_step(const char *path, Model *model /*BBS:, ImportStepProgressFn proFn
     if (!load_step_fn)
         return false;
 
-    load_step_fn(path, &occt_object);
+    load_step_fn(path, &occt_object, deflections);
 
     assert(! occt_object.volumes.empty());
     

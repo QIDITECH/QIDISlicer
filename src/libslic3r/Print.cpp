@@ -77,6 +77,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "overhang_fan_speed_3",
         "chamber_temperature",
         "chamber_minimal_temperature",
+        //Y30
+        "box_temperature",
         "colorprint_heights",
         "cooling",
         "default_acceleration",
@@ -166,7 +168,9 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "wipe",
         "wipe_tower_acceleration",
         //w15
-        "wipe_distance"
+        "wipe_distance",
+        //y25
+        "nozzle_volume"
     };
 
     static std::unordered_set<std::string> steps_ignore;
@@ -206,6 +210,8 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
                opt_key == "complete_objects"
             || opt_key == "filament_type"
             || opt_key == "first_layer_temperature"
+            //Y30
+            || opt_key == "filament_flush_temp"
             || opt_key == "filament_loading_speed"
             || opt_key == "filament_loading_speed_start"
             || opt_key == "filament_unloading_speed"

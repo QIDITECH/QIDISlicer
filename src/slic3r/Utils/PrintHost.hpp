@@ -83,6 +83,9 @@ public:
     //B64
     static PrintHost *get_print_host_url(std::string url, std::string local_ip);
 
+    //y25
+    virtual bool send_command_to_printer(wxString& curl_msg, wxString commond) const {return false;}
+
 protected:
     virtual wxString format_error(const std::string &body, const std::string &error, unsigned status) const;
 };

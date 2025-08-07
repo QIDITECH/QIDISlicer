@@ -43,7 +43,7 @@
             border: none; 
         }
         
-        tr:nth-child(2) td, tr:nth-child(3) td, tr:nth-child(4) td, tr:nth-child(5) td, tr:nth-child(6) td, tr:nth-child(9) td, tr:nth-child(13) td, tr:nth-child(14) td, tr:nth-child(15) td, tr:nth-child(16) td, tr:nth-child(17) td, tr:nth-child(18) td, tr:nth-child(19) td {
+        tr:nth-child(2) td, tr:nth-child(3) td, tr:nth-child(4) td, tr:nth-child(5) td, tr:nth-child(6) td, tr:nth-child(9) td, tr:nth-child(13) td, tr:nth-child(14) td, tr:nth-child(15) td, tr:nth-child(16) td, tr:nth-child(17) td, tr:nth-child(18) td, tr:nth-child(19),tr:nth-child(20) td {
             height: 20px; 
         }
 
@@ -144,6 +144,9 @@
             border-bottom: 1px solid #ccc;
         }
         tr:nth-child(18),tr:nth-child(18) td:nth-child(1) {
+            border-bottom: 1px solid #ccc;
+        }
+        tr:nth-child(19),tr:nth-child(19) td:nth-child(1) {
             border-bottom: 1px solid #ccc;
         }
         
@@ -263,6 +266,9 @@
                 <label><input type="checkbox" value="filament21"> UltraPA</label>
                 <label><input type="checkbox" value="filament22"> UltraPA-CF25</label>
                 <label><input type="checkbox" value="filament23"> WOOD Rapido</label>
+                <label><input type="checkbox" value="filament24"> TPU-Aero</label>
+                <label><input type="checkbox" value="filament25"> Support For PET/PA</label>
+                <label><input type="checkbox" value="filament26"> Support For PAHT</label>
             </div>
         </div>
     </div>
@@ -296,6 +302,9 @@
                 <th class="filament21">UltraPA</th>
                 <th class="filament22">UltraPA-CF25</th>
                 <th class="filament23">WOOD Rapido</th>
+                <th class="filament24">TPU-Aero</th>
+                <th class="filament25">Support For PET/PA</th>
+                <th class="filament26">Support For PAHT</th>
             </tr>
         </thead>
         <tbody>
@@ -354,6 +363,8 @@
                         "Print speed": "Print speed",
                         "Post processing": "Post processing",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "QIDI BOX settings",
+                        "Is QIDI BOX applicable": "Is QIDI BOX applicable",
                         "Compare filaments": "Compare filaments:"
                     },
                     zh_CN: {
@@ -376,9 +387,11 @@
                         "Sealed box": "是否封箱",
                         "Print settings": "打印设置",
                         "Nozzle temperature": "喷嘴温度",
-                        "Print speed": "打印速度d",
+                        "Print speed": "打印速度",
                         "Post processing": "打印后处理",
                         "Anneal": "退火",
+                        "QIDI BOX settings": "QIDI BOX设置",
+                        "Is QIDI BOX applicable": "是否适用QIDI BOX",
                         "Compare filaments": "比较耗材:"
                     },
                     fr: { 
@@ -404,6 +417,8 @@
                         "Print speed": "Vitesse d'impression",
                         "Post processing": "Post - traitement",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "Paramètres QIDI BOX",
+                        "Is QIDI BOX applicable": "Est-ce que QIDI BOX est applicable",
                         "Compare filaments": "Comparer les filaments:"
                     },
                     cs: {
@@ -429,6 +444,8 @@
                         "Print speed": "Rychlost tisku",
                         "Post processing": "Pozpracování",
                         "Anneal": "Rozšíření",
+                        "QIDI BOX settings": "Nastavení QIDI BOX",
+                        "Is QIDI BOX applicable": "Je použitelná QIDI BOX",
                         "Compare filaments": "Porovnat vlákna:"
                     },
                     de: {
@@ -454,6 +471,8 @@
                         "Print speed": "Druckgeschwindigkeit",
                         "Post processing": "Nachbearbeitung",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "QIDI BOX-Einstellungen",
+                        "Is QIDI BOX applicable": "Ist QIDI BOX anwendbar",
                         "Compare filaments": "Filamente vergleichen:"
                     },
                     es: {
@@ -479,6 +498,8 @@
                         "Print speed": "Velocidad de impresión",
                         "Post processing": "Reprocesamiento",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "Configuración de QIDI BOX",
+                        "Is QIDI BOX applicable": "Es aplicable QIDI BOX",
                         "Compare filaments": "Filamentos comparativos:"
                     },
                     hu: {
@@ -504,6 +525,8 @@
                         "Print speed": "Nyomtatási sebesség",
                         "Post processing": "Utófeldolgozás",
                         "Anneal": "Melléklet",
+                        "QIDI BOX settings": "QIDI BOX beállítások",
+                        "Is QIDI BOX applicable": "QIDI BOX alkalmazandó",
                         "Compare filaments": "Szálak összehasonlítása:"
                     },
                     it: {
@@ -529,6 +552,8 @@
                         "Print speed": "Velocità di stampa",
                         "Post processing": "Post-elaborazione",
                         "Anneal": "Allegato",
+                        "QIDI BOX settings": "Impostazioni QIDI BOX",
+                        "Is QIDI BOX applicable": "È applicabile QIDI BOX",
                         "Compare filaments": "Confronta filamenti:"
                     },
                     ja: {
@@ -554,6 +579,8 @@
                         "Print speed": "印刷速度",
                         "Post processing": "後処理",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "QIDI BOX設定",
+                        "Is QIDI BOX applicable": "QIDIボックス適用か",
                         "Compare filaments": "ひかくフィラメント:"
                     },
                     ko: {
@@ -579,6 +606,8 @@
                         "Print speed": "인쇄 속도",
                         "Post processing": "후처리",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "QIDI BOX 설정",
+                        "Is QIDI BOX applicable": "QIDI BOX 적용 가능합니까",
                         "Compare filaments": "비교적 긴 실:"
                     },
                     nl: {
@@ -604,6 +633,8 @@
                         "Print speed": "Afdruksnelheid",
                         "Post processing": "Postverwerking",
                         "Anneal": "Anneal",
+                        "QIDI BOX settings": "QIDI BOX instellingen",
+                        "Is QIDI BOX applicable": "Is QIDI BOX van toepassing",
                         "Compare filaments": "Filamenten vergelijken:"
                     },
                     pl: {
@@ -629,6 +660,8 @@
                         "Print speed": "Szybkość drukowania",
                         "Post processing": "Przetwarzanie po przetwarzaniu",
                         "Anneal": "Wyżej",
+                        "QIDI BOX settings": "Ustawienia QIDI BOX",
+                        "Is QIDI BOX applicable": "Czy stosuje się QIDI BOX",
                         "Compare filaments": "Porównaj filamenty:"
                     },
                     ru: {
@@ -654,6 +687,8 @@
                         "Print speed": "Velocidade de impressão",
                         "Post processing": "Pós-processamento",
                         "Anneal": "Anexo",
+                        "QIDI BOX settings": "Настройки QIDI BOX",
+                        "Is QIDI BOX applicable": "применяется ли QIDI BOX",
                         "Compare filaments": "Более длинный шелк:"
                     },
                     sv: {
@@ -679,6 +714,8 @@
                         "Print speed": "Utskriftshastighet",
                         "Post processing": "Efterbehandling",
                         "Anneal": "Bilaga",
+                        "QIDI BOX settings": "QIDI BOX-inställningar",
+                        "Is QIDI BOX applicable": "Är QIDI BOX tillämplig",
                         "Compare filaments": "Jämför glödtrådar:"
                     },
                     tr: {
@@ -704,6 +741,8 @@
                         "Print speed": "Bastırma hızı",
                         "Post processing": "İşlemi",
                         "Anneal": "Annealfrance. kgm",
+                        "QIDI BOX settings": "QIDI BOX ayarları",
+                        "Is QIDI BOX applicable": "QIDI BOX uygulanabilir mi",
                         "Compare filaments": "Kıyafetleri karşılaştır:"
                     },
                     uk: {
@@ -729,6 +768,8 @@
                         "Print speed": "Швидкість друку",
                         "Post processing": "Посля обробки",
                         "Anneal": "Анналstar name",
+                        "QIDI BOX settings": "Налаштування QIDI BOX",
+                        "Is QIDI BOX applicable": "Чи застосовується QIDI BOX",
                         "Compare filaments": "Порівняти гілки:"
                     },
                     pt: {
@@ -754,6 +795,8 @@
                         "Print speed": "Velocidade de impressão",
                         "Post processing": "Pós-processamento",
                         "Anneal": "Anexo",
+                        "QIDI BOX settings": "QIDI BOX settings",
+                        "Is QIDI BOX applicable": "É aplicável o QIDI BOX",
                         "Compare filaments": "Comparar filamentos:"
                     },
                     
@@ -798,6 +841,9 @@
                 document.write('<td>'+ createProgressBar(50,"#0784FF")+ '</td>');//ultra pa
                 document.write('<td>'+ createProgressBar(50,"#0784FF")+ '</td>');//ultra pa-cf25
                 document.write('<td>'+ createProgressBar(25,"#0784FF")+ '</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
                 
                 /*Corrosion resistance*/
@@ -827,6 +873,9 @@
                 document.write('<td>'+ createProgressBar(50,"#5cb85c")+ '</td>');//ultra pa
                 document.write('<td>/</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Creep resistance*/
@@ -856,6 +905,9 @@
                 document.write('<td>'+ createProgressBar(50,"#CC6B36")+ '</td>');//ultra pa
                 document.write('<td>/</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*HDT 0.45*/
@@ -885,6 +937,9 @@
                 document.write('<td>77.8℃</td>');//ultra pa
                 document.write('<td>96.1℃</td>');//ultra pa-cf25
                 document.write('<td>57℃</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*HDT 1.80*/
@@ -914,6 +969,9 @@
                 document.write('<td>77.8℃</td>');//ultra pa
                 document.write('<td>83℃</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Tensile strength*/
@@ -943,6 +1001,9 @@
                 document.write('<td>86.15 ± 0.56 MPa<br>'+ createProgressBar(86.15/150*100,"#CCB70B")+ '</td>');//ultra pa
                 document.write('<td>109.68 ± 1.84 MPa<br>'+ createProgressBar(109.68/150*100,"#CCB70B")+ '</td>');//ultra pa-cf25
                 document.write('<td>26.5 ± 1.5 MPa<br>'+ createProgressBar(26.5/150*100,"#CCB70B")+ '</td>');//wood rapido
+                document.write('<td>6.81±0.11 MPa<br>'+ createProgressBar(6.81/150*100,"#CCB70B")+ '</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Tensile modulus*/
@@ -972,6 +1033,9 @@
                 document.write('<td>3609.22 ± 153.31 MPa<br>'+ createProgressBar(3609.22/10000*100,"#CC0003")+ '</td>');//ultra pa
                 document.write('<td>8996.26 ± 232.21 MPa<br>'+ createProgressBar(8996.26/10000*100,"#CC0003")+ '</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Elongation at break*/
@@ -1001,6 +1065,9 @@
                 document.write('<td>11.68 ± 3.36%</td>');//ultra pa
                 document.write('<td>2.18 ± 0.14%</td>');//ultra pa-cf25
                 document.write('<td>9 ± 1%</td>');//wood rapido
+                document.write('<td>576.27±8.48%</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Flexural strength*/
@@ -1030,6 +1097,9 @@
                 document.write('<td>121.47 ± 3.14 MPa<br>'+ createProgressBar(121.47/200*100,"#16417C")+ '</td>');//ultra pa
                 document.write('<td>176.24 ± 3.51 MPa<br>'+ createProgressBar(176.24/200*100,"#16417C")+ '</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Flexural modulus*/
@@ -1059,6 +1129,9 @@
                 document.write('<td>3314.03 ± 181.88 MPa<br>'+ createProgressBar(3314.03/10000*100,"#EA3FF7")+ '</td>');//ultra pa
                 document.write('<td>8487.47 ± 246.46 MPa<br>'+ createProgressBar(8487.47/10000*100,"#EA3FF7")+ '</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Notch impact strength*/
@@ -1088,6 +1161,9 @@
                 document.write('<td>5.78 ± 0.30KJ/㎡<br>'+ createProgressBar(5.78/30*100,"#F77089")+ '</td>');//ultra pa
                 document.write('<td>12.04 ± 0.94KJ/㎡<br>'+ createProgressBar(12.04/30*100,"#F77089")+ '</td>');//ultra pa-cf25
                 document.write('<td>3.5 ± 0.5KJ/㎡<br>'+ createProgressBar(3.5/30*100,"#F77089")+ '</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
 
                 /*Drying*/
@@ -1117,6 +1193,9 @@
                 document.write('<td>' + getTranslation('Need to dry', lang) + '</td>');//ultra pa
                 document.write('<td>' + getTranslation('Need to dry', lang) + '</td>');//ultra pa-cf25
                 document.write('<td>' + getTranslation('Recommended drying', lang) + '</td>');//wood rapido
+                document.write('<td>' + getTranslation('Need to dry', lang) + '</td>');//tpu aero
+                document.write('<td>' + getTranslation('Need to dry', lang) + '</td>');//support for pet/pa
+                document.write('<td>' + getTranslation('Need to dry', lang) + '</td>');//support for paht
                 document.write('</tr>');
                 
                 /*Dry conditions*/
@@ -1146,6 +1225,9 @@
                 document.write('<td>100-120℃ 4-6h</td>');//ultra pa
                 document.write('<td>80-100℃ 4-6h</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>70-80℃ 4-6h</td>');//tpu aero
+                document.write('<td>80-100℃ 4-6h</td>');//support for pet/pa
+                document.write('<td>80-100℃ 4-6h</td>');//support for paht
                 document.write('</tr>');
                 
                 /*Suitable hot bed temperature*/
@@ -1175,6 +1257,9 @@
                 document.write('<td>70-80℃</td>');//ultra pa
                 document.write('<td>70-80℃</td>');//ultra pa-cf25
                 document.write('<td>60℃</td>');//wood rapido
+                document.write('<td>30-45℃</td>');//tpu aero
+                document.write('<td>70-90℃</td>');//support for pet/pa
+                document.write('<td>80-90℃</td>');//support for paht
                 document.write('</tr>');
 
                 /*Sealed box*/
@@ -1204,6 +1289,9 @@
                 document.write('<td>×</td>');//ultra pa
                 document.write('<td>×</td>');//ultra pa-cf25
                 document.write('<td>×</td>');//wood rapido
+                document.write('<td>×</td>');//tpu aero
+                document.write('<td>×</td>');//support for pet/pa
+                document.write('<td>×</td>');//support for paht
                 document.write('</tr>');
                 
                 /*Print settings*/
@@ -1233,6 +1321,9 @@
                 document.write('<td>280-300℃</td>');//ultra pa
                 document.write('<td>300-340℃</td>');//ultra pa-cf25
                 document.write('<td>190-220℃</td>');//wood rapido
+                document.write('<td>230-270℃</td>');//tpu aero
+                document.write('<td>260-280℃</td>');//support for pet/pa
+                document.write('<td>270-280℃</td>');//support for paht
                 document.write('</tr>');
                 
                 /*Print speed*/
@@ -1262,6 +1353,9 @@
                 document.write('<td>＜90mm/s</td>');//ultra pa
                 document.write('<td>＜120mm/s</td>');//ultra pa-cf25
                 document.write('<td>＜200mm/s</td>');//wood rapido
+                document.write('<td>＜100mm/s</td>');//tpu aero
+                document.write('<td>＜120mm/s</td>');//support for pet/pa
+                document.write('<td>＜120mm/s</td>');//support for paht
                 document.write('</tr>');
                 
                 /*Post processing*/
@@ -1291,9 +1385,43 @@
                 document.write('<td>/</td>');//ultra pa
                 document.write('<td>80-100℃</td>');//ultra pa-cf25
                 document.write('<td>/</td>');//wood rapido
+                document.write('<td>/</td>');//tpu aero
+                document.write('<td>/</td>');//support for pet/pa
+                document.write('<td>/</td>');//support for paht
                 document.write('</tr>');
                 
     
+               /*Is QIDI BOX applicable*/
+                document.write('<tr>');
+                document.write('<td>' + getTranslation('QIDI BOX settings', lang) + '</td>');
+                document.write('<td>' + getTranslation('Is QIDI BOX applicable', lang) + '</td>');
+                document.write('<td>√</td>');//pla
+                document.write('<td>√</td>');//pla matte
+                document.write('<td>√</td>');//pla metal
+                document.write('<td>√</td>');//pla silk
+                document.write('<td>√</td>');//pla cf
+                document.write('<td>√</td>');//abs
+                document.write('<td>√</td>');//abs odorless
+                document.write('<td>√</td>');//abs metal
+                document.write('<td>√</td>');//abs gf
+                document.write('<td>√</td>');//asa
+                document.write('<td>√</td>');//asa aero
+                document.write('<td>√</td>');//pa12 cf
+                document.write('<td>√</td>');//paht cf
+                document.write('<td>√</td>');//paht gf
+                document.write('<td>√</td>');//pc abs fr
+                document.write('<td>√</td>');//pet cf
+                document.write('<td>√</td>');//pet gf
+                document.write('<td>√</td>');//petg
+                document.write('<td>√</td>');//pps-cf
+                document.write('<td>×</td>');//tpu
+                document.write('<td>√</td>');//ultra pa
+                document.write('<td>√</td>');//ultra pa-cf25
+                document.write('<td>√</td>');//wood rapido
+                document.write('<td>×</td>');//tpu aero
+                document.write('<td>√</td>');//support for pet/pa
+                document.write('<td>√</td>');//support for paht
+                document.write('</tr>');
                 
             </script>
         </tbody>

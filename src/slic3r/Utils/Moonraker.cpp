@@ -495,5 +495,35 @@ std::string Moonraker::make_url(const std::string &path) const
     }
 }
 
+//y25
+bool Moonraker::send_command_to_printer(wxString& msg, wxString commond) const
+{
+    // printer_state: http://192.168.20.66/printer/objects/query?print_stats
+    const char* name = get_name();
+    std::string gcode = "G28";
+    std::string commond_str = commond.ToStdString();
+    std::string json_body = "{\"script\": \"" + commond_str + "\"}";
+
+    auto url = make_url("printer/gcode/script");
+    bool successful = false;
+    Http http = Http::post(std::move(url));
+    http.header("Content-Type", "application/json")
+        .set_post_body(json_body)
+        .timeout_connect(4)
+        .on_error([&](std::string body, std::string error, unsigned status) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("%1%: Error sending G-code: %2%, HTTP %3%, body: %4%")
+            % name % error % status % body;
+            })
+        .on_complete([&](std::string body, unsigned status) {
+        BOOST_LOG_TRIVIAL(debug) << boost::format("%1%: G-code sent successfully: %2%") % name % gcode;
+        successful = true;
+            })
+#ifdef _WIN32
+        .ssl_revoke_best_effort(m_ssl_revoke_best_effort)
+#endif // _WIN32
+        .perform_sync();
+
+    return successful;
+}
 
 }

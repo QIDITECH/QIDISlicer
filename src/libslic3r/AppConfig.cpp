@@ -224,6 +224,16 @@ void AppConfig::set_defaults()
     if (get("sys_menu_enabled").empty())
         set("sys_menu_enabled", "1");
 #endif // _WIN32
+
+    if (get("show_step_import_parameters").empty())
+        set("show_step_import_parameters", "1");
+
+    if (get("linear_precision").empty())
+        set("linear_precision", "0.005");
+
+    if (get("angle_precision").empty())
+        set("angle_precision", "1.");
+
         // B45
     if (get("machine_list_minification").empty())
         set("machine_list_minification", "1");
