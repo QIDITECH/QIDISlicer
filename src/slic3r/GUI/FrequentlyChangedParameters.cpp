@@ -324,12 +324,14 @@ FreqChangedParams::FreqChangedParams(wxWindow* parent)
         auto sizer = new wxBoxSizer(wxHORIZONTAL);
         sizer->Add(sync_btn, 0, wxALIGN_CENTER_VERTICAL);
         sync_btn->Bind(wxEVT_BUTTON, [parent](wxCommandEvent& e){
-            //y25
+            //y25 y28
             std::string      ph_host = "";
+            std::string      ph_api_key = "";
             bool has_select_printer = wxGetApp().preset_bundle->physical_printers.has_selection();
             if (has_select_printer) {
                 PhysicalPrinter& ph_printer = wxGetApp().preset_bundle->physical_printers.get_selected_printer();
                 ph_host = ph_printer.config.opt_string("print_host");
+                ph_api_key = ph_printer.config.opt_string("printhost_apikey");
             }
 
             GetBoxInfoDialog dlg(wxGetApp().plater());
@@ -337,7 +339,7 @@ FreqChangedParams::FreqChangedParams(wxWindow* parent)
                 dlg.ShowModal();
             }
             else{
-                dlg.synchronize_by_ip(ph_host);
+                dlg.synchronize_by_ip(ph_host, ph_api_key);
             }
         });
         return sizer;

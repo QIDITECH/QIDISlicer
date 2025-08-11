@@ -137,19 +137,9 @@ void SwitchButton::Rescale()
 			}
             memdc.SetTextForeground(text_color.colorForStates(state ^ StateColor::Checked));
             auto text_y = BS + (thumbSize.y - textSize[0].y) / 2;
-#ifdef __APPLE__
-            if (Slic3r::is_mac_version_15()) {
-                text_y -= FromDIP(2);
-            }
-#endif
             memdc.DrawText(labels[0], {BS + (thumbSize.x - textSize[0].x) / 2, text_y});
             memdc.SetTextForeground(text_color2.count() == 0 ? text_color.colorForStates(state) : text_color2.colorForStates(state));
             auto text_y_1 = BS + (thumbSize.y - textSize[1].y) / 2;
-#ifdef __APPLE__
-            if (Slic3r::is_mac_version_15()) {
-                text_y_1 -= FromDIP(2);
-            }
-#endif
             memdc.DrawText(labels[1], {trackSize.x - thumbSize.x - BS + (thumbSize.x - textSize[1].x) / 2, text_y_1});
 			memdc.SelectObject(wxNullBitmap);
 #ifdef __WXOSX__

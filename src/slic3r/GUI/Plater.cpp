@@ -7404,6 +7404,8 @@ void Plater::send_gcode()
     }
 
     std::string sync_ip = box_msg.box_list_printer_ip;
+    //y28
+    std::string sync_api_key = box_msg.box_list_printer_api_key;
 
     bool has_diff = false;
 
@@ -7418,7 +7420,8 @@ void Plater::send_gcode()
         QIDINetwork qidi;
         wxString msg = "";
         GUI::Box_info filament_info;
-        filament_info = qidi.get_box_info(msg, sync_ip);
+        //y28
+        filament_info = qidi.get_box_info(msg, sync_ip, sync_api_key);
         GUI::Box_info cur_box_info;
         cur_box_info = get_cur_box_info();
 

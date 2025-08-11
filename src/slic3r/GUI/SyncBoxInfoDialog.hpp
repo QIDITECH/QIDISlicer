@@ -26,7 +26,10 @@ public:
     GetBoxInfoDialog(Plater* plater = nullptr);
     ~GetBoxInfoDialog();
     void synchronization(wxCommandEvent &event);
-    void synchronize_by_ip(std::string ip);
+
+    //y28
+    void synchronize_by_ip(std::string ip, std::string api_key);
+
     void cancel(wxCommandEvent &event);
     void on_dpi_changed(const wxRect& suggested_rect) override;
     void init_printer_combox();
@@ -37,6 +40,8 @@ public:
     void load_box_list();
 
     std::vector<std::string> m_printer_ip;
+    //y28
+    std::vector<std::string> m_printer_api_key;
 
 private:
     Plater*             m_plater{ nullptr };
@@ -52,6 +57,8 @@ private:
     bool                m_isNetMode;
     GUI::Box_info       syn_box_info;
     std::string         m_sync_printer_ip;
+    //y28
+    std::string         m_sync_printer_api_key;
 };
 
 }}  // namespace Slic3r::GUI

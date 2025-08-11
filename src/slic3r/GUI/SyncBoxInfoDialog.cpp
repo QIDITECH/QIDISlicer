@@ -25,7 +25,6 @@ namespace Slic3r { namespace GUI {
     SetIcon(wxIcon(icon_path.c_str(), wxBITMAP_TYPE_ICO));
 
     Freeze();
-    SetBackgroundColour(m_colour_def_color);
 
     m_sizer_main = new wxBoxSizer(wxVERTICAL);
     m_sizer_main->SetMinSize(wxSize(0, -1));
@@ -39,17 +38,20 @@ namespace Slic3r { namespace GUI {
     m_stext_printer_title = new wxStaticText(this, wxID_ANY, _L("Printer"), wxDefaultPosition, wxSize(-1, -1), 0);
     m_stext_printer_title->SetFont(::Label::Head_14);
     m_stext_printer_title->Wrap(-1);
-    m_stext_printer_title->SetForegroundColour(m_colour_bold_color);
-    m_stext_printer_title->SetBackgroundColour(m_colour_def_color);
 
     m_comboBox_printer = new ::ComboBox(this, wxID_ANY, "", wxDefaultPosition, wxSize(FromDIP(250), 20), 0, nullptr, wxCB_READONLY);
+
     m_sizer_printer->Add(m_stext_printer_title, 0, wxALIGN_CENTER | wxALL, FromDIP(5));
     m_sizer_printer->Add(0, 0, 0, wxEXPAND | wxALIGN_CENTER | wxLEFT, FromDIP(12));
     m_sizer_printer->Add(m_comboBox_printer, 1, wxEXPAND | wxALIGN_CENTER | wxALL, FromDIP(5));
 
     wxPanel* switch_button_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBU_LEFT | wxTAB_TRAVERSAL | wxBU_RIGHT);
     wxBoxSizer* sizer_switch_area = new wxBoxSizer(wxHORIZONTAL);
-    switch_button_panel->SetBackgroundColour((wxColour("#FFFFFF")));
+//y28
+#ifdef _WIN32
+    bool is_dark = wxGetApp().app_config->get_bool("dark_color_mode");
+    switch_button_panel->SetBackgroundColour(is_dark ? wxColour(43, 43, 43) : wxColour(255, 255, 255));
+#endif
     m_switch_button = new SwitchButton(switch_button_panel);
     m_switch_button->SetMaxSize(wxSize(100, 100));
     m_switch_button->SetLabels(_L("Local"), _L("Link"));
@@ -61,6 +63,8 @@ namespace Slic3r { namespace GUI {
         m_comboBox_printer->SetValue("");
         m_comboBox_printer->Clear();
         m_printer_ip.clear();
+        //y28
+        m_printer_api_key.clear();
         PresetBundle& preset_bundle = *wxGetApp().preset_bundle;
         PhysicalPrinterCollection& ph_printers = wxGetApp().preset_bundle->physical_printers;
         std::string preset_typename = NormalizeVendor(preset_bundle.printers.get_edited_preset().name);
@@ -71,6 +75,8 @@ namespace Slic3r { namespace GUI {
                 if (preset_typename.find(NormalizeVendor(printer_preset)) != std::string::npos) {
                     m_comboBox_printer->Append(from_u8(printer_name));
                     m_printer_ip.push_back((it->config.opt_string("print_host")));
+                    //y28
+                    m_printer_api_key.push_back((it->config.opt_string("printhost_apikey")));
                 }
             }
             m_comboBox_printer->SetSelection(0);
@@ -102,23 +108,16 @@ namespace Slic3r { namespace GUI {
     switch_button_panel->Layout();
     m_sizer_printer->Add(switch_button_panel, 0, wxALL | wxALIGN_CENTER, FromDIP(5));
 
-    wxBoxSizer* m_sizer_btn = new wxBoxSizer(wxHORIZONTAL);
-    btn_bg_enable = StateColor(
-            std::pair<wxColour, int>(wxColour(95, 82, 253), StateColor::Pressed),
-            std::pair<wxColour, int>(wxColour(129, 150, 255), StateColor::Hovered),
-            std::pair<wxColour, int>(wxColour(68, 121, 251), StateColor::Normal));
-
-    m_button_sync = new wxButton(this, wxID_ANY, _L("Sync"), wxDefaultPosition, wxSize(60, 25), wxBU_EXACTFIT);
-    wxGetApp().UpdateDarkUI(m_button_sync, true);
+    //y28
+    wxStdDialogButtonSizer* btns = this->CreateStdDialogButtonSizer(wxOK | wxCANCEL);
+    m_button_sync = static_cast<wxButton*>(this->FindWindowById(wxID_OK, this));
+    m_button_cancel = static_cast<wxButton*>(this->FindWindowById(wxID_CANCEL, this));
     m_button_sync->Bind(wxEVT_BUTTON, &GetBoxInfoDialog::synchronization, this);
-
-    m_button_cancel = new wxButton(this, wxID_ANY, _L("Cancel"), wxDefaultPosition, wxSize(60, 25), wxBU_EXACTFIT);
-    wxGetApp().UpdateDarkUI(m_button_cancel, true);
-    m_button_cancel->Bind(wxEVT_BUTTON, &GetBoxInfoDialog::cancel, this);
-
-    m_sizer_btn->AddStretchSpacer();
-    m_sizer_btn->Add(m_button_sync, 0, wxALIGN_RIGHT | wxALL, FromDIP(5));
-    m_sizer_btn->Add(m_button_cancel, 0, wxALIGN_RIGHT | wxALL, FromDIP(5));
+    m_button_sync->Bind(wxEVT_BUTTON, &GetBoxInfoDialog::cancel, this);
+#ifdef _WIN32
+    wxGetApp().UpdateDarkUI(m_button_sync);
+    wxGetApp().UpdateDarkUI(m_button_cancel);
+#endif
 
     m_sizer_main->Add(m_line_top, 0, wxEXPAND | wxTOP, FromDIP(0));
     m_sizer_main->AddSpacer(FromDIP(10));
@@ -126,7 +125,7 @@ namespace Slic3r { namespace GUI {
     m_sizer_main->AddSpacer(FromDIP(15));
     m_sizer_main->Add(m_sizer_printer, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(20));
     m_sizer_main->AddSpacer(FromDIP(25));
-    m_sizer_main->Add(m_sizer_btn, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(20));
+    m_sizer_main->Add(btns, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(20));
     m_sizer_main->AddSpacer(FromDIP(10));
 
     SetSizer(m_sizer_main);
@@ -162,19 +161,27 @@ void GetBoxInfoDialog::synchronization(wxCommandEvent &event)
 #if QDT_RELEASE_TO_PUBLIC
     int selected_idx = m_comboBox_printer->GetSelection();
     std::string printer_ip = m_printer_ip[selected_idx];
+    //y28
+    std::string printer_api_key = "";
+    if(!m_printer_api_key.empty())
+        printer_api_key = m_printer_api_key[selected_idx];
+
+    m_sync_printer_ip = printer_ip;
+    m_sync_printer_api_key = printer_api_key;
 
     QIDINetwork qidi;
     wxString msg = "";
-    bool has_box = qidi.get_box_state(msg, printer_ip);
+    //y28
+    bool has_box = qidi.get_box_state(msg, printer_ip, printer_api_key);
      if (!has_box) {
          WarningDialog(this, _L("This Printer has not connect the box, please check.")).ShowModal();
      }
      else {
         //Get Box_info
         GUI::Box_info filament_info;
-        filament_info = qidi.get_box_info(msg, printer_ip);
+        filament_info = qidi.get_box_info(msg, printer_ip, printer_api_key);
         m_plater->current_box_info = filament_info;
-        qidi.get_color_filament_str(msg, filament_info, printer_ip);
+        qidi.get_color_filament_str(msg, filament_info, printer_ip, printer_api_key);
         generate_filament_id(filament_info);
         syn_box_info = std::move(filament_info);
         update_filament_info(filament_info);
@@ -190,23 +197,25 @@ void GetBoxInfoDialog::synchronization(wxCommandEvent &event)
 #endif
 }
 
-void GetBoxInfoDialog::synchronize_by_ip(std::string ip)
+//y28
+void GetBoxInfoDialog::synchronize_by_ip(std::string ip, std::string api_key)
 {
 #if QDT_RELEASE_TO_PUBLIC
     m_sync_printer_ip = ip;
+    m_sync_printer_api_key = api_key;
 
     QIDINetwork qidi;
     wxString msg = "";
-    bool has_box = qidi.get_box_state(msg, m_sync_printer_ip);
+    bool has_box = qidi.get_box_state(msg, m_sync_printer_ip, m_sync_printer_api_key);
      if (!has_box) {
         WarningDialog(this, _L("This Printer has not connect the box, please check.")).ShowModal();
      }
      else {
         //Get Box_info
         GUI::Box_info filament_info;
-        filament_info = qidi.get_box_info(msg, m_sync_printer_ip);
+        filament_info = qidi.get_box_info(msg, m_sync_printer_ip, m_sync_printer_api_key);
         m_plater->current_box_info = filament_info;
-        qidi.get_color_filament_str(msg, filament_info, m_sync_printer_ip);
+        qidi.get_color_filament_str(msg, filament_info, m_sync_printer_ip, m_sync_printer_api_key);
         generate_filament_id(filament_info);
         syn_box_info = filament_info;
         update_filament_info(filament_info);
@@ -260,6 +269,7 @@ void GetBoxInfoDialog::update_filament_info(GUI::Box_info& machine_filament_info
     m_plater->box_msg.box_list_preset_name = preset_name_box;
 
     m_plater->box_msg.box_list_printer_ip = m_sync_printer_ip;
+    m_plater->box_msg.box_list_printer_api_key = m_sync_printer_api_key;
 }
  
 void GetBoxInfoDialog::cancel(wxCommandEvent &event)

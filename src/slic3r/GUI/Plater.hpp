@@ -68,6 +68,8 @@ struct Box_msg {
     std::vector<std::string> filament_type;
     std::string box_list_preset_name;
     std::string box_list_printer_ip;
+    //y28
+    std::string box_list_printer_api_key;
     int box_count = 0;
     int auto_reload_detect = 0;
 };
