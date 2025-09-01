@@ -113,7 +113,7 @@ namespace Slic3r { namespace GUI {
     m_button_sync = static_cast<wxButton*>(this->FindWindowById(wxID_OK, this));
     m_button_cancel = static_cast<wxButton*>(this->FindWindowById(wxID_CANCEL, this));
     m_button_sync->Bind(wxEVT_BUTTON, &GetBoxInfoDialog::synchronization, this);
-    m_button_sync->Bind(wxEVT_BUTTON, &GetBoxInfoDialog::cancel, this);
+    m_button_cancel->Bind(wxEVT_BUTTON, &GetBoxInfoDialog::cancel, this);
 #ifdef _WIN32
     wxGetApp().UpdateDarkUI(m_button_sync);
     wxGetApp().UpdateDarkUI(m_button_cancel);

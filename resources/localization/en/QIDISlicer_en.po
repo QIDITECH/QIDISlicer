@@ -28225,3 +28225,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr ""
+
+msgid "Export GCODE.3MF file:"
+msgstr ""
+
+msgid "Export File"
+msgstr ""
+
+msgid "Export all gcode.3mf"
+msgstr ""
+
+msgid "Sync filament info from the box"
+msgstr ""
+
+msgid "Sync Box information"
+msgstr ""
+
+msgid "Please select the printer in the list to get box info"
+msgstr ""
+
+msgid "This Printer has not connect the box, please check."
+msgstr ""

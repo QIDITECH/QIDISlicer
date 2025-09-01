@@ -1056,6 +1056,8 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionFloat,              z_offset))
     //y25
     ((ConfigOptionString,             box_id))
+    //y29
+    ((ConfigOptionBool,               is_support_3mf))
 )
 
 PRINT_CONFIG_CLASS_DERIVED_DEFINE0(

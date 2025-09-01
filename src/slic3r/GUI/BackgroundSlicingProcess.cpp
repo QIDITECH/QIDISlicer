@@ -99,9 +99,17 @@ std::pair<std::string, bool> SlicingProcessCompletedEvent::format_error_message(
 void BackgroundSlicingProcess::set_temp_output_path(int bed_idx)
 {
     boost::filesystem::path temp_path(wxStandardPaths::Get().GetTempDir().utf8_str().data());
-    temp_path /= (boost::format(".%1%_%2%.gcode") % get_current_pid() % bed_idx).str();
-	m_temp_output_path = temp_path.string();
+	//y29
+    boost::filesystem::path temp_gcode_path = temp_path/(boost::format(".%1%_%2%.gcode") % get_current_pid() % bed_idx).str();
+	m_temp_output_path = temp_gcode_path.string();
+	
+	boost::filesystem::path temp_3mf_path = temp_path/(boost::format(".%1%.gcode.3mf") % get_current_pid()).str();
+	m_temp_3mf_output_path = temp_3mf_path.string();
 }
+
+//y29
+std::string BackgroundSlicingProcess::temp_3mf_output_path() const { return m_temp_3mf_output_path; }
+std::string BackgroundSlicingProcess::temp_gcode_output_path() const { return m_temp_output_path; }
 
 BackgroundSlicingProcess::~BackgroundSlicingProcess() 
 { 
@@ -112,12 +120,17 @@ BackgroundSlicingProcess::~BackgroundSlicingProcess()
 	// in the same directory that starts the same (see set_temp_output_path).
 	const auto temp_dir = boost::filesystem::path(m_temp_output_path).parent_path();
 	std::string prefix = boost::filesystem::path(m_temp_output_path).filename().string();
+	//y29
+	std::string _3mf_prefix = boost::filesystem::path(m_temp_3mf_output_path).filename().string();
 	prefix = prefix.substr(0, prefix.find('_'));
+	_3mf_prefix = _3mf_prefix.substr(0, _3mf_prefix.find('.'));
     for (const auto& entry : boost::filesystem::directory_iterator(temp_dir)) {
         if (entry.is_regular_file()) {
             const std::string filename = entry.path().filename().string();
             if (boost::starts_with(filename, prefix) && boost::ends_with(filename, ".gcode"))
                 boost::filesystem::remove(entry);
+			if(boost::starts_with(filename, _3mf_prefix) && boost::ends_with(filename, ".gcode.3mf"))
+				boost::filesystem::remove(entry);
         }
     }
 }
@@ -780,7 +793,8 @@ void BackgroundSlicingProcess::prepare_upload(PrintHostJob &upload_job)
 
     m_print->set_status(100, GUI::format(_L("Scheduling upload to `%1%`. See Window -> Print Host Upload Queue"), upload_job.printhost->get_host()));
 
-	upload_job.upload_data.source_path = std::move(source_path);
+	if(upload_job.upload_data.source_path.empty())
+		upload_job.upload_data.source_path = std::move(source_path);
 
 	GUI::wxGetApp().printhost_job_queue().enqueue(std::move(upload_job));
 }

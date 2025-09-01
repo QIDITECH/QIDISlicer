@@ -46,6 +46,8 @@ namespace pt = boost::property_tree;
 
 #include <fast_float.h>
 
+#include "nlohmann/json.hpp"
+
 // Slightly faster than sprintf("%.9g"), but there is an issue with the karma floating point formatter,
 // https://github.com/boostorg/spirit/pull/586
 // where the exported string is one digit shorter than it should be to guarantee lossless round trip.
@@ -89,6 +91,12 @@ const std::string SLA_DRAIN_HOLES_FILE = "Metadata/Slic3r_PE_sla_drain_holes.txt
 const std::string CUSTOM_GCODE_PER_PRINT_Z_FILE = "Metadata/QIDI_Slicer_custom_gcode_per_print_z.xml";
 const std::string WIPE_TOWER_INFORMATION_FILE = "Metadata/QIDI_Slicer_wipe_tower_information.xml";
 const std::string CUT_INFORMATION_FILE = "Metadata/QIDI_Slicer_cut_information.xml";
+
+//y29
+const std::string QDS_MODEL_CONFIG_FILE = "Metadata/model_settings.config";
+const std::string QDS_MODEL_CONFIG_RELS_FILE = "Metadata/_rels/model_settings.config.rels";
+const std::string QDS_SLICE_INFO_CONFIG_FILE = "Metadata/slice_info.config";
+const std::string QDS_PROJECT_CONFIG_FILE = "Metadata/project_settings.config";
 
 static constexpr const char *RELATIONSHIP_TAG = "Relationship";
 
@@ -196,6 +204,20 @@ static constexpr const char *DEPTH_ATTR       = "depth";
 static constexpr const char *USE_SURFACE_ATTR = "use_surface";
 // static constexpr const char *FIX_TRANSFORMATION_ATTR = "transform";
 
+//y29
+static constexpr const char* PLATE_TAG = "plate";
+static constexpr const char* PLATERID_ATTR = "plater_id";
+static constexpr const char* GCODE_FILE_ATTR = "gcode_file";
+static constexpr const char* THUMBNAIL_FILE_ATTR = "thumbnail_file";
+static constexpr const char* SLICE_HEADER_TAG = "header";
+static constexpr const char* SLICE_HEADER_ITEM_TAG = "header_item";
+static constexpr const char* PLATE_IDX_ATTR = "index";
+static constexpr const char* PRINTER_MODEL_ID_ATTR = "printer_model_id";
+static constexpr const char* NOZZLE_DIAMETERS_ATTR = "nozzle_diameters";
+static constexpr const char* SLICE_PREDICTION_ATTR = "prediction";
+static constexpr const char* SLICE_WEIGHT_ATTR = "weight";
+static constexpr const char *LAYER_FILAMENT_LISTS_TAG      = "layer_filament_lists";
+static constexpr const char *LAYER_FILAMENT_LIST_TAG       = "layer_filament_list";
 
 const unsigned int VALID_OBJECT_TYPES_COUNT = 1;
 const char* VALID_OBJECT_TYPES[] =
@@ -2762,14 +2784,21 @@ namespace Slic3r {
         bool m_fullpath_sources{ true };
         bool m_zip64 { true };
 
+        //y29
+        std::vector<std::string> m_plates_gcode;
+        std::vector<std::string> m_thumbnails;
+
     public:
-        bool save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, bool fullpath_sources, const ThumbnailData* thumbnail_data, bool zip64);
+        //y29
+        bool save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, bool fullpath_sources, const ThumbnailsList* thumbnail_datas, bool zip64, bool export_gcode_3mf = false, std::string temp_gcode_path = "", bool all_gcodes = false, std::vector<PlateData> plate_datas = std::vector<PlateData>());
         static void add_transformation(std::stringstream &stream, const Transform3d &tr);
     private:
         void _publish(Model &model);
-        bool _save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, const ThumbnailData* thumbnail_data);
+        //y29
+        bool _save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, const ThumbnailsList* thumbnail_datas, bool export_gcode_3mf = false, std::string temp_gcode_path = "", bool all_gcodes = false, std::vector<PlateData> plate_datas = std::vector<PlateData>());
         bool _add_content_types_file_to_archive(mz_zip_archive& archive);
-        bool _add_thumbnail_file_to_archive(mz_zip_archive& archive, const ThumbnailData& thumbnail_data);
+        //y29
+        bool _add_thumbnail_file_to_archive(mz_zip_archive& archive, const ThumbnailData& thumbnail_data, int idx);
         bool _add_relationships_file_to_archive(mz_zip_archive& archive);
         bool _add_model_file_to_archive(const std::string& filename, mz_zip_archive& archive, const Model& model, IdToObjectDataMap& objects_data);
         bool _add_object_to_model_stream(mz_zip_writer_staged_context &context, unsigned int& object_id, ModelObject& object, BuildItemsList& build_items, VolumeToOffsetsMap& volumes_offsets);
@@ -2784,17 +2813,24 @@ namespace Slic3r {
         bool _add_model_config_file_to_archive(mz_zip_archive& archive, const Model& model, const IdToObjectDataMap &objects_data);
         bool _add_custom_gcode_per_print_z_file_to_archive(mz_zip_archive& archive, Model& model, const DynamicPrintConfig* config);
         bool _add_wipe_tower_information_file_to_archive( mz_zip_archive& archive, Model& model);
+        bool _add_gcode_file_to_archive(mz_zip_archive& archive, std::string gcode_path, bool all_gcodes = false);
+        bool _add_QDS_model_config_file_to_archive(mz_zip_archive& archive, bool all_gcodes = false);
+        bool _add_slice_info_config_file_to_archive(mz_zip_archive &archive, const Model &model, const DynamicPrintConfig& config, bool all_gcodes = false, std::vector<PlateData> plate_datas = std::vector<PlateData>());
+        bool _add_gcode_info_config_file_to_archive(mz_zip_archive &archive, std::vector<PlateData> plate_datas = std::vector<PlateData>());
+        bool _add_project_settings_file_to_archive(mz_zip_archive &archive, const DynamicPrintConfig& config);
     };
 
-    bool _3MF_Exporter::save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, bool fullpath_sources, const ThumbnailData* thumbnail_data, bool zip64)
+    //y29
+    bool _3MF_Exporter::save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, bool fullpath_sources, const std::vector<ThumbnailData>* thumbnail_datas, bool zip64, bool export_gcode_3mf, std::string temp_gcode_path, bool all_gcodes, std::vector<PlateData> plate_datas)
     {
         clear_errors();
         m_fullpath_sources = fullpath_sources;
         m_zip64 = zip64;
-        return _save_model_to_file(filename, model, config, thumbnail_data);
+        return _save_model_to_file(filename, model, config, thumbnail_datas, export_gcode_3mf, temp_gcode_path, all_gcodes, plate_datas);
     }
 
-    bool _3MF_Exporter::_save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, const ThumbnailData* thumbnail_data)
+    //y29
+    bool _3MF_Exporter::_save_model_to_file(const std::string& filename, Model& model, const DynamicPrintConfig* config, const std::vector<ThumbnailData>* thumbnail_datas, bool export_gcode_3mf, std::string temp_gcode_path, bool all_gcodes, std::vector<PlateData> plate_datas)
     {
         mz_zip_archive archive;
         mz_zip_zero_struct(&archive);
@@ -2812,9 +2848,25 @@ namespace Slic3r {
             return false;
         }
 
-        if (thumbnail_data != nullptr && thumbnail_data->is_valid()) {
+        //y29
+        if (thumbnail_datas != nullptr && !thumbnail_datas->empty()) {
             // Adds the file Metadata/thumbnail.png.
-            if (!_add_thumbnail_file_to_archive(archive, *thumbnail_data)) {
+            m_thumbnails.clear();
+            for (int i = 0; i < (*thumbnail_datas).size(); i++){
+                ThumbnailData data = (*thumbnail_datas)[i];
+                if (data.is_valid()){
+                    if (!_add_thumbnail_file_to_archive(archive, data, i)) {
+                        close_zip_writer(&archive);
+                        boost::filesystem::remove(filename);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        //y29
+        if(export_gcode_3mf){
+            if (!_add_gcode_file_to_archive(archive, temp_gcode_path, all_gcodes)) {
                 close_zip_writer(&archive);
                 boost::filesystem::remove(filename);
                 return false;
@@ -2917,6 +2969,41 @@ namespace Slic3r {
             return false;
         }
 
+        //y29
+        if(export_gcode_3mf){
+            if (!_add_QDS_model_config_file_to_archive(archive, all_gcodes)) {
+                close_zip_writer(&archive);
+                boost::filesystem::remove(filename);
+                return false;
+            }
+        }
+
+        //y29
+        if(export_gcode_3mf){
+            if (!_add_slice_info_config_file_to_archive(archive, model, *config, all_gcodes, plate_datas)) {
+                close_zip_writer(&archive);
+                boost::filesystem::remove(filename);
+                return false;
+            }
+        }
+
+        //y29
+        if(export_gcode_3mf){
+            if (!_add_gcode_info_config_file_to_archive(archive, plate_datas)) {
+                close_zip_writer(&archive);
+                boost::filesystem::remove(filename);
+                return false;
+            }
+        }
+        //y29
+        if(export_gcode_3mf){
+            if (!_add_project_settings_file_to_archive(archive, *config)) {
+                close_zip_writer(&archive);
+                boost::filesystem::remove(filename);
+                return false;
+            }
+        }
+
         if (!mz_zip_writer_finalize_archive(&archive)) {
             close_zip_writer(&archive);
             boost::filesystem::remove(filename);
@@ -2949,15 +3036,170 @@ namespace Slic3r {
         return true;
     }
 
-    bool _3MF_Exporter::_add_thumbnail_file_to_archive(mz_zip_archive& archive, const ThumbnailData& thumbnail_data)
+    //y29
+    bool _3MF_Exporter::_add_slice_info_config_file_to_archive(mz_zip_archive& archive, const Model& model, const DynamicPrintConfig& config, bool all_gcodes, std::vector<PlateData> plate_datas)
+    {
+        std::stringstream stream;
+        // Store mesh transformation in full precision, as the volumes are stored transformed and they need to be transformed back
+        // when loaded as accurately as possible.
+		stream << std::setprecision(std::numeric_limits<double>::max_digits10);
+        stream << std::setiosflags(std::ios::fixed) << std::setprecision(2);
+        stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        stream << "<" << CONFIG_TAG << ">\n";
+
+        // save slice header for debug
+        stream << "  <" << SLICE_HEADER_TAG << ">\n";
+        stream << "    <" << SLICE_HEADER_ITEM_TAG << " " << KEY_ATTR << "=\"" << "X-QDT-Client-Type"    << "\" " << VALUE_ATTR << "=\"" << "slicer" << "\"/>\n";
+        stream << "    <" << SLICE_HEADER_ITEM_TAG << " " << KEY_ATTR << "=\"" << "X-QDT-Client-Version" << "\" " << VALUE_ATTR << "=\"" << SLIC3R_VERSION << "\"/>\n";
+        stream << "  </" << SLICE_HEADER_TAG << ">\n";
+
+        int current_bed_idx = s_multiple_beds.get_active_bed();
+        int bed_count = s_multiple_beds.get_number_of_beds();
+        for(int idx = 0; idx < plate_datas.size(); idx++){
+            PlateData plate_data = plate_datas[idx];
+            if(plate_data.plate_index != current_bed_idx + 1 && !all_gcodes)
+                continue;
+            stream << "  <" << PLATE_TAG << ">\n";
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << PLATE_IDX_ATTR        << "\" " << VALUE_ATTR << "=\"" << plate_data.plate_index << "\"/>\n";
+
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << PRINTER_MODEL_ID_ATTR       << "\" " << VALUE_ATTR << "=\"" << plate_data.printer_model << "\"/>\n";
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << NOZZLE_DIAMETERS_ATTR       << "\" " << VALUE_ATTR << "=\"" << plate_data.nozzle_diameters << "\"/>\n";
+            
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << SLICE_PREDICTION_ATTR << "\" " << VALUE_ATTR << "=\"" << plate_data.gcode_prediction << "\"/>\n";
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << SLICE_WEIGHT_ATTR      << "\" " << VALUE_ATTR << "=\"" <<  plate_data.gcode_weight << "\"/>\n";
+        
+            std::vector<std::string> filament_msg = plate_data.filament_msg;
+            for(int i = 0; i < filament_msg.size(); i++){
+                stream << filament_msg[i] << "\n";
+            }
+            stream << "  </" << PLATE_TAG << ">\n";
+        }
+        stream << "</" << CONFIG_TAG << ">\n";
+
+        std::string out = stream.str();
+
+        if (!mz_zip_writer_add_mem(&archive, QDS_SLICE_INFO_CONFIG_FILE.c_str(), (const void*)out.data(), out.length(), MZ_DEFAULT_COMPRESSION)) {
+            add_error("Unable to add model config file to archive");
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ":" << __LINE__ << boost::format(", store  slice-info to 3mf,  length %1%, failed\n") % out.length();
+            return false;
+        }
+
+        return true;
+    }
+
+    //y29
+    bool _3MF_Exporter::_add_gcode_file_to_archive(mz_zip_archive& archive, std::string gcode_path, bool all_gcodes)
+    {
+        m_plates_gcode.clear();
+        std::vector<std::string> gcode_files;
+        const auto temp_dir = boost::filesystem::path(gcode_path).parent_path();
+        std::string prefix = boost::filesystem::path(gcode_path).filename().string();
+        prefix = prefix.substr(0, prefix.find('_'));
+        for (const auto& entry : boost::filesystem::directory_iterator(temp_dir)) {
+            if (entry.is_regular_file()) {
+                const std::string filename = entry.path().filename().string();
+                if (boost::starts_with(filename, prefix) && boost::ends_with(filename, ".gcode"))
+                    gcode_files.push_back(entry.path().string());
+            }
+        }
+
+        bool all_success = true;
+
+        int current_bed_idx = s_multiple_beds.get_active_bed();
+        std::string current_gcode_name = "";
+        if(!all_gcodes)
+            current_gcode_name = (boost::format(".%1%_%2%.gcode") %get_current_pid() %(current_bed_idx)).str();
+
+        int idx = 1;
+        for (const auto& file_path : gcode_files) {
+            if(file_path.find(current_gcode_name) == std::string::npos && !current_gcode_name.empty()){
+                idx++;
+                continue;
+            }
+            std::ifstream file(file_path, std::ios::binary | std::ios::ate);
+            if (!file.is_open()) {
+                add_error("Unable to open gcode file: " + file_path);
+                all_success = false;
+                continue;
+            }
+            
+            std::streamsize file_size = file.tellg();
+            file.seekg(0, std::ios::beg);
+            
+            std::vector<char> buffer(file_size);
+            if (!file.read(buffer.data(), file_size)) {
+                add_error("Unable to read gcode file: " + file_path);
+                all_success = false;
+                idx++;
+                continue;
+            }
+            file.close();
+            
+            std::string filename;
+            if(!current_gcode_name.empty())
+                filename = (boost::format("Metadata/plate_%1%.gcode") % (current_bed_idx + 1)).str();
+            else
+                filename = (boost::format("Metadata/plate_%1%.gcode") % idx).str();
+            
+            bool res = mz_zip_writer_add_mem(&archive, filename.c_str(), buffer.data(), buffer.size(), MZ_DEFAULT_COMPRESSION);
+            if (!res) {
+                add_error("Unable to add gcode file to archive: " + filename);
+                all_success = false;
+            }
+
+            m_plates_gcode.push_back(filename);
+            idx++;
+        }
+
+        return all_success;
+    }
+
+    bool _3MF_Exporter::_add_gcode_info_config_file_to_archive(mz_zip_archive &archive, std::vector<PlateData> plate_datas){
+        bool res = true;
+
+        for(int i = 0; i < plate_datas.size(); i++){
+            nlohmann::json j;
+            j["filament_ids"] = plate_datas[i].used_extruders;
+            j["filament_colors"] = plate_datas[i].filament_colors;
+            std::string out = j.dump();
+            std::string json_file_name = (boost::format("Metadata/plate_%1%.json") % (plate_datas[i].plate_index)).str();
+            if (!mz_zip_writer_add_mem(&archive, json_file_name.c_str(), (const void*)out.data(), out.length(), MZ_DEFAULT_COMPRESSION)) {
+                add_error("Unable to add json file to archive");
+                BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ":" << __LINE__ << boost::format(", Unable to add json file to archive\n");
+                return false;
+            }
+        }
+        return res;
+    }
+
+    bool _3MF_Exporter::_add_project_settings_file_to_archive(mz_zip_archive &archive, const DynamicPrintConfig& config){
+        bool res = true;
+
+        nlohmann::json j;
+        j["filament_colour"] = config.option<ConfigOptionStrings>("filament_colour")->values;
+        j["filament_type"] = config.option<ConfigOptionStrings>("filament_type")->values;
+        std::string out = j.dump();
+        std::string json_file_name = (boost::format(QDS_PROJECT_CONFIG_FILE)).str();
+        if (!mz_zip_writer_add_mem(&archive, json_file_name.c_str(), (const void*)out.data(), out.length(), MZ_DEFAULT_COMPRESSION)) {
+            add_error("Unable to add json file to archive");
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ":" << __LINE__ << boost::format(", Unable to add json file to archive\n");
+            return false;
+        }
+        return res;
+    }
+
+    //y29
+    bool _3MF_Exporter::_add_thumbnail_file_to_archive(mz_zip_archive& archive, const ThumbnailData& thumbnail_data, int idx)
     {
         bool res = false;
 
         size_t png_size = 0;
         void* png_data = tdefl_write_image_to_png_file_in_memory_ex((const void*)thumbnail_data.pixels.data(), thumbnail_data.width, thumbnail_data.height, 4, &png_size, MZ_DEFAULT_LEVEL, 1);
         if (png_data != nullptr) {
-            res = mz_zip_writer_add_mem(&archive, THUMBNAIL_FILE.c_str(), (const void*)png_data, png_size, MZ_DEFAULT_COMPRESSION);
+            std::string thumbnail_name = (boost::format("Metadata/plate_%1%.png") % (idx+1)).str();
+            res = mz_zip_writer_add_mem(&archive, thumbnail_name.c_str(), (const void*)png_data, png_size, MZ_DEFAULT_COMPRESSION);
             mz_free(png_data);
+            m_thumbnails.push_back(thumbnail_name);
         }
 
         if (!res)
@@ -3663,6 +3905,42 @@ namespace Slic3r {
         return true;
     }
 
+    //y29
+    bool _3MF_Exporter::_add_QDS_model_config_file_to_archive(mz_zip_archive& archive, bool all_gcodes){
+        std::stringstream stream;
+        // Store mesh transformation in full precision, as the volumes are stored transformed and they need to be transformed back
+        // when loaded as accurately as possible.
+		stream << std::setprecision(std::numeric_limits<double>::max_digits10);
+        stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        stream << "<" << CONFIG_TAG << ">\n";
+
+        int current_bed_idx = s_multiple_beds.get_active_bed();
+        int bed_count = s_multiple_beds.get_number_of_beds();
+        for(int i = 0; i < bed_count; i++){
+            stream << "  <" << PLATE_TAG << ">\n";
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << PLATERID_ATTR << "\" " << VALUE_ATTR << "=\"" << i + 1 << "\"/>\n";
+            if(current_bed_idx == i && !all_gcodes)
+                stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << GCODE_FILE_ATTR << "\" " << VALUE_ATTR << "=\"" << (boost::format("plate_%1%.gcode") % (current_bed_idx + 1)).str() << "\"/>\n";
+            else if(all_gcodes)
+                stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << GCODE_FILE_ATTR << "\" " << VALUE_ATTR << "=\"" << (boost::format("plate_%1%.gcode") % (i + 1)).str() << "\"/>\n";
+            else
+                stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << GCODE_FILE_ATTR << "\" " << VALUE_ATTR << "=\"" << "" << "\"/>\n";
+            stream << "    <" << METADATA_TAG << " " << KEY_ATTR << "=\"" << THUMBNAIL_FILE_ATTR << "\" " << VALUE_ATTR << "=\"" << m_thumbnails[i] << "\"/>\n";
+            stream << "  </" << PLATE_TAG << ">\n";
+        }
+
+        stream << "</" << CONFIG_TAG << ">\n";
+
+        std::string out = stream.str();
+        if (!mz_zip_writer_add_mem(&archive, QDS_MODEL_CONFIG_FILE.c_str(), (const void*)out.data(), out.length(), MZ_DEFAULT_COMPRESSION)) {
+            BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << ":" << __LINE__ << boost::format("Unable to add model config file to archive\n");
+            add_error("Unable to add model config file to archive");
+            return false;
+        }
+
+        return true;
+    }
+
     bool _3MF_Exporter::_add_model_config_file_to_archive(mz_zip_archive& archive, const Model& model, const IdToObjectDataMap &objects_data)
     {
         enum class MetadataType{
@@ -3994,7 +4272,8 @@ bool load_3mf(
     return res;
 }
 
-bool store_3mf(const char* path, Model* model, const DynamicPrintConfig* config, bool fullpath_sources, const ThumbnailData* thumbnail_data, bool zip64)
+//y29
+bool store_3mf(const char* path, Model* model, const DynamicPrintConfig* config, bool fullpath_sources, const std::vector<ThumbnailData>* thumbnail_datas, bool zip64, bool export_gcode_3mf, std::string temp_gcode_path, bool all_gcodes, std::vector<PlateData> plate_datas)
 {
     // All export should use "C" locales for number formatting.
     CNumericLocalesSetter locales_setter;
@@ -4003,7 +4282,7 @@ bool store_3mf(const char* path, Model* model, const DynamicPrintConfig* config,
         return false;
 
     _3MF_Exporter exporter;
-    bool res = exporter.save_model_to_file(path, *model, config, fullpath_sources, thumbnail_data, zip64);
+    bool res = exporter.save_model_to_file(path, *model, config, fullpath_sources, thumbnail_datas, zip64, export_gcode_3mf, temp_gcode_path, all_gcodes, plate_datas);
     if (!res)
         exporter.log_errors();
 

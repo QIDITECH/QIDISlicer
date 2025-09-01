@@ -437,6 +437,12 @@ bool Moonraker::upload(PrintHostUpload upload_data, ProgressFn prorgess_fn, Erro
         http.form_add("path", upload_parent_path.string());
     if (upload_data.post_action == PrintHostPostUploadAction::StartPrint)
         http.form_add("print", "true");
+
+    //y29
+    if(upload_data.is_3mf){
+        http.form_add("plateindex", std::to_string(upload_data.plate_index));
+    }
+    
     progress_percentage = 0;
     http.form_add_file("file", upload_data.source_path.string(), upload_filename.string())
         .on_complete([&](std::string body, unsigned status) {

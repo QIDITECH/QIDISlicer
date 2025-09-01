@@ -29809,3 +29809,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Daha fazla bilgi edin"
+
+msgid "Export GCODE.3MF file:"
+msgstr "GCODE.3MF dosyasını dışa aktar:"
+
+msgid "Export File"
+msgstr "Dosyayı Dışa Aktar"
+
+msgid "Export all gcode.3mf"
+msgstr "Tüm gcode.3mf dosyalarını dışa aktar"
+
+msgid "Sync filament info from the box"
+msgstr "Kutudan filament bilgilerini senkronize et"
+
+msgid "Sync Box information"
+msgstr "Kutu bilgilerini senkronize et"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Kutu bilgilerini almak için listeden yazıcıyı seçin"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Bu yazıcı kutuya bağlı değil, lütfen kontrol edin."

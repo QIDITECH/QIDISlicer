@@ -2777,6 +2777,12 @@ void PrintConfigDef::init_fff_params()
     def->set_default_value(new ConfigOptionFloat(0.0));
 //y25
 
+    //y29
+    def = this->add("is_support_3mf", coBool);
+    def->label = L("Support 3MF");
+    def->tooltip = L("The machine supports export .gcode.3mf file.");
+    def->set_default_value(new ConfigOptionBool(false));
+
     def = this->add("filament_id", coStrings);
     def->set_default_value(new ConfigOptionStrings { "" });
 

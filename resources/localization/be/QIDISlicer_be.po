@@ -30367,3 +30367,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Даведацца больш"
+
+msgid "Export GCODE.3MF file:"
+msgstr "Экспартаваць файл GCODE.3MF:"
+
+msgid "Export File"
+msgstr "Экспартаваць файл"
+
+msgid "Export all gcode.3mf"
+msgstr "Экспартаваць усе gcode.3mf"
+
+msgid "Sync filament info from the box"
+msgstr "Сінхранізаваць інфармацыю аб філаменце з скрыні"
+
+msgid "Sync Box information"
+msgstr "Сінхранізаваць інфармацыю скрыні"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Выберыце друкарку з спісу, каб атрымаць інфармацыю аб скрыні"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Гэтая друкарка не падключана да скрыні, калі ласка, праверце."

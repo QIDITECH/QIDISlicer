@@ -28665,3 +28665,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Lue lisää"
+
+msgid "Export GCODE.3MF file:"
+msgstr "Vie GCODE.3MF-tiedosto:"
+
+msgid "Export File"
+msgstr "Vie tiedosto"
+
+msgid "Export all gcode.3mf"
+msgstr "Vie kaikki gcode.3mf-tiedostot"
+
+msgid "Sync filament info from the box"
+msgstr "Synkronoi langan tiedot laatikosta"
+
+msgid "Sync Box information"
+msgstr "Synkronoi laatikon tiedot"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Valitse tulostin listasta saadaksesi laatikon tiedot"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Tämä tulostin ei ole yhteydessä laatikkoon, tarkista yhteys."

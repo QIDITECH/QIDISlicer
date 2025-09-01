@@ -35,7 +35,8 @@ enum class ActionButtonType : int {
     Reslice,
     Export,
     SendGCode,
-    Connect
+    Connect,
+    ExportGCode3MF
 };
 
 class Sidebar : public wxPanel
@@ -66,10 +67,14 @@ class Sidebar : public wxPanel
     wxButton*       m_btn_export_gcode          { nullptr };
     wxButton*       m_btn_reslice               { nullptr };
     wxButton*       m_btn_connect_gcode         { nullptr };
+    //y29
+    wxButton*       m_btn_export_gcode_3mf      {nullptr};
+
     ScalableButton* m_btn_send_gcode            { nullptr };
     ScalableButton* m_btn_export_gcode_removable{ nullptr }; //exports to removable drives (appears only if removable drive is connected)
                                                              //
     wxButton* m_btn_export_all_gcode                { nullptr };
+    wxButton* m_btn_export_all_gcode_3mf            { nullptr };    //y29
     wxButton* m_btn_connect_gcode_all               { nullptr };
 	ScalableButton* m_btn_export_all_gcode_removable{ nullptr };
 
@@ -130,6 +135,7 @@ public:
     bool show_export_all(bool show) const;
     bool show_export_removable_all(bool show) const;
     bool show_connect_all(bool show) const;
+    bool show_export_all_3mf(bool show) const;  //y29
 
     void switch_to_autoslicing_mode();
     void switch_from_autoslicing_mode();
@@ -148,6 +154,9 @@ public:
     void sys_color_changed();
 
     bool is_collapsed{ false };
+
+    //y29
+    bool show_gcode_3mf_export(bool show) const;
 };
 
 } // namespace GUI

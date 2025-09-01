@@ -29,6 +29,20 @@ namespace Slic3r {
 
     */
 
+    //y29
+    struct PlateData {
+        int             plate_index;
+        std::string     printer_model;
+        float           nozzle_diameters;
+        std::string     gcode_filename;
+        int             gcode_prediction;
+        float           gcode_weight;
+        std::vector<std::string> filament_msg;
+        std::vector<unsigned int> used_extruders;
+        std::vector<std::string> filament_colors;
+    };
+
+
     enum {
         support_points_format_version = 1
     };
@@ -57,7 +71,9 @@ namespace Slic3r {
 
     // Save the given model and the config data contained in the given Print into a 3mf file.
     // The model could be modified during the export process if meshes are not repaired or have no shared vertices
-    extern bool store_3mf(const char* path, Model* model, const DynamicPrintConfig* config, bool fullpath_sources, const ThumbnailData* thumbnail_data = nullptr, bool zip64 = true);
+    //y29
+    
+    extern bool store_3mf(const char* path, Model* model, const DynamicPrintConfig* config, bool fullpath_sources, const std::vector<ThumbnailData>* thumbnail_datas = nullptr, bool zip64 = true, bool export_gcode_3mf = false, std::string temp_gcode_path = "", bool all_gcodes = false, std::vector<PlateData> plate_datas = std::vector<PlateData>());
 
 } // namespace Slic3r
 

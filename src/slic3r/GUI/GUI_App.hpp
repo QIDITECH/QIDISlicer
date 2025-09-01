@@ -83,6 +83,7 @@ enum FileType
     FT_SL1,
 
     FT_ZIP,
+    FT_GCODE_3MF,   //y29
 
     FT_SIZE,
 };

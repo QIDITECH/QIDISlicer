@@ -411,20 +411,30 @@ void PrinterWebView::SetPresetChanged(bool status) {
             ShowNetPrinterButton();
         else
             ShowLocalPrinterButton();
-        //y3
+        //y3 //y29
          if (webisNetMode == isNetWeb) {
              for (DeviceButton* button : m_net_buttons) {
-                 if (button->getIPLabel().find(m_ip) != std::string::npos) {
-                     button->SetIsSelected(true);
-                     break;
-                 }
+                wxString button_ip = button->getIPLabel();
+                if (button_ip.Lower().starts_with("http"))
+                    button_ip.Remove(0, 7);
+                if (button_ip.Lower().ends_with("10088"))
+                    button_ip.Remove(button_ip.length() - 6);
+                if (button_ip == m_ip) {
+                    button->SetIsSelected(true);
+                    break;
+                }
              }
          } 
          else if (webisNetMode == isLocalWeb) 
          {
             for (DeviceButton* button : m_buttons) 
             {
-                if (button->getIPLabel().find(m_ip) != std::string::npos) 
+                wxString button_ip = button->getIPLabel();
+                if (button_ip.Lower().starts_with("http"))
+                    button_ip.Remove(0, 7);
+                if (button_ip.Lower().ends_with("10088"))
+                    button_ip.Remove(button_ip.length() - 6);
+                if (button_ip == m_ip) 
                 {
                     button->SetIsSelected(true);
                     break;
@@ -1026,8 +1036,14 @@ void PrinterWebView::load_url(wxString &url)
         button->SetIsSelected(false);
     }
 
+    //y29
     for (DeviceButton *button : m_buttons) {
-        if ((button->getIPLabel()).find(m_ip) != std::string::npos)
+        wxString button_ip = button->getIPLabel();
+        if (button_ip.Lower().starts_with("http"))
+            button_ip.Remove(0, 7);
+        if (button_ip.Lower().ends_with("10088"))
+            button_ip.Remove(button_ip.length() - 6);
+        if (button_ip == m_ip)
             button->SetIsSelected(true);
         else
             button->SetIsSelected(false);

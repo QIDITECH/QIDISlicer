@@ -41,6 +41,10 @@ struct PrintHostUpload
     PrintHostPostUploadAction post_action { PrintHostPostUploadAction::None };
 
     std::string data_json;
+
+    //y29
+    bool is_3mf = false;
+    int plate_index = 1;
 };
 
 class PrintHost

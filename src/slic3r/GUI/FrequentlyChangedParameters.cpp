@@ -317,7 +317,7 @@ FreqChangedParams::FreqChangedParams(wxWindow* parent)
     auto add_sync_btn = [this](wxWindow* parent) {
 
         //y26
-        auto sync_btn = new wxButton(parent, wxID_ANY, _L("Syn filament info from the box"), wxDefaultPosition, wxSize(200, 30), wxBU_EXACTFIT);
+        auto sync_btn = new wxButton(parent, wxID_ANY, _L("Sync filament info from the box"), wxDefaultPosition, wxSize(200, 30), wxBU_EXACTFIT);
         wxGetApp().UpdateDarkUI(sync_btn, true);
 
         sync_btn->SetToolTip(_L("Click the sync button to synchronize the Box information to the filament column."));

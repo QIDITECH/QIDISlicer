@@ -28908,3 +28908,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "자세히 알아보기"
+
+msgid "Export GCODE.3MF file:"
+msgstr "GCODE.3MF 파일 내보내기:"
+
+msgid "Export File"
+msgstr "파일 내보내기"
+
+msgid "Export all gcode.3mf"
+msgstr "모든 gcode.3mf 내보내기"
+
+msgid "Sync filament info from the box"
+msgstr "박스에서 필라멘트 정보 동기화"
+
+msgid "Sync Box information"
+msgstr "박스 정보 동기화"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "박스 정보를 얻으려면 목록에서 프린터를 선택하세요"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "이 프린터는 박스에 연결되어 있지 않습니다. 확인해 주세요."

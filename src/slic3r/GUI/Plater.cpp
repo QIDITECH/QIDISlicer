@@ -148,7 +148,8 @@ using Slic3r::Preset;
 using Slic3r::PrintHostJob;
 using Slic3r::GUI::format_wxstr;
 
-static const std::pair<unsigned int, unsigned int> THUMBNAIL_SIZE_3MF = { 256, 256 };
+//y29
+static const std::pair<unsigned int, unsigned int> THUMBNAIL_SIZE_3MF = { 512, 512 };
 //B64
 static const std::pair<unsigned int, unsigned int> THUMBNAIL_SIZE_SEND = {128, 160};
 
@@ -1831,7 +1832,9 @@ wxString Plater::priv::get_export_file(GUI::FileType file_type)
         case FT_GCODE:
         case FT_OBJ:
         case FT_OBJECT:
-            wildcard = file_wildcards(file_type);
+        //y29
+        case FT_GCODE_3MF:
+             wildcard = file_wildcards(file_type);
         break;
         default:
             wildcard = file_wildcards(FT_MODEL);
@@ -1865,6 +1868,13 @@ wxString Plater::priv::get_export_file(GUI::FileType file_type)
         {
             output_file.replace_extension("obj");
             dlg_title = _L("Export OBJ file:");
+            break;
+        }
+        //y29
+        case FT_GCODE_3MF:
+        {
+            output_file.replace_extension(".gcode.3mf");
+            dlg_title = _L("Export GCODE.3MF file:");
             break;
         }
         default: break;
@@ -3505,6 +3515,10 @@ void Plater::priv::on_process_completed(SlicingProcessCompletedEvent &evt)
             notification_manager->push_exporting_finished_notification(last_output_path, last_output_dir_path, false);
     }
     exporting_status = ExportingStatus::NOT_EXPORTING;
+
+    ////y29
+    //if(wxGetApp().preset_bundle->printers.get_selected_preset().config.opt_bool("is_support_3mf"))
+    //    q->export_3mf(fs::path(this->background_process.temp_3mf_output_path()));
 }
 
 void Plater::priv::on_layer_editing_toggled(bool enable)
@@ -4091,31 +4105,53 @@ void Plater::priv::show_action_buttons(const bool ready_to_slice_) const
 # endif
 
     // when a background processing is ON, export_btn and/or send_btn are showing
+    //y29
     if (get_config_bool("background_processing"))
     {
 	    RemovableDriveManager::RemovableDrivesStatus removable_media_status = wxGetApp().removable_drive_manager()->status();
-		if (sidebar->show_reslice(false) |
-			sidebar->show_export(true) |
-            //y18
-			sidebar->show_send(send_gcode_shown | link_has_machine | local_has_devices) |
-            //y15
-            // sidebar->show_connect(connect_gcode_shown) |
-			sidebar->show_export_removable(removable_media_status.has_removable_drives))
-            sidebar->Layout();
+        if(wxGetApp().preset_bundle->printers.get_selected_preset().config.opt_bool("is_support_3mf")){
+            if (sidebar->show_reslice(false) |
+                sidebar->show_export(false) |
+                sidebar->show_send(send_gcode_shown | link_has_machine | local_has_devices) |
+                sidebar->show_export_removable(removable_media_status.has_removable_drives) |
+                sidebar->show_gcode_3mf_export(true))
+                ;
+        }
+        else {
+            if (sidebar->show_reslice(false) |
+                sidebar->show_export(true) |
+                sidebar->show_send(send_gcode_shown | link_has_machine | local_has_devices) |
+                sidebar->show_export_removable(removable_media_status.has_removable_drives) |
+                sidebar->show_gcode_3mf_export(false))
+                ;
+        }
+        sidebar->Layout();
     }
     else
     {
 	    RemovableDriveManager::RemovableDrivesStatus removable_media_status;
 	    if (! ready_to_slice) 
 	    	removable_media_status = wxGetApp().removable_drive_manager()->status();
-        if (sidebar->show_reslice(ready_to_slice) |
-            sidebar->show_export(!ready_to_slice) |
-            //y18
-            sidebar->show_send((send_gcode_shown | link_has_machine | local_has_devices) && !ready_to_slice) |
-            //y15
-            // sidebar->show_connect(connect_gcode_shown && !ready_to_slice) |
-			sidebar->show_export_removable(!ready_to_slice && removable_media_status.has_removable_drives))
-            sidebar->Layout();
+        bool is_support_3mf = wxGetApp().preset_bundle->printers.get_selected_preset().config.opt_bool("is_support_3mf");
+        if (is_support_3mf) {
+            if (sidebar->show_reslice(ready_to_slice) |
+                sidebar->show_export(false) |
+                sidebar->show_send((send_gcode_shown | link_has_machine | local_has_devices) && !ready_to_slice) |
+                sidebar->show_export_removable(!ready_to_slice && removable_media_status.has_removable_drives) |
+                sidebar->show_gcode_3mf_export(!ready_to_slice)) {
+                ;
+            }
+        }
+        else {
+            if (sidebar->show_reslice(ready_to_slice) |
+                sidebar->show_export(!ready_to_slice) |
+                sidebar->show_send((send_gcode_shown | link_has_machine | local_has_devices) && !ready_to_slice) |
+                sidebar->show_export_removable(!ready_to_slice && removable_media_status.has_removable_drives) |
+                sidebar->show_gcode_3mf_export(false)) {
+                ;
+            }
+        }
+        sidebar->Layout();
     }
 }
 
@@ -4130,7 +4166,8 @@ void Plater::priv::show_autoslicing_action_buttons() const {
 
     RemovableDriveManager::RemovableDrivesStatus removable_media_status = wxGetApp().removable_drive_manager()->status();
 
-    bool updated{sidebar->show_export_all(true)};
+    //y29
+    bool updated{wxGetApp().preset_bundle->printers.get_selected_preset().config.opt_bool("is_support_3mf") ? sidebar->show_export_all_3mf(true) : sidebar->show_export_all(true)};
     updated = sidebar->show_connect_all(connect_gcode_shown) || updated;
     updated = sidebar->show_export_removable_all(removable_media_status.has_removable_drives) || updated;
     if (updated) {
@@ -6961,13 +6998,18 @@ bool Plater::export_3mf(const boost::filesystem::path& output_path)
     const std::string path_u8 = into_u8(path);
     wxBusyCursor wait;
     bool full_pathnames = wxGetApp().app_config->get_bool("export_sources_full_pathnames");
-    ThumbnailData thumbnail_data;
-    ThumbnailsParams thumbnail_params = { {}, false, true, true, true };
-    p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_3MF.first, THUMBNAIL_SIZE_3MF.second, thumbnail_params, Camera::EType::Ortho);
+
+    //y29
+    //ThumbnailsParams thumbnail_params = { {}, false, true, true, true };
+    //ThumbnailsList thumbnail_datas = p->generate_thumbnails(thumbnail_params, Camera::EType::Ortho);
+    //p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_3MF.first, THUMBNAIL_SIZE_3MF.second, thumbnail_params, Camera::EType::Ortho);
+
+    std::vector<ThumbnailData> thumbnail_datas = p->thumbnails;
+
     bool ret = false;
     try
     {
-        ret = Slic3r::store_3mf(path_u8.c_str(), &p->model, export_config ? &cfg : nullptr, full_pathnames, &thumbnail_data);
+        ret = Slic3r::store_3mf(path_u8.c_str(), &p->model, export_config ? &cfg : nullptr, full_pathnames, &thumbnail_datas);
     }
     catch (boost::filesystem::filesystem_error& e)
     {
@@ -6986,6 +7028,162 @@ bool Plater::export_3mf(const boost::filesystem::path& output_path)
         show_error(this, what);
     }
     return ret;
+}
+
+//y29
+void Plater::export_gcode_3mf(bool prefer_removable, bool all_gcodes)
+{
+    if (p->model.objects.empty())
+        return;
+
+    if (canvas3D()->get_gizmos_manager().is_in_editing_mode(true))
+        return;
+
+    if (!is_sliceable(s_print_statuses[s_multiple_beds.get_active_bed()]))
+        return;
+
+    fs::path default_output_file;
+    AppConfig& appconfig = *wxGetApp().app_config;
+
+    wxString path = p->get_export_file(FT_GCODE_3MF);
+    if (path.empty()) { return; }
+    fs::path output_path(path);
+
+    bool is_success_ful = export_gcode_3mf(output_path, all_gcodes);
+    if (is_success_ful) {
+        // update last output dir
+        AppConfig& appconfig{ *wxGetApp().app_config };
+        appconfig.update_last_output_dir(output_path.parent_path().string(), false);
+        p->notification_manager->push_exporting_finished_notification(output_path.string(), p->last_output_dir_path, false);
+    }
+    else {
+        // Failure
+        const wxString what = GUI::format_wxstr("%1%: %2%", _L("Unable to save file"), path);
+        show_error(this, what);
+    }
+}
+
+//y29
+bool Plater::export_gcode_3mf(const boost::filesystem::path& output_path, bool all_gcodes){
+    if (p->model.objects.empty())
+        return false;
+    
+    if (!output_path.empty()) {
+        if (p->model.objects.empty()) {
+            MessageDialog dialog(nullptr, _L("The plater is empty.\nDo you want to save the project?"), _L("Save project"), wxYES_NO);
+            if (dialog.ShowModal() != wxID_YES)
+                return false;
+        }
+
+        wxString path;
+        bool export_config = true;
+        if (output_path.empty()) {
+            path = p->get_export_file(FT_3MF);
+            if (path.empty()) { return false; }
+        }
+        else
+            path = from_path(output_path);
+
+        if (!path.Lower().EndsWith(".gcode.3mf"))
+            return false;
+
+        // take care about private data stored into .3mf
+        // modify model
+        publish(p->model);
+
+        DynamicPrintConfig cfg = wxGetApp().preset_bundle->full_config_secure();
+        const std::string path_u8 = into_u8(path);
+        wxBusyCursor wait;
+        bool full_pathnames = wxGetApp().app_config->get_bool("export_sources_full_pathnames");
+
+        //y29
+        //ThumbnailsParams thumbnail_params = { {}, false, true, true, true };
+        //ThumbnailsList thumbnail_datas = p->generate_thumbnails(thumbnail_params, Camera::EType::Ortho);
+        //p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_3MF.first, THUMBNAIL_SIZE_3MF.second, thumbnail_params, Camera::EType::Ortho);
+
+        std::vector<ThumbnailData> thumbnail_datas;
+        if (!p->thumbnails.empty())
+            thumbnail_datas = p->thumbnails;
+        else {
+            ThumbnailData thumbnail_data;
+            ThumbnailsParams thumbnail_params = { {}, false, true, true, true };
+            p->generate_thumbnail(thumbnail_data, THUMBNAIL_SIZE_3MF.first, THUMBNAIL_SIZE_3MF.second, thumbnail_params, Camera::EType::Ortho);
+            thumbnail_datas.push_back(thumbnail_data);
+        }
+
+        std::vector<std::string> filament_msg;
+        std::vector<PlateData> plate_datas;
+        for(int i = 0; i < s_multiple_beds.get_number_of_beds(); i++){
+            filament_msg.clear();
+            PlateData pdata;
+            pdata.plate_index = i + 1;
+            pdata.gcode_filename = (boost::format("plat_%1%.gcode") % (i + 1)).str();
+            pdata.printer_model = cfg.opt_string("printer_model");
+            pdata.nozzle_diameters = cfg.opt_float("nozzle_diameter", 0);
+
+            PrintStatistics print_statistic = wxGetApp().plater()->get_fff_prints()[s_multiple_beds.get_active_bed()].get()->print_statistics();
+            pdata.gcode_prediction = print_statistic.normal_print_time_seconds;
+            pdata.gcode_weight = print_statistic.total_weight;
+
+            std::vector<unsigned int> pdata_extruders = print_statistic.printing_extruders;
+            pdata.used_extruders = pdata_extruders;
+
+            const auto& extruders_filaments = wxGetApp().preset_bundle->extruders_filaments;
+
+            unsigned int j = 0;
+            std::vector<std::string> filament_colors;
+            for (const auto& [filament_id, filament_vol] : print_statistic.filament_stats) {
+                assert(filament_id < extruders_filaments.size());
+                if (const Preset* preset = extruders_filaments[filament_id].get_selected_preset()) {
+                    double filament_weight;
+                    if (print_statistic.filament_stats.size() == 1)
+                        filament_weight = print_statistic.total_weight;
+                    else {
+                        double filament_density = preset->config.opt_float("filament_density", 0);
+                        filament_weight = filament_vol * filament_density/* *2.4052f*/ * 0.001; // assumes 1.75mm filament diameter;
+                    }
+
+                    float t_filament_diameter = preset->config.opt_float("filament_diameter", 0u);
+                    double t_filament_length = filament_vol / (M_PI * t_filament_diameter * t_filament_diameter / 4.0) / 1000.0;
+                    std::string t_filament_type = preset->config.opt_string("filament_type", 0u);
+                    std::string t_filament_id = preset->config.opt_string("filament_id", 0u);
+                    std::string t_filament_color = cfg.opt_string("extruder_colour", j);
+                    if (t_filament_color.empty())
+                        t_filament_color = preset->config.opt_string("filament_colour", 0u);
+                    filament_colors.push_back(t_filament_color);
+
+                    std::string msg = (boost::format("    <filament id=\"%1%\" tray_info_idx=\"%2%\" type=\"%3%\" color=\"%4%\" used_m=\"%5%\" used_g=\"%6%\" />")
+                        % (pdata_extruders[j] + 1)
+                        % t_filament_id
+                        % t_filament_type
+                        % t_filament_color
+                        % t_filament_length
+                        % filament_weight).str();
+                    filament_msg.push_back(msg);
+                }
+                j++;
+            }
+            pdata.filament_colors = filament_colors;
+            pdata.filament_msg = filament_msg;
+            plate_datas.push_back(pdata);
+        }
+
+        std::string gcode_temp_path = p->background_process.temp_gcode_output_path();
+        bool ret = false;
+        try
+        {
+            ret = Slic3r::store_3mf(path_u8.c_str(), &p->model, export_config ? &cfg : nullptr, full_pathnames, &thumbnail_datas, true, true, gcode_temp_path, all_gcodes, plate_datas);
+            return ret;
+        }
+        catch (boost::filesystem::filesystem_error& e)
+        {
+            const wxString what = _("Unable to save file") + ": " + path_u8 + "\n" + e.code().message();
+            MessageDialog dlg(this, what, _("Error saving gcode.3mf file"), wxOK | wxICON_ERROR);
+            dlg.ShowModal();
+            return false;
+        }
+    }
+    return false;
 }
 
 void Plater::reload_from_disk()
@@ -7396,50 +7594,9 @@ void Plater::send_gcode()
     }
     max_send_number = std::stoi(wxGetApp().app_config->get("max_send"));
 
-    std::string      selected_printer_host = "";
-    bool has_select_printer = wxGetApp().preset_bundle->physical_printers.has_selection();
-    if (has_select_printer) {
-        PhysicalPrinter& ph_printer = wxGetApp().preset_bundle->physical_printers.get_selected_printer();
-        selected_printer_host = ph_printer.config.opt_string("print_host");
-    }
-
-    std::string sync_ip = box_msg.box_list_printer_ip;
-    //y28
-    std::string sync_api_key = box_msg.box_list_printer_api_key;
-
-    bool has_diff = false;
-
-    if(sync_ip.empty()){
-        ;
-    }
-    else if (selected_printer_host != sync_ip && !selected_printer_host.empty()){
-        WarningDialog(this, _L("Please note that the printer of the synchronous BOX does not match the currently selected printer.")).ShowModal();
-    }
-#if QDT_RELEASE_TO_PUBLIC
-    else{
-        QIDINetwork qidi;
-        wxString msg = "";
-        GUI::Box_info filament_info;
-        //y28
-        filament_info = qidi.get_box_info(msg, sync_ip, sync_api_key);
-        GUI::Box_info cur_box_info;
-        cur_box_info = get_cur_box_info();
-
-        if (filament_info.filament_index != cur_box_info.filament_index
-            || filament_info.filament_vendor != cur_box_info.filament_vendor
-            || filament_info.filament_color_index != cur_box_info.filament_color_index
-            || filament_info.slot_state != cur_box_info.slot_state
-            || filament_info.slot_id != cur_box_info.slot_id
-            || filament_info.box_count != cur_box_info.box_count
-            || filament_info.auto_reload_detect != cur_box_info.auto_reload_detect) {
-            has_diff = true;
-        }
-#endif
-    }
-
-    if(has_diff){
-        WarningDialog(this, _L("The BOX information has been updated. Please resynchronize.")).ShowModal();
-    }
+    bool qidi_3mf = wxGetApp().preset_bundle->printers.get_selected_preset().config.opt_bool("is_support_3mf");
+    if (qidi_3mf)
+        default_output_file.replace_extension(".gcode.3mf");
 
     //B61 //y20
     PrintHostSendDialog dlg(default_output_file, PrintHostPostUploadAction::StartPrint, groups, storage_paths, storage_names, this, only_link);
@@ -7482,6 +7639,24 @@ void Plater::send_gcode()
 
         std::chrono::system_clock::time_point curr_time = std::chrono::system_clock::now();
         //auto                                  diff = std::chrono::duration_cast<std::chrono::seconds>(curr_time - m_time_p);
+
+
+        fs::path output_path(wxStandardPaths::Get().GetTempDir().utf8_str().data());
+        fs::path temp_path;
+        bool temp_file_is_ready = true;
+        if(qidi_3mf){
+            temp_path = output_path/(boost::format(".%1%.gcode.3mf") % get_current_pid()).str();
+            temp_file_is_ready = export_gcode_3mf(temp_path);
+        } else {
+            temp_path = output_path/(boost::format(".%1%_%2%.gcode") % get_current_pid() % s_multiple_beds.get_active_bed()).str();
+            temp_file_is_ready = fs::exists(temp_path);
+        }
+
+        if(!temp_file_is_ready){
+            show_error(this, _L("Temporary file could not be created."));
+            return;
+        }
+
         for (int i = 0; i < pppd.size(); i++) {
             if (checkbox_status[i]) {
                 auto          preset_data   = pppd[i];
@@ -7491,6 +7666,9 @@ void Plater::send_gcode()
                     return;
 
                 upload_job.upload_data.upload_path = dlg.filename();
+                upload_job.upload_data.source_path = temp_path;
+                upload_job.upload_data.is_3mf       = qidi_3mf;
+                upload_job.upload_data.plate_index = s_multiple_beds.get_active_bed() + 1;
                 upload_job.upload_data.post_action = dlg.post_action();
                 upload_job.upload_data.group       = dlg.group();
                 upload_job.upload_data.storage     = dlg.storage();
@@ -7552,10 +7730,13 @@ void Plater::send_gcode()
                 if (upload_job.empty())
                         return;
                 upload_job.upload_data.upload_path = dlg.filename();
+                upload_job.upload_data.source_path = temp_path;
+                upload_job.upload_data.is_3mf       = qidi_3mf;
+                upload_job.upload_data.plate_index = s_multiple_beds.get_active_bed() + 1;
                 upload_job.upload_data.post_action = dlg.post_action();
                 upload_job.upload_data.group       = dlg.group();
                 upload_job.upload_data.storage     = dlg.storage();
-                        upload_job.create_time             = std::chrono::system_clock::now();
+                upload_job.create_time             = std::chrono::system_clock::now();
 
                 if (UploadCount != 0 && UploadCount % std::stoi(wxGetApp().app_config->get("max_send")) == 0) {
                     m_sending_interval += std::stoi(wxGetApp().app_config->get("sending_interval")) * 60;

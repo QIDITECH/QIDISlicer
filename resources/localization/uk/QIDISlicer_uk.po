@@ -29240,3 +29240,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Дізнатися більше"
+
+msgid "Export GCODE.3MF file:"
+msgstr "Експортувати файл GCODE.3MF:"
+
+msgid "Export File"
+msgstr "Експортувати файл"
+
+msgid "Export all gcode.3mf"
+msgstr "Експортувати всі файли gcode.3mf"
+
+msgid "Sync filament info from the box"
+msgstr "Синхронізувати інформацію про філамент із коробки"
+
+msgid "Sync Box information"
+msgstr "Синхронізувати інформацію коробки"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Виберіть принтер зі списку, щоб отримати інформацію про коробку"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Цей принтер не підключений до коробки, будь ласка, перевірте."

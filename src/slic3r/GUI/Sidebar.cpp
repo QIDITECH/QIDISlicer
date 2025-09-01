@@ -482,13 +482,17 @@ Sidebar::Sidebar(Plater *parent)
     init_btn(&m_btn_reslice     , _L("Slice now")            , scaled_height);
     init_btn(&m_btn_connect_gcode, _L("Send to Connect"), scaled_height);
 
+    //y29
+    init_btn(&m_btn_export_gcode_3mf, _L("Export File"), scaled_height);
+
     enable_buttons(false);
 
     m_btns_sizer = new wxBoxSizer(wxVERTICAL);
 
     auto *complect_btns_sizer = new wxBoxSizer(wxHORIZONTAL);
     complect_btns_sizer->Add(m_btn_export_gcode, 1, wxEXPAND);
-
+    //y29
+    complect_btns_sizer->Add(m_btn_export_gcode_3mf, 1, wxEXPAND);
     //B
     m_btn_connect_gcode->Hide();
 
@@ -517,9 +521,11 @@ Sidebar::Sidebar(Plater *parent)
 
 	init_scalable_btn(&m_btn_export_all_gcode_removable, "export_to_sd", _L("Export all to SD card / Flash drive") + " " + GUI::shortkey_ctrl_prefix() + "U");
     init_btn(&m_btn_export_all_gcode, _L("Export all G-codes") + dots, scaled_height);
+    init_btn(&m_btn_export_all_gcode_3mf, _L("Export all gcode.3mf"), scaled_height);    //y29
     init_btn(&m_btn_connect_gcode_all, _L("Send all to Connect"), scaled_height);
 
     m_autoslicing_btns_sizer->Add(m_btn_export_all_gcode, 1, wxEXPAND);
+    m_autoslicing_btns_sizer->Add(m_btn_export_all_gcode_3mf, 1, wxEXPAND);  //y29
     m_autoslicing_btns_sizer->Add(m_btn_connect_gcode_all, 1, wxEXPAND | wxLEFT, margin_5);
 	m_autoslicing_btns_sizer->Add(m_btn_export_all_gcode_removable, 0, wxLEFT, margin_5);
 
@@ -530,6 +536,8 @@ Sidebar::Sidebar(Plater *parent)
 
     // Events
     m_btn_export_gcode->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_plater->export_gcode(false); });
+    //y29
+    m_btn_export_gcode_3mf->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_plater->export_gcode_3mf(false); });
     m_btn_reslice->Bind(wxEVT_BUTTON, [this](wxCommandEvent&)
     {
         if (m_plater->canvas3D()->get_gizmos_manager().is_in_editing_mode(true))
@@ -562,6 +570,11 @@ Sidebar::Sidebar(Plater *parent)
 
     m_btn_export_all_gcode->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
         this->m_plater->export_all_gcodes(false);
+    });
+
+    //y29
+    m_btn_export_all_gcode_3mf->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
+        this->m_plater->export_gcode_3mf(false, true);
     });
 
     m_btn_export_all_gcode_removable->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
@@ -797,6 +810,7 @@ void Sidebar::msw_rescale()
 #endif
     m_btn_export_gcode->SetMinSize(wxSize(-1, scaled_height));
     m_btn_reslice     ->SetMinSize(wxSize(-1, scaled_height));
+    m_btn_export_gcode_3mf->SetMinSize(wxSize(-1, scaled_height));
 
     m_scrolled_panel->Layout();
 }
@@ -806,11 +820,11 @@ void Sidebar::sys_color_changed()
 #ifdef _WIN32
     wxWindowUpdateLocker noUpdates(this);
 
-    for (wxWindow* win : std::vector<wxWindow*>{ this, m_sliced_info->GetStaticBox(), m_object_info->GetStaticBox(), m_btn_reslice, m_btn_export_gcode })
+    for (wxWindow* win : std::vector<wxWindow*>{ this, m_sliced_info->GetStaticBox(), m_object_info->GetStaticBox(), m_btn_reslice, m_btn_export_gcode, m_btn_export_gcode_3mf })
         wxGetApp().UpdateDarkUI(win);
     for (wxWindow* win : std::vector<wxWindow*>{ m_scrolled_panel, m_presets_panel })
         wxGetApp().UpdateAllStaticTextDarkUI(win);
-    for (wxWindow* btn : std::vector<wxWindow*>{ m_btn_reslice, m_btn_export_gcode, m_btn_connect_gcode })
+    for (wxWindow* btn : std::vector<wxWindow*>{ m_btn_reslice, m_btn_export_gcode, m_btn_connect_gcode, m_btn_export_gcode_3mf })
         wxGetApp().UpdateDarkUI(btn, true);
 
     m_frequently_changed_parameters->sys_color_changed();
@@ -1142,6 +1156,7 @@ void Sidebar::enable_buttons(bool enable)
     m_btn_send_gcode->Enable(enable);
     m_btn_export_gcode_removable->Enable(enable);
     m_btn_connect_gcode->Enable(enable);
+    m_btn_export_gcode_3mf->Enable(enable);
 }
 
 //Y5
@@ -1151,6 +1166,7 @@ void Sidebar::enable_export_buttons(bool enable)
     m_btn_send_gcode->Enable(enable);
 //    p->btn_eject_device->Enable(enable);
     m_btn_export_gcode_removable->Enable(enable);
+    m_btn_export_gcode_3mf->Enable(enable);
 }
 
 void Sidebar::enable_bulk_buttons(bool enable)
@@ -1158,6 +1174,8 @@ void Sidebar::enable_bulk_buttons(bool enable)
     m_btn_export_all_gcode->Enable(enable);
     m_btn_export_all_gcode_removable->Enable(enable);
     m_btn_connect_gcode_all->Enable(enable);
+    //y29
+    m_btn_export_all_gcode_3mf->Enable(enable);
 }
 
 bool Sidebar::show_reslice(bool show) const {
@@ -1184,6 +1202,15 @@ bool Sidebar::show_export_removable(bool show) const {
     }
     return m_btn_export_gcode_removable->Show(show);
 }
+
+//y29
+bool Sidebar::show_gcode_3mf_export(bool show) const {
+    if (this->m_autoslicing_mode) {
+        return false;
+    }
+    return m_btn_export_gcode_3mf->Show(show);
+}
+
 bool Sidebar::show_connect(bool show) const {
     if (this->m_autoslicing_mode) {
         return false;
@@ -1194,6 +1221,12 @@ bool Sidebar::show_connect(bool show) const {
 bool Sidebar::show_export_all(bool show) const {
     return m_btn_export_all_gcode->Show(show);
 };
+
+//y29
+bool Sidebar::show_export_all_3mf(bool show) const {
+    return m_btn_export_all_gcode_3mf->Show(show);
+};
+
 bool Sidebar::show_export_removable_all(bool show) const {
     return m_btn_export_all_gcode_removable->Show(show);
 };
@@ -1243,6 +1276,7 @@ void Sidebar::set_btn_label(const ActionButtonType btn_type, const wxString& lab
     case ActionButtonType::Export:    m_btn_export_gcode->SetLabelText(label);   break;
     case ActionButtonType::SendGCode: /*m_btn_send_gcode->SetLabelText(label);*/ break;
     case ActionButtonType::Connect: /*m_btn_connect_gcode->SetLabelText(label);*/ break;
+    case ActionButtonType::ExportGCode3MF: m_btn_export_gcode_3mf->SetLabelText(label); break;
     }
 }
 

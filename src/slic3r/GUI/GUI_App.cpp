@@ -498,6 +498,7 @@ static const FileWildcards file_wildcards_by_type[FT_SIZE] = {
     /* FT_SL1 (deprecated, overriden by sla_wildcards) */     { "Masked SLA files"sv, { ".sl1"sv, ".sl1s"sv, ".pwmx"sv } },
 
     /* FT_ZIP */     { "Zip files"sv, { ".zip"sv } },
+    /* FT_GCODE_3MF*/ {"G-code 3MF files"sv, { ".gcode.3mf"sv } },  //y29
 };
 
 // This function produces a Win32 file dialog file template mask to be consumed by wxWidgets on all platforms.

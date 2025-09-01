@@ -177,6 +177,10 @@ public:
 	void finalize_gcode(const std::string &path, const bool path_on_removable_media);
     void prepare_upload(PrintHostJob &upload_job);
 
+	//y29
+	std::string temp_3mf_output_path() const;
+	std::string temp_gcode_output_path() const;
+
 private:
 	void 	thread_proc();
 	// Calls thread_proc(), catches all C++ exceptions and shows them using wxApp::OnUnhandledException().
@@ -227,6 +231,8 @@ private:
     // Temporary G-code, there is one defined for the BackgroundSlicingProcess,
     // differentiated from the other processes by a process ID.
 	std::string 				m_temp_output_path;
+	//y29
+	std::string				 	m_temp_3mf_output_path;
 	// Output path provided by the user. The output path may be set even if the slicing is running,
 	// but once set, it cannot be re-set.
 	std::string 				m_export_path;

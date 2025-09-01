@@ -1036,7 +1036,8 @@ void GCodeGenerator::_do_export(Print& print, GCodeOutputStream &file, Thumbnail
             throw Slic3r::ExportError(error_str);
         }
 
-        if (!thumbnails.empty())
+        //y29
+        if (!thumbnails.empty() && !m_config.is_support_3mf)
             GCodeThumbnails::export_thumbnails_to_file(thumbnail_cb, thumbnails,
                 [&file](const char* sz) { file.write(sz); },
                 [&print]() { print.throw_if_canceled(); });

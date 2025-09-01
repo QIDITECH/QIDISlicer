@@ -31059,3 +31059,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Dowiedz się więcej"
+
+msgid "Export GCODE.3MF file:"
+msgstr "Eksportuj plik GCODE.3MF:"
+
+msgid "Export File"
+msgstr "Eksportuj plik"
+
+msgid "Export all gcode.3mf"
+msgstr "Eksportuj wszystkie pliki gcode.3mf"
+
+msgid "Sync filament info from the box"
+msgstr "Synchronizuj informacje o filamentach z boxa"
+
+msgid "Sync Box information"
+msgstr "Synchronizuj informacje z boxa"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Wybierz drukarkę z listy, aby uzyskać informacje o boxie"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Ta drukarka nie jest podłączona do boxa, proszę to sprawdzić."

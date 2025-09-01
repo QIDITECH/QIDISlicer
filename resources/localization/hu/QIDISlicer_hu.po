@@ -30115,3 +30115,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Tudj meg többet"
+
+msgid "Export GCODE.3MF file:"
+msgstr "GCODE.3MF fájl exportálása:"
+
+msgid "Export File"
+msgstr "Fájl exportálása"
+
+msgid "Export all gcode.3mf"
+msgstr "Összes gcode.3mf exportálása"
+
+msgid "Sync filament info from the box"
+msgstr "Filament információk szinkronizálása a dobozból"
+
+msgid "Sync Box information"
+msgstr "Doboz információk szinkronizálása"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Válassza ki a nyomtatót a listából a doboz információkhoz"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Ez a nyomtató nincs csatlakoztatva a dobozhoz, kérem ellenőrizze."

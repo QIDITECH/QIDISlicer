@@ -502,6 +502,10 @@ public:
     GUI::Box_info get_cur_box_info() { return current_box_info; };
 #endif
 
+    //y29
+    void export_gcode_3mf(bool prefer_removable = false, bool all_gcodes = false);
+    bool export_gcode_3mf(const boost::filesystem::path& output_path, bool all_gcodes = false);
+
 private:
     std::optional<fs_path> get_default_output_file();
     std::optional<wxString> check_output_path_has_error(const boost::filesystem::path& path) const;

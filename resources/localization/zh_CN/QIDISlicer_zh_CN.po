@@ -28996,3 +28996,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "了解更多"
+
+msgid "Export GCODE.3MF file:"
+msgstr "导出GCODE.3MF文件："
+
+msgid "Export File"
+msgstr "导出文件"
+
+msgid "Export all gcode.3mf"
+msgstr "导出所有gcode.3mf文件"
+
+msgid "Sync filament info from the box"
+msgstr "从盒子同步线材信息"
+
+msgid "Sync Box information"
+msgstr "同步盒子信息"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "请从列表中选择打印机以获取盒子信息"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "此打印机未连接盒子，请检查。"

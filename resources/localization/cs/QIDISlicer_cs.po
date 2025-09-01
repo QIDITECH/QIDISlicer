@@ -30709,3 +30709,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "Zjistit více"
+
+msgid "Export GCODE.3MF file:"
+msgstr "Exportovat soubor GCODE.3MF:"
+
+msgid "Export File"
+msgstr "Exportovat soubor"
+
+msgid "Export all gcode.3mf"
+msgstr "Exportovat všechny gcode.3mf"
+
+msgid "Sync filament info from the box"
+msgstr "Synchronizovat informace o filamentu z boxu"
+
+msgid "Sync Box information"
+msgstr "Synchronizovat informace z boxu"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "Vyberte tiskárnu ze seznamu pro získání informací o boxu"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "Tato tiskárna není připojena k boxu, prosím zkontrolujte."

@@ -30671,3 +30671,24 @@ msgstr ""
 
 msgid "Learn more"
 msgstr "詳細を見る"
+
+msgid "Export GCODE.3MF file:"
+msgstr "GCODE.3MFファイルをエクスポート："
+
+msgid "Export File"
+msgstr "ファイルをエクスポート"
+
+msgid "Export all gcode.3mf"
+msgstr "すべてのgcode.3mfをエクスポート"
+
+msgid "Sync filament info from the box"
+msgstr "ボックスからフィラメント情報を同期"
+
+msgid "Sync Box information"
+msgstr "ボックス情報を同期"
+
+msgid "Please select the printer in the list to get box info"
+msgstr "ボックス情報を取得するにはリストからプリンターを選択してください"
+
+msgid "This Printer has not connect the box, please check."
+msgstr "このプリンターはボックスに接続されていません。確認してください。"

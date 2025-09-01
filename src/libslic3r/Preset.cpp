@@ -609,7 +609,9 @@ static std::vector<std::string> s_Preset_printer_options {
     "box_id",
     "nozzle_volume",
     //Y30
-    "box_temperature_control"
+    "box_temperature_control",
+    //y29
+    "is_support_3mf"
 };
 
 static std::vector<std::string> s_Preset_sla_print_options {
