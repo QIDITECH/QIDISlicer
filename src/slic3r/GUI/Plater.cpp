@@ -7042,12 +7042,11 @@ void Plater::export_gcode_3mf(bool prefer_removable, bool all_gcodes)
     if (!is_sliceable(s_print_statuses[s_multiple_beds.get_active_bed()]))
         return;
 
-    fs::path default_output_file;
     AppConfig& appconfig = *wxGetApp().app_config;
 
     wxString path = p->get_export_file(FT_GCODE_3MF);
     if (path.empty()) { return; }
-    fs::path output_path(path);
+    fs::path output_path(path.ToStdString());
 
     bool is_success_ful = export_gcode_3mf(output_path, all_gcodes);
     if (is_success_ful) {
@@ -7691,6 +7690,17 @@ void Plater::send_gcode()
                 //std::chrono::seconds seconds_to_add(upload_job.sendinginterval);
 
                 //m_time_p = upload_job.create_time + seconds_to_add;
+
+                //y29
+                GUI::Box_info cur_box_info;
+                cur_box_info = get_cur_box_info();
+                wxString enable_commond;
+                if(cur_box_info.box_count != 0)
+                    enable_commond = "SAVE_VARIABLE VARIABLE=enable_box VALUE=1";
+                else
+                    enable_commond = "SAVE_VARIABLE VARIABLE=enable_box VALUE=0";
+
+                bool enable_box = upload_job.printhost->send_command_to_printer(enable_commond, enable_commond);
 
                 //y25
                 if (!activate_slot.empty() && upload_job.upload_data.post_action == PrintHostPostUploadAction::StartPrint) {
