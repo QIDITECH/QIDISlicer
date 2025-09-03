@@ -394,18 +394,18 @@ BuildVolume::ObjectState BuildVolume::check_outside(Polygon hull) const
     {
         const Vec3d bed_offset = s_multiple_beds.get_bed_translation(i);
         if (m_exclude_bed_shape.size() > 0) {
-            //y29
-            std::vector<Vec2d> tem_exclude_bed_shap;
-            for (int i = 0; i < m_exclude_bed_shape.size(); i++)
-                tem_exclude_bed_shap.push_back(Vec2d{ m_exclude_bed_shape[i].x() + bed_offset.x(), m_exclude_bed_shape[i].y() + bed_offset.y() });
-            BoundingBoxf tem_bboxf = get_extents(tem_exclude_bed_shap);
-            auto                    tem_exclude_bboxf = BoundingBoxf3{ to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height) };
-            Slic3r::Polygon p = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
-            if (intersection({ p }, { hull }).empty() == false) {
-                return ObjectState::Colliding;
-                break;
+            for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
+                std::vector<Vec2d> tem_exclude_bed_shap;
+                for (int j = 1; j < 6; j++)
+                    tem_exclude_bed_shap.push_back(Vec2d{ m_exclude_bed_shape[i + j].x() + bed_offset.x(), m_exclude_bed_shape[i + j].y() + bed_offset.y() });
+                BoundingBoxf tem_bboxf = get_extents(tem_exclude_bed_shap);
+                auto                    tem_exclude_bboxf = BoundingBoxf3{ to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height) };
+                Slic3r::Polygon p = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
+                if (intersection({ p }, { hull }).empty() == false) {
+                    return ObjectState::Colliding;
+                    break;
+                }
             }
-            //y29
         }
         else {
             return ObjectState::Inside;
@@ -441,18 +441,18 @@ bool BuildVolume::all_paths_inside(const GCodeProcessorResult& paths, const Boun
         if ((build_volume.contains(paths_bbox))) {
             if (m_exclude_bed_shape.size() > 0) {
                 Slic3r::Polygon convex_hull_2d = Slic3r::Geometry::convex_hull(std::move(pts));
-                //y29
-                std::vector<Vec2d> tem_exclude_bed_shap;
-                for (int i = 0; i < m_exclude_bed_shape.size(); i++)
-                    tem_exclude_bed_shap.push_back(m_exclude_bed_shape[i]);
-                BoundingBoxf            tem_bboxf = get_extents(tem_exclude_bed_shap);
-                auto                    tem_exclude_bboxf = BoundingBoxf3{ to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height) };
-                Slic3r::Polygon p = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
-                if (intersection({p}, {convex_hull_2d}).empty() == false) {
-                    return false;
-                    break;
+                for (int i = 1; i < m_exclude_bed_shape.size(); i += 7) {
+                    std::vector<Vec2d> tem_exclude_bed_shap;
+                    for (int j = 1; j < 6; j++)
+                        tem_exclude_bed_shap.push_back(m_exclude_bed_shape[i + j]);
+                    BoundingBoxf            tem_bboxf         = get_extents(tem_exclude_bed_shap);
+                    auto                    tem_exclude_bboxf = BoundingBoxf3{to_3d(tem_bboxf.min, 0.), to_3d(tem_bboxf.max, m_max_print_height)};
+                    Slic3r::Polygon p = tem_exclude_bboxf.polygon(true); // instance convex hull is scaled, so we need to scale here
+                    if (intersection({p}, {convex_hull_2d}).empty() == false) {
+                        return false;
+                        break;
+                    }
                 }
-                //y29
             }
         }
 
